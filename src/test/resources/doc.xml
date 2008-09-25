@@ -1,0 +1,12 @@
+<saml:Assertion ID="_6100e27a-39ae-452b-a83c-f246bd24df78" IssueInstant="2008-01-25T13:26:50.861Z" Version="2.0" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+  <saml:Issuer>CN=omii002.cnaf.infn.it,L=CNAF,OU=Host,O=INFN,C=IT</saml:Issuer>
+  <saml:Subject>
+    <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName">C=PL,ST=Kujawsko-Pomorskie,L=Torun,O=UW,OU=ICM,CN=Krzysztof Benedyczak,1.2.840.113549.1.9.1=#1610676f6c6269406d61742e756d6b2e706c</saml:NameID>
+  </saml:Subject>
+  <saml:Conditions NotBefore="2008-01-25T13:26:50.861Z" NotOnOrAfter="2008-01-26T01:26:50.861Z"/>
+  <saml:AttributeStatement>
+    <saml:Attribute Name="http://voms.forge.cnaf.infn.it/group" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified">
+      <saml:AttributeValue xsi:type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema">/omiieurope</saml:AttributeValue>
+    </saml:Attribute>
+  </saml:AttributeStatement>
+</saml:Assertion>

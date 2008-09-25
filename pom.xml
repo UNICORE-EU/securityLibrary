@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>eu.unicore.security</groupId>
+	<artifactId>securityLibrary</artifactId>
+	<packaging>jar</packaging>
+	<version>1.4-SNAPSHOT</version>
+	<name>securityLibrary</name>
+	<url>http://www.unicore.eu</url>
+	<parent>
+		<groupId>eu.unicore.security</groupId>
+		<artifactId>securityFramework</artifactId>
+		<version>1.1</version>
+		<relativePath>..</relativePath>
+	</parent>
+	<dependencies>
+		<dependency>
+			<groupId>eu.unicore.security</groupId>
+			<artifactId>SAMLtypes</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.14</version>
+		</dependency>
+		<!-- this is repackaged and fixed version to work with both JDK 5 and 6
+		(in JDK6 internal implementation is not used) -->
+		<dependency>
+			<groupId>org.apache.santuario</groupId>
+			<artifactId>xmlsec-java6</artifactId>
+			<version>1.4.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.0.4</version>
+		</dependency>
+	</dependencies>
+	<!-- 
+		REPOSITORIES used
+	-->
+	<repositories>
+		<repository>
+			<id>vsgc-public</id>
+			<name>VSGC repository</name>
+			<url>http://zam904.zam.kfa-juelich.de/maven</url>
+		</repository>
+	</repositories>
+	<distributionManagement>
+		<!-- use the following if you're not using a snapshot version. -->
+		<repository>
+			<id>vsgc-public</id>
+			<name>VSGC repository</name>
+			<url>
+				scp://zam904.zam.kfa-juelich.de/srv/www/htdocs/maven
+			</url>
+		</repository>
+		<!-- use the following if you ARE using a snapshot version. -->
+		<snapshotRepository>
+			<id>vsgc-public-snapshot</id>
+			<name>VSGC SNAPSHOT Repository</name>
+			<url>
+				scp://zam904.zam.kfa-juelich.de/srv/www/htdocs/maven
+			</url>
+		</snapshotRepository>
+	</distributionManagement>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<!-- <skip>true</skip> -->
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

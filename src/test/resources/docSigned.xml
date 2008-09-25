@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<soap:Header>
+<wsse:Security soap:mustUnderstand="1" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"><ds:Signature Id="Signature-7245716" xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+<ds:SignedInfo>
+<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"><ec:InclusiveNamespaces PrefixList="" xmlns:ec="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:CanonicalizationMethod>
+<ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+<ds:Reference URI="#id-298288731">
+<ds:Transforms>
+<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"><ec:InclusiveNamespaces PrefixList="xsd xsi" xmlns:ec="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transform>
+</ds:Transforms>
+<ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+<ds:DigestValue>BZ/vApKI74h/rbvwm0KdyglWHuo=</ds:DigestValue>
+</ds:Reference>
+</ds:SignedInfo>
+<ds:SignatureValue>
+T17acefEGbMv9WhHwdLuD1oPxMFwiWaU32nEeqDet4ikrK7zs2PBHVsFVBQXtdH9SJxIc/Iey7BX
+Ikx+NMu0Q8a86msUqIwRlsVbarwr8Jdl/vITmNklduTcGvSuKu7BfRK9cx5bs0sT+NMzwTBQp8e6
+fpoZZ5heB0Ka3j8wT+g=
+</ds:SignatureValue>
+<ds:KeyInfo Id="KeyId-979582289">
+<wsse:SecurityTokenReference wsu:Id="STRId-1286943672" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"><ds:X509Data>
+<ds:X509IssuerSerial>
+<ds:X509IssuerName>CN=Tester,OU=ICM,O=UW,L=Warsaw,ST=Unknown,C=PL</ds:X509IssuerName>
+<ds:X509SerialNumber>1212001837</ds:X509SerialNumber>
+</ds:X509IssuerSerial>
+</ds:X509Data></wsse:SecurityTokenReference>
+</ds:KeyInfo>
+</ds:Signature></wsse:Security></soap:Header><soap:Body wsu:Id="id-298288731" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"><ns1:TestSignature xmlns:ns1="http://xfireutil.security.unicore.icm.edu.pl"/></soap:Body></soap:Envelope>
