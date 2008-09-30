@@ -14,7 +14,7 @@ import java.security.cert.X509Certificate;
 
 /**
  * Verifies if the certificate is not expired. In future CRL support
- * should be added here. 
+ * should be added here. Also additional certificate handling utils are provided. 
  * <p>
  * This class is used internally by other APIs. Every certificate which is used
  * at any <b>validation</b> (e.g. check if ETD assertion is valid) is checked. 
@@ -47,5 +47,19 @@ public class CertificateUtils
 			verifyCertificate(cert, doCRLCheck, isGenerateMode);
 	}
 
-	
+	public static String safePrintSubject(X509Certificate cert)
+	{
+		if (cert == null)
+			return "EMPTY certificate";
+		if (cert.getSubjectX500Principal() == null)
+			return "certificate without a subject";
+		return cert.getSubjectX500Principal().getName();
+	}
+
+	public static String safePrintSubject(X509Certificate[] cert)
+	{
+		if (cert == null || cert.length == 0)
+			return "EMPTY certificate";
+		return safePrintSubject(cert[0]);
+	}
 }
