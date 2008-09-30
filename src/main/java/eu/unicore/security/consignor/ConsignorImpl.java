@@ -10,6 +10,7 @@ package eu.unicore.security.consignor;
 
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
@@ -17,6 +18,7 @@ import java.util.Date;
 import org.apache.xml.security.utils.RFC2253Parser;
 
 import eu.unicore.saml.SAMLConstants.AuthNClasses;
+import eu.unicore.security.CertificateUtils;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.dsig.DSigException;
 
@@ -40,6 +42,15 @@ public class ConsignorImpl implements ConsignorAPI
 		assertion.setX509Issuer(issuerDN);
 		if (consignorCert != null)
 		{
+			try
+			{
+				CertificateUtils.verifyCertificate(consignorCert, 
+					true, true);
+			} catch (Exception e)
+			{
+				throw new DSigException("Consignor certificate is not " +
+						"valid: " + e);
+			}
 			assertion.setX509Subject(
 				consignorCert[0].getSubjectX500Principal().getName());
 			try
@@ -98,25 +109,25 @@ public class ConsignorImpl implements ConsignorAPI
 					!assertion.isCorrectlySigned(
 					issuerCertificate.getPublicKey()))
 				return new ValidationResult(false, "Signature is invalid");
+			CertificateUtils.verifyCertificate(issuerCertificate, 
+					true, false);
 		} catch (DSigException e)
 		{
 			return new ValidationResult(false, e.getMessage());
+		} catch (CertificateException e)
+		{
+			return new ValidationResult(false, "Consignor certificate is not " +
+				"valid: " + e);
 		}
 		return new ValidationResult(true, "OK");
 	}
 
 	public ConsignorAssertion generateConsignorToken(String issuerDN, 
-			X509Certificate []consignorCert, AuthNClasses acClass)
+			X509Certificate []consignorCert, AuthNClasses acClass) 
+		throws DSigException
 	{
-		try
-		{
-			return generateConsignorToken(issuerDN, consignorCert, null, 
+		return generateConsignorToken(issuerDN, consignorCert, null, 
 					-1, -1, acClass);
-		} catch (DSigException e)
-		{
-			//can't happen
-			return null;
-		}
 	}
 
 	public ConsignorAssertion generateConsignorToken(String issuerDN, 

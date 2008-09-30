@@ -10,6 +10,7 @@ package eu.unicore.security.etd;
 
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
@@ -18,6 +19,7 @@ import java.util.List;
 import org.apache.xml.security.utils.RFC2253Parser;
 import org.apache.xmlbeans.XmlObject;
 
+import eu.unicore.security.CertificateUtils;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.dsig.DSigException;
 
@@ -48,6 +50,16 @@ public class ETDImpl implements ETDApi
 		TrustDelegation td = new TrustDelegation(custodian);
 		td.setX509Issuer(issuer[0].getSubjectX500Principal().getName());
 		td.setX509Subject(subject);
+		try
+		{
+			CertificateUtils.verifyCertificate(issuer, true, true);
+		} catch (CertificateException e)
+		{
+			throw new DSigException("Issuer (" +
+				issuer[0].getSubjectX500Principal().getName()
+				+ ") certificate is invalid: "
+				+ e);
+		}
 		return addRestrictionsAndSign(td, issuer, pk, restrictions);
 	}
 
@@ -71,6 +83,37 @@ public class ETDImpl implements ETDApi
 		td.setX509Issuer(issuer[0].getSubjectX500Principal().getName());
 		td.setX509Subject(receiver[0].getSubjectX500Principal().getName());
 		td.setSenderVouchesX509Confirmation(receiver);
+		
+		try
+		{
+			CertificateUtils.verifyCertificate(custodian, true, true);
+		} catch (CertificateException e)
+		{
+			throw new DSigException("Custodian (" + 
+				custodian.getSubjectX500Principal().getName() + 
+				") certificate is invalid: " + e);
+		}
+		try
+		{
+			CertificateUtils.verifyCertificate(issuer, true, true);
+		} catch (CertificateException e)
+		{
+			throw new DSigException("Issuer (" +
+				issuer[0].getSubjectX500Principal().getName()
+				+ ") certificate is invalid: "
+				+ e);
+		}
+		try
+		{
+			CertificateUtils.verifyCertificate(receiver, true, true);
+		} catch (CertificateException e)
+		{
+			throw new DSigException("Receiver (" +
+				receiver[0].getSubjectX500Principal().getName()
+				+ ") certificate is invalid: "
+				+ e);
+		}
+		
 		return addRestrictionsAndSign(td, issuer, pk, restrictions);
 	}
 	

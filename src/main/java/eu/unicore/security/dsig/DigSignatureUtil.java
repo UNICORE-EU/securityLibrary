@@ -15,6 +15,8 @@ import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
@@ -51,6 +53,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import eu.unicore.security.CertificateUtils;
 
 import xmlbeans.org.w3.x2000.x09.xmldsig.KeyInfoType;
 import xmlbeans.org.w3.x2000.x09.xmldsig.X509DataType;
@@ -98,10 +102,14 @@ public class DigSignatureUtil
 	private void genEnvelopedSignatureInternal(PrivateKey privKey, PublicKey pubKey,  
 			X509Certificate []cert, Document docToSign, Node insertBefore) 
 		throws MarshalException, XMLSignatureException,	NoSuchAlgorithmException, 
-		InvalidAlgorithmParameterException, KeyException
+		InvalidAlgorithmParameterException, KeyException, CertificateExpiredException, CertificateNotYetValidException
 	{
 		DigestMethod digistMethod = fac.newDigestMethod(DigestMethod.SHA1, null);
 		Vector<Transform> transforms = new Vector<Transform>(); 
+
+		if (cert != null)
+			CertificateUtils.verifyCertificate(cert, false, true);
+
 		
 		transforms.add(fac.newTransform(Transform.ENVELOPED, 
 				(TransformParameterSpec) null));

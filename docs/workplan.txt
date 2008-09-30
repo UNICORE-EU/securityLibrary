@@ -1,3 +1,6 @@
+[NOTE - this file contains original workplan which is already DONE, so
+it purely historical]
+
 
 *** Main issues to address ***
 

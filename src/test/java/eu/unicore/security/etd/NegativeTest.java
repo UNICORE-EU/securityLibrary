@@ -11,7 +11,9 @@ package eu.unicore.security.etd;
 import java.util.Calendar;
 import java.util.Date;
 
+import eu.unicore.security.CertificateUtils;
 import eu.unicore.security.ValidationResult;
+import eu.unicore.security.dsig.DSigException;
 import eu.unicore.security.etd.TrustDelegation;
 
 /**
@@ -192,7 +194,46 @@ public class NegativeTest extends ETDTestBase
 	}
 
 
+	public void testExpiredCertVerify()
+	{
+		try
+		{
+			System.setProperty(CertificateUtils.VERIFY_GENERATION_KEY, "false");
+			TrustDelegation td = etdEngine.generateTD(expiredDN, expiredCert,
+					privKeyExpired, receiverDN1, null);
 
+			ValidationResult result = 
+				etdEngine.validateTD(td, expiredDN, expiredDN, receiverDN1);
+			if (result.isValid() || 
+				!result.getInvalidResaon().startsWith("Issuer certificate is not valid"))
+				fail("Validation of ETD issued with expired issuer's certificate is wrong: " + 
+						result.getInvalidResaon());
+		} catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+		assertTrue(true);
+	}
+
+	public void testExpiredCertGenerate()
+	{
+		try
+		{
+			System.setProperty(CertificateUtils.VERIFY_GENERATION_KEY, "true");
+
+			etdEngine.generateTD(expiredDN, expiredCert, 
+				privKeyExpired, receiverDN1, null);
+			fail("Generation of ETD with expired issuer's certificate succeeded.");
+		} catch (Exception e)
+		{
+			if (!(e instanceof DSigException) || 
+				!e.getMessage().startsWith("Issuer ("))
+				fail("Wrong error when generating ETD with expired cert: "
+					+ e);
+			
+		}
+		assertTrue(true);
+	}
 
 
 

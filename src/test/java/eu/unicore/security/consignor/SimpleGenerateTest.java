@@ -13,9 +13,11 @@ import java.security.cert.X509Certificate;
 import javax.security.auth.x500.X500Principal;
 
 import eu.unicore.saml.SAMLConstants.AuthNClasses;
+import eu.unicore.security.CertificateUtils;
 import eu.unicore.security.TestBase;
 import eu.unicore.security.UnicoreSecurityFactory;
 import eu.unicore.security.ValidationResult;
+import eu.unicore.security.dsig.DSigException;
 import xmlbeans.org.oasis.saml2.assertion.AssertionDocument;
 
 /**
@@ -86,4 +88,45 @@ public class SimpleGenerateTest extends TestBase
 		}
 		assertTrue(true);
 	}
+	
+	public void testExpiredCert1()
+	{
+		try
+		{
+			System.setProperty(CertificateUtils.VERIFY_GENERATION_KEY, "false");
+			ConsignorAPI impl = UnicoreSecurityFactory.getConsignorAPI();
+			ConsignorAssertion token = 
+				impl.generateConsignorToken(issuerDN2, expiredCert,
+						AuthNClasses.TLS);
+			
+			AssertionDocument doc = token.getXML();
+			ConsignorAssertion parsedToken = new ConsignorAssertion(doc);
+			ValidationResult res = 
+				impl.verifyConsignorToken(parsedToken, expiredCert[0]);
+			if (res.isValid())
+				fail("Assertion issued with expired cert was accepted");
+			
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		assertTrue(true);
+	}
+
+	public void testExpiredCert2()
+	{
+			System.setProperty(CertificateUtils.VERIFY_GENERATION_KEY, "true");
+			ConsignorAPI impl = UnicoreSecurityFactory.getConsignorAPI();
+			try
+			{
+				impl.generateConsignorToken(issuerDN2, expiredCert,
+						AuthNClasses.TLS);
+				fail("Assertion issued with expired cert was accepted");
+			} catch (DSigException e)
+			{
+			}
+			assertTrue(true);
+	}
+	
 }

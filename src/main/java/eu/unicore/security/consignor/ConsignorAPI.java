@@ -43,10 +43,11 @@ public interface ConsignorAPI
 	 * @param consignorCert certificate of consignor
 	 * @param acClass authentication context class choice (not implemented right now)
 	 * @return created assertion
+	 * @throws DSigException 
 	 */
 	public ConsignorAssertion generateConsignorToken(
 			String issuerDN, X509Certificate []consignorCert,
-			AuthNClasses acClass);
+			AuthNClasses acClass) throws DSigException;
 
 	/**
 	 * Generates signed consignor assertion without a subject. Used by gateway

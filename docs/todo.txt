@@ -1,0 +1,7 @@
+-) Write general documentation: detailed features, API guide and 
+starting points.
+
+-) Implement CRL support, document certificate validation (curently only
+expired certs are checked).
+
+-) use SAML code from samly2 library -> remove (whole?) eu.unicore.saml package
