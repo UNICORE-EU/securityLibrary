@@ -39,6 +39,13 @@
 			<artifactId>commons-logging</artifactId>
 			<version>1.0.4</version>
 		</dependency>
+
+		<dependency>
+			<groupId>eu.unicore.security</groupId>
+			<artifactId>crl-checking</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+
 	</dependencies>
 	<!-- 
 		REPOSITORIES used

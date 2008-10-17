@@ -8,9 +8,18 @@
 
 package eu.unicore.security;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+
+import eu.unicore.crlcheck.CRLCheckResult;
+import eu.unicore.crlcheck.CRLManager;
+import eu.unicore.crlcheck.CRLManagerProperties;
 
 /**
  * Verifies if the certificate is not expired. In future CRL support
@@ -27,39 +36,58 @@ import java.security.cert.X509Certificate;
  */
 public class CertificateUtils
 {
-	public static final String VERIFY_GENERATION_KEY = 
-		"eu.unicore.securty.VerifyExpiredCertUponCreation";
-	
-	public static void verifyCertificate(X509Certificate cert, boolean doCRLCheck, 
-		boolean isGenerateMode) 
-		throws CertificateExpiredException, CertificateNotYetValidException
-	{
-		String verify = System.getProperty(CertificateUtils.VERIFY_GENERATION_KEY); 
-		if (!isGenerateMode || (verify != null && verify.equals("true")))
-			cert.checkValidity();
-	}
 
-	public static void verifyCertificate(X509Certificate[] certs, boolean doCRLCheck,
-		boolean isGenerateMode) 
-		throws CertificateExpiredException, CertificateNotYetValidException
-	{
-		for (X509Certificate cert: certs)
-			verifyCertificate(cert, doCRLCheck, isGenerateMode);
-	}
+  public static final String VERIFY_GENERATION_KEY = "eu.unicore.securty.VerifyExpiredCertUponCreation";
+  public static final String CRLMGR_PROPS_FILE     = "crlmanager.properties.file";
+  
+  private static CRLManager crlManager = null;
+  
+  static {
+    CRLManagerProperties crlMgrProps = new CRLManagerProperties();
+    try
+    {
+      crlMgrProps.load(new FileInputStream(new File(System.getProperty(CRLMGR_PROPS_FILE))));
+      crlManager = new CRLManager(crlMgrProps);
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+      crlManager = new CRLManager(new CRLManagerProperties());
+    }
+  }
 
-	public static String safePrintSubject(X509Certificate cert)
-	{
-		if (cert == null)
-			return "EMPTY certificate";
-		if (cert.getSubjectX500Principal() == null)
-			return "certificate without a subject";
-		return cert.getSubjectX500Principal().getName();
-	}
+  public static void verifyCertificate(X509Certificate cert, boolean doCRLCheck, boolean isGenerateMode) throws CertificateExpiredException, CertificateNotYetValidException
+  {
+    String verify = System.getProperty(CertificateUtils.VERIFY_GENERATION_KEY);
+    if (!isGenerateMode || (verify != null && verify.equals("true"))) cert.checkValidity();
 
-	public static String safePrintSubject(X509Certificate[] cert)
-	{
-		if (cert == null || cert.length == 0)
-			return "EMPTY certificate";
-		return safePrintSubject(cert[0]);
-	}
+    if (doCRLCheck)
+    {
+      CRLCheckResult cr = crlManager.checkCertificate(cert);
+      if (!cr.isValid())
+      {
+        // FIXME This is actually the wrong exception, introduced for minimally invasive testing
+        throw new CertificateExpiredException(cr.getReason());
+      }
+    }
+  }
+
+  public static void verifyCertificate(X509Certificate[] certs, boolean doCRLCheck, boolean isGenerateMode) throws CertificateExpiredException, CertificateNotYetValidException
+  {
+    for (X509Certificate cert : certs)
+      verifyCertificate(cert, doCRLCheck, isGenerateMode);
+  }
+
+  public static String safePrintSubject(X509Certificate cert)
+  {
+    if (cert == null) return "EMPTY certificate";
+    if (cert.getSubjectX500Principal() == null) return "certificate without a subject";
+    return cert.getSubjectX500Principal().getName();
+  }
+
+  public static String safePrintSubject(X509Certificate[] cert)
+  {
+    if (cert == null || cert.length == 0) return "EMPTY certificate";
+    return safePrintSubject(cert[0]);
+  }
 }
