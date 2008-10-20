@@ -6,7 +6,7 @@
 	<groupId>eu.unicore.security</groupId>
 	<artifactId>securityLibrary</artifactId>
 	<packaging>jar</packaging>
-	<version>1.4-SNAPSHOT</version>
+	<version>1.4-rc1</version>
 	<name>securityLibrary</name>
 	<url>http://www.unicore.eu</url>
 	<parent>
@@ -43,7 +43,7 @@
 		<dependency>
 			<groupId>eu.unicore.security</groupId>
 			<artifactId>crl-checking</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>1.0-rc1</version>
 		</dependency>
 
 	</dependencies>

@@ -31,7 +31,6 @@ import eu.unicore.crlcheck.CRLManagerProperties;
  * is not checked. You can change this behaviour by setting
  * VERIFY_GENERATION_KEY property to "true".
  * 
- * TODO implement CRL support.
  * @author golbi
  */
 public class CertificateUtils
@@ -41,19 +40,27 @@ public class CertificateUtils
   public static final String CRLMGR_PROPS_FILE     = "crlmanager.properties.file";
   
   private static CRLManager crlManager = null;
-  
+
   static {
-    CRLManagerProperties crlMgrProps = new CRLManagerProperties();
-    try
-    {
-      crlMgrProps.load(new FileInputStream(new File(System.getProperty(CRLMGR_PROPS_FILE))));
-      crlManager = new CRLManager(crlMgrProps);
-    }
-    catch (Exception e)
-    {
-      e.printStackTrace();
-      crlManager = new CRLManager(new CRLManagerProperties());
-    }
+      String crlManagerPropertiesFile=System.getProperty(CRLMGR_PROPS_FILE);
+      CRLManagerProperties crlMgrProps = new CRLManagerProperties();
+      if(crlManagerPropertiesFile!=null){
+        FileInputStream fis=null;
+        try
+        {
+	    fis=new FileInputStream(crlManagerPropertiesFile);
+            crlMgrProps.load(fis);
+        }
+        catch (Exception e)
+        {
+	    System.err.println("Error initialising CRL checker.");
+            e.printStackTrace();
+        }
+        finally{
+	    if(fis!=null)try{fis.close();}catch(IOException ignored){}
+        }
+      crlManager=new CRLManager(crlMgrProps);
+      }
   }
 
   public static void verifyCertificate(X509Certificate cert, boolean doCRLCheck, boolean isGenerateMode) throws CertificateExpiredException, CertificateNotYetValidException
@@ -61,13 +68,13 @@ public class CertificateUtils
     String verify = System.getProperty(CertificateUtils.VERIFY_GENERATION_KEY);
     if (!isGenerateMode || (verify != null && verify.equals("true"))) cert.checkValidity();
 
-    if (doCRLCheck)
+    if (doCRLCheck && crlManager!=null)
     {
       CRLCheckResult cr = crlManager.checkCertificate(cert);
       if (!cr.isValid())
       {
-        // FIXME This is actually the wrong exception, introduced for minimally invasive testing
-        throw new CertificateExpiredException(cr.getReason());
+        // TODO Is there a better exception for this?
+        throw new CertificateExpiredException("CRL check failed: "+cr.getReason());
       }
     }
   }
