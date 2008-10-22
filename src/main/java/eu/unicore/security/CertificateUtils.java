@@ -22,8 +22,8 @@ import eu.unicore.crlcheck.CRLManager;
 import eu.unicore.crlcheck.CRLManagerProperties;
 
 /**
- * Verifies if the certificate is not expired. In future CRL support
- * should be added here. Also additional certificate handling utils are provided. 
+ * Verifies if the certificate is not expired or revoked (if CRL check is configured)
+ * Also, additional certificate handling utils are provided. 
  * <p>
  * This class is used internally by other APIs. Every certificate which is used
  * at any <b>validation</b> (e.g. check if ETD assertion is valid) is checked. 
@@ -43,8 +43,8 @@ public class CertificateUtils
 
   static {
       String crlManagerPropertiesFile=System.getProperty(CRLMGR_PROPS_FILE);
-      CRLManagerProperties crlMgrProps = new CRLManagerProperties();
       if(crlManagerPropertiesFile!=null){
+        CRLManagerProperties crlMgrProps = new CRLManagerProperties();
         FileInputStream fis=null;
         try
         {
@@ -59,8 +59,9 @@ public class CertificateUtils
         finally{
 	    if(fis!=null)try{fis.close();}catch(IOException ignored){}
         }
-      crlManager=new CRLManager(crlMgrProps);
+        crlManager=new CRLManager(crlMgrProps);
       }
+
   }
 
   public static void verifyCertificate(X509Certificate cert, boolean doCRLCheck, boolean isGenerateMode) throws CertificateExpiredException, CertificateNotYetValidException
