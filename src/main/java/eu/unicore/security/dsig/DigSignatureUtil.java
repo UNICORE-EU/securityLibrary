@@ -68,7 +68,8 @@ import xmlbeans.org.w3.x2000.x09.xmldsig.X509DataType;
  */
 public class DigSignatureUtil
 {
-	private static final Logger log = Logger.getLogger(DigSignatureUtil.class);
+	private static final Logger log = Logger.getLogger("unicore.security.dsig." + 
+		DigSignatureUtil.class.getSimpleName());
 	private final static String PROVIDER = "refactored.org.jcp.xml.dsig.internal.dom.XMLDSigRI";
 	private static XMLSignatureFactory fac = null;
 	

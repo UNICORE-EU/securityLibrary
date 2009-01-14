@@ -21,7 +21,8 @@ import org.apache.log4j.Logger;
  */
 public class Utils
 {
-	private static final Logger log = Logger.getLogger(Utils.class.getName());
+	private static final Logger log = Logger.getLogger("unicore.security." + 
+		Utils.class.getSimpleName());
 
 	public static X509Certificate deserializeCertificate(byte []encodedCert)
 	{
