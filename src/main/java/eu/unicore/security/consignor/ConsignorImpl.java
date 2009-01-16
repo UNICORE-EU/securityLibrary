@@ -96,7 +96,7 @@ public class ConsignorImpl implements ConsignorAPI
 	public ValidationResult verifyConsignorToken(ConsignorAssertion assertion,
 			X509Certificate issuerCertificate)
 	{
-		String i1 = assertion.getIssuer();
+		String i1 = assertion.getIssuerDN();
 		String i2 = RFC2253Parser.rfc2253toXMLdsig(
 				issuerCertificate.getSubjectX500Principal().getName());
 		if (!i1.equals(i2))

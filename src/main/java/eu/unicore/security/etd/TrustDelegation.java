@@ -14,11 +14,11 @@ import java.security.cert.X509Certificate;
 import org.apache.xml.security.utils.RFC2253Parser;
 import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlException;
-import org.apache.xmlbeans.XmlObject;
-import org.apache.xmlbeans.XmlString;
 
-import eu.unicore.saml.SAMLAssertion;
-import eu.unicore.saml.SAMLParseException;
+import eu.unicore.samly2.assertion.Assertion;
+import eu.unicore.samly2.elements.SAMLAttribute;
+import eu.unicore.samly2.exceptions.SAMLParseException;
+
 import xmlbeans.org.oasis.saml2.assertion.AssertionDocument;
 import xmlbeans.org.oasis.saml2.assertion.AttributeStatementType;
 import xmlbeans.org.oasis.saml2.assertion.AttributeType;
@@ -28,7 +28,7 @@ import xmlbeans.org.oasis.saml2.assertion.AttributeType;
  * Java representation of trust delegation token.
  * @author K. Benedyczak
  */
-public class TrustDelegation extends SAMLAssertion
+public class TrustDelegation extends Assertion
 {
 
 	private static final long serialVersionUID = 1L;
@@ -42,38 +42,39 @@ public class TrustDelegation extends SAMLAssertion
 	
 	public TrustDelegation(String custodian)
 	{
-		super("_trustDelegation_");
+		super();
 		String dn = RFC2253Parser.rfc2253toXMLdsig(custodian);
 		custodianDN = dn;
 		hash = null;
-		XmlString value = XmlString.Factory.newInstance();
-		value.setStringValue(dn);
-		addAttribute(CUSTODIAN_NAME, CUSTODIAN_NAME_FORMAT_DN, 
-				new XmlObject[] {value});
+		SAMLAttribute custodianA = new SAMLAttribute(CUSTODIAN_NAME, 
+			CUSTODIAN_NAME_FORMAT_DN);
+		custodianA.addStringAttributeValue(dn);
+		addAttribute(custodianA);
 	}
 
 	public TrustDelegation(X509Certificate custodian)
 	{
-		super("_trustDelegation_");
+		super();
 		
 		String dn = RFC2253Parser.rfc2253toXMLdsig(
 				custodian.getSubjectX500Principal().getName());
 		custodianDN = dn;
-		XmlString value = XmlString.Factory.newInstance();
-		value.setStringValue(dn);
-		addAttribute(CUSTODIAN_NAME, CUSTODIAN_NAME_FORMAT_DN, 
-				new XmlObject[] {value});
+		SAMLAttribute custodianA = new SAMLAttribute(CUSTODIAN_NAME, 
+			CUSTODIAN_NAME_FORMAT_DN);
+		custodianA.addStringAttributeValue(dn);
+		addAttribute(custodianA);
 		hash = custodian.hashCode();
-		XmlString value2 = XmlString.Factory.newInstance();
-		value2.setStringValue(hash + "");
-		addAttribute(CUSTODIAN_NAME, CUSTODIAN_NAME_FORMAT_FP, 
-				new XmlObject[] {value2});
+		
+		SAMLAttribute custodian2A = new SAMLAttribute(CUSTODIAN_NAME, 
+			CUSTODIAN_NAME_FORMAT_FP);
+		custodian2A.addStringAttributeValue(hash + "");
+		addAttribute(custodian2A);
 	}
 	
 	public TrustDelegation(AssertionDocument doc) throws SAMLParseException, XmlException, IOException
 	{
 		super(doc);
-		if (getSubject() == null)
+		if (getSubjectDN() == null)
 			throw new SAMLParseException("No subject (user) in assertion.");
 		AttributeStatementType[] attrSs = getAttributes();
 		custodianDN = null;

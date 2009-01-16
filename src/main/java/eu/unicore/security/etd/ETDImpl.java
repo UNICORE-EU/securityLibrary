@@ -216,11 +216,11 @@ public class ETDImpl implements ETDApi
 	public ValidationResult validateTD(TrustDelegation td, String custodian, 
 			String issuer, String receiver)
 	{
-		String i1 = td.getIssuer();
+		String i1 = td.getIssuerDN();
 		String i2 = RFC2253Parser.rfc2253toXMLdsig(issuer);
 		if (!i1.equals(i2))
 			return new ValidationResult(false, "Wrong issuer");
-		String r1 = td.getSubject();
+		String r1 = td.getSubjectDN();
 		String r2 = RFC2253Parser.rfc2253toXMLdsig(receiver);
 		if (!r1.equals(r2))
 			return new ValidationResult(false, "Wrong receiver");
@@ -345,22 +345,22 @@ public class ETDImpl implements ETDApi
 		{
 			TrustDelegation cur = td.get(i);
 			if (i + 1 < td.size())
-				if (!cur.getSubject().equals(td.get(i+1).getIssuer()))
+				if (!cur.getSubjectDN().equals(td.get(i+1).getIssuerDN()))
 					return new ValidationResult(
 						false, "Chain is inconsistent at position " + i);
 			String receiver = subject;
 			if (i + 1 < td.size())
-				receiver = td.get(i+1).getIssuer();
+				receiver = td.get(i+1).getIssuerDN();
 			
 			ValidationResult singleTD = validateTD(cur, custodian, 
-				cur.getIssuer(), receiver);
+				cur.getIssuerDN(), receiver);
 			if (!singleTD.isValid())
 				return new ValidationResult(false, 
 						"Chain has invalid entry at position "
 						+ i + ": " + singleTD.getInvalidResaon());
 			
 			maxProxies[i] = cur.getProxyRestriction();
-			if (s.equals(cur.getSubject()))
+			if (s.equals(cur.getSubjectDN()))
 				break;
 		}
 		if (i == td.size())

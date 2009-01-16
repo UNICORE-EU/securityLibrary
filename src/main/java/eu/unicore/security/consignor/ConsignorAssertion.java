@@ -12,10 +12,11 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 
 import org.apache.xmlbeans.XmlException;
-import org.apache.xmlbeans.XmlObject;
 
-import eu.unicore.saml.SAMLAssertion;
-import eu.unicore.saml.SAMLParseException;
+import eu.unicore.samly2.assertion.Assertion;
+import eu.unicore.samly2.elements.SAMLAttribute;
+import eu.unicore.samly2.exceptions.SAMLParseException;
+
 import xmlbeans.org.oasis.saml2.assertion.AssertionDocument;
 import xmlbeans.org.oasis.saml2.assertion.AttributeStatementType;
 import xmlbeans.org.oasis.saml2.assertion.AttributeType;
@@ -28,7 +29,7 @@ import xmlbeans.org.oasis.saml2.assertion.AttributeType;
  * <p>Note that those tokens can be cached to improve performance.
  * @author K. Benedyczak
  */
-public class ConsignorAssertion extends SAMLAssertion
+public class ConsignorAssertion extends Assertion
 {
 	private static final long serialVersionUID = 9087483370558929619L;
 	public static final String CONSIGNOR_ROLE = "CONSIGNOR";
@@ -37,9 +38,9 @@ public class ConsignorAssertion extends SAMLAssertion
 	
 	public ConsignorAssertion()
 	{
-		super("_consignorRole_");
-		addAttribute(CONSIGNOR_ROLE, ROLE_NAME_FORMAT, 
-				new XmlObject[] {});
+		super();
+		SAMLAttribute attribute = new SAMLAttribute(CONSIGNOR_ROLE, ROLE_NAME_FORMAT);
+		addAttribute(attribute);
 	}
 	
 	public ConsignorAssertion(AssertionDocument doc) 

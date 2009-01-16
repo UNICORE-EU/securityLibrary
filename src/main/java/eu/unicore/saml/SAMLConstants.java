@@ -14,13 +14,5 @@ package eu.unicore.saml;
  */
 public class SAMLConstants
 {
-	public static final String DN_FORMAT = 
-		"urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName";
-	public static final String VERSION = "2.0";
-	
-	public static final String CONFIRMATION_SENDER_VOUCHES = 
-		"urn:oasis:names:tc:SAML:2.0:cm:sender-vouches";
-	
 	public static enum AuthNClasses {NONE, TLS};
-	public static String AC_CLASS_TLS = "urn:oasis:names:tc:SAML:2.0:ac:classes:TLSClient";
 }

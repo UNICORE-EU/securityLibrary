@@ -6,7 +6,7 @@
 	<groupId>eu.unicore.security</groupId>
 	<artifactId>securityLibrary</artifactId>
 	<packaging>jar</packaging>
-	<version>1.4-rc1</version>
+	<version>1.5</version>
 	<name>securityLibrary</name>
 	<url>http://www.unicore.eu</url>
 	<parent>
@@ -17,9 +17,9 @@
 	</parent>
 	<dependencies>
 		<dependency>
-			<groupId>eu.unicore.security</groupId>
-			<artifactId>SAMLtypes</artifactId>
-			<version>1.1</version>
+			<groupId>pl.edu.icm.saml</groupId>
+			<artifactId>samly2</artifactId>
+			<version>1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
@@ -39,13 +39,6 @@
 			<artifactId>commons-logging</artifactId>
 			<version>1.0.4</version>
 		</dependency>
-
-		<dependency>
-			<groupId>eu.unicore.security</groupId>
-			<artifactId>crl-checking</artifactId>
-			<version>1.0-rc1</version>
-		</dependency>
-
 	</dependencies>
 	<!-- 
 		REPOSITORIES used

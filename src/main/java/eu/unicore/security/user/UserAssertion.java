@@ -13,10 +13,11 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
 import org.apache.xmlbeans.XmlException;
-import org.apache.xmlbeans.XmlObject;
 
-import eu.unicore.saml.SAMLAssertion;
-import eu.unicore.saml.SAMLParseException;
+import eu.unicore.samly2.assertion.Assertion;
+import eu.unicore.samly2.elements.SAMLAttribute;
+import eu.unicore.samly2.exceptions.SAMLParseException;
+
 import xmlbeans.org.oasis.saml2.assertion.AssertionDocument;
 import xmlbeans.org.oasis.saml2.assertion.AttributeStatementType;
 import xmlbeans.org.oasis.saml2.assertion.AttributeType;
@@ -28,7 +29,7 @@ import xmlbeans.org.oasis.saml2.assertion.AttributeType;
  * 
  * @author K. Benedyczak
  */
-public class UserAssertion extends SAMLAssertion
+public class UserAssertion extends Assertion
 {
 	private static final long serialVersionUID = 7953888384523638747L;
 	public static final String USER_ROLE = "USER";
@@ -41,7 +42,7 @@ public class UserAssertion extends SAMLAssertion
 	 */
 	public UserAssertion(String consignorDN, String userDN)
 	{
-		super("_userRole_");
+		super();
 		constructorCommon(consignorDN, userDN);
 	}
 
@@ -56,7 +57,7 @@ public class UserAssertion extends SAMLAssertion
 	public UserAssertion(String consignorDN, X509Certificate[] userCertChain) 
 		throws CertificateEncodingException
 	{
-		super("_userRole_");
+		super();
 		String userDN = userCertChain[0].getSubjectX500Principal().getName();
 		constructorCommon(consignorDN, userDN);
 		setSenderVouchesX509Confirmation(userCertChain);
@@ -64,8 +65,8 @@ public class UserAssertion extends SAMLAssertion
 	
 	private void constructorCommon(String consignorDN, String userDN)
 	{
-		addAttribute(USER_ROLE, ROLE_NAME_FORMAT,
-				new XmlObject[] {});
+		SAMLAttribute attribute = new SAMLAttribute(USER_ROLE, ROLE_NAME_FORMAT);
+		addAttribute(attribute);
 		setX509Issuer(consignorDN);
 		setX509Subject(userDN);
 	}
@@ -74,7 +75,7 @@ public class UserAssertion extends SAMLAssertion
 		throws SAMLParseException, XmlException, IOException
 	{
 		super(doc);
-		if (getSubject() == null)
+		if (getSubjectDN() == null)
 			throw new SAMLParseException("No subject (user) in assertion.");
 		boolean found = false;
 		AttributeStatementType[] attrSs = getAttributes();
@@ -100,7 +101,7 @@ public class UserAssertion extends SAMLAssertion
 	
 	public String getUserDN()
 	{
-		return getSubject();
+		return getSubjectDN();
 	}
 
 	public X509Certificate[] getUserCertificate()
