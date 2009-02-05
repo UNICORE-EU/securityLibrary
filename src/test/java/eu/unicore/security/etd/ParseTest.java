@@ -28,8 +28,8 @@ public class ParseTest extends ETDTestBase
 	{
 		try
 		{
-			TrustDelegation td = etdEngine.generateTD(issuerDN1, issuerCert1,
-					privKey1, receiverDN1, null);
+			TrustDelegation td = etdEngine.generateTD(issuerDN3, issuerCert3,
+					privKey4, receiverDN1, null);
 
 			TrustDelegation td2 = new TrustDelegation(td.getXML());
 			System.out.println("-------------------------------------------\n" + 
@@ -40,7 +40,7 @@ public class ParseTest extends ETDTestBase
 			System.out.println(td2.getXML().xmlText(xmlOpts));
 			
 			ValidationResult result = 
-				etdEngine.validateTD(td2, issuerDN1, issuerDN1, receiverDN1);
+				etdEngine.validateTD(td2, issuerDN3, issuerDN3, receiverDN1);
 			if (!result.isValid())
 				fail(result.getInvalidResaon());
 		} catch (Exception e)

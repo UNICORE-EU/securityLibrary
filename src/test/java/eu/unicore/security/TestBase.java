@@ -30,16 +30,18 @@ public abstract class TestBase extends TestCase
 	private static final String KEYSTORE2 = "keystoreRSA2.jks";
 	private static final String KEYSTORE3 = "keystoreDSA1.jks";
 	private static final String KEYSTORE4 = "keystoreDSA2.jks";
+	private static final String KEYSTORE5 = "keystoreRSA3.p12";
 	private static final String KEYSTORE_EXP = "keystoreExpired.jks";
 	
 	
-	private KeyStore ks1, ks2, ks3, ks4, ksExp;
+	private KeyStore ks1, ks2, ks3, ks4, ks5, ksExp;
 	protected X509Certificate[] issuerCert1, receiverCert1;
 	protected X509Certificate[] issuerCert2, receiverCert2;
 	protected X509Certificate[] expiredCert;
-	protected String issuerDN1, issuerDN2;
+	protected X509Certificate[] issuerCert3;
+	protected String issuerDN1, issuerDN2, issuerDN3;
 	protected String receiverDN1, receiverDN2, expiredDN;
-	protected PrivateKey privKey1, privKey2, privKey3, privKeyExpired;
+	protected PrivateKey privKey1, privKey2, privKey3, privKey4, privKeyExpired;
 	protected XmlOptions xmlOpts;
 	
 	protected void setUp()
@@ -63,6 +65,10 @@ public abstract class TestBase extends TestCase
 			is = getClass().getResourceAsStream("/" + KEYSTORE4);
 			ks4.load(is, PASSWORD.toCharArray());
 
+			ks5 = KeyStore.getInstance("PKCS12");
+			is = getClass().getResourceAsStream("/" + KEYSTORE5);
+			ks5.load(is, PASSWORD.toCharArray());
+			
 			ksExp = KeyStore.getInstance("JKS");
 			is = getClass().getResourceAsStream("/" + KEYSTORE_EXP);
 			ksExp.load(is, PASSWORD.toCharArray());
@@ -72,17 +78,19 @@ public abstract class TestBase extends TestCase
 			issuerCert2 = convertChain(ks3.getCertificateChain(ALIAS));
 			receiverCert2 = convertChain(ks4.getCertificateChain(ALIAS));
 			expiredCert = convertChain(ksExp.getCertificateChain(ALIAS));
-			
+			issuerCert3 = convertChain(ks5.getCertificateChain(ALIAS));
 			
 			privKey1 = (PrivateKey) ks1.getKey(ALIAS, PASSWORD.toCharArray());
 			privKey2 = (PrivateKey) ks3.getKey(ALIAS, PASSWORD.toCharArray());
 			privKey3 = (PrivateKey) ks2.getKey(ALIAS, PASSWORD.toCharArray());
+			privKey4 = (PrivateKey) ks5.getKey(ALIAS, PASSWORD.toCharArray());
 			privKeyExpired = (PrivateKey) ksExp.getKey(ALIAS, PASSWORD.toCharArray());
 			
 			issuerDN1 = issuerCert1[0].getSubjectX500Principal().getName();
 			receiverDN1 = receiverCert1[0].getSubjectX500Principal().getName();
 			issuerDN2 = issuerCert2[0].getSubjectX500Principal().getName();
 			receiverDN2 = receiverCert2[0].getSubjectX500Principal().getName();
+			issuerDN3 = issuerCert3[0].getSubjectX500Principal().getName();
 			expiredDN = expiredCert[0].getSubjectX500Principal().getName();
 		} catch (Exception e)
 		{

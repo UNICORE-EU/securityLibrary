@@ -8,6 +8,8 @@
 
 package eu.unicore.security.etd;
 
+import javax.security.auth.x500.X500Principal;
+
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.etd.TrustDelegation;
 
@@ -16,6 +18,54 @@ import eu.unicore.security.etd.TrustDelegation;
  */
 public class GenerateAndVerifyTest extends ETDTestBase
 {
+
+	
+	public void testRSACert3()
+	{
+		try
+		{
+			TrustDelegation td = etdEngine.generateTD(issuerCert1[0], issuerCert1,
+					privKey1, issuerCert3, null);
+			
+			String dnsubFromTD = new X500Principal(td.getSubjectDN()).getName(
+				X500Principal.CANONICAL);
+			String dnsubOrig = issuerCert3[0].getSubjectX500Principal().getName(
+				X500Principal.CANONICAL);
+			
+			assertTrue(dnsubOrig.equals(dnsubFromTD));
+			
+			ValidationResult result = 
+				etdEngine.validateTD(td, issuerCert1[0], issuerCert1, 
+						issuerCert3);
+			if (!result.isValid())
+				fail(result.getInvalidResaon());
+		} catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+		assertTrue(true);
+	}
+
+	
+	public void testRSACert2()
+	{
+		try
+		{
+			TrustDelegation td = etdEngine.generateTD(issuerCert3[0], issuerCert3,
+					privKey4, receiverCert1, null);
+			ValidationResult result = 
+				etdEngine.validateTD(td, issuerCert3[0], issuerCert3, 
+						receiverCert1);
+			if (!result.isValid())
+				fail(result.getInvalidResaon());
+		} catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+		assertTrue(true);
+	}
+
+	
 	public void testRSACert()
 	{
 		try

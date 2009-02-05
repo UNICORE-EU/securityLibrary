@@ -21,6 +21,34 @@ import eu.unicore.security.etd.TrustDelegation;
  */
 public class TDChainTest extends ETDTestBase
 {
+	public void testNormalCert2()
+	{
+		try
+		{
+			DelegationRestrictions restrictions = new DelegationRestrictions(
+					new Date(), 1, 3);
+			Vector<TrustDelegation> td = new Vector<TrustDelegation>();
+			td.add(etdEngine.generateTD(issuerCert3[0], issuerCert3,
+					privKey4, issuerCert2, restrictions));
+			restrictions.setMaxProxyCount(2);
+			List<TrustDelegation> chain = etdEngine.issueChainedTD(td, 
+					issuerCert2, privKey2, receiverCert1, restrictions);
+			chain = etdEngine.issueChainedTD(chain, 
+					receiverCert1, privKey3, receiverCert2, null);
+			
+			ValidationResult result = 
+				etdEngine.isTrustDelegated(chain, receiverCert2, issuerCert3);
+			if (!result.isValid())
+				fail("Normal chain validation failed: " + result.getInvalidResaon());
+		} catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+		assertTrue(true);
+	}
+
+	
+
 	public void testNormalDN()
 	{
 		try
@@ -182,5 +210,4 @@ public class TDChainTest extends ETDTestBase
 		}
 		assertTrue(true);
 	}
-
 }
