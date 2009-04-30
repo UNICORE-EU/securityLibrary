@@ -402,7 +402,7 @@ public class ETDImpl implements ETDApi
 			return new ValidationResult(false, "Wrong user");
 		Integer custodianHash = initial.getCustodianCertHash();
 		if (custodianHash == null)
-			return new ValidationResult(false, "Initial delegation doesn't have" +
+			return new ValidationResult(false, "Initial delegation doesn't have " +
 					"custodian certificate hash.");
 		if (!custodianHash.equals(user[0].hashCode()))
 			return new ValidationResult(false, "Wrong user (certificate hashes " +
