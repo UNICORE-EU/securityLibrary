@@ -49,7 +49,7 @@
 			<id>vsgc-public</id>
 			<name>VSGC repository</name>
 			<url>
-				scp://zam904.zam.kfa-juelich.de/srv/www/htdocs/maven
+				dav://zam904.zam.kfa-juelich.de/maven
 			</url>
 		</repository>
 		<!-- use the following if you ARE using a snapshot version. -->
@@ -57,10 +57,11 @@
 			<id>vsgc-public-snapshot</id>
 			<name>VSGC SNAPSHOT Repository</name>
 			<url>
-				scp://zam904.zam.kfa-juelich.de/srv/www/htdocs/maven
+				dav://zam904.zam.kfa-juelich.de/maven
 			</url>
 		</snapshotRepository>
 	</distributionManagement>
+
 	<build>
 		<plugins>
 			<plugin>
