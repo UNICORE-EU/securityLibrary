@@ -6,7 +6,7 @@
 	<groupId>eu.unicore.security</groupId>
 	<artifactId>securityLibrary</artifactId>
 	<packaging>jar</packaging>
-	<version>1.5.1</version>
+	<version>1.5.2</version>
 	<name>securityLibrary</name>
 	<url>http://www.unicore.eu</url>
 	<parent>
@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>pl.edu.icm.saml</groupId>
 			<artifactId>samly2</artifactId>
-			<version>1.2.1</version>
+			<version>1.2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
