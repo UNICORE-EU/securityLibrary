@@ -55,7 +55,7 @@ public class ETDImpl implements ETDApi
 			CertificateUtils.verifyCertificate(issuer, true, true);
 		} catch (CertificateException e)
 		{
-			throw new DSigException("Issuer (" +
+			throw new DSigException("Issuer's (" +
 				issuer[0].getSubjectX500Principal().getName()
 				+ ") certificate is invalid: "
 				+ e);
@@ -89,7 +89,7 @@ public class ETDImpl implements ETDApi
 			CertificateUtils.verifyCertificate(custodian, true, true);
 		} catch (CertificateException e)
 		{
-			throw new DSigException("Custodian (" + 
+			throw new DSigException("Custodian's (" + 
 				custodian.getSubjectX500Principal().getName() + 
 				") certificate is invalid: " + e);
 		}
@@ -98,7 +98,7 @@ public class ETDImpl implements ETDApi
 			CertificateUtils.verifyCertificate(issuer, true, true);
 		} catch (CertificateException e)
 		{
-			throw new DSigException("Issuer (" +
+			throw new DSigException("Issuer's (" +
 				issuer[0].getSubjectX500Principal().getName()
 				+ ") certificate is invalid: "
 				+ e);
@@ -108,7 +108,7 @@ public class ETDImpl implements ETDApi
 			CertificateUtils.verifyCertificate(receiver, true, true);
 		} catch (CertificateException e)
 		{
-			throw new DSigException("Receiver (" +
+			throw new DSigException("Receiver's (" +
 				receiver[0].getSubjectX500Principal().getName()
 				+ ") certificate is invalid: "
 				+ e);
@@ -219,11 +219,13 @@ public class ETDImpl implements ETDApi
 		String i1 = td.getIssuerDN();
 		String i2 = RFC2253Parser.rfc2253toXMLdsig(issuer);
 		if (!i1.equals(i2))
-			return new ValidationResult(false, "Wrong issuer");
+			return new ValidationResult(false, "Wrong issuer (is " + i1 + 
+					" and should be " + i2 + ")");
 		String r1 = td.getSubjectDN();
 		String r2 = RFC2253Parser.rfc2253toXMLdsig(receiver);
 		if (!r1.equals(r2))
-			return new ValidationResult(false, "Wrong receiver");
+			return new ValidationResult(false, "Wrong receiver (is " + r1 + 
+					" and should be " + r2 + ")");
 		
 		X509Certificate []issuerCert = td.getIssuerFromSignature();
 		if (issuerCert == null || issuerCert.length == 0)
@@ -248,6 +250,10 @@ public class ETDImpl implements ETDApi
 	public ValidationResult validateTD(TrustDelegation td, X509Certificate custodian, 
 			X509Certificate[] issuer, X509Certificate[] receiver)
 	{
+		if (issuer == null || issuer.length == 0)
+			throw new IllegalArgumentException("Issuer argument must not be null/empty");
+		if (receiver == null || receiver.length == 0)
+			throw new IllegalArgumentException("Receiver argument must not be null/empty");
 		X509Certificate[] issuerFromTD = td.getIssuerFromSignature();
 		if (issuerFromTD == null || issuerFromTD.length == 0)
 			return new ValidationResult(false, "No issuer certificate in trust " +
@@ -256,10 +262,14 @@ public class ETDImpl implements ETDApi
 		if (subjectFromTD == null || subjectFromTD.length == 0)
 			return new ValidationResult(false, "No receiver certificate in trust " +
 					"delegation assertion");
-		if (!compareChains(issuer, issuerFromTD))
-			return new ValidationResult(false, "Wrong issuer");
+		if (!compareChains(issuer, issuerFromTD)) 
+			return new ValidationResult(false, "Wrong delegation issuer " +
+					"(TD issuer certificate: [" + issuerFromTD[0].toString() +
+					"] and should be: [" +issuer[0].toString() + "])");
 		if (!compareChains(receiver, subjectFromTD))
-			return new ValidationResult(false, "Wrong receiver");
+			return new ValidationResult(false, "Wrong delegation receiver " +
+					"(TD receiver certificate: [" + subjectFromTD[0].toString() +
+					"] and should be: [" +receiver[0].toString() + "])");
 		return validateTDBasic(td, issuer[0], custodian.getSubjectX500Principal().getName(),
 				custodian.hashCode());
 	}

@@ -6,7 +6,7 @@
 	<groupId>eu.unicore.security</groupId>
 	<artifactId>securityLibrary</artifactId>
 	<packaging>jar</packaging>
-	<version>1.5.2</version>
+	<version>1.5.3-SNAPSHOT</version>
 	<name>securityLibrary</name>
 	<url>http://www.unicore.eu</url>
 	<parent>
