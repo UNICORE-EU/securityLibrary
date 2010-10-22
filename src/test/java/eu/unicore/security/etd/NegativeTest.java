@@ -111,7 +111,7 @@ public class NegativeTest extends ETDTestBase
 			ValidationResult result = 
 				etdEngine.validateTD(td, issuerCert1[0], issuerCert1, receiverCert2);
 			if (result.isValid() || 
-				!result.getInvalidResaon().startsWith("Wrong receiver"))
+				!result.getInvalidResaon().startsWith("Wrong delegation receiver"))
 				fail("Validation of wrong receiver succeeded/error is wrong: " + 
 						result.getInvalidResaon());
 		} catch (Exception e)
@@ -227,7 +227,7 @@ public class NegativeTest extends ETDTestBase
 		} catch (Exception e)
 		{
 			if (!(e instanceof DSigException) || 
-				!e.getMessage().startsWith("Issuer ("))
+				!e.getMessage().startsWith("Issuer's ("))
 				fail("Wrong error when generating ETD with expired cert: "
 					+ e);
 			
