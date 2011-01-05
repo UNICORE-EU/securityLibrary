@@ -6,7 +6,7 @@
 	<groupId>eu.unicore.security</groupId>
 	<artifactId>securityLibrary</artifactId>
 	<packaging>jar</packaging>
-	<version>1.6.1</version>
+	<version>1.6.2-SNAPSHOT</version>
 	<name>securityLibrary</name>
 
 	<parent>
