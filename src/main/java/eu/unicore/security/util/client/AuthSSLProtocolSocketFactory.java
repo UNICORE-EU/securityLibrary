@@ -33,6 +33,9 @@ import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
 import org.apache.log4j.Logger;
 
+import eu.unicore.security.util.LogPfx;
+
+
 /**
  * Code from Commons HTTPClient "contrib" section <br/>
  * 
@@ -63,7 +66,7 @@ import org.apache.log4j.Logger;
 
 public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 {
-	private static final Logger LOG = Logger.getLogger(eu.unicore.security.util.LogPfx.LOG_PFX +
+	private static final Logger LOG = Logger.getLogger(LogPfx.LOG_PFX +
 		 AuthSSLProtocolSocketFactory.class.getSimpleName());
 
 	private SSLContext sslcontext = null;

@@ -8,14 +8,12 @@
 
 package eu.unicore.security.util;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.apache.xml.serialize.Method;
-import org.apache.xml.serialize.OutputFormat;
-import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.Document;
+
+import eu.unicore.security.dsig.DigSignatureUtil;
 
 /**
  * Utility methods to simply dump XML DOM. Useful for logging
@@ -26,15 +24,7 @@ public class DOMUtilities
 {
 	public static String getDOMAsRawString(Document doc) throws IOException
 	{
-		OutputFormat of = new OutputFormat(Method.XML, null, false);
-		of.setPreserveSpace(true);
-		of.setLineWidth(0);
-		of.setPreserveEmptyAttributes(true);
-		XMLSerializer serializer = new XMLSerializer(of);
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		serializer.setOutputByteStream(baos);
-		serializer.serialize(doc);
-		return baos.toString();
+		return DigSignatureUtil.dumpDOMToString(doc);
 	}
 
 	public static void logDOMAsRawString(String prefix, Document doc, 
