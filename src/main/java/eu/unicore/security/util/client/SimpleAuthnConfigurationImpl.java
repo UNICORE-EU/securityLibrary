@@ -77,7 +77,7 @@ public class SimpleAuthnConfigurationImpl extends AbstractSecurityConfigurationI
 		return false;
 	}
 
-	public String getHttpPasswd()
+	public String getHttpPassword()
 	{
 		return httpPasswd;
 	}

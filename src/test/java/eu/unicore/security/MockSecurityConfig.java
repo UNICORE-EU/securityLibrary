@@ -85,7 +85,7 @@ public class MockSecurityConfig implements IAuthenticationConfiguration
 		return doSSLAuthN;
 	}
 
-	public String getHttpPasswd()
+	public String getHttpPassword()
 	{
 		return HTTP_PASSWD;
 	}
@@ -107,12 +107,12 @@ public class MockSecurityConfig implements IAuthenticationConfiguration
 		return KS_ALIAS_WRONG;
 	}
 
-	public String getKeystoreKeyPasswd()
+	public String getKeystoreKeyPassword()
 	{
 		return KS_PASSWD;
 	}
 
-	public String getKeystorePasswd()
+	public String getKeystorePassword()
 	{
 		return KS_PASSWD;
 	}
@@ -127,7 +127,7 @@ public class MockSecurityConfig implements IAuthenticationConfiguration
 		return KS;
 	}
 
-	public String getTruststorePasswd()
+	public String getTruststorePassword()
 	{
 		return KS_PASSWD;
 	}

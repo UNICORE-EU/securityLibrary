@@ -37,7 +37,7 @@ public interface IAuthenticationConfiguration extends ISecurityConfiguration
 	
 	/**
 	 * Returns truststore location. If this method returns null
-	 * then (for SSL connections) client will trust ALL any server's certificate.
+	 * then (for SSL connections) client will trust ANY server certificate.
 	 * @return
 	 */
 	public String getTruststore();
@@ -45,7 +45,7 @@ public interface IAuthenticationConfiguration extends ISecurityConfiguration
 	 * Returns truststore password.
 	 * @return
 	 */
-	public String getTruststorePasswd();
+	public String getTruststorePassword();
 	/**
 	 * Returns truststore type.
 	 * @return
@@ -66,5 +66,5 @@ public interface IAuthenticationConfiguration extends ISecurityConfiguration
 	 * Returns HTTP BASIC Auth user's password. Required if doHttpAuthn is true.
 	 * @return
 	 */
-	public String getHttpPasswd();
+	public String getHttpPassword();
 }

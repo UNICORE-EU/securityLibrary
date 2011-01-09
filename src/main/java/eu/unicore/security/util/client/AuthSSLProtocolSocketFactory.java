@@ -196,19 +196,19 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 			if (sec.doSSLAuthn())
 			{
 				KeyStore keystore = createKeyStore(sec.getKeystore(), 
-						sec.getKeystorePasswd(), 
+						sec.getKeystorePassword(), 
 						sec.getKeystoreType(), 
 						sec.getKeystoreAlias(), false);
 				if (LOG.isDebugEnabled())
 					debugKS(keystore);
 				keymanagers = createKeyManagers(keystore, 
-						sec.getKeystoreKeyPasswd());
+						sec.getKeystoreKeyPassword());
 			}
 			if (sec.getTruststore() != null)
 			{
 				KeyStore truststore = createKeyStore(sec
 						.getTruststore(), sec
-						.getTruststorePasswd(), sec
+						.getTruststorePassword(), sec
 						.getTruststoreType(), null, true);
 				if (LOG.isDebugEnabled())
 					debugTS(truststore);

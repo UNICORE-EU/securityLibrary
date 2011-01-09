@@ -16,7 +16,7 @@ public interface ISecurityConfiguration extends Cloneable
 	 * Returns keystore password.
 	 * @return
 	 */
-	public String getKeystorePasswd();
+	public String getKeystorePassword();
 	/**
 	 * Returns key alias in keystore.
 	 * @return
@@ -26,7 +26,7 @@ public interface ISecurityConfiguration extends Cloneable
 	 * Returns key password in keystore.
 	 * @return
 	 */
-	public String getKeystoreKeyPasswd();
+	public String getKeystoreKeyPassword();
 	/**
 	 * Returns keystore type.
 	 * @return

@@ -26,7 +26,7 @@ public abstract class AbstractSecurityConfigurationImpl implements IAuthenticati
 		return false;
 	}
 
-	public String getHttpPasswd()
+	public String getHttpPassword()
 	{
 		return null;
 	}
@@ -46,12 +46,12 @@ public abstract class AbstractSecurityConfigurationImpl implements IAuthenticati
 		return null;
 	}
 
-	public String getKeystoreKeyPasswd()
+	public String getKeystoreKeyPassword()
 	{
 		return null;
 	}
 
-	public String getKeystorePasswd()
+	public String getKeystorePassword()
 	{
 		return null;
 	}
@@ -66,7 +66,7 @@ public abstract class AbstractSecurityConfigurationImpl implements IAuthenticati
 		return null;
 	}
 
-	public String getTruststorePasswd()
+	public String getTruststorePassword()
 	{
 		return null;
 	}
