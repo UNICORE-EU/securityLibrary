@@ -15,4 +15,5 @@ package eu.unicore.security.util;
 public class LogPfx
 {
 	public static final String LOG_PFX = "unicore.security.";
+	public static final String LOG_PFX_CLIENT = "unicore.client.";
 }
