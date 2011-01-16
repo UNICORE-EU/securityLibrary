@@ -97,7 +97,15 @@ public class SecurityTokens implements Serializable
 	private SignatureStatus signatureStatus = SignatureStatus.UNCHECKED;
 	private Map<String, Object> context;
 	private X500Principal userName;
-	private boolean validTrustDelegation;
+	/**
+	 * If true then tdTokens confirmed that the User allowed the Consignor to act 
+	 * on her behalf or Consignor is equal to User or this is a local call.
+	 */
+	private boolean consignorTrusted;
+	/**
+	 * If true then tdTokens contains a valid TD which was issued by the User.
+	 */
+	private boolean trustDelegationValidated;
 	private List<TrustDelegation> tdTokens;
 
 	public SecurityTokens()
@@ -215,7 +223,7 @@ public class SecurityTokens implements Serializable
 	 */
 	public X509Certificate getEffectiveUserCertificate()
 	{
-		if (user != null && validTrustDelegation)
+		if (user != null && consignorTrusted)
 			return getUserCertificate();
 		return getConsignorCertificate();
 	}
@@ -228,7 +236,7 @@ public class SecurityTokens implements Serializable
 	 */
 	public X500Principal getEffectiveUserName()
 	{
-		if (userName != null && validTrustDelegation)
+		if (userName != null && consignorTrusted)
 			return getUserName();
 		X509Certificate cc = getConsignorCertificate();
 		if (cc == null)
@@ -290,21 +298,41 @@ public class SecurityTokens implements Serializable
 	}
 
 	/**
-	 * Returns true iff the trust delegation attached is valid and 
-	 * it confirms that trust is delegated from the contained user to the consignor.
+	 * Returns true if the Consignor is anyhow allowed to work on
+	 * User's behalf, as set by the setConsignorTrusted method. 
 	 * @return
 	 */
-	public boolean isValidTrustDelegation()
+	public boolean isConsignorTrusted()
 	{
-		return validTrustDelegation;
+		return consignorTrusted;
 	}
 
 	/**
-	 * Sets the attached trust delegation status.
+	 * Sets the key value telling if the Consignor is allowed to work on 
+	 * the Users behalf. 
 	 */
-	public void setValidTrustDelegation(boolean validTrustDelegation)
+	public void setConsignorTrusted(boolean consignorTrusted)
 	{
-		this.validTrustDelegation = validTrustDelegation;
+		this.consignorTrusted = consignorTrusted;
+	}
+
+	/**
+	 * Returns true iff the trust delegation attached is valid and 
+	 * issued by the User. This does not mean that the trust is delegated to 
+	 * the consignor, use isValidConsig
+	 * @return
+	 */
+	public boolean isTrustDelegationValidated()
+	{
+		return trustDelegationValidated;
+	}
+
+	/**
+	 * Sets the attached trust delegation general validation status.
+	 */
+	public void setTrustDelegationValidated(boolean validTrustDelegation)
+	{
+		this.trustDelegationValidated = validTrustDelegation;
 	}
 
 	/**
@@ -338,7 +366,9 @@ public class SecurityTokens implements Serializable
 		
 		if (!other.getMessageSignatureStatus().equals(getMessageSignatureStatus()))
 			return false;
-		if (other.isValidTrustDelegation() != isValidTrustDelegation())
+		if (other.isConsignorTrusted() != isConsignorTrusted())
+			return false;
+		if (other.isTrustDelegationValidated() != isTrustDelegationValidated())
 			return false;
 		
 		if (other.getConsignorCertificate() == null)

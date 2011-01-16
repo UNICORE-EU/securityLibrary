@@ -46,9 +46,9 @@ public class TestEquality extends TestCase
 			t2.setConsignor(cp1);
 			assertTrue(t1.equals(t2));
 			
-			t1.setValidTrustDelegation(true);
+			t1.setConsignorTrusted(true);
 			assertFalse(t1.equals(t2));			
-			t2.setValidTrustDelegation(true);
+			t2.setConsignorTrusted(true);
 			assertTrue(t1.equals(t2));
 			
 			t1.setMessageSignatureStatus(SignatureStatus.OK);

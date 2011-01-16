@@ -111,7 +111,7 @@ public interface ETDApi
 	/**
 	 * Validate single trust delegation assertion. Checks if receiver has trust of custodian 
 	 * delegated by issuer. This validation is done in terms of certificates and it is assumed
-	 * that assertion includes neccessary certificates.
+	 * that assertion includes necessary certificates.
 	 *  
 	 * @param td
 	 * @param custodian
@@ -152,5 +152,12 @@ public interface ETDApi
 	 */
 	public ValidationResult isTrustDelegated(List<TrustDelegation> td, X509Certificate[] subject, 
 			X509Certificate[] user);
+	
+	/**
+	 * Helper method to check if the subject is present in the chain. The chain is
+	 * not checked for consistency, so it should be validated before.
+	 * @return true if subject is present in chain
+	 */
+	public boolean isSubjectInChain(List<TrustDelegation> td, String subject);
 
 }

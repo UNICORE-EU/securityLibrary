@@ -481,6 +481,18 @@ public class ETDImpl implements ETDApi
 				return false;
 		return true;
 	}
+
+	@Override
+	public boolean isSubjectInChain(List<TrustDelegation> tdChain, String subject)
+	{
+		String s = RFC2253Parser.rfc2253toXMLdsig(subject);
+		for (TrustDelegation td: tdChain)
+		{
+			if (td.getSubjectDN().equals(s))
+				return true;
+		}
+		return false;
+	}
 }
 
 
