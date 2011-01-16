@@ -19,7 +19,7 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.log4j.Logger;
 
-import eu.unicore.security.util.LogPfx;
+import eu.unicore.security.util.Log;
 
 /**
  * Contains helper code to create HttpClient instances. The following settings are always set
@@ -50,8 +50,7 @@ import eu.unicore.security.util.LogPfx;
  */
 public class HttpUtils {
 
-	private static final Logger logger=Logger.getLogger(LogPfx.LOG_PFX_CLIENT + 
-			HttpUtils.class.getSimpleName());
+	private static final Logger logger=Log.getLogger(Log.CLIENT, HttpUtils.class);
 
 	//prevent instantiation 
 	private HttpUtils(){}
