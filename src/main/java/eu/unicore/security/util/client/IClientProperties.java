@@ -55,6 +55,11 @@ public interface IClientProperties extends IAuthenticationConfiguration
 	public boolean isSslEnabled();
 	
 	/**
+	 * Digital signature mechanism can be disabled with this method returning false.
+	 */
+	public boolean doSignMessage();
+	
+	/**
 	 * Returns additional settings which are used to set up HTTP client.
 	 * @return see above
 	 * @see HttpUtils

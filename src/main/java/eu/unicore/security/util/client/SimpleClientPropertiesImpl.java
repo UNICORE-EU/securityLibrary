@@ -52,8 +52,15 @@ public class SimpleClientPropertiesImpl extends SimpleAuthnConfigurationImpl
 		return p;
 	}
 	
+	@Override
 	public IClientProperties clone()
 	{
 		return new SimpleClientPropertiesImpl();
+	}
+
+	@Override
+	public boolean doSignMessage()
+	{
+		return false;
 	}
 }
