@@ -35,5 +35,5 @@ public interface ISecurityConfiguration extends Cloneable
 	/**
 	 * Cloning support is mandatory
 	 */
-	public Object clone();
+	public ISecurityConfiguration clone();
 }

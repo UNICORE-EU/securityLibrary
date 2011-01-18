@@ -137,7 +137,7 @@ public class MockSecurityConfig implements IAuthenticationConfiguration
 		return "JKS";
 	}
 
-	public Object clone()
+	public IAuthenticationConfiguration clone()
 	{
 		try
 		{

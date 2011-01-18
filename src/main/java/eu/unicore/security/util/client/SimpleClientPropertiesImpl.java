@@ -7,6 +7,7 @@
  */
 package eu.unicore.security.util.client;
 
+import java.security.PrivateKey;
 import java.util.Properties;
 
 import eu.unicore.security.util.client.SimpleAuthnConfigurationImpl;
@@ -62,5 +63,17 @@ public class SimpleClientPropertiesImpl extends SimpleAuthnConfigurationImpl
 	public boolean doSignMessage()
 	{
 		return false;
+	}
+
+	@Override
+	public PrivateKey getPrivateKey()
+	{
+		return null;
+	}
+
+	@Override
+	public ETDClientSettings getETDSettings()
+	{
+		return null;
 	}
 }

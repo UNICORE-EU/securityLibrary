@@ -92,7 +92,7 @@ public class SimpleAuthnConfigurationImpl extends AbstractSecurityConfigurationI
 		return ctx;
 	}
 
-	public Object clone()
+	public IAuthenticationConfiguration clone()
 	{
 		return new SimpleAuthnConfigurationImpl(ctx, httpUser, httpPasswd);
 	}

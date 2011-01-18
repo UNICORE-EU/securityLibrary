@@ -67,4 +67,9 @@ public interface IAuthenticationConfiguration extends ISecurityConfiguration
 	 * @return
 	 */
 	public String getHttpPassword();
+	
+	/**
+	 * Cloning support is mandatory
+	 */
+	public IAuthenticationConfiguration clone();
 }

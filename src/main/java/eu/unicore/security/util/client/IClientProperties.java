@@ -7,6 +7,7 @@
  */
 package eu.unicore.security.util.client;
 
+import java.security.PrivateKey;
 import java.util.Properties;
 
 import eu.unicore.security.util.client.HttpUtils;
@@ -17,11 +18,13 @@ import eu.unicore.security.util.client.IAuthenticationConfiguration;
  * <ul>
  *  <li> whether to initialize SSL or not
  *  <li> list of outgoing and incoming handlers
- *  <li> classloader to be used in case of loading handler classes 
+ *  <li> classloader to be used in case of loading handler classes
+ *  <li> settings to automatically initialize signing of outgoing messages.
+ *  <li> settings to automatically initialize ETD for outgoing messages.
  * </ul>
  * 
  * TODO - this class does not fit in this module. It is here only as it is extended 
- * in use-core. Should be moved somewhere out of here.
+ * in use-core. Should be moved to secutils-xfire (but use-core doesn't depend on it).
  * 
  * @author golbi
  */
@@ -58,6 +61,18 @@ public interface IClientProperties extends IAuthenticationConfiguration
 	 * Digital signature mechanism can be disabled with this method returning false.
 	 */
 	public boolean doSignMessage();
+
+	/**
+	 * private key for signing messages and assertions
+	 * 
+	 * @return PrivateKey
+	 */
+	public PrivateKey getPrivateKey();
+
+	/**
+	 * Returns an object with setup of ETD to be used in outgoing calls.
+	 */
+	public ETDClientSettings getETDSettings();
 	
 	/**
 	 * Returns additional settings which are used to set up HTTP client.

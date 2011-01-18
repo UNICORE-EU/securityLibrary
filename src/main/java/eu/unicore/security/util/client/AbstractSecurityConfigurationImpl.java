@@ -81,5 +81,5 @@ public abstract class AbstractSecurityConfigurationImpl implements IAuthenticati
 		return null;
 	}
 	
-	public abstract Object clone();
+	public abstract IAuthenticationConfiguration clone();
 }
