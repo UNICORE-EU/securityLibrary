@@ -9,6 +9,7 @@ package eu.unicore.security.util.client;
 
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.util.Map;
 import java.util.Properties;
 
 import eu.unicore.security.util.client.SimpleAuthnConfigurationImpl;
@@ -86,6 +87,12 @@ implements IClientProperties
 	
 	@Override
 	public ETDClientSettings getETDSettings()
+	{
+		return null;
+	}
+
+	@Override
+	public Map<String, Object> getExtraSecurityTokens()
 	{
 		return null;
 	}

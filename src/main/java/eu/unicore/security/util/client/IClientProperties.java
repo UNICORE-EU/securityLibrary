@@ -9,6 +9,7 @@ package eu.unicore.security.util.client;
 
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.util.Map;
 import java.util.Properties;
 
 import eu.unicore.security.util.client.HttpUtils;
@@ -98,4 +99,12 @@ public interface IClientProperties extends IAuthenticationConfiguration
 	 * @see XFireClientFactory
 	 */
 	public Properties getExtraSettings();
+	
+	
+	/**
+	 * For outgoing calls, get extra security information. This map is used whenever 
+	 * specialized objects are to be passed to the additional <b>handlers</b> which
+	 * were configured by this class.
+	 */
+	public Map<String,Object> getExtraSecurityTokens();
 }
