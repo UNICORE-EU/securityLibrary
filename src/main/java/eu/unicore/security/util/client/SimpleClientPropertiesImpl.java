@@ -8,6 +8,7 @@
 package eu.unicore.security.util.client;
 
 import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 import java.util.Properties;
 
 import eu.unicore.security.util.client.SimpleAuthnConfigurationImpl;
@@ -19,10 +20,10 @@ import eu.unicore.security.util.client.SimpleAuthnConfigurationImpl;
  *
  */
 public class SimpleClientPropertiesImpl extends SimpleAuthnConfigurationImpl 
-	implements IClientProperties
+implements IClientProperties
 {
 	private final Properties p = new Properties();
-	
+
 	@Override
 	public String getOutHandlerClassNames()
 	{
@@ -52,7 +53,7 @@ public class SimpleClientPropertiesImpl extends SimpleAuthnConfigurationImpl
 	{
 		return p;
 	}
-	
+
 	@Override
 	public IClientProperties clone()
 	{
@@ -71,6 +72,18 @@ public class SimpleClientPropertiesImpl extends SimpleAuthnConfigurationImpl
 		return null;
 	}
 
+	@Override
+	public X509Certificate getPublicKey()
+	{
+		return null;
+	}
+	
+	@Override
+	public X509Certificate[] getCertificateChain()
+	{
+		return null;
+	}
+	
 	@Override
 	public ETDClientSettings getETDSettings()
 	{

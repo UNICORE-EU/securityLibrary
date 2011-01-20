@@ -8,6 +8,7 @@
 package eu.unicore.security.util.client;
 
 import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 import java.util.Properties;
 
 import eu.unicore.security.util.client.HttpUtils;
@@ -69,13 +70,29 @@ public interface IClientProperties extends IAuthenticationConfiguration
 	 */
 	public PrivateKey getPrivateKey();
 
+
+	/**
+	 * the user's certificate chain. 
+	 * @return array of X509Certificates
+	 */
+	public X509Certificate[] getCertificateChain();
+
+	/**
+	 * the user's certificate, equal to the first entry in the certificate chain
+	 * (this is equivalent to calling getCertificateChain()[0])
+	 * @return X509Certificate
+	 */
+	public X509Certificate getPublicKey();
+	
 	/**
 	 * Returns an object with setup of ETD to be used in outgoing calls.
 	 */
 	public ETDClientSettings getETDSettings();
 	
 	/**
-	 * Returns additional settings which are used to set up HTTP client.
+	 * Returns additional settings which are used to set up the client call
+	 * (e.g., HTTP client proxy settings or additional security handler settings)
+	 * 
 	 * @return see above
 	 * @see HttpUtils
 	 * @see XFireClientFactory
