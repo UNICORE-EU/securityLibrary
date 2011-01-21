@@ -15,6 +15,7 @@ import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
 
+import eu.unicore.security.etd.DelegationRestrictions;
 import eu.unicore.security.etd.TrustDelegation;
 
 /**
@@ -31,6 +32,8 @@ public class ETDClientSettings implements Cloneable
 	private boolean extendTrustDelegation;
 	private List<TrustDelegation> trustDelegationTokens;
 	private X509Certificate[] issuerCertificateChain;
+	private DelegationRestrictions delegationRestrictions = new DelegationRestrictions(null, null, 10);
+	private Integer relativeDelegationValidityDays = 30;
 	
 	/**
 	 * SAML attribute name for transporting attribute requests from client to server 
@@ -148,6 +151,65 @@ public class ETDClientSettings implements Cloneable
 	public void setIssuerCertificateChain(X509Certificate[] certChain)
 	{
 		this.issuerCertificateChain = certChain;
+	}
+	
+	/**
+	 * Sets delegation restrictions
+	 * @param delegationRestrictions
+	 */
+	public void setDelegationRestrictions(DelegationRestrictions delegationRestrictions)
+	{
+		this.delegationRestrictions = delegationRestrictions;
+	}
+
+	/**
+	 * Gets delegation restrictions
+	 * @return
+	 */
+	public DelegationRestrictions getDelegationRestrictions()
+	{
+		return delegationRestrictions;
+	}
+
+	/**
+	 * If relative validity is set then time constraints in delegation are computed 
+	 * just before delegation creation. Beginning of validity is set to 1 hour 
+	 * before the current time (to accommodate possible lack of clocks synchronization)
+	 * and end of validity is set to the specified number of days from the time
+	 * of assertion creation.
+	 * <br>
+	 * By default this option is used, and is set to one month.
+	 * @param relativeDelegationValidityDays use null value to disable this feature
+	 */
+	public void setRelativeDelegationValidityDays(
+			Integer relativeDelegationValidityDays)
+	{
+		this.relativeDelegationValidityDays = relativeDelegationValidityDays;
+	}
+
+	/**
+	 * 
+	 * @return number of days for which the newly created delegation is valid.
+	 */
+	public Integer getRelativeDelegationValidityDays()
+	{
+		return relativeDelegationValidityDays;
+	}
+	
+	/**
+	 * Convenience method, allows for setting up ETD with one invocation. This is useful
+	 * for creation of an initial assertion with default settings.
+	 * @param requestedUserDN
+	 * @param delegationReceiver
+	 * @param properties
+	 */
+	public void initializeSimple(X500Principal delegationReceiver,	IClientProperties properties)
+	{
+		String requestedUserDN = properties.getCertificateChain()[0].getSubjectX500Principal().getName();
+		setRequestedUser(requestedUserDN);
+		setReceiver(delegationReceiver);
+		setExtendTrustDelegation(true);
+		setIssuerCertificateChain(properties.getCertificateChain());
 	}
 	
 	public ETDClientSettings clone()
