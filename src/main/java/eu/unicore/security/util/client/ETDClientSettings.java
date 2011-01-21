@@ -226,6 +226,8 @@ public class ETDClientSettings implements Cloneable
 			copy.trustDelegationTokens = new ArrayList<TrustDelegation>();
 			copy.trustDelegationTokens.addAll(trustDelegationTokens);
 		}
+		copy.relativeDelegationValidityDays = relativeDelegationValidityDays;
+		copy.delegationRestrictions = delegationRestrictions.clone();
 		return copy;
 	}
 }

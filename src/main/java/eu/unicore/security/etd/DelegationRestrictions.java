@@ -16,7 +16,7 @@ import org.apache.xmlbeans.XmlObject;
 /**
  * @author K. Benedyczak
  */
-public class DelegationRestrictions
+public class DelegationRestrictions implements Cloneable
 {
 	private Date notBefore;
 	private Date notOnOrAfter;
@@ -79,5 +79,15 @@ public class DelegationRestrictions
 	public void setCustomConditions(XmlObject[] conditions)
 	{
 		this.conditions = conditions;
+	}
+	
+	public DelegationRestrictions clone()
+	{
+		DelegationRestrictions clone = new DelegationRestrictions(
+				notBefore == null ? null : new Date(notBefore.getTime()), 
+				notOnOrAfter == null ? null : new Date(notOnOrAfter.getTime()), maxProxyCount);
+		if (conditions != null)
+			clone.setCustomConditions(conditions.clone());
+		return clone;
 	}
 }

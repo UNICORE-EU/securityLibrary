@@ -32,7 +32,7 @@ public class TestAuthSSLSocketFactory extends junit.framework.TestCase
 		{
 			KeyStore ks = AuthSSLProtocolSocketFactory.createKeyStore(
 					"src/test/resources/client/demo_keystore",
-					"demo123", "jks", "jetty", true);
+					"demo123", "jks", "jetty", false);
 			Enumeration<String> en = ks.aliases();
 			assertTrue(en.hasMoreElements());
 			String alias = en.nextElement();
