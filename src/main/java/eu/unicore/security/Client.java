@@ -69,6 +69,12 @@ public class Client implements Serializable {
 	//the (set of) possible unix login name(s) and groups optionally with the preferred one
 	private Xlogin xlogin;
 	
+	//list of VOs the user is a member of
+	private String[] vos;
+	
+	private Queue queue;
+	
+	
 	//all attributes that were established by attribute sources.
 	private SubjectAttributesHolder subjectAttributes;
 	
@@ -83,6 +89,8 @@ public class Client implements Serializable {
 		extraAttributes=new HashMap<String,Serializable>();
 		setSubjectAttributes(new SubjectAttributesHolder());
 		xlogin=new Xlogin();
+		vos = new String[0];
+		queue = new Queue();
 	}
 	
 	public String toString(){
@@ -174,4 +182,19 @@ public class Client implements Serializable {
 		return subjectAttributes;
 	}
 
+	public String[] getVos() {
+		return vos;
+	}
+
+	public void setVos(String[] vos) {
+		this.vos = vos;
+	}
+
+	public Queue getQueue() {
+		return queue;
+	}
+
+	public void setQueue(Queue queue) {
+		this.queue = queue;
+	}
 }
