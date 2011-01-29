@@ -69,15 +69,19 @@ public class Client implements Serializable {
 	//the (set of) possible unix login name(s) and groups optionally with the preferred one
 	private Xlogin xlogin;
 	
-	//attributes may contain things relevant on the target system 
-	//such as xlogin, licence keys, ...
-	private final Map<String,Serializable> attributes;
+	//all attributes that were established by attribute sources.
+	private SubjectAttributesHolder subjectAttributes;
+	
+	//additional attributes may contain things relevant on the target system 
+	//such as licence keys, ... In most cases subjectAttributes are what you need.
+	private final Map<String,Serializable> extraAttributes;
 	
 	/**
 	 * constructs an anonymous Client
 	 */
 	public Client(){
-		attributes=new HashMap<String,Serializable>();
+		extraAttributes=new HashMap<String,Serializable>();
+		setSubjectAttributes(new SubjectAttributesHolder());
 		xlogin=new Xlogin();
 	}
 	
@@ -123,8 +127,8 @@ public class Client implements Serializable {
 		this.distinguishedName = distinguishedName;
 	}
 
-	public Map<String, Serializable> getAttributes() {
-		return attributes;
+	public Map<String, Serializable> getExtraAttributes() {
+		return extraAttributes;
 	}
 	
 	/**
@@ -154,12 +158,20 @@ public class Client implements Serializable {
 	}
 	
 	public String getUserEmail(){
-		return (String)attributes.get(ATTRIBUTE_USER_EMAIL);
+		return (String)extraAttributes.get(ATTRIBUTE_USER_EMAIL);
 	}
 	
 	public void setUserEmail(String email){
-		if(email==null)attributes.remove(ATTRIBUTE_USER_EMAIL);
-		attributes.put(ATTRIBUTE_USER_EMAIL,email);
+		if(email==null)extraAttributes.remove(ATTRIBUTE_USER_EMAIL);
+		extraAttributes.put(ATTRIBUTE_USER_EMAIL,email);
+	}
+
+	public void setSubjectAttributes(SubjectAttributesHolder subjectAttributes) {
+		this.subjectAttributes = subjectAttributes;
+	}
+
+	public SubjectAttributesHolder getSubjectAttributes() {
+		return subjectAttributes;
 	}
 
 }
