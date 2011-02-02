@@ -7,13 +7,18 @@
  */
 package eu.unicore.security;
 
+import java.io.Serializable;
+
 /**
  * Holds info about queues the client can use. This information is collected from attribute sources
  * The selected queue is also stored.
  * @author golbi
  */
-public class Queue
+public class Queue implements Serializable
 {
+	
+	private static final long serialVersionUID=1L;
+	
 	private String selectedQueue;
 	private String []validQueues;
 
