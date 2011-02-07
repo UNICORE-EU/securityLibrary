@@ -61,4 +61,9 @@ public class Queue implements Serializable
 	{
 		this.validQueues = validQueues;
 	}
+	
+	public boolean isSelectedQueueSet()
+	{
+		return selectedQueue != null;
+	}
 }
