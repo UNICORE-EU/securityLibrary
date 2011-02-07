@@ -21,8 +21,6 @@ public class Queue implements Serializable
 	
 	private String selectedQueue;
 	private String []validQueues;
-	private boolean validQueuesDefined = false;
-	private boolean selectedQueueDefined = false;
 
 	public Queue(String[] validQueues)
 	{
@@ -49,7 +47,6 @@ public class Queue implements Serializable
 			if (valid.equals(selectedQueue))
 			{
 				this.selectedQueue = selectedQueue;
-				selectedQueueDefined = true;
 				return;
 			}
 		throw new SecurityException("Requested queue <"+selectedQueue+"> is not available.");
@@ -63,16 +60,5 @@ public class Queue implements Serializable
 	public void setValidQueues(String[] validQueues)
 	{
 		this.validQueues = validQueues;
-		validQueuesDefined = validQueues != null;
-	}
-	
-	public boolean isValidQueuesDefined()
-	{
-		return validQueuesDefined;
-	}
-
-	public boolean isSelectedQueueDefined()
-	{
-		return selectedQueueDefined;
 	}
 }
