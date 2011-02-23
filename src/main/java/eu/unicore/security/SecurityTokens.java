@@ -244,24 +244,24 @@ public class SecurityTokens implements Serializable
 		return cc.getSubjectX500Principal();
 	}
 
+
+        private static final String lineSep=System.getProperty("line.separator");
+
 	public String toString()
 	{
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		if (userName != null)
-			sb.append("User name: " + userName.getName() + "\r\n");
+		    sb.append("User name: ").append(userName.getName()).append(lineSep);
 		if (user != null)
-			sb.append("(have user cert)\r\n");
+		    sb.append("(have user cert)").append(lineSep);
 		if (consignor != null)
 		{
-			X509Certificate cc = (X509Certificate) 
-				consignor.getCertificates().get(0); 
-			sb.append("Consignor DN: " + 
-				cc.getSubjectX500Principal().getName());
+		    X509Certificate cc = (X509Certificate)consignor.getCertificates().get(0); 
+		    sb.append("Consignor DN: ").append(cc.getSubjectX500Principal().getName());
 		}
 		if (signatureStatus != null)
 		{
-			sb.append("Message signature status: "
-					+ signatureStatus.toString());
+		    sb.append(lineSep+"Message signature status: ").append(signatureStatus.toString());
 		}
 		String res = sb.toString();
 		if (res.length() == 0)
