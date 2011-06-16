@@ -226,8 +226,36 @@ public class Xlogin implements Serializable{
 		return getEncodedInteranl(selectedSupplementaryGroups);
 	}
 		
-	public String toString(){
-		return "["+getEncoded()+(isMultiLogin()?", active = "+getUserName():"")+"]";
+	public String toString() {
+		StringBuilder cInfo = new StringBuilder(256);
+		
+		cInfo.append("uid: [");
+		cInfo.append(getEncoded());
+		if (isMultiLogin()) 
+		{
+			cInfo.append(", active=");
+			cInfo.append(getUserName());
+		}
+		cInfo.append("]");
+		
+		if (groups != null && groups.length > 0) {
+			cInfo.append(", gids: [");
+			cInfo.append(getEncodedGroups());
+			if (groups.length > 1) {
+				cInfo.append(", active=");
+				cInfo.append(getGroup());
+			}
+			if (selectedSupplementaryGroups != null &&
+					selectedSupplementaryGroups.length > 0) {
+				cInfo.append(", selectedSupplementaryGids=");
+				cInfo.append(getEncodedSelectedSupplementaryGroups());
+			}
+		}
+		cInfo.append(", addingOSgroups: ");
+		cInfo.append(isAddDefaultGroups());
+		cInfo.append("]");
+		
+		return cInfo.toString();
 	}
 	
 	public void setAddDefaultGroups(boolean addDefaultGroups)

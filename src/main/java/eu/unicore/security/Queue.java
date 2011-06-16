@@ -66,4 +66,25 @@ public class Queue implements Serializable
 	{
 		return selectedQueue != null;
 	}
+	
+	public String toString()
+	{
+		if (getValidQueues().length == 0)
+			return "";
+		
+		StringBuilder cInfo = new StringBuilder(); 
+		cInfo.append("[");
+		for (int i=0; i<getValidQueues().length-1; i++) {
+			cInfo.append(getValidQueues()[i]);
+			cInfo.append(":");
+		}
+		cInfo.append(getValidQueues()[getValidQueues().length-1]);
+		
+		if (getValidQueues().length > 1) {
+			cInfo.append(", selected=");
+			cInfo.append(getSelectedQueue());
+		}
+		cInfo.append("]");
+		return cInfo.toString();
+	}
 }
