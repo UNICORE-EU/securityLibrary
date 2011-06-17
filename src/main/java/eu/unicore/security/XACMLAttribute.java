@@ -159,4 +159,16 @@ public class XACMLAttribute implements Serializable
 			return false;
 		return true;
 	}
+	
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder(128);
+		sb.append(name);
+		sb.append(": ");
+		sb.append(value);
+		sb.append(" [");
+		sb.append(type);
+		sb.append("]");
+		return sb.toString();
+	}
 }

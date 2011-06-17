@@ -34,6 +34,7 @@
 package eu.unicore.security;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -93,9 +94,29 @@ public class Client implements Serializable {
 		queue = new Queue();
 	}
 	
-	public String toString(){
-		return "Name: "+distinguishedName +"\nXlogin: " + xlogin
-			+ ", role: " + role + "\nSecurity tokens: " + secTokens;
+	public String toString() {
+		StringBuilder cInfo = new StringBuilder();
+		
+		cInfo.append("Name: ");
+		cInfo.append(distinguishedName);
+		cInfo.append("\nXlogin: ");
+		cInfo.append(xlogin);
+		cInfo.append("\nRole: ");
+		cInfo.append(role);
+		if (queue.getValidQueues().length > 0) {
+			cInfo.append("\nQueues: ");
+			cInfo.append(queue);
+		}
+		if (vos.length > 0) {
+			cInfo.append("\nVOs: ");
+			cInfo.append(Arrays.toString(vos));
+		}
+		if (secTokens != null)
+		{
+			cInfo.append("\nSecurity tokens: ");
+			cInfo.append(secTokens);
+		}	
+		return cInfo.toString(); 
 	}
 	
 	/**
@@ -187,6 +208,8 @@ public class Client implements Serializable {
 	}
 
 	public void setVos(String[] vos) {
+		if (vos == null)
+			throw new IllegalArgumentException("Can not set null VOs array, use empty array instead");
 		this.vos = vos;
 	}
 
@@ -195,6 +218,8 @@ public class Client implements Serializable {
 	}
 
 	public void setQueue(Queue queue) {
+		if (queue == null)
+			throw new IllegalArgumentException("Can not set null Queue object, use empty Queue instead");
 		this.queue = queue;
 	}
 }

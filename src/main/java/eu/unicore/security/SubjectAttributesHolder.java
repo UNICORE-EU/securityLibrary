@@ -9,12 +9,14 @@ package eu.unicore.security;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -227,5 +229,54 @@ public class SubjectAttributesHolder implements Serializable
 		if (xacmlAttributes.size() > 0)
 			return true;
 		return false;
+	}
+	
+	private static void outputAttrsMap(StringBuilder sb, Map<String, String[]> attrs)
+	{
+		Iterator<Entry<String, String[]>> valid = 
+			attrs.entrySet().iterator();
+		while (valid.hasNext())
+		{
+			Entry<String, String[]> validE = valid.next();
+			sb.append(validE.getKey());
+			sb.append(": ");
+			sb.append(Arrays.toString(validE.getValue()));
+			if (valid.hasNext())
+				sb.append("; ");
+		}
+	}
+	
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder(1024);
+		boolean needEnter = false;
+		if (validIncarnationAttributes.size() != 0)
+		{
+			sb.append("Valid attribute values: ");
+			outputAttrsMap(sb, validIncarnationAttributes);
+			needEnter = true;
+		}
+		if (defaultIncarnationAttributes.size() != 0)
+		{
+			if (needEnter)
+				sb.append("\n");
+			sb.append("Default attribute values: ");
+			outputAttrsMap(sb, defaultIncarnationAttributes);
+			needEnter = true;
+		}
+		if (xacmlAttributes.size() > 0) 
+		{
+			if (needEnter)
+				sb.append("\n");
+			sb.append("XACML authorization attributes: ");
+			Iterator<Entry<String, List<XACMLAttribute>>> xacml = 
+				xacmlAttributes.entrySet().iterator();
+			while (xacml.hasNext())
+			{
+				Entry<String, List<XACMLAttribute>> validE = xacml.next();
+				sb.append(validE.getValue());
+			}
+		}
+		return sb.toString();
 	}
 }
