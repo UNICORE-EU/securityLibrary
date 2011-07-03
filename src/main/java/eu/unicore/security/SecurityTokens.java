@@ -386,6 +386,14 @@ public class SecurityTokens implements Serializable
 			return false;
 		return true;
 	}
+
+	public int hashCode(){
+		return getMessageSignatureStatus().hashCode()
+				^ (isConsignorTrusted()?0x1:0x0)
+				^ (isTrustDelegationValidated()?0x2:0x0)
+				^ getConsignorCertificate().hashCode()
+				^ getEffectiveUserName().hashCode();
+	}
 }
 
 

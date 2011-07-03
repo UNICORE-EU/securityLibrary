@@ -22,7 +22,7 @@ import org.apache.commons.httpclient.protocol.Protocol;
  * 
  * @author John Kristian
  */
-public class CustomHostConfiguration extends HostConfiguration{
+public class CustomHostConfiguration extends HostConfiguration implements Cloneable{
 
 	public CustomHostConfiguration(HttpHostFactory factory)
 	{
