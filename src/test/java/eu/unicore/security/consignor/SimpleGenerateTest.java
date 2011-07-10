@@ -12,7 +12,7 @@ import java.security.cert.X509Certificate;
 
 import javax.security.auth.x500.X500Principal;
 
-import eu.unicore.saml.SAMLConstants.AuthNClasses;
+import eu.unicore.samly2.SAMLConstants.AuthNClasses;
 import eu.unicore.security.CertificateUtils;
 import eu.unicore.security.TestBase;
 import eu.unicore.security.UnicoreSecurityFactory;

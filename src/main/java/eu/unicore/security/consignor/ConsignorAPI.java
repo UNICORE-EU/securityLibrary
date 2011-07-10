@@ -11,7 +11,7 @@ package eu.unicore.security.consignor;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
-import eu.unicore.saml.SAMLConstants.AuthNClasses;
+import eu.unicore.samly2.SAMLConstants.AuthNClasses;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.dsig.DSigException;
 

@@ -17,7 +17,7 @@ import java.util.Date;
 
 import org.apache.xml.security.utils.RFC2253Parser;
 
-import eu.unicore.saml.SAMLConstants.AuthNClasses;
+import eu.unicore.samly2.SAMLConstants.AuthNClasses;
 import eu.unicore.security.CertificateUtils;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.dsig.DSigException;
