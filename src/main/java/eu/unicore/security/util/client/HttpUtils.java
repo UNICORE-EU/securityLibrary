@@ -242,5 +242,6 @@ public class HttpUtils {
 	public static void setConnectionTimeout(HttpClient client, int socketTimeout, int connectTimeout){
 		client.getParams().setSoTimeout(socketTimeout);
 		client.getParams().setConnectionManagerTimeout(connectTimeout);
+		client.getHttpConnectionManager().getParams().setConnectionTimeout(connectTimeout);
 	}
 }
