@@ -16,6 +16,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.security.auth.x500.X500Principal;
+
 import org.apache.xml.security.utils.RFC2253Parser;
 import org.apache.xmlbeans.XmlObject;
 
@@ -405,10 +407,9 @@ public class ETDImpl implements ETDApi
 		if (td.size() == 0)
 			return new ValidationResult(false, "Delegation chain is empty");
 		TrustDelegation initial = td.get(0);
-		String custodian = initial.getCustodianDN();
-		String u = RFC2253Parser.rfc2253toXMLdsig(
-			user[0].getSubjectX500Principal().getName());
-		if (!u.equals(custodian))
+		String custodianRfc = RFC2253Parser.xmldsigtoRFC2253(initial.getCustodianDN());
+		X500Principal u = user[0].getSubjectX500Principal();
+		if (!CertificateUtils.dnEqual(u, custodianRfc))
 			return new ValidationResult(false, "Wrong user");
 		Integer custodianHash = initial.getCustodianCertHash();
 		if (custodianHash == null)

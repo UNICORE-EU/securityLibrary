@@ -12,6 +12,7 @@ import java.security.cert.X509Certificate;
 
 import javax.security.auth.x500.X500Principal;
 
+import eu.unicore.security.CertificateUtils;
 import eu.unicore.security.etd.DelegationRestrictions;
 
 import junit.framework.TestCase;
@@ -41,8 +42,7 @@ public class TestETDClientSettings extends TestCase
 		settings = settings.clone();
 		
 		assertTrue(settings.getReceiver().equals(receiver));
-		assertTrue(new X500Principal(settings.getRequestedUser())
-			.equals(cert.getSubjectX500Principal()));
+		assertTrue(CertificateUtils.dnEqual(cert.getSubjectX500Principal(), settings.getRequestedUser()));
 		assertTrue(settings.isExtendTrustDelegation());
 		assertTrue(settings.getDelegationRestrictions().getMaxProxyCount() == 12);
 		

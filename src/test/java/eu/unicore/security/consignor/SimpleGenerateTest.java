@@ -59,7 +59,7 @@ public class SimpleGenerateTest extends TestBase
 		try
 		{
 			ConsignorAPI impl = UnicoreSecurityFactory.getConsignorAPI();
-			String c1 = issuerCert1[0].getSubjectX500Principal().getName(X500Principal.CANONICAL);
+			String c1 = issuerCert1[0].getSubjectX500Principal().getName();
 			ConsignorAssertion token = 
 				impl.generateConsignorToken(issuerDN2, issuerCert1,
 						AuthNClasses.TLS);
@@ -77,9 +77,9 @@ public class SimpleGenerateTest extends TestBase
 			if (!res.isValid())
 				fail(res.getInvalidResaon());
 			X509Certificate []cert = parsedToken.getConsignor();
-			String c2 = cert[0].getSubjectX500Principal().getName(X500Principal.CANONICAL);
+			String c2 = cert[0].getSubjectX500Principal().getName();
 			System.out.println("Consignor read back is: " + c2);
-			if (!c1.equals(c2))
+			if (!CertificateUtils.dnEqual(c1, c2))
 				fail("Consignor is not the same after parsing");
 		} catch (Exception e)
 		{
