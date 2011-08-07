@@ -10,6 +10,7 @@ package eu.unicore.security.etd;
 
 import javax.security.auth.x500.X500Principal;
 
+import eu.unicore.security.CertificateUtils;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.etd.TrustDelegation;
 
@@ -27,12 +28,10 @@ public class GenerateAndVerifyTest extends ETDTestBase
 			TrustDelegation td = etdEngine.generateTD(issuerCert1[0], issuerCert1,
 					privKey1, issuerCert3, null);
 			
-			String dnsubFromTD = new X500Principal(td.getSubjectDN()).getName(
-				X500Principal.CANONICAL);
-			String dnsubOrig = issuerCert3[0].getSubjectX500Principal().getName(
-				X500Principal.CANONICAL);
+			String dnsubFromTD = new X500Principal(td.getSubjectDN()).getName();
+			String dnsubOrig = issuerCert3[0].getSubjectX500Principal().getName();
 			
-			assertTrue(dnsubOrig.equals(dnsubFromTD));
+			assertTrue(CertificateUtils.dnEqual(dnsubFromTD, dnsubOrig));
 			
 			ValidationResult result = 
 				etdEngine.validateTD(td, issuerCert1[0], issuerCert1, 

@@ -15,6 +15,8 @@ import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.security.auth.x500.X500Principal;
+
 import org.apache.xml.security.utils.RFC2253Parser;
 
 import eu.unicore.samly2.SAMLConstants.AuthNClasses;
@@ -96,10 +98,9 @@ public class ConsignorImpl implements ConsignorAPI
 	public ValidationResult verifyConsignorToken(ConsignorAssertion assertion,
 			X509Certificate issuerCertificate)
 	{
-		String i1 = assertion.getIssuerDN();
-		String i2 = RFC2253Parser.rfc2253toXMLdsig(
-				issuerCertificate.getSubjectX500Principal().getName());
-		if (!i1.equals(i2))
+		String i1 = RFC2253Parser.xmldsigtoRFC2253(assertion.getIssuerDN());
+		X500Principal i2 = issuerCertificate.getSubjectX500Principal();
+		if (!CertificateUtils.dnEqual(i2, i1))
 			return new ValidationResult(false, "Wrong issuer");
 		if (!assertion.checkTimeConditions())
 			return new ValidationResult(false, "Lifetime conditions are not met");
