@@ -20,6 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 
+import eu.unicore.security.util.client.ISecurityConfiguration;
+
 /**
  * 
  * @author schuller
@@ -30,7 +32,31 @@ public class KeystoreUtil {
 	private final static Logger log=Log.getLogger(Log.SECURITY,KeystoreUtil.class);
 
 	private KeystoreUtil(){}
-
+	
+	public static String getDefaultKeyAlias(ISecurityConfiguration sec)
+	{
+		try
+		{
+			KeyStore keystore = loadKeyStore(sec.getKeystore(),
+					sec.getKeystorePassword(),
+					sec.getKeystoreType());
+			Enumeration<String> e = keystore.aliases();
+			while (e.hasMoreElements())
+			{
+				String a = e.nextElement();
+				if (keystore.isKeyEntry(a))
+					return a;
+			}
+		} catch (Exception e)
+		{
+			log.warn("Error reading keystore " +
+				"(while searching for defult key alias): " + e);
+			return null;
+		}
+		log.info("No key entry found in keystore: " + sec.getKeystore());
+		return null;
+	}
+	
 	/**
 	 * loads keystore from a file 
 	 * 

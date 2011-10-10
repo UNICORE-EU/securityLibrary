@@ -25,7 +25,7 @@ public class TestKeystoreUtils extends TestCase{
 	public void testInferTSTypePEM()throws Exception{
 		String name="src/test/resources/client/server.pem";
 		String password="unused";
-		KeyStore ks=KeystoreUtil.loadTruststore(name, null, password);
+		KeyStore ks=KeystoreUtil.loadTruststore(name, password, null);
 		assertNotNull(ks);
 		assertTrue(ks.aliases().hasMoreElements());
 	}
