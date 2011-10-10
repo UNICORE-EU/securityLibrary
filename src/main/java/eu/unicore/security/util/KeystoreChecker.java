@@ -7,9 +7,6 @@
  */
 package eu.unicore.security.util;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.util.Enumeration;
@@ -38,11 +35,7 @@ public class KeystoreChecker
 					"Unfortunately many libraries does not allow for this. " +
 			"Please set in on your keystore and in your configuration.");
 
-		KeyStore ks = KeyStore.getInstance(type);
-
-		InputStream is = new BufferedInputStream(new FileInputStream(file)); 
-		ks.load(is, password.toCharArray());
-		is.close();
+		KeystoreUtil.loadTruststore(file, password, type);
 	}
 	
 	public static void validateKeystore(String file, String password, String keyPassword, 
@@ -53,11 +46,7 @@ public class KeystoreChecker
 					"Unfortunately many libraries does not allow for this. " +
 			"Please set in on your keystore and in your configuration.");
 
-		KeyStore ks = KeyStore.getInstance(type);
-
-		InputStream is = new BufferedInputStream(new FileInputStream(file)); 
-		ks.load(is, password.toCharArray());
-		is.close();
+		KeyStore ks = KeystoreUtil.loadKeyStore(file, password, type);
 		if (alias == null)
 			alias = findAlias(ks);
 		if (alias == null)

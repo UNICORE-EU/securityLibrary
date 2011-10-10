@@ -1,9 +1,7 @@
 package eu.unicore.security.util.client;
 
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -33,6 +31,7 @@ import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
 import org.apache.log4j.Logger;
 
+import eu.unicore.security.util.KeystoreUtil;
 import eu.unicore.security.util.Log;
 
 
@@ -87,22 +86,11 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 			throw new IllegalArgumentException(
 					"Keystore/Truststore name may not be null");
 
-		String storeType = type != null ? type : "jks";
-		KeyStore keystore = KeyStore.getInstance(storeType);
-		InputStream is = null;
-		try
-		{
-			is = new FileInputStream(name);
-			keystore.load(is, passwd != null ? passwd.toCharArray()
-					: null);
-		} finally
-		{
-			if (is != null)
-				is.close();
+		if (isTruststore){
+			return KeystoreUtil.loadTruststore(name, passwd, type);
 		}
 		
-		if (isTruststore)
-			return keystore;
+		KeyStore keystore=KeystoreUtil.loadKeyStore(name, passwd, type);
 		
 		//if there is only one alias let's use it even if there is no user-defined one
 		//if there are more than one protest
