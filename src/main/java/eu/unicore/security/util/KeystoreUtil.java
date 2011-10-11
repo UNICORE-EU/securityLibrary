@@ -190,7 +190,7 @@ public class KeystoreUtil {
 				X509Certificate cert=(X509Certificate)cf.generateCertificate(bis);
 				String dn=cert.getSubjectX500Principal().toString();
 				ks.setCertificateEntry("trusted-"+counter.incrementAndGet(), cert);
-				log.info("Added trusted certificate: "+dn+" loaded from file <"+name+">");
+				log.debug("Added trusted certificate: "+dn+" loaded from file <"+name+">");
 				//check if we have more data...
 				bis.mark(1);
 				if(bis.read()==-1)break;
