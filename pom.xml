@@ -54,7 +54,7 @@
 		<dependency>
 			<groupId>pl.edu.icm.saml</groupId>
 			<artifactId>samly2</artifactId>
-			<version>1.3.7-SNAPSHOT</version>
+			<version>1.3.6</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
