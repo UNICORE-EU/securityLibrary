@@ -86,7 +86,7 @@ public class KeystoreUtil {
 			if(fName.endsWith(".jks")){
 				type="jks";
 			}
-			else if(fName.endsWith(".p12") || fName.endsWith(".pkcs12")){
+			else if(fName.endsWith(".p12") || fName.endsWith(".pkcs12") || fName.endsWith(".pfx")){
 				type="pkcs12";
 			}
 		}
