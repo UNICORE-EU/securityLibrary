@@ -23,10 +23,18 @@ import java.util.Set;
  * Holds subject's attributes as collected by one or more attribute sources.
  * There are two principal sets of attributes here: incarnation attributes and 
  * extra XACML attributes which are used for authorisation only. For incarnation
- * attributes two structures are stored: the actual attributes that shall be used,
- * and all permitted values. The latter are used when user specify the attribute by 
- * herself.  
- *  
+ * attributes three structures are stored:
+ * <ul> 
+ * <li> All permitted attributes, which are used if user specify manually 
+ *  a preferred value for an attribute (e.g. an Xlogin to be used) to check if this selection is valid.
+ * <li> default attributes (a subset of permitted) which usually can be configured by an admin in attribute source
+ *  and are used if user doesn't specify a concrete attribute value to be used.
+ * <li> attributes from a preferred VO, which are stored only if AIP is providing attributes for a preferred group
+ *  or its parent. Then attributes as established in the preferred VO/group (which might be subgroup of the AIP
+ *  base VO/group) are stored. Note that this is not checked automatically if those attributes are a subset 
+ *  of permitted attributes, but this check should be performed before using them.
+ * </ul>
+ * 
  * @author golbi
  * @see IAttributeSource class in use-core
  */
@@ -37,15 +45,35 @@ public class SubjectAttributesHolder implements Serializable
 	private Map<String, List<XACMLAttribute>> xacmlAttributes;
 	private Map<String, String[]> defaultIncarnationAttributes;
 	private Map<String, String[]> validIncarnationAttributes;
+	
+	private Map<String, String[]> preferredVoIncarnationAttributes = new HashMap<String, String[]>();
+	/**
+	 * Stores the actual name of the VO which attributes are in the preferredVOIncarnationAttributes.
+	 * Must be one of preferredVos. It can be overwritten if subsequent AIP provides attributes from a VO which
+	 * is higher on the preferredVos list.  
+	 */
+	private String selectedVo;
+	private String[] preferredVos;
 
+	
 	/**
 	 * All structures are initialized to be empty.
 	 */
 	public SubjectAttributesHolder()
 	{
+		this(new String[] {});
+	}
+	
+	/**
+	 * All structures are initialized to be empty.
+	 * Selected VO is initially set. 
+	 */
+	public SubjectAttributesHolder(String[] preferredVos)
+	{
 		xacmlAttributes = new HashMap<String, List<XACMLAttribute>>();
 		defaultIncarnationAttributes = new HashMap<String, String[]>();
 		validIncarnationAttributes = new HashMap<String, String[]>();
+		this.preferredVos = preferredVos;
 	}
 
 	
@@ -57,13 +85,19 @@ public class SubjectAttributesHolder implements Serializable
 	{
 		this(null, incarnationAttributes, incarnationAttributes);
 	}
-	
+
 	public SubjectAttributesHolder(Map<String, String[]> defaultIncarnationAttributes,
 			Map<String, String[]> validIncarnationAttributes)
 	{
 		this(null, defaultIncarnationAttributes, validIncarnationAttributes);
 	}
-	
+
+
+	/**
+	 * @param xacmlAttributes
+	 * @param defaultIncarnationAttributes
+	 * @param validIncarnationAttributes
+	 */
 	public SubjectAttributesHolder(List<XACMLAttribute> xacmlAttributes,
 			Map<String, String[]> defaultIncarnationAttributes,
 			Map<String, String[]> validIncarnationAttributes)
@@ -82,8 +116,7 @@ public class SubjectAttributesHolder implements Serializable
 	 */
 	public void addAllOverwritting(SubjectAttributesHolder from)
 	{
-		if (from.getDefaultIncarnationAttributes() != null)
-			defaultIncarnationAttributes.putAll(from.getDefaultIncarnationAttributes());
+		addAllCommon(from);
 		if (from.getValidIncarnationAttributes() != null)
 			validIncarnationAttributes.putAll(from.getValidIncarnationAttributes());
 		if (from.getXacmlAttributes() != null)
@@ -98,15 +131,13 @@ public class SubjectAttributesHolder implements Serializable
 	/**
 	 * Adds all attributes from the argument object. Existing attributes are merged whenever 
 	 * this makes sense: valid values and XACML attributes are merged, defaults for incarnation 
-	 * are overriden.
+	 * are overridden.
 	 * 
 	 * @param from
 	 */
 	public void addAllMerging(SubjectAttributesHolder from)
 	{
-		//this one same as in case overriding
-		if (from.getDefaultIncarnationAttributes() != null)
-			defaultIncarnationAttributes.putAll(from.getDefaultIncarnationAttributes());
+		addAllCommon(from);
 		if (from.getValidIncarnationAttributes() != null)
 		{
 			for(Map.Entry<String, String[]>e: from.getValidIncarnationAttributes().entrySet())
@@ -135,6 +166,22 @@ public class SubjectAttributesHolder implements Serializable
 				addToXACMLList(xacmlAttribute);
 		}
 	}
+	
+	private void addAllCommon(SubjectAttributesHolder from)
+	{
+		if (from.getDefaultIncarnationAttributes() != null)
+			defaultIncarnationAttributes.putAll(from.getDefaultIncarnationAttributes());
+		if (from.getSelectedVo() != null)
+		{
+			int newPref = getVoPreferrence(from.getSelectedVo());
+			if (newPref >= 0 && (selectedVo == null || newPref < getVoPreferrence(selectedVo)))
+			{
+				selectedVo = from.getSelectedVo();
+				preferredVoIncarnationAttributes.putAll(from.getPreferredVoIncarnationAttributes());
+			}
+		}
+	}
+	
 	
 	private void addToXACMLList(XACMLAttribute a)
 	{
@@ -166,6 +213,17 @@ public class SubjectAttributesHolder implements Serializable
 				addToXACMLList(a);
 		}
 	}
+
+	/**
+	 * @return the preferredVoAttributes (if present and valid or default attributes. 
+	 */
+	public Map<String, String[]> getIncarnationAttributes()
+	{
+		if (validateVoIncarnationAttributes())
+			return getPreferredVoIncarnationAttributes();
+		return getDefaultIncarnationAttributes();
+	}
+
 	
 	public Map<String, String[]> getDefaultIncarnationAttributes()
 	{
@@ -178,6 +236,99 @@ public class SubjectAttributesHolder implements Serializable
 	}
 	
 	/**
+	 * @return the preferredVoIncarnationAttributes. May be null if were not set.
+	 */
+	public Map<String, String[]> getPreferredVoIncarnationAttributes()
+	{
+		return preferredVoIncarnationAttributes;
+	}
+
+	/**
+	 * @param exactVo exact VO of the selected attributes 
+	 * @param preferredVoIncarnationAttributes the preferredVoIncarnationAttributes to set
+	 */
+	public void setPreferredVoIncarnationAttributes(String exactVo, 
+			Map<String, String[]> preferredVoIncarnationAttributes)
+	{
+		for (String vo: preferredVos)
+			if (vo.equals(exactVo)) 
+			{
+				this.selectedVo = exactVo;
+				this.preferredVoIncarnationAttributes = preferredVoIncarnationAttributes;
+				return;
+			}
+		throw new IllegalArgumentException("Selected VO must be one of the preferred VOs");
+	}
+
+	/**
+	 * lower index - higher preference.
+	 * Negative value - vo is not preferred.
+	 * @param vo
+	 * @return
+	 */
+	public int getVoPreferrence(String vo)
+	{
+		for (int i=0; i<preferredVos.length; i++)
+			if (preferredVos[i].equals(vo))
+				return i;
+		return -1;
+	}
+	
+	
+	
+	/**
+	 * @return the selectedVo
+	 */
+	public String getSelectedVo()
+	{
+		return selectedVo;
+	}
+
+
+	/**
+	 * @param selectedVo the selectedVo to set
+	 */
+	public void setSelectedVo(String selectedVo)
+	{
+		this.selectedVo = selectedVo;
+	}
+	
+	/**
+	 * @return the preferredVos
+	 */
+	public String[] getPreferredVos()
+	{
+		return preferredVos;
+	}
+
+	/**
+	 * @param preferredVos the preferredVos to set
+	 */
+	public void setPreferredVos(String[] preferredVos)
+	{
+		this.preferredVos = preferredVos;
+	}
+
+
+	/**
+	 * 
+	 * @return true if preferred VO attributes are set and all values are among valid attributes 
+	 */
+	public boolean validateVoIncarnationAttributes()
+	{
+		if (preferredVoIncarnationAttributes == null)
+			return false;
+		try
+		{
+			testSubset(preferredVoIncarnationAttributes, validIncarnationAttributes);
+			return true;
+		} catch (IllegalArgumentException e)
+		{
+			return false;
+		}
+	}
+
+	/**
 	 * Sets incarnation attributes. Valid incarnation attributes must be a superset of default incarnation
 	 * attributes.  
 	 * @param defaultIncarnationAttributes
@@ -188,13 +339,22 @@ public class SubjectAttributesHolder implements Serializable
 	{
 		if (defaultIncarnationAttributes == null || validIncarnationAttributes == null)
 			throw new IllegalArgumentException("Arguments can not be null");
-		Iterator<Map.Entry<String, String[]>> it = defaultIncarnationAttributes.entrySet().iterator();
+		testSubset(defaultIncarnationAttributes, validIncarnationAttributes);
+		this.defaultIncarnationAttributes = new HashMap<String, String[]>();
+		this.defaultIncarnationAttributes.putAll(defaultIncarnationAttributes);
+		this.validIncarnationAttributes = new HashMap<String, String[]>();
+		this.validIncarnationAttributes.putAll(validIncarnationAttributes);
+	}
+	
+	private static void testSubset(Map<String, String[]> attributes, Map<String, String[]> validAttributes)
+	{
+		Iterator<Map.Entry<String, String[]>> it = attributes.entrySet().iterator();
 		while (it.hasNext()) 
 		{
 			Map.Entry<String, String[]> defA = it.next();
-			if (validIncarnationAttributes.containsKey(defA.getKey()))
+			if (validAttributes.containsKey(defA.getKey()))
 			{
-				String[] validVals = validIncarnationAttributes.get(defA.getKey());
+				String[] validVals = validAttributes.get(defA.getKey());
 				String[] defaultVals = defA.getValue();
 				for (String defaultVal: defaultVals)
 				{
@@ -216,10 +376,7 @@ public class SubjectAttributesHolder implements Serializable
 						defA.getKey() + " is not present among valid incarnation attributes.");
 			}
 		}
-		this.defaultIncarnationAttributes = new HashMap<String, String[]>();
-		this.defaultIncarnationAttributes.putAll(defaultIncarnationAttributes);
-		this.validIncarnationAttributes = new HashMap<String, String[]>();
-		this.validIncarnationAttributes.putAll(validIncarnationAttributes);
+		
 	}
 	
 	public boolean isPresent()
@@ -245,7 +402,7 @@ public class SubjectAttributesHolder implements Serializable
 				sb.append("; ");
 		}
 	}
-	
+
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder(1024);
@@ -263,6 +420,14 @@ public class SubjectAttributesHolder implements Serializable
 			sb.append("Default attribute values: ");
 			outputAttrsMap(sb, defaultIncarnationAttributes);
 			needEnter = true;
+		}
+		if (preferredVoIncarnationAttributes.size() != 0 && selectedVo != null)
+		{
+			if (needEnter)
+				sb.append("\n");
+			sb.append("Selected VO: ").append(selectedVo).append(", its attribute values: ");
+			outputAttrsMap(sb, preferredVoIncarnationAttributes);
+			needEnter = true;			
 		}
 		if (xacmlAttributes.size() > 0) 
 		{

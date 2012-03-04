@@ -73,6 +73,9 @@ public class Client implements Serializable {
 	//list of VOs the user is a member of
 	private String[] vos;
 	
+	//VO under which the request is performed, may be null
+	private String vo;
+	
 	private Queue queue;
 	
 	
@@ -80,7 +83,7 @@ public class Client implements Serializable {
 	private SubjectAttributesHolder subjectAttributes;
 	
 	//additional attributes may contain things relevant on the target system 
-	//such as licence keys, ... In most cases subjectAttributes are what you need.
+	//such as license keys, ... In most cases subjectAttributes are what you need.
 	private final Map<String,Serializable> extraAttributes;
 	
 	/**
@@ -110,6 +113,9 @@ public class Client implements Serializable {
 		if (vos.length > 0) {
 			cInfo.append("\nVOs: ");
 			cInfo.append(Arrays.toString(vos));
+		}
+		if (vo != null) {
+			cInfo.append("\nSelected VO: ").append(vo);
 		}
 		if (secTokens != null)
 		{
@@ -222,4 +228,27 @@ public class Client implements Serializable {
 			throw new IllegalArgumentException("Can not set null Queue object, use empty Queue instead");
 		this.queue = queue;
 	}
+	
+	/**
+	 * @return the selected VO or null if request is not VO bound
+	 */
+	public String getVo() {
+		return vo;
+	}
+
+	/**
+	 * @param vo the vo to set. Must be one of VOs set for this object
+	 * @throws IllegalArgumentException if argument is not in all client's VOs.
+	 */
+	public void setVo(String vo) {
+		for (String v: vos)
+			if (v.equals(v))
+			{
+				this.vo = vo;
+				return;
+			}
+		throw new IllegalArgumentException("The selected VO '" + vo + 
+				"' is not one of the VOs the client is memeber of");
+	}
+
 }
