@@ -66,7 +66,7 @@ public class SubjectAttributesHolder implements Serializable
 	
 	/**
 	 * All structures are initialized to be empty.
-	 * Selected VO is initially set. 
+	 * Preferred VOs are initially set. 
 	 */
 	public SubjectAttributesHolder(String[] preferredVos)
 	{
@@ -250,6 +250,8 @@ public class SubjectAttributesHolder implements Serializable
 	public void setPreferredVoIncarnationAttributes(String exactVo, 
 			Map<String, String[]> preferredVoIncarnationAttributes)
 	{
+		if (exactVo == null)
+			throw new IllegalArgumentException("Preferred VO can not be null");
 		for (String vo: preferredVos)
 			if (vo.equals(exactVo)) 
 			{
