@@ -156,7 +156,115 @@ public class SubjectAttributesHolderTest extends TestCase
 
 		assertTrue(xacmlA2.size() == 4);
 	}
+	
+	public void testPreferedVo()
+	{
+		SubjectAttributesHolder holder = new SubjectAttributesHolder();
+		
+		assertFalse(holder.isPresent());
+		
+		holder.setPreferredVos(new String[] {"/0", "/a", "/b", "/c"});
+		assertEquals(0, holder.getVoPreferrence("/0"));
+		assertEquals(1, holder.getVoPreferrence("/a"));
+		assertEquals(2, holder.getVoPreferrence("/b"));
+		assertTrue(holder.getVoPreferrence("/z") < 0);
+		
+		Map<String, String[]> attributes = new HashMap<String, String[]>();
+		attributes.put("a1", new String[] {"val1"});
+		try
+		{
+			holder.setPreferredVoIncarnationAttributes("/z", attributes);
+			fail("managed to set selected VO which is not among preferred by the user");
+		} catch (IllegalArgumentException e)
+		{
+			//ok
+		}
+		
+		holder.setPreferredVoIncarnationAttributes("/b", attributes);
+		Map<String, String[]> ret = holder.getPreferredVoIncarnationAttributes();
+		assertEquals(1, ret.size());
+		assertNotNull(ret.get("a1"));
+		assertEquals(1, ret.get("a1").length);
+		assertEquals("val1", ret.get("a1")[0]);
+		
+		Map<String, String[]> attributes2 = new HashMap<String, String[]>();
+		attributes2.put("a2", new String[] {"val2"});
 
+		holder.setPreferredVoIncarnationAttributes("/a", attributes2);
+		Map<String, String[]> ret2 = holder.getPreferredVoIncarnationAttributes();
+		assertEquals(1, ret2.size());
+		assertNotNull(ret2.get("a2"));
+		assertEquals(1, ret2.get("a2").length);
+		assertEquals("val2", ret2.get("a2")[0]);
+		
+		assertFalse(holder.isPresent());
+		assertFalse(holder.validateVoIncarnationAttributes());
+		
+		Map<String, String[]> attributesDef = new HashMap<String, String[]>();
+		attributesDef.put("a2", new String[] {"val2", "val3"});
+		attributesDef.put("a3", new String[] {"val3"});
+		
+		holder.setAllIncarnationAttributes(attributesDef, attributesDef);
+		
+		assertTrue(holder.isPresent());
+		assertTrue(holder.validateVoIncarnationAttributes());
+		
+		Map<String, String[]> ret3 = holder.getIncarnationAttributes();
+		assertEquals(2, ret3.size());
+		assertNotNull(ret3.get("a2"));
+		assertEquals(1, ret3.get("a2").length);
+		assertEquals("val2", ret3.get("a2")[0]);
+		assertNotNull(ret3.get("a3"));
+		assertEquals(1, ret3.get("a3").length);
+		assertEquals("val3", ret3.get("a3")[0]);
+		
+		
+		SubjectAttributesHolder holder2 = new SubjectAttributesHolder(new String[] {"/0"});
+		Map<String, String[]> attributesVoNew = new HashMap<String, String[]>();
+		attributesVoNew.put("a2", new String[] {"val3"});
+		holder2.setPreferredVoIncarnationAttributes("/0", attributesVoNew);
+		holder.addAllOverwritting(holder2);
+		
+		Map<String, String[]> ret4 = holder.getPreferredVoIncarnationAttributes();
+		assertEquals(1, ret4.size());
+		assertNotNull(ret4.get("a2"));
+		assertEquals(1, ret4.get("a2").length);
+		assertEquals("val3", ret4.get("a2")[0]);
+	}
+
+	
+	
+	
+	public void testToString()
+	{
+		Map<String, String[]> defA = new HashMap<String, String[]>(); 
+		Map<String, String[]> validA = new HashMap<String, String[]>();
+		Map<String, String[]> voA = new HashMap<String, String[]>();
+		List<XACMLAttribute> xacmlA = new ArrayList<XACMLAttribute>();
+		defA.put("aa1", new String[] {"a", "b"});
+		validA.put("aa1", new String[] {"a", "b"});
+		defA.put("aa2", new String[] {"a", "c"});
+		validA.put("aa2", new String[] {"a", "c"});
+		voA.put("aa3", new String[] {"g"});
+		xacmlA.add(new XACMLAttribute("x1", "v1", Type.STRING));
+		xacmlA.add(new XACMLAttribute("x1", "v2", Type.STRING));
+		xacmlA.add(new XACMLAttribute("x2", "v1", Type.STRING));
+		
+		SubjectAttributesHolder holder = new SubjectAttributesHolder(xacmlA, defA, validA);
+		holder.setPreferredVos(new String[] {"/a"});
+		holder.setPreferredVoIncarnationAttributes("/a", voA);
+		
+		String full = holder.toString();
+		assertTrue(full.contains("aa1"));
+		assertTrue(full.contains("aa2"));
+		assertTrue(full.contains("aa3"));
+		assertTrue(full.contains("x1"));
+		assertTrue(full.contains("x2"));
+		
+		SubjectAttributesHolder holder2 = new SubjectAttributesHolder();
+		String empty = holder2.toString();
+		assertTrue(empty.length() == 0);
+	}
 }
 
 

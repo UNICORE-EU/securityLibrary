@@ -31,9 +31,12 @@ import java.util.Set;
  *  and are used if user doesn't specify a concrete attribute value to be used.
  * <li> attributes from a preferred VO, which are stored only if AIP is providing attributes for a preferred group
  *  or its parent. Then attributes as established in the preferred VO/group (which might be subgroup of the AIP
- *  base VO/group) are stored. Note that this is not checked automatically if those attributes are a subset 
- *  of permitted attributes, but this check should be performed before using them.
+ *  base VO/group) are stored.
  * </ul>
+ * 
+ * This class is used in two ways. It contains a set of methods and constructors 
+ * to initialize the object. Additionally there are two methods which allows
+ * for combining data from this class with other instance: using merge or overwrite mode. 
  * 
  * @author golbi
  * @see IAttributeSource class in use-core
@@ -293,14 +296,6 @@ public class SubjectAttributesHolder implements Serializable
 
 
 	/**
-	 * @param selectedVo the selectedVo to set
-	 */
-	public void setSelectedVo(String selectedVo)
-	{
-		this.selectedVo = selectedVo;
-	}
-	
-	/**
 	 * @return the preferredVos
 	 */
 	public String[] getPreferredVos()
@@ -319,7 +314,8 @@ public class SubjectAttributesHolder implements Serializable
 
 	/**
 	 * 
-	 * @return true if preferred VO attributes are set and all values are among valid attributes 
+	 * @return true if preferred VO attributes are set and all values are among valid attributes. Using current UVOS
+	 * this should be guaranteed, but we check anyway.
 	 */
 	public boolean validateVoIncarnationAttributes()
 	{
