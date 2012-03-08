@@ -215,12 +215,17 @@ public class SubjectAttributesHolder implements Serializable
 	}
 
 	/**
-	 * @return the preferredVoAttributes (if present and valid or default attributes. 
+	 * @return if preferred VO attributes are not set then default attributes are returned. Otherwise
+	 * a map with default attributes overwritten with the preferred VO attributes is returned.   
 	 */
 	public Map<String, String[]> getIncarnationAttributes()
 	{
-		if (validateVoIncarnationAttributes())
-			return getPreferredVoIncarnationAttributes();
+		if (validateVoIncarnationAttributes()) {
+			Map<String, String[]> ret = new HashMap<String, String[]>();
+			ret.putAll(getDefaultIncarnationAttributes());
+			ret.putAll(getPreferredVoIncarnationAttributes());
+			return ret;
+		}
 		return getDefaultIncarnationAttributes();
 	}
 
@@ -318,7 +323,7 @@ public class SubjectAttributesHolder implements Serializable
 	 */
 	public boolean validateVoIncarnationAttributes()
 	{
-		if (preferredVoIncarnationAttributes == null)
+		if (preferredVoIncarnationAttributes.size() == 0)
 			return false;
 		try
 		{
