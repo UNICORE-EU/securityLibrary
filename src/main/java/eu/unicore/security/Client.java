@@ -242,7 +242,7 @@ public class Client implements Serializable {
 	 */
 	public void setVo(String vo) {
 		for (String v: vos)
-			if (v.equals(v))
+			if (v.equals(vo))
 			{
 				this.vo = vo;
 				return;
