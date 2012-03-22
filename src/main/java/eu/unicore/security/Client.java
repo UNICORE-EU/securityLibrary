@@ -39,11 +39,37 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Describes the user that is consuming resources<br/>
+ * Describes the entity that is performing an operation on the server side.
+ * Wraps low level security material which was used to authenticate the client
+ * (including attributes which can be used for authorization) and values chosen
+ * during the client incarnation, like local xlogin, security role, VOs or groups. 
  *  
  * @author schuller
+ * @author golbi
  */
 public class Client implements Serializable {
+	
+	/**
+	 * Defines a type of client.
+	 * @author K. Benedyczak
+	 */
+	public static enum Type {
+		/**
+		 * The object represents an external client who was somehow 
+		 * authenticated.
+		 */
+		AUTHENTICATED, 
+		/**
+		 * The object represents an external client who was not authenticated, 
+		 * i.e. we don't know who it is
+		 */
+		ANONYMOUS,
+		/**
+		 * The object is associated with an operation invoked by the local server
+		 * code on its own behalf 
+		 */
+		LOCAL
+	}; 
 	
 	private static final long serialVersionUID=1L;
 	
@@ -58,17 +84,30 @@ public class Client implements Serializable {
 	//for storing the email address in the attributes
 	public static final String ATTRIBUTE_USER_EMAIL="user.email";
 	
+	/**
+	 * Fake DN used to identify an anonymous client. It is used just not to return null.
+	 */
+	public static final String ANONYMOUS_CLIENT_DN = "CN=ANONYMOUS,O=UNKNOWN,OU=UNKNOWN";
+
+	/**
+	 * Fake DN used to identify a local client.
+	 */
+	public static final String LOCAL_CLIENT_DN = "CN=Local_call";
+
 	
-	//the role of the client
-	private Role role;
 	//the token by which a client is identified
 	private SecurityTokens secTokens;
 	
-	//who this client really is...
-	private String distinguishedName; 
+	private String manuallySetDn;
+	
+	//what kind of client
+	private Type type; 
 	
 	//the (set of) possible unix login name(s) and groups optionally with the preferred one
 	private Xlogin xlogin;
+
+	//the role of the client
+	private Role role;
 	
 	//list of VOs the user is a member of
 	private String[] vos;
@@ -87,12 +126,15 @@ public class Client implements Serializable {
 	private final Map<String,Serializable> extraAttributes;
 	
 	/**
-	 * constructs an anonymous Client
+	 * Constructs an anonymous Client. Setters must be used to fully configure
+	 * the Client.
 	 */
-	public Client(){
-		extraAttributes=new HashMap<String,Serializable>();
+	public Client() {
+		setAnonymousClient();
+		extraAttributes = new HashMap<String,Serializable>();
 		setSubjectAttributes(new SubjectAttributesHolder());
-		xlogin=new Xlogin();
+		xlogin = new Xlogin();
+		role = new Role();
 		vos = new String[0];
 		queue = new Queue();
 	}
@@ -101,11 +143,11 @@ public class Client implements Serializable {
 		StringBuilder cInfo = new StringBuilder();
 		
 		cInfo.append("Name: ");
-		cInfo.append(distinguishedName);
+		cInfo.append(getDistinguishedName());
 		cInfo.append("\nXlogin: ");
-		cInfo.append(xlogin);
+		cInfo.append(getXlogin());
 		cInfo.append("\nRole: ");
-		cInfo.append(role);
+		cInfo.append(getRole());
 		if (queue.getValidQueues().length > 0) {
 			cInfo.append("\nQueues: ");
 			cInfo.append(queue);
@@ -124,44 +166,108 @@ public class Client implements Serializable {
 		}	
 		return cInfo.toString(); 
 	}
-	
+
+
 	/**
-	 * @return Returns the {@link SecurityTokens}
+	 * @return type of this client
+	 */
+	public Type getType() {
+		return type;
+	}
+
+	/**
+	 * Makes this client ANONYMOUS 
+	 */
+	public void setAnonymousClient() {
+		this.type = Type.ANONYMOUS;
+		this.secTokens = null;
+	}
+
+	/**
+	 * Makes this client LOCAL 
+	 */
+	public void setLocalClient() {
+		this.type = Type.LOCAL;
+		this.secTokens = null;
+	}
+
+	/**
+	 * Sets the type of this client basing on SecurityTokens - 
+	 * it can be AUTHENTICATED or ANONYMOUS. 
+	 * @param secTokens security tokens established during authentication 
+	 */
+	public void setAuthenticatedClient(SecurityTokens secTokens) {
+		this.secTokens = secTokens;
+		if (secTokens == null || secTokens.getEffectiveUserName() == null) {
+			this.type = Type.ANONYMOUS;
+			return;
+		}
+		this.type = Type.AUTHENTICATED;
+	}
+
+	/**
+	 * @param secTokens the security tokens used to authenticate this client
+	 * @deprecated Use {@link #setAuthenticatedClient(SecurityTokens)} instead!
+	 */
+	@Deprecated
+	public void setSecurityTokens(SecurityTokens secTokens) {
+		setAuthenticatedClient(secTokens);
+	}
+	
+
+	/**
+	 * @return Returns the {@link SecurityTokens} or null if 
+	 * the client is not of AUTHENTICATED type
 	 */
 	public SecurityTokens getSecurityTokens() {
 		return secTokens;
 	}
+
 	/**
-	 * @param secTokens the security tokens used to authenticate this client
+	 * @return the client's distinguished name. For authenticated 
+	 * clients it is the effective user's name. For other types of clients one 
+	 * of predefined constants is returned. This method never returns null.
 	 */
-	public void setSecurityTokens(SecurityTokens secTokens) {
-		this.secTokens = secTokens;
+	public String getDistinguishedName() {
+		if (manuallySetDn != null)
+			return manuallySetDn;
+		if (type == Type.ANONYMOUS)
+			return ANONYMOUS_CLIENT_DN;
+		else if (type == Type.LOCAL)
+			return LOCAL_CLIENT_DN;
+		else
+			return secTokens.getEffectiveUserName().toString();
 	}
+	
+	
+	/**
+	 * Overrides the default DN of effective user.
+	 * @deprecated don't use this feature at all
+	 */
+	@Deprecated
+	public void setDistinguishedName(String dn) {
+		this.manuallySetDn = dn;
+	}
+
+	
+	//****************** INCARNATION AND AUTHZ PART *******************************
+	
+	
 	/**
 	 * @return Returns the role.
 	 */
 	public Role getRole() {
 		return role;
 	}
+	
 	/**
 	 * @param role The role to set.
 	 */
 	public void setRole(Role role) {
 		this.role = role;
 	}
-	/**
-	 * @return Returns the distinguishedName.
-	 */
-	public String getDistinguishedName() {
-		return distinguishedName;
-	}
-	/**
-	 * @param distinguishedName The distinguishedName to set.
-	 */
-	public void setDistinguishedName(String distinguishedName) {
-		this.distinguishedName = distinguishedName;
-	}
 
+	
 	public Map<String, Serializable> getExtraAttributes() {
 		return extraAttributes;
 	}
@@ -184,12 +290,40 @@ public class Client implements Serializable {
 		this.xlogin=xlogin;
 	}
 
-	public String getUserName() {
+	/**
+	 * Convenience method returning the selected Xlogin name.
+	 * @return
+	 */
+	public String getSelectedXloginName() {
 		return xlogin.getUserName();
 	}
 
-	public void setUserName(String userName) {
+	/**
+	 * Convenience method setting the selected Xlogin name.
+	 * @param userName
+	 */
+	public void setSelectedXloginName(String userName) {
 		xlogin.setSelectedLogin(userName);
+	}
+
+	/**
+	 * Convenience method returning the selected Xlogin name.
+	 * @deprecated Use {@link #getSelectedXloginName()} instead
+	 * @return
+	 */
+	@Deprecated
+	public String getUserName() {
+		return getSelectedXloginName();
+	}
+
+	/**
+	 * Convenience method setting the selected Xlogin name.
+	 * @param userName
+	 * @deprecated Use {@link #setSelectedXloginName(String)} instead
+	 */
+	@Deprecated
+	public void setUserName(String userName) {
+		setSelectedXloginName(userName);
 	}
 	
 	public String getUserEmail(){
@@ -250,5 +384,4 @@ public class Client implements Serializable {
 		throw new IllegalArgumentException("The selected VO '" + vo + 
 				"' is not one of the VOs the client is memeber of");
 	}
-
 }

@@ -236,10 +236,9 @@ public class Xlogin implements Serializable{
 			cInfo.append(", active=");
 			cInfo.append(getUserName());
 		}
-		cInfo.append("]");
-		
+		cInfo.append("], gids: [");
+
 		if (groups != null && groups.length > 0) {
-			cInfo.append(", gids: [");
 			cInfo.append(getEncodedGroups());
 			if (groups.length > 1) {
 				cInfo.append(", active=");
@@ -250,8 +249,9 @@ public class Xlogin implements Serializable{
 				cInfo.append(", selectedSupplementaryGids=");
 				cInfo.append(getEncodedSelectedSupplementaryGroups());
 			}
+			cInfo.append(", ");
 		}
-		cInfo.append(", addingOSgroups: ");
+		cInfo.append("addingOSgroups: ");
 		cInfo.append(isAddDefaultGroups());
 		cInfo.append("]");
 		

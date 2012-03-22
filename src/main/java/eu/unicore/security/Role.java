@@ -46,16 +46,31 @@ public class Role implements Serializable {
 	
 	private String name,description;
 	
-	public Role(){}
+	/**
+	 * Creates an anonymous role
+	 */
+	public Role() {
+		this.name="anonymous";
+		this.description="No role information available";
+	}
 	
+	/**
+	 * Creates a specific role.
+	 * @param n
+	 * @param d
+	 */
 	public Role(String n, String d){
 		this.name=n;
 		this.description=d;
 	}
 	
-	public String getName(){return name;}
+	public String getName() {
+		return name;
+	}
 	
-	public String toString(){return name+": "+description;}
+	public String toString() {
+		return name + ": " + description;
+	}
 
 	/**
 	 * @return Returns the description.
@@ -68,6 +83,8 @@ public class Role implements Serializable {
 	 * @param description The description to set.
 	 */
 	public void setDescription(String description) {
+		if (description == null)
+			throw new IllegalArgumentException("Role description can not be null");
 		this.description = description;
 	}
 
@@ -75,6 +92,8 @@ public class Role implements Serializable {
 	 * @param name The name to set.
 	 */
 	public void setName(String name) {
+		if (name == null)
+			throw new IllegalArgumentException("Role can not be null");
 		this.name = name;
 	}
 }

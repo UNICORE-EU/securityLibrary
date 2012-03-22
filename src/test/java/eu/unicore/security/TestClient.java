@@ -15,7 +15,7 @@ public class TestClient extends TestCase
 	{
 		Client c = new Client();
 		c.toString();
-		c.setDistinguishedName("CN=foo");
+		c.setLocalClient();
 		c.toString();
 		c.setQueue(new Queue());
 		c.toString();
