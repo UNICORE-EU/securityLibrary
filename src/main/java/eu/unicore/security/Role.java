@@ -43,33 +43,69 @@ import java.io.Serializable;
 public class Role implements Serializable {
 		
 	private static final long serialVersionUID = 1L;
+
+	/**
+	 * role attribute value: anonymous
+	 */
+	public static final String ROLE_ANONYMOUS="anonymous";
+
 	
 	private String name,description;
+	private String[] validRoles;
 	
 	/**
 	 * Creates an anonymous role
 	 */
 	public Role() {
-		this.name="anonymous";
-		this.description="No role information available";
+		this.name = ROLE_ANONYMOUS;
+		this.description = "No role information available";
 	}
 	
 	/**
-	 * Creates a specific role.
+	 * Creates a specific role, which is used as the only one valid.
 	 * @param n
 	 * @param d
 	 */
 	public Role(String n, String d){
 		this.name=n;
 		this.description=d;
+		validRoles = new String[] {name};
+	}
+
+	/**
+	 * Creates a specific role, with a list of other valid roles.
+	 * The specified role must be one of valid roles.
+	 * @param n
+	 * @param d
+	 */
+	public Role(String n, String d, String[] valid){
+		this.name=n;
+		this.description=d;
+		this.validRoles = valid;
+		if (!isValid(n))
+			throw new IllegalArgumentException("Selected role must be one of valid roles");
+	}
+
+	/**
+	 * Creates with a list of other valid roles, the first one is selected
+	 */
+	public Role(String[] valid){
+		this.name=valid[0];
+		this.description="";
+		this.validRoles = valid;
 	}
 	
 	public String getName() {
-		return name;
+		if(validRoles==null)return ROLE_ANONYMOUS;
+		return (name!=null) ? name:validRoles[0];	
 	}
 	
 	public String toString() {
 		return name + ": " + description;
+	}
+	
+	public String[] getValidRoles() {
+		return validRoles;
 	}
 
 	/**
@@ -89,11 +125,30 @@ public class Role implements Serializable {
 	}
 
 	/**
-	 * @param name The name to set.
+	 * @param name The name to set, must be valid
 	 */
 	public void setName(String name) {
-		if (name == null)
-			throw new IllegalArgumentException("Role can not be null");
+		if (!isValid(name))
+			throw new IllegalArgumentException("Selected role must be one of valid roles");
 		this.name = name;
 	}
+	
+	/**
+	 * @param preferredRole - the preferred role
+	 * @return true if this object contains the preferred one
+	 */
+	public boolean isValid(String preferredRole) {
+		//null is always valid as a preferred - when set it means that first 
+		//role on the list should be used.
+		if (preferredRole == null) 
+			return true;
+		if (validRoles == null)
+			return false;
+		for(String s: validRoles){
+			if(preferredRole.equals(s))
+				return true;
+		}
+		return false;
+	}
+
 }
