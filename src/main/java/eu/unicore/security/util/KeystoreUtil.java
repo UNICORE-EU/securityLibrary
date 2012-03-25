@@ -86,7 +86,7 @@ public class KeystoreUtil {
 			if(fName.endsWith(".jks")){
 				type="jks";
 			}
-			else if(fName.endsWith(".p12") || fName.endsWith(".pkcs12") || fName.endsWith(".pfx")){
+			else if(isP12(fName)){
 				type="pkcs12";
 			}
 		}
@@ -148,13 +148,19 @@ public class KeystoreUtil {
 		if(type==null){
 			File f=new File(file);
 			if(!f.exists())throw new FileNotFoundException("No such file : "+file);
+			String fName=file.toLowerCase();
 			if(f.isDirectory()){
 				type="directory";
 			}
-			else if(f.getName().toLowerCase().endsWith("pem")){
+			else if(fName.endsWith("pem")){
 				type="file";
 			}
-			else type="jks";
+			else {
+				if(isP12(fName)){
+					type="pkcs12";
+				}
+				else type="jks";
+			}
 		}
 		if("file".equalsIgnoreCase(type)){
 			return loadTruststoreFromPemFile(file);
@@ -175,7 +181,7 @@ public class KeystoreUtil {
 	}
 
 	private static KeyStore loadTruststoreFromPemFile(String name) throws IOException,NoSuchAlgorithmException,CertificateException,KeyStoreException {
-		KeyStore trustStore= KeyStore.getInstance("jks");
+		KeyStore trustStore=KeyStore.getInstance("jks");
 		trustStore.load(null, "unicore".toCharArray());
 		loadPemFile(name,trustStore);
 		return trustStore;
@@ -215,5 +221,9 @@ public class KeystoreUtil {
 			loadPemFile(pem.getAbsolutePath(),trustStore);
 		}
 		return trustStore;
+	}
+	
+	private static boolean isP12(String name){
+		return name.endsWith("p12") || name.endsWith("pkcs12")|| name.endsWith("pfx");
 	}
 }
