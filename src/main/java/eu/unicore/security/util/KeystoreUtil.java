@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -143,7 +144,7 @@ public class KeystoreUtil {
 	 * @throws NoSuchAlgorithmException
 	 */
 	public static KeyStore loadTruststore(String file,String password, String type)
-			throws KeyStoreException,CertificateException,IOException,NoSuchAlgorithmException{
+			throws KeyStoreException,CertificateException,IOException,NoSuchAlgorithmException,NoSuchProviderException{
 		KeyStore trustStore=null;
 		if(type==null){
 			File f=new File(file);
@@ -169,7 +170,13 @@ public class KeystoreUtil {
 			return loadTruststoreFromDirectory(file);
 		}
 		else{	
-			trustStore=KeyStore.getInstance(type);
+			if("pkcs12".equalsIgnoreCase(type)){
+				trustStore=KeyStore.getInstance(type, "BC");
+			}
+			else{
+				//use default provider for JKS
+				trustStore=KeyStore.getInstance(type);
+			}
 			FileInputStream fis=new FileInputStream(file);
 			try{
 				trustStore.load(new FileInputStream(file), password.toCharArray());

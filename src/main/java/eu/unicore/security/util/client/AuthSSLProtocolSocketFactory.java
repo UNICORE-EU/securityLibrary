@@ -10,6 +10,8 @@ import java.net.UnknownHostException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -30,6 +32,7 @@ import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
 import org.apache.log4j.Logger;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import eu.unicore.security.util.KeystoreUtil;
 import eu.unicore.security.util.Log;
@@ -72,6 +75,11 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 
 	private IAuthenticationConfiguration sec;
 
+	static{
+		if(Security.getProvider("BC")==null){
+			Security.addProvider(new BouncyCastleProvider());
+		}
+	}
 	public AuthSSLProtocolSocketFactory(IAuthenticationConfiguration sec)
 	{
 		this.sec = sec;
@@ -80,7 +88,7 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 	static KeyStore createKeyStore(String name, String passwd,
 			String type, String alias, boolean isTruststore) throws KeyStoreException,
 			NoSuchAlgorithmException, CertificateException,
-			IOException
+			IOException, NoSuchProviderException
 	{
 		if (name == null)
 			throw new IllegalArgumentException(
