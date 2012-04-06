@@ -65,6 +65,7 @@ public class TestJettyServer extends JettyServerBase {
 			JettyProperties extraSettings) throws ConfigurationException
 	{
 		super(listenUrls, secProperties, extraSettings, JettyLogger.class);
+		initServer();
 	}
 
 	

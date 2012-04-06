@@ -330,7 +330,7 @@ public class TruststorePropertiesConfig extends PropertiesHelper
 		
 		ValidatorParamsExt params = getValidatorParamsExt();
 		return new KeystoreCertChainValidator(ksPath, ksPassword, 
-			ksType, storeUpdateInterval, params);
+			ksType, storeUpdateInterval*1000, params);
 	}	
 	
 	private void setCrlCheckingMode() throws ConfigurationException

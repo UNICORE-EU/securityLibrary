@@ -53,7 +53,8 @@ import eu.unicore.security.util.Log;
 
 /**
  * Wraps a Jetty server and allows to configure it using {@link AuthnAndTrustProperties}<br/>
- * This class is useful for subclassing when creating a custom Jetty server.
+ * This class is useful for subclassing when creating a custom Jetty server. Subclasses must call 
+ * {@link #initServer()} method in constructor to initialize the server.
  * 
  * @author schuller
  * @author K. Benedyczak
@@ -85,7 +86,6 @@ public abstract class JettyServerBase {
 		this.jettyLogger = jettyLogger;
 		this.listenUrls = listenUrls;
 		this.extraSettings = extraSettings;
-		initServer();
 	}
 
 	public void start() throws Exception{
@@ -133,9 +133,10 @@ public abstract class JettyServerBase {
 	}
 	
 	protected Connector[] createConnectors() throws ConfigurationException {
-		Connector[] ret = new Connector[listenUrls.length];
+		AbstractConnector[] ret = new AbstractConnector[listenUrls.length];
 		for (int i=0; i<listenUrls.length; i++) {
 			ret[i] = createConnector(listenUrls[i]);
+			configureConnector(ret[i], listenUrls[i]);
 		}
 		return ret;
 	}
@@ -147,14 +148,13 @@ public abstract class JettyServerBase {
 	 * @return
 	 * @throws ConfigurationException 
 	 */
-	protected Connector createConnector(URL url) throws ConfigurationException {
+	protected AbstractConnector createConnector(URL url) throws ConfigurationException {
 		AbstractConnector connector;
 		if (url.getProtocol().startsWith("https")){
 			connector = createSecureConnector(url);
 		} else {
 			connector = createPlainConnector(url);
 		}
-		configureConnector(connector, url);
 		return connector;
 	}
 	
