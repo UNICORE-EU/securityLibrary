@@ -27,11 +27,11 @@ import junit.framework.TestCase;
 
 public class TestHttpUtils extends TestCase
 {
-	private JettyServer server;
+	private TestJettyServer server;
 	
 	public void setUp() throws Exception
 	{
-		server = new JettyServer(1);
+		server = TestJettyServer.getInstance(1);
 		server.addServlet(SimpleServlet.class.getName(), "/servlet1");
 		server.addServlet(RedirectServlet.class.getName(), "/servlet2");
 		server.start();
