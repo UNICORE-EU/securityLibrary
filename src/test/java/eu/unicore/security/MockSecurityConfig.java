@@ -8,13 +8,10 @@
 
 package eu.unicore.security;
 
-import java.io.FileInputStream;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
-
-import javax.net.ssl.SSLContext;
-
+import eu.emi.security.authn.x509.X509CertChainValidator;
+import eu.emi.security.authn.x509.X509Credential;
+import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
+import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.unicore.security.util.client.IAuthenticationConfiguration;
 
 /**
@@ -31,14 +28,12 @@ public class MockSecurityConfig implements IAuthenticationConfiguration
 	public static final String KS_ALIAS = "mykey";
 	public static final String KS_ALIAS_GW = "gw";
 	public static final String KS_ALIAS_WRONG = "mykey_wrong";
-	
 
-	
+	private boolean correctSSLAuthN;
 	private boolean doHTTPAuthN;
-	private boolean doSSLAuthN, correctSSLAuthN;
-	
-	private KeyStore ks;
-	
+	private boolean doSSLAuthN;
+	private X509CertChainValidator validator;
+	private X509Credential credential;
 	
 	public MockSecurityConfig(boolean doHTTPAuthN,
 			boolean doSSLAuthN, boolean correctSSLAuthN) throws Exception
@@ -46,97 +41,54 @@ public class MockSecurityConfig implements IAuthenticationConfiguration
 		this.doHTTPAuthN = doHTTPAuthN;
 		this.doSSLAuthN = doSSLAuthN;
 		this.correctSSLAuthN = correctSSLAuthN;
-		loadKeystore();
+		if (doSSLAuthN)
+		{
+			credential = new KeystoreCredential(KS, 
+				KS_PASSWD.toCharArray(), KS_PASSWD.toCharArray(), 
+				correctSSLAuthN ? KS_ALIAS: KS_ALIAS_WRONG, 
+				"JKS");
+			validator = new KeystoreCertChainValidator(KS, KS_PASSWD.toCharArray(), 
+				"JKS", -1);
+		}
 	}
 
-	private void loadKeystore() throws Exception
-	{
-		ks = KeyStore.getInstance("JKS");
-		ks.load(new FileInputStream(KS), KS_PASSWD.toCharArray());
-	}
-	
-	public String getCertDN(String alias) throws Exception
-	{
-		X509Certificate cert = (X509Certificate) ks.getCertificate(
-				alias);
-		return cert.getSubjectX500Principal().getName();
-		
-	}
-
-	public X509Certificate getUserCert(String alias) throws Exception
-	{
-		return (X509Certificate) ks.getCertificate(alias);
-		
-	}
-	
-	public PrivateKey getUserKey(String alias) throws Exception
-	{
-		return (PrivateKey) ks.getKey(alias,
-				KS_PASSWD.toCharArray());
-	}
-
+	@Override
 	public boolean doHttpAuthn()
 	{
 		return doHTTPAuthN;
 	}
 
+	@Override
 	public boolean doSSLAuthn()
 	{
 		return doSSLAuthN;
 	}
 
+	@Override
 	public String getHttpPassword()
 	{
 		return HTTP_PASSWD;
 	}
 
+	@Override
 	public String getHttpUser()
 	{
 		return HTTP_USER;
 	}
 
-	public String getKeystore()
+	@Override
+	public X509Credential getCredential()
 	{
-		return KS;
+		return credential;
 	}
 
-	public String getKeystoreAlias()
+	@Override
+	public X509CertChainValidator getValidator()
 	{
-		if (correctSSLAuthN)
-			return KS_ALIAS;
-		return KS_ALIAS_WRONG;
+		return validator;
 	}
-
-	public String getKeystoreKeyPassword()
-	{
-		return KS_PASSWD;
-	}
-
-	public String getKeystorePassword()
-	{
-		return KS_PASSWD;
-	}
-
-	public String getKeystoreType()
-	{
-		return "JKS";
-	}
-
-	public String getTruststore()
-	{
-		return KS;
-	}
-
-	public String getTruststorePassword()
-	{
-		return KS_PASSWD;
-	}
-
-	public String getTruststoreType()
-	{
-		return "JKS";
-	}
-
+	
+	@Override
 	public IAuthenticationConfiguration clone()
 	{
 		try
@@ -147,10 +99,5 @@ public class MockSecurityConfig implements IAuthenticationConfiguration
 		{
 			throw new RuntimeException("Can't clone!");
 		}
-	}
-
-	public SSLContext getSSLContext()
-	{
-		return null;
 	}
 }

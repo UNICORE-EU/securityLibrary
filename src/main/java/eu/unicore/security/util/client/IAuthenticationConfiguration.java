@@ -1,56 +1,36 @@
 package eu.unicore.security.util.client;
 
-import javax.net.ssl.SSLContext;
+import eu.emi.security.authn.x509.X509CertChainValidator;
+import eu.emi.security.authn.x509.X509Credential;
 
 
 /**
  * Implementation of this interface provides data necessary for 
- * setting up transport level security and HTTP authentication. SSL
- * can be set up in two ways: either by providing ready to use SSLContext
- * or by providing all the keystore and truststore details which are needed 
- * to create a new SSLContext.
+ * setting up transport level security and HTTP authentication.
  * 
  * @author K. Benedyczak
  */
-public interface IAuthenticationConfiguration extends ISecurityConfiguration
+public interface IAuthenticationConfiguration
 {
 	/**
-	 * This method can return initialized {@link SSLContext} or null.
-	 * If null is returned then {@link SSLContext} will be created by this library
-	 * itself using the data from the other methods defined in this interface.
-	 * If this method returns non-null value then most of the methods in this 
-	 * interface are not used (only HTTP related are still used). 
-	 *  
-	 * @return initialized SSL context.
-	 */
-	public SSLContext getSSLContext();
-
-	/**
 	 * Returns true if the client-side TLS authentication should be done.
-	 * If false then all (inherited from the super interface  
-	 * {@link ISecurityConfiguration}) getKeystore* methods are 
-	 * not used at all.
+	 * If false then local credential retrieval method 
+	 * is not used at all.
 	 * @return
 	 */
 	public boolean doSSLAuthn();
+
+	/**
+	 * 
+	 * @return local credential, used if doSSLAuthn returns true
+	 */
+	public X509Credential getCredential();
 	
-	
 	/**
-	 * Returns truststore location. If this method returns null
-	 * then (for SSL connections) client will trust ANY server certificate.
+	 * Returns certificates validator.
 	 * @return
 	 */
-	public String getTruststore();
-	/**
-	 * Returns truststore password.
-	 * @return
-	 */
-	public String getTruststorePassword();
-	/**
-	 * Returns truststore type.
-	 * @return
-	 */
-	public String getTruststoreType();
+	public X509CertChainValidator getValidator();
 	
 	/**
 	 * Returns true if HTTP BASIC Auth should be used.

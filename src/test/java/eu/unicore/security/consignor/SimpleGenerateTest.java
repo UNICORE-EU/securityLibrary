@@ -10,12 +10,13 @@ package eu.unicore.security.consignor;
 
 import java.security.cert.X509Certificate;
 
+import javax.security.auth.x500.X500Principal;
+
+import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.samly2.SAMLConstants.AuthNClasses;
-import eu.unicore.security.CertificateUtils;
 import eu.unicore.security.TestBase;
 import eu.unicore.security.UnicoreSecurityFactory;
 import eu.unicore.security.ValidationResult;
-import eu.unicore.security.dsig.DSigException;
 import xmlbeans.org.oasis.saml2.assertion.AssertionDocument;
 
 /**
@@ -57,7 +58,7 @@ public class SimpleGenerateTest extends TestBase
 		try
 		{
 			ConsignorAPI impl = UnicoreSecurityFactory.getConsignorAPI();
-			String c1 = issuerCert1[0].getSubjectX500Principal().getName();
+			X500Principal c1 = issuerCert1[0].getSubjectX500Principal();
 			ConsignorAssertion token = 
 				impl.generateConsignorToken(issuerDN2, issuerCert1,
 						AuthNClasses.TLS);
@@ -75,9 +76,9 @@ public class SimpleGenerateTest extends TestBase
 			if (!res.isValid())
 				fail(res.getInvalidResaon());
 			X509Certificate []cert = parsedToken.getConsignor();
-			String c2 = cert[0].getSubjectX500Principal().getName();
+			X500Principal c2 = cert[0].getSubjectX500Principal();
 			System.out.println("Consignor read back is: " + c2);
-			if (!CertificateUtils.dnEqual(c1, c2))
+			if (!X500NameUtils.rfc3280Equal(c1, c2))
 				fail("Consignor is not the same after parsing");
 		} catch (Exception e)
 		{
@@ -91,7 +92,6 @@ public class SimpleGenerateTest extends TestBase
 	{
 		try
 		{
-			System.setProperty(CertificateUtils.VERIFY_GENERATION_KEY, "false");
 			ConsignorAPI impl = UnicoreSecurityFactory.getConsignorAPI();
 			ConsignorAssertion token = 
 				impl.generateConsignorToken(issuerDN2, expiredCert,
@@ -111,20 +111,4 @@ public class SimpleGenerateTest extends TestBase
 		}
 		assertTrue(true);
 	}
-
-	public void testExpiredCert2()
-	{
-			System.setProperty(CertificateUtils.VERIFY_GENERATION_KEY, "true");
-			ConsignorAPI impl = UnicoreSecurityFactory.getConsignorAPI();
-			try
-			{
-				impl.generateConsignorToken(issuerDN2, expiredCert,
-						AuthNClasses.TLS);
-				fail("Assertion issued with expired cert was accepted");
-			} catch (DSigException e)
-			{
-			}
-			assertTrue(true);
-	}
-	
 }

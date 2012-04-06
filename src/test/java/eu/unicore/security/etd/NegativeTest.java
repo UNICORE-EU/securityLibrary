@@ -11,9 +11,8 @@ package eu.unicore.security.etd;
 import java.util.Calendar;
 import java.util.Date;
 
-import eu.unicore.security.CertificateUtils;
+import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
 import eu.unicore.security.ValidationResult;
-import eu.unicore.security.dsig.DSigException;
 import eu.unicore.security.etd.TrustDelegation;
 
 /**
@@ -29,7 +28,7 @@ public class NegativeTest extends ETDTestBase
 					privKey1, receiverDN1, null);
 
 			ValidationResult result = 
-				etdEngine.validateTD(td, issuerDN2, issuerDN1, receiverDN1);
+				etdEngine.validateTD(td, issuerDN2, issuerDN1, receiverDN1, new BinaryCertChainValidator(true));
 			if (result.isValid() || 
 				!result.getInvalidResaon().startsWith("Wrong custodian"))
 				fail("Validation of wrong custodian succeeded/error is wrong: " + 
@@ -49,7 +48,7 @@ public class NegativeTest extends ETDTestBase
 					privKey1, receiverCert1, null);
 
 			ValidationResult result = 
-				etdEngine.validateTD(td, issuerCert2[0], issuerCert1, receiverCert1);
+				etdEngine.validateTD(td, issuerCert2[0], issuerCert1, receiverCert1, new BinaryCertChainValidator(true));
 			if (result.isValid() || 
 				!result.getInvalidResaon().startsWith("Wrong custodian"))
 				fail("Validation of wrong custodian succeeded/error is wrong: " + 
@@ -69,7 +68,7 @@ public class NegativeTest extends ETDTestBase
 					privKey1, receiverDN1, null);
 
 			ValidationResult result = 
-				etdEngine.validateTD(td, issuerDN1, issuerDN2, receiverDN1);
+				etdEngine.validateTD(td, issuerDN1, issuerDN2, receiverDN1, new BinaryCertChainValidator(true));
 			if (result.isValid() || 
 				!result.getInvalidResaon().startsWith("Wrong issuer"))
 				fail("Validation of wrong issuer succeeded/error is wrong: " + 
@@ -89,7 +88,7 @@ public class NegativeTest extends ETDTestBase
 					privKey1, receiverDN1, null);
 
 			ValidationResult result = 
-				etdEngine.validateTD(td, issuerDN1, issuerDN1, receiverDN2);
+				etdEngine.validateTD(td, issuerDN1, issuerDN1, receiverDN2, new BinaryCertChainValidator(true));
 			if (result.isValid() || 
 				!result.getInvalidResaon().startsWith("Wrong receiver"))
 				fail("Validation of wrong receiver succeeded/error is wrong: " + 
@@ -109,7 +108,7 @@ public class NegativeTest extends ETDTestBase
 					privKey1, receiverCert1, null);
 
 			ValidationResult result = 
-				etdEngine.validateTD(td, issuerCert1[0], issuerCert1, receiverCert2);
+				etdEngine.validateTD(td, issuerCert1[0], issuerCert1, receiverCert2, new BinaryCertChainValidator(true));
 			if (result.isValid() || 
 				!result.getInvalidResaon().startsWith("Wrong delegation receiver"))
 				fail("Validation of wrong receiver succeeded/error is wrong: " + 
@@ -130,7 +129,7 @@ public class NegativeTest extends ETDTestBase
 					privKey3, receiverDN1, null);
 
 			ValidationResult result = 
-				etdEngine.validateTD(td, issuerDN1, issuerDN1, receiverDN1);
+				etdEngine.validateTD(td, issuerDN1, issuerDN1, receiverDN1, new BinaryCertChainValidator(true));
 			if (result.isValid() || 
 				!result.getInvalidResaon().startsWith("Signature is incorrect"))
 				fail("Validation of wrong key succeeded/error is wrong: " + 
@@ -155,7 +154,7 @@ public class NegativeTest extends ETDTestBase
 					privKey1, receiverDN1, restrictions);
 
 			ValidationResult result = 
-				etdEngine.validateTD(td, issuerDN1, issuerDN1, receiverDN1);
+				etdEngine.validateTD(td, issuerDN1, issuerDN1, receiverDN1, new BinaryCertChainValidator(true));
 			if (result.isValid() || 
 				!result.getInvalidResaon().startsWith("Delegation is no more valid"))
 				fail("Validation of wrong end date succeeded/error is wrong: " + 
@@ -181,7 +180,7 @@ public class NegativeTest extends ETDTestBase
 					privKey1, receiverDN1, restrictions);
 
 			ValidationResult result = 
-				etdEngine.validateTD(td, issuerDN1, issuerDN1, receiverDN1);
+				etdEngine.validateTD(td, issuerDN1, issuerDN1, receiverDN1, new BinaryCertChainValidator(true));
 			if (result.isValid() || 
 				!result.getInvalidResaon().startsWith("Delegation is not yet valid"))
 				fail("Validation of wrong start date succeeded/error is wrong: " + 
@@ -195,46 +194,23 @@ public class NegativeTest extends ETDTestBase
 
 
 	public void testExpiredCertVerify()
-	{
+	{ 
 		try
 		{
-			System.setProperty(CertificateUtils.VERIFY_GENERATION_KEY, "false");
 			TrustDelegation td = etdEngine.generateTD(expiredDN, expiredCert,
 					privKeyExpired, receiverDN1, null);
-
 			ValidationResult result = 
-				etdEngine.validateTD(td, expiredDN, expiredDN, receiverDN1);
+				etdEngine.validateTD(td, expiredDN, expiredDN, receiverDN1,
+					new BinaryCertChainValidator(false));
 			if (result.isValid() || 
 				!result.getInvalidResaon().startsWith("Issuer certificate is FAILED"))
 				fail("Validation of ETD issued with expired issuer's certificate is wrong: " + 
 						result.getInvalidResaon());
 		} catch (Exception e)
 		{
+			e.printStackTrace();
 			fail(e.getMessage());
 		}
 		assertTrue(true);
 	}
-
-	public void testExpiredCertGenerate()
-	{
-		try
-		{
-			System.setProperty(CertificateUtils.VERIFY_GENERATION_KEY, "true");
-
-			etdEngine.generateTD(expiredDN, expiredCert, 
-				privKeyExpired, receiverDN1, null);
-			fail("Generation of ETD with expired issuer's certificate succeeded.");
-		} catch (Exception e)
-		{
-			if (!(e instanceof DSigException) || 
-				!e.getMessage().startsWith("Issuer's ("))
-				fail("Wrong error when generating ETD with expired cert: "
-					+ e);
-			
-		}
-		assertTrue(true);
-	}
-
-
-
 }

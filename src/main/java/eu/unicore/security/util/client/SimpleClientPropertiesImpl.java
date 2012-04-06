@@ -7,8 +7,6 @@
  */
 package eu.unicore.security.util.client;
 
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.Properties;
 
@@ -16,12 +14,10 @@ import eu.unicore.security.util.client.SimpleAuthnConfigurationImpl;
 
 /**
  * Do nothing implementation of {@link IClientProperties}.
- * TODO - same as for ICLientPorpoerites. 
  * @author golbi
- *
  */
 public class SimpleClientPropertiesImpl extends SimpleAuthnConfigurationImpl 
-implements IClientProperties
+					implements IClientProperties
 {
 	private final Properties p = new Properties();
 
@@ -67,24 +63,6 @@ implements IClientProperties
 		return false;
 	}
 
-	@Override
-	public PrivateKey getPrivateKey()
-	{
-		return null;
-	}
-
-	@Override
-	public X509Certificate getPublicKey()
-	{
-		return null;
-	}
-	
-	@Override
-	public X509Certificate[] getCertificateChain()
-	{
-		return null;
-	}
-	
 	@Override
 	public ETDClientSettings getETDSettings()
 	{

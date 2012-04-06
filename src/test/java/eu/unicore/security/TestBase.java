@@ -34,7 +34,7 @@ public abstract class TestBase extends TestCase
 	private static final String KEYSTORE_EXP = "keystoreExpired.jks";
 	
 	
-	private KeyStore ks1, ks2, ks3, ks4, ks5, ksExp;
+	protected KeyStore ks1, ks2, ks3, ks4, ks5, ksExp;
 	protected X509Certificate[] issuerCert1, receiverCert1;
 	protected X509Certificate[] issuerCert2, receiverCert2;
 	protected X509Certificate[] expiredCert;

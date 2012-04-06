@@ -8,78 +8,53 @@
 
 package eu.unicore.security.util.client;
 
-import javax.net.ssl.SSLContext;
+import eu.emi.security.authn.x509.X509CertChainValidator;
+import eu.emi.security.authn.x509.X509Credential;
+import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
 
 /**
  * Do nothing implementation of security configuration. Useful for subclassing.
+ * This implementation provides absolutely no security (trusting everything, not
+ * authenticating with anything).
  * @author K. Benedyczak
  */
 public abstract class AbstractSecurityConfigurationImpl implements IAuthenticationConfiguration
 {
+	@Override
 	public boolean doHttpAuthn()
 	{
 		return false;
 	}
 
+	@Override
 	public boolean doSSLAuthn()
 	{
 		return false;
 	}
 
+	@Override
 	public String getHttpPassword()
 	{
 		return null;
 	}
 
+	@Override
 	public String getHttpUser()
 	{
 		return null;
 	}
 
-	public String getKeystore()
-	{
-		return null;
-	}
-
-	public String getKeystoreAlias()
-	{
-		return null;
-	}
-
-	public String getKeystoreKeyPassword()
-	{
-		return null;
-	}
-
-	public String getKeystorePassword()
-	{
-		return null;
-	}
-
-	public String getKeystoreType()
-	{
-		return null;
-	}
-
-	public String getTruststore()
-	{
-		return null;
-	}
-
-	public String getTruststorePassword()
-	{
-		return null;
-	}
-
-	public String getTruststoreType()
+	@Override
+	public X509Credential getCredential()
 	{
 		return null;
 	}
 	
-	public SSLContext getSSLContext()
+	@Override
+	public X509CertChainValidator getValidator()
 	{
-		return null;
+		return new BinaryCertChainValidator(true);
 	}
-	
+
 	public abstract IAuthenticationConfiguration clone();
 }

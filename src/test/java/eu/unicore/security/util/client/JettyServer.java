@@ -32,6 +32,8 @@
 
 package eu.unicore.security.util.client;
 
+import java.io.IOException;
+import java.security.KeyStoreException;
 import java.util.HashMap;
 
 import org.mortbay.jetty.AbstractConnector;
@@ -46,6 +48,12 @@ import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.HashSessionIdManager;
 import org.mortbay.thread.QueuedThreadPool;
+
+import eu.emi.security.authn.x509.X509CertChainValidator;
+import eu.emi.security.authn.x509.X509Credential;
+import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
+import eu.emi.security.authn.x509.impl.KeystoreCredential;
+import eu.unicore.security.util.jetty.CustomSslSocketConnector;
 
 
 /**
@@ -75,7 +83,7 @@ public class JettyServer {
 		configureServer();
 	}
 
-	private void initServer() {
+	private void initServer() throws KeyStoreException, IOException {
 		int port = 62407;
 		String host = "127.0.0.1";
 		url = "http://" + host + ":" + port;
@@ -134,18 +142,17 @@ public class JettyServer {
 		}
 	}
 
-	protected AbstractConnector createSecureConnector(int port, String host) {
-		SslSocketConnector ssl = new SslSocketConnector();
+	protected AbstractConnector createSecureConnector(int port, String host) 
+			throws KeyStoreException, IOException {
+		X509CertChainValidator validator = new KeystoreCertChainValidator(KEYSTORE, 
+			KEYSTORE_P.toCharArray(), "JKS", -1);
+		X509Credential credential = new KeystoreCredential(KEYSTORE, 
+			KEYSTORE_P.toCharArray(), KEYSTORE_P.toCharArray(), null, "JKS");
+		SslSocketConnector ssl = new CustomSslSocketConnector(
+			validator, credential);
 		ssl.setPort(port);
 		ssl.setHost(host);
 		ssl.setNeedClientAuth(true);
-		ssl.setKeystore(KEYSTORE);
-		ssl.setKeyPassword(KEYSTORE_P);
-		ssl.setPassword(KEYSTORE_P);
-		ssl.setKeystoreType("JKS");
-		ssl.setTruststore(KEYSTORE);
-		ssl.setTruststoreType("JKS");
-		ssl.setTrustPassword(KEYSTORE_P);
 		ssl.setSoLingerTime(soLinger);
 		return ssl;
 	}

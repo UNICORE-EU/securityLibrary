@@ -204,11 +204,11 @@ public class ETDClientSettings implements Cloneable
 	 */
 	public void initializeSimple(X500Principal delegationReceiver,	IAuthenticationConfiguration properties)
 	{
-		String requestedUserDN = properties.getCertificateChain()[0].getSubjectX500Principal().getName();
+		String requestedUserDN = properties.getCredential().getCertificate().getSubjectX500Principal().getName();
 		setRequestedUser(requestedUserDN);
 		setReceiver(delegationReceiver);
 		setExtendTrustDelegation(true);
-		setIssuerCertificateChain(properties.getCertificateChain());
+		setIssuerCertificateChain(properties.getCredential().getCertificateChain());
 	}
 	
 	public ETDClientSettings clone()

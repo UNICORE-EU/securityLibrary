@@ -99,7 +99,7 @@ public class HttpUtils {
 	{
 		HttpClient client = createClient(properties);
 		configureSSL(client, security);
-		configureProxy(client,uri, properties);
+		configureProxy(client, uri, properties);
 		return client;
 	}
 
@@ -115,7 +115,7 @@ public class HttpUtils {
 		HttpClient client = new RedirectingHttpClient(connClose, maxRedirects);
 
 		MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
-		HttpConnectionManagerParams conParams = new HttpConnectionManagerParams (); 
+		HttpConnectionManagerParams conParams = new HttpConnectionManagerParams(); 
 		manager.setParams(conParams);
 		int maxConnPerHost = getIntValue(MAX_HOST_CONNECTIONS, properties, DEFAULT_MAX_HOST_CONNECTIONS);
 		conParams.setDefaultMaxConnectionsPerHost(maxConnPerHost);

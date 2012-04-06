@@ -7,8 +7,6 @@
  */
 package eu.unicore.security.util.client;
 
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.Properties;
 
@@ -24,9 +22,6 @@ import eu.unicore.security.util.client.IAuthenticationConfiguration;
  *  <li> settings to automatically initialize signing of outgoing messages.
  *  <li> settings to automatically initialize ETD for outgoing messages.
  * </ul>
- * 
- * TODO - this class does not fit in this module. It is here only as it is extended 
- * in use-core. Should be moved to secutils-xfire (but use-core doesn't depend on it).
  * 
  * @author golbi
  */
@@ -64,27 +59,6 @@ public interface IClientProperties extends IAuthenticationConfiguration
 	 */
 	public boolean doSignMessage();
 
-	/**
-	 * private key for signing messages and assertions
-	 * 
-	 * @return PrivateKey
-	 */
-	public PrivateKey getPrivateKey();
-
-
-	/**
-	 * the user's certificate chain. 
-	 * @return array of X509Certificates
-	 */
-	public X509Certificate[] getCertificateChain();
-
-	/**
-	 * the user's certificate, equal to the first entry in the certificate chain
-	 * (this is equivalent to calling getCertificateChain()[0])
-	 * @return X509Certificate
-	 */
-	public X509Certificate getPublicKey();
-	
 	/**
 	 * Returns an object with setup of ETD to be used in outgoing calls.
 	 */

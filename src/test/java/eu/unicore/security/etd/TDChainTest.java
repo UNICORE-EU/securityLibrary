@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
+import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.etd.DelegationRestrictions;
 import eu.unicore.security.etd.TrustDelegation;
@@ -37,7 +38,7 @@ public class TDChainTest extends ETDTestBase
 					receiverCert1, privKey3, receiverCert2, null);
 			
 			ValidationResult result = 
-				etdEngine.isTrustDelegated(chain, receiverCert2, issuerCert3);
+				etdEngine.isTrustDelegated(chain, receiverCert2, issuerCert3, new BinaryCertChainValidator(true));
 			if (!result.isValid())
 				fail("Normal chain validation failed: " + result.getInvalidResaon());
 		} catch (Exception e)
@@ -65,7 +66,7 @@ public class TDChainTest extends ETDTestBase
 					receiverCert1, privKey3, receiverDN2, null);
 			
 			ValidationResult result = 
-				etdEngine.isTrustDelegated(chain, receiverDN2, issuerDN1);
+				etdEngine.isTrustDelegated(chain, receiverDN2, issuerDN1, new BinaryCertChainValidator(true));
 			if (!result.isValid())
 				fail("Normal chain validation failed: " + result.getInvalidResaon());
 		} catch (Exception e)
@@ -91,7 +92,7 @@ public class TDChainTest extends ETDTestBase
 					receiverCert1, privKey3, receiverCert2, null);
 			
 			ValidationResult result = 
-				etdEngine.isTrustDelegated(chain, receiverCert2, issuerCert1);
+				etdEngine.isTrustDelegated(chain, receiverCert2, issuerCert1, new BinaryCertChainValidator(true));
 			if (!result.isValid())
 				fail("Normal chain validation failed: " + result.getInvalidResaon());
 		} catch (Exception e)
@@ -117,7 +118,7 @@ public class TDChainTest extends ETDTestBase
 					receiverCert1, privKey3, receiverDN2, null);
 			
 			ValidationResult result = 
-				etdEngine.isTrustDelegated(chain, receiverDN1, issuerDN1);
+				etdEngine.isTrustDelegated(chain, receiverDN1, issuerDN1, new BinaryCertChainValidator(true));
 			if (!result.isValid())
 				fail("Intermediary receiver verification failed: " + 
 						result.getInvalidResaon());
@@ -144,7 +145,7 @@ public class TDChainTest extends ETDTestBase
 					receiverCert1, privKey3, receiverDN2, null);
 			
 			ValidationResult result = 
-				etdEngine.isTrustDelegated(chain, receiverDN2, issuerDN2);
+				etdEngine.isTrustDelegated(chain, receiverDN2, issuerDN2, new BinaryCertChainValidator(true));
 			if (result.isValid() || !result.getInvalidResaon().contains("Wrong user"))
 				fail("Chain with wrong user passed validation: " + result);
 		} catch (Exception e)
@@ -170,7 +171,7 @@ public class TDChainTest extends ETDTestBase
 					receiverCert1, privKey3, receiverCert2, null);
 			
 			ValidationResult result = 
-				etdEngine.isTrustDelegated(chain, receiverCert2, issuerCert2);
+				etdEngine.isTrustDelegated(chain, receiverCert2, issuerCert2, new BinaryCertChainValidator(true));
 			if (result.isValid() || !result.getInvalidResaon().equals("Wrong user"))
 				fail("Chain with wrong issuer passed validation");
 		} catch (Exception e)
@@ -197,7 +198,7 @@ public class TDChainTest extends ETDTestBase
 					receiverCert1, privKey3, receiverDN2, null);
 			
 			ValidationResult result = 
-				etdEngine.isTrustDelegated(chain, receiverDN2, issuerDN1);
+				etdEngine.isTrustDelegated(chain, receiverDN2, issuerDN1, new BinaryCertChainValidator(true));
 
 			if (result.isValid() || !result.getInvalidResaon().equals(
 					"Chain length exceedes maximum proxy restriction of " +

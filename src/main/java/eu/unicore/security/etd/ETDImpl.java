@@ -10,7 +10,6 @@ package eu.unicore.security.etd;
 
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
@@ -18,10 +17,10 @@ import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.apache.xml.security.utils.RFC2253Parser;
 import org.apache.xmlbeans.XmlObject;
 
-import eu.unicore.security.CertificateUtils;
+import eu.emi.security.authn.x509.X509CertChainValidator;
+import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.dsig.DSigException;
 
@@ -52,21 +51,11 @@ public class ETDImpl implements ETDApi
 		TrustDelegation td = new TrustDelegation(custodian);
 		td.setX509Issuer(issuer[0].getSubjectX500Principal().getName());
 		td.setX509Subject(subject);
-		try
-		{
-			CertificateUtils.verifyCertificate(issuer, true, true);
-		} catch (CertificateException e)
-		{
-			throw new DSigException("Issuer's (" +
-				issuer[0].getSubjectX500Principal().getName()
-				+ ") certificate is invalid: "
-				+ e);
-		}
 		return addRestrictionsAndSign(td, issuer, pk, restrictions);
 	}
 
 	/**
-	 * Generates trust delegationin terms of certificates.
+	 * Generates trust delegation in terms of certificates.
 	 * @param custodian DN of initial trust delegation issuer (if not in trust delegation chain 
 	 * it is equal to issuer)
 	 * @param issuer Actual issuer certificate of this trust delegation
@@ -85,37 +74,6 @@ public class ETDImpl implements ETDApi
 		td.setX509Issuer(issuer[0].getSubjectX500Principal().getName());
 		td.setX509Subject(receiver[0].getSubjectX500Principal().getName());
 		td.setSenderVouchesX509Confirmation(receiver);
-		
-		try
-		{
-			CertificateUtils.verifyCertificate(custodian, true, true);
-		} catch (CertificateException e)
-		{
-			throw new DSigException("Custodian's (" + 
-				custodian.getSubjectX500Principal().getName() + 
-				") certificate is invalid: " + e);
-		}
-		try
-		{
-			CertificateUtils.verifyCertificate(issuer, true, true);
-		} catch (CertificateException e)
-		{
-			throw new DSigException("Issuer's (" +
-				issuer[0].getSubjectX500Principal().getName()
-				+ ") certificate is invalid: "
-				+ e);
-		}
-		try
-		{
-			CertificateUtils.verifyCertificate(receiver, true, true);
-		} catch (CertificateException e)
-		{
-			throw new DSigException("Receiver's (" +
-				receiver[0].getSubjectX500Principal().getName()
-				+ ") certificate is invalid: "
-				+ e);
-		}
-		
 		return addRestrictionsAndSign(td, issuer, pk, restrictions);
 	}
 	
@@ -213,44 +171,45 @@ public class ETDImpl implements ETDApi
 	 * @param custodian
 	 * @param issuer
 	 * @param receiver
+ 	 * @param validator certificate chain validator, used to check issuer cert chain
+ 	 * received from the assertion
 	 * @return
 	 */
 	public ValidationResult validateTD(TrustDelegation td, String custodian, 
-			String issuer, String receiver)
+			String issuer, String receiver, X509CertChainValidator validator)
 	{
 		String i1 = td.getIssuerDN();
-		String i2 = RFC2253Parser.rfc2253toXMLdsig(issuer);
-		if (!i1.equals(i2))
+		if (!X500NameUtils.equal(i1, issuer))
 			return new ValidationResult(false, "Wrong issuer (is " + i1 + 
-					" and should be " + i2 + ")");
+					" and should be " + issuer + ")");
 		String r1 = td.getSubjectDN();
-		String r2 = RFC2253Parser.rfc2253toXMLdsig(receiver);
-		if (!r1.equals(r2))
+		if (!X500NameUtils.equal(r1, receiver))
 			return new ValidationResult(false, "Wrong receiver (is " + r1 + 
-					" and should be " + r2 + ")");
+					" and should be " + receiver + ")");
 		
 		X509Certificate []issuerCert = td.getIssuerFromSignature();
 		if (issuerCert == null || issuerCert.length == 0)
 			return new ValidationResult(false, "Lack of issuer certificate " +
 				"(neither in KeyInfo element nor in available certificates list)");
 		
-		return validateTDBasic(td, issuerCert[0], custodian, null);
+		return validateTDBasic(validator, td, issuerCert, custodian, null);
 	}
 
 	
 	/**
 	 * Validate single trust delegation assertion. Checks if receiver has trust of custodian 
 	 * delegated by issuer. This validation is done in terms of certificates and it is assumed
-	 * that assertion includes neccessary certificates.
+	 * that assertion includes necessary certificates.
 	 *  
 	 * @param td
 	 * @param custodian
-	 * @param issuer
+	 * @param issuer expected issuer certificate chain (it is verified if it is a valid chain).
 	 * @param receiver
+	 * @param validator certificate chain validator, used to check issuer cert chain.
 	 * @return
 	 */
 	public ValidationResult validateTD(TrustDelegation td, X509Certificate custodian, 
-			X509Certificate[] issuer, X509Certificate[] receiver)
+			X509Certificate[] issuer, X509Certificate[] receiver, X509CertChainValidator validator)
 	{
 		if (issuer == null || issuer.length == 0)
 			throw new IllegalArgumentException("Issuer argument must not be null/empty");
@@ -272,19 +231,18 @@ public class ETDImpl implements ETDApi
 			return new ValidationResult(false, "Wrong delegation receiver " +
 					"(TD receiver certificate: [" + subjectFromTD[0].toString() +
 					"] and should be: [" +receiver[0].toString() + "])");
-		return validateTDBasic(td, issuer[0], custodian.getSubjectX500Principal().getName(),
+		return validateTDBasic(validator, td, issuer, custodian.getSubjectX500Principal().getName(),
 				custodian.hashCode());
 	}
 	
 	
-	private ValidationResult validateTDBasic(TrustDelegation td, X509Certificate issuer,
-			String custodianDN, Integer custodianHash)
+	private ValidationResult validateTDBasic(X509CertChainValidator validator, TrustDelegation td, 
+			X509Certificate[] issuer, String custodianDN, Integer custodianHash)
 	{
 		String c1 = td.getCustodianDN();
-		String c2 = RFC2253Parser.rfc2253toXMLdsig(custodianDN);
-		if (!c1.equals(c2))
+		if (!X500NameUtils.equal(c1, custodianDN))
 			return new ValidationResult(false, "Wrong custodian (is " + c1 + 
-					" should be " + c2);
+					" should be " + custodianDN);
 		if (custodianHash != null)
 		{
 			Integer i = td.getCustodianCertHash();
@@ -295,18 +253,17 @@ public class ETDImpl implements ETDApi
 				return new ValidationResult(false, "Wrong custodian (certificate" +
 						" hashes are different)");				
 		}
+
 		
-		try
+		eu.emi.security.authn.x509.ValidationResult issuerCertValidation = validator.validate(issuer);
+		if (!issuerCertValidation.isValid())
 		{
-			issuer.checkValidity();
-		} catch (Exception e)
-		{
-			return new ValidationResult(false, "Issuer certificate is not valid");
+			return new ValidationResult(false, "Issuer certificate is " + issuerCertValidation.toString());
 		}
 		
 		try
 		{
-			if (!td.isCorrectlySigned(issuer.getPublicKey()))
+			if (!td.isCorrectlySigned(issuer[0].getPublicKey()))
 				return new ValidationResult(false, "Signature is incorrect");
 		} catch (DSigException e)
 		{
@@ -317,10 +274,10 @@ public class ETDImpl implements ETDApi
 		Date notBefore = td.getNotBefore();
 		Date now = new Date();
 		if (notBefore != null && now.before(notBefore))
-			return new ValidationResult(false, "Delegation is not yet valid"); 
+			return new ValidationResult(false, "Delegation is not yet valid, will be from: " + notBefore); 
 		Date notOnOrAfter = td.getNotOnOrAfter();
 		if (notOnOrAfter != null && (now.after(notOnOrAfter) || now.equals(notOnOrAfter)))
-			return new ValidationResult(false, "Delegation is no more valid");
+			return new ValidationResult(false, "Delegation is no more valid, expired at: " + notOnOrAfter);
 		
 		return new ValidationResult(true, "Validation OK");
 	}
@@ -337,42 +294,47 @@ public class ETDImpl implements ETDApi
 	 * @param td
 	 * @param subject
 	 * @param user
+	 * @param validator certificate chain validator, used to check issuer cert chain.
 	 * @return validation result
 	 */
 	public ValidationResult isTrustDelegated(List<TrustDelegation> td, String subject, 
-			String user)
+			String user, X509CertChainValidator validator)
 	{
 		if (td == null || subject == null || user == null)
 			return new ValidationResult(false, "Some of arguments are null");
 		if (td.size() == 0)
 			return new ValidationResult(false, "Delegation chain is empty");
 		String custodian = td.get(0).getCustodianDN();
-		String u = RFC2253Parser.rfc2253toXMLdsig(user);
-		if (!u.equals(custodian))
-			return new ValidationResult(false, "Wrong user");
-		String s = RFC2253Parser.rfc2253toXMLdsig(subject);
+		if (!X500NameUtils.equal(user, custodian))
+			return new ValidationResult(false, "Wrong user, it is not equal to custodian, user is: " + 
+					user + " while custodian is: " + custodian);
 		int i=0;
 		int []maxProxies = new int[td.size()]; 
 		for (; i<td.size(); i++)
 		{
 			TrustDelegation cur = td.get(i);
 			if (i + 1 < td.size())
-				if (!cur.getSubjectDN().equals(td.get(i+1).getIssuerDN()))
+				if (!X500NameUtils.equal(cur.getSubjectDN(), td.get(i+1).getIssuerDN()))
 					return new ValidationResult(
-						false, "Chain is inconsistent at position " + i);
+						false, "Chain is inconsistent at position " + i + 
+							", subject and issuer do not match. Subject is: " + 
+							cur.getSubjectDN() + 
+							" while the issuer of the next delegation in chain is: " + 
+							td.get(i+1).getIssuerDN());
 			String receiver = subject;
 			if (i + 1 < td.size())
 				receiver = td.get(i+1).getIssuerDN();
 			
 			ValidationResult singleTD = validateTD(cur, custodian, 
-				cur.getIssuerDN(), receiver);
+				cur.getIssuerDN(), receiver, validator);
 			if (!singleTD.isValid())
 				return new ValidationResult(false, 
 						"Chain has invalid entry at position "
 						+ i + ": " + singleTD.getInvalidResaon());
 			
 			maxProxies[i] = cur.getProxyRestriction();
-			if (s.equals(cur.getSubjectDN()))
+			
+			if (X500NameUtils.equal(subject, cur.getSubjectDN()))
 				break;
 		}
 		if (i == td.size())
@@ -396,10 +358,11 @@ public class ETDImpl implements ETDApi
 	 * @param td
 	 * @param subject
 	 * @param user
+	 * @param validator certificate chain validator, used to check issuer cert chain.
 	 * @return validation result
 	 */
 	public ValidationResult isTrustDelegated(List<TrustDelegation> td, 
-			X509Certificate[] subject, X509Certificate[] user)
+			X509Certificate[] subject, X509Certificate[] user, X509CertChainValidator validator)
 	{
 		if (td == null || subject == null || user == null || 
 				user.length == 0 || subject.length == 0)
@@ -407,9 +370,9 @@ public class ETDImpl implements ETDApi
 		if (td.size() == 0)
 			return new ValidationResult(false, "Delegation chain is empty");
 		TrustDelegation initial = td.get(0);
-		String custodianRfc = RFC2253Parser.xmldsigtoRFC2253(initial.getCustodianDN());
+		String custodian = initial.getCustodianDN();
 		X500Principal u = user[0].getSubjectX500Principal();
-		if (!CertificateUtils.dnEqual(u, custodianRfc))
+		if (!X500NameUtils.equal(u, custodian))
 			return new ValidationResult(false, "Wrong user");
 		Integer custodianHash = initial.getCustodianCertHash();
 		if (custodianHash == null)
@@ -441,14 +404,15 @@ public class ETDImpl implements ETDApi
 						false, "No issuer certificate at position " + (i+1));
 				if (!compareChains(curSubject, nextIssuer))
 					return new ValidationResult(
-						false, "Chain is inconsistent at position " + i);
+						false, "Chain is inconsistent at position " + i + 
+						" issuer's and subject's certificates do not match");
 			}
 			X509Certificate[] curIssuer = cur.getIssuerFromSignature();
 			if (curIssuer == null || curIssuer.length == 0)
 				return new ValidationResult(false, 
 						"No issuer certificate at position " + i);
 			ValidationResult singleTD = validateTD(cur, custodianCert[0], 
-				curIssuer, curSubject);
+				curIssuer, curSubject, validator);
 			if (!singleTD.isValid())
 				return new ValidationResult(false, 
 						"Chain has invalid entry at position "
@@ -486,10 +450,9 @@ public class ETDImpl implements ETDApi
 	@Override
 	public boolean isSubjectInChain(List<TrustDelegation> tdChain, String subject)
 	{
-		String s = RFC2253Parser.rfc2253toXMLdsig(subject);
 		for (TrustDelegation td: tdChain)
 		{
-			if (td.getSubjectDN().equals(s))
+			if (X500NameUtils.equal(td.getSubjectDN(), subject))
 				return true;
 		}
 		return false;

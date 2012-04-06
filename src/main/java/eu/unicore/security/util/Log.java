@@ -43,6 +43,16 @@ public class Log {
 	public static final String CLIENT="unicore.client";
 	
 	/**
+	 * logger prefix for connection problem debugging
+	 */
+	public static final String CONNECTIONS="unicore.connections";
+
+	/**
+	 * logger prefix for configuration problem debugging
+	 */
+	public static final String CONFIG="unicore.configuration";
+	
+	/**
 	 * returns a logger name, using the given prefix and the simple name
 	 * of the given class
 	 * 

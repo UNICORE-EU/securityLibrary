@@ -23,6 +23,10 @@ import org.apache.commons.httpclient.protocol.Protocol;
  * @author John Kristian
  */
 public class CustomHostConfiguration extends HostConfiguration implements Cloneable{
+	
+	private static final String DEFAULT_SCHEME = new String(HttpURL.DEFAULT_SCHEME);
+	private final HttpHostFactory factory;
+
 
 	public CustomHostConfiguration(HttpHostFactory factory)
 	{
@@ -35,14 +39,10 @@ public class CustomHostConfiguration extends HostConfiguration implements Clonea
 		this.factory = that.factory;
 	}
 
-	private final HttpHostFactory factory;
-
 	public Object clone()
 	{
 		return new CustomHostConfiguration(this);
 	}
-
-	private static final String DEFAULT_SCHEME = new String(HttpURL.DEFAULT_SCHEME);
 
 	public void setHost(String host)
 	{

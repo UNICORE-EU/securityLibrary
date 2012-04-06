@@ -13,6 +13,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
+import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.dsig.DSigException;
 
@@ -103,10 +104,11 @@ public interface ETDApi
 	 * @param custodian
 	 * @param issuer
 	 * @param receiver
+ 	 * @param validator certificate chain validator, used to check issuer cert chain.
 	 * @return
 	 */
 	public ValidationResult validateTD(TrustDelegation td, String custodian,
-			String issuer, String receiver);
+			String issuer, String receiver, X509CertChainValidator validator);
 
 	/**
 	 * Validate single trust delegation assertion. Checks if receiver has trust of custodian 
@@ -117,10 +119,11 @@ public interface ETDApi
 	 * @param custodian
 	 * @param issuer
 	 * @param receiver
+ 	 * @param validator certificate chain validator, used to check issuer cert chain.
 	 * @return
 	 */
 	public ValidationResult validateTD(TrustDelegation td, X509Certificate custodian,
-			X509Certificate []issuer, X509Certificate []receiver);
+			X509Certificate []issuer, X509Certificate []receiver, X509CertChainValidator validator);
 
 	/**
 	 * Tests if the specified trust delegation chain delegates the trust from user to
@@ -134,10 +137,11 @@ public interface ETDApi
 	 * @param td
 	 * @param subject
 	 * @param user
+	 * @param validator certificate chain validator, used to check issuer cert chain.
 	 * @return validation result
 	 */
 	public ValidationResult isTrustDelegated(List<TrustDelegation> td, String subject, 
-			String user);
+			String user, X509CertChainValidator validator);
 
 	/**
 	 * Tests if the specified trust delegation chain delegates the trust from user to
@@ -148,10 +152,11 @@ public interface ETDApi
 	 * @param td
 	 * @param subject
 	 * @param user
+	 * @param validator certificate chain validator, used to check issuer cert chain.
 	 * @return validation result
 	 */
 	public ValidationResult isTrustDelegated(List<TrustDelegation> td, X509Certificate[] subject, 
-			X509Certificate[] user);
+			X509Certificate[] user, X509CertChainValidator validator);
 	
 	/**
 	 * Helper method to check if the subject is present in the chain. The chain is

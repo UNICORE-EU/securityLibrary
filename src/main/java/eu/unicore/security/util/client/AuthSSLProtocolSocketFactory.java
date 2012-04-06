@@ -9,33 +9,26 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Security;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
 import org.apache.log4j.Logger;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import eu.unicore.security.util.KeystoreUtil;
+import eu.emi.security.authn.x509.X509CertChainValidator;
+import eu.emi.security.authn.x509.X509Credential;
+import eu.emi.security.authn.x509.impl.CertificateUtils;
+import eu.emi.security.authn.x509.impl.FormatMode;
+import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
 import eu.unicore.security.util.Log;
+import eu.unicore.security.util.LoggingX509TrustManager;
 
 
 /**
@@ -68,205 +61,65 @@ import eu.unicore.security.util.Log;
 
 public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 {
-	private static final Logger LOG = Log.getLogger(Log.SECURITY,
+	private static final Logger log = Log.getLogger(Log.SECURITY,
 			AuthSSLProtocolSocketFactory.class);
 
 	private SSLContext sslcontext = null;
-
 	private IAuthenticationConfiguration sec;
 
-	static{
-		if(Security.getProvider("BC")==null){
-			Security.addProvider(new BouncyCastleProvider());
-		}
-	}
 	public AuthSSLProtocolSocketFactory(IAuthenticationConfiguration sec)
 	{
 		this.sec = sec;
 	}
 
-	static KeyStore createKeyStore(String name, String passwd,
-			String type, String alias, boolean isTruststore) throws KeyStoreException,
-			NoSuchAlgorithmException, CertificateException,
-			IOException, NoSuchProviderException
-	{
-		if (name == null)
-			throw new IllegalArgumentException(
-					"Keystore/Truststore name may not be null");
-
-		if (isTruststore){
-			return KeystoreUtil.loadTruststore(name, passwd, type);
-		}
-		
-		KeyStore keystore=KeystoreUtil.loadKeyStore(name, passwd, type);
-		
-		//if there is only one alias let's use it even if there is no user-defined one
-		//if there are more than one protest
-		if (alias == null || alias.trim().length() == 0)
-		{
-			boolean keyFound = false;
-			Enumeration<String> en = keystore.aliases();
-			while (en.hasMoreElements())
-			{
-				String a = en.nextElement();
-				if (keystore.isKeyEntry(a))
-				{
-					if (keyFound)
-						throw new IllegalArgumentException(
-							"Keystore key alias must be specified when " +
-							"keystore contains multiple keys.");
-					keyFound = true;
-					alias = a;
-				}
-			}
-		}
-		
-		
-		// we must have alias defined here. However it may be wrong.
-		if (!keystore.containsAlias(alias))
-			throw new IllegalArgumentException("Alias " + alias + " does not exist" +
-				" in the keystore " + name);
-		if (!keystore.isKeyEntry(alias))
-			throw new IllegalArgumentException("Alias " + alias + " does not " +
-				" refer to a key entry in the keystore " + name);
-		
-		LOG.debug("Using alias <" + alias + ">");
-		Enumeration<String> en = keystore.aliases();
-		List<String> delete = new ArrayList<String>();
-		while (en.hasMoreElements())
-		{
-			String a = en.nextElement();
-			if (!alias.equalsIgnoreCase(a) && keystore.isKeyEntry(a))
-			{
-				LOG.debug("Deleting non-needed key " + a);
-				delete.add(a);
-			}
-		}
-		for (String del : delete)
-			keystore.deleteEntry(del);
-
-		return keystore;
-	}
-
-	private static KeyManager[] createKeyManagers(final KeyStore keystore,
-			final String password) throws KeyStoreException,
-			NoSuchAlgorithmException, UnrecoverableKeyException
-	{
-		if (keystore == null)
-		{
-			throw new IllegalArgumentException(
-					"Keystore may not be null");
-		}
-		KeyManagerFactory kmfactory = KeyManagerFactory
-				.getInstance(KeyManagerFactory
-						.getDefaultAlgorithm());
-		kmfactory.init(keystore, password != null ? password
-				.toCharArray() : null);
-		return kmfactory.getKeyManagers();
-	}
-
-	private static TrustManager[] createTrustManagers(
-			final KeyStore keystore) throws KeyStoreException,
-			NoSuchAlgorithmException
-	{
-		if (keystore == null)
-		{
-			return new TrustManager[] {new DummyTrustManager()};
-		}
-		TrustManagerFactory tmfactory = TrustManagerFactory
-				.getInstance(TrustManagerFactory
-						.getDefaultAlgorithm());
-		tmfactory.init(keystore);
-		TrustManager[] trustmanagers = tmfactory.getTrustManagers();
-		return trustmanagers;
-	}
-
 	private synchronized SSLContext createSSLContext()
 	{
-		if (sec.getSSLContext() != null)
-			return sec.getSSLContext();
 		try
 		{
-			KeyManager[] keymanagers = null;
-			TrustManager[] trustmanagers = null;
+			KeyManager km;
 			if (sec.doSSLAuthn())
 			{
-				KeyStore keystore = createKeyStore(sec.getKeystore(), 
-						sec.getKeystorePassword(), 
-						sec.getKeystoreType(), 
-						sec.getKeystoreAlias(), false);
-				if (LOG.isDebugEnabled())
-					debugKS(keystore);
-				keymanagers = createKeyManagers(keystore, 
-						sec.getKeystoreKeyPassword());
-			}
-			if (sec.getTruststore() != null)
-			{
-				KeyStore truststore = createKeyStore(sec
-						.getTruststore(), sec
-						.getTruststorePassword(), sec
-						.getTruststoreType(), null, true);
-				if (LOG.isDebugEnabled())
-					debugTS(truststore);
-				trustmanagers = createTrustManagers(truststore);
+				km = sec.getCredential().getKeyManager();
+				if (log.isTraceEnabled())
+					debugKS(sec.getCredential());
 			} else
-				trustmanagers = createTrustManagers(null);
+			{
+				km = new NoAuthKeyManager();
+				log.trace("Not authenticating client");
+			}
+			
+			X509TrustManager tm = SocketFactoryCreator.getSSLTrustManager(sec.getValidator());
+			tm = new LoggingX509TrustManager(tm);
+			if (log.isTraceEnabled())
+				debugTS(sec.getValidator());
+			
 			SSLContext sslcontext = SSLContext.getInstance("SSL");
-			sslcontext.init(keymanagers, trustmanagers, null);
+			sslcontext.init(new KeyManager[] {km}, new TrustManager[] {tm}, null);
+			
 			return sslcontext;
 		} catch (Exception e)
 		{
-			LOG.fatal(e.getMessage(), e);
+			log.fatal(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
 
-	private void debugTS(KeyStore ks) throws KeyStoreException
+	private void debugTS(X509CertChainValidator validator) throws KeyStoreException
 	{
-		Enumeration<String> aliases = ks.aliases();
-		while (aliases.hasMoreElements())
+		X509Certificate trustedCerts[] = validator.getTrustedIssuers();
+		for (X509Certificate cert: trustedCerts)
 		{
-			String alias = aliases.nextElement();
-			LOG.debug("Trusted certificate '" + alias + "':");
-			Certificate trustedcert = ks.getCertificate(alias);
-			if (trustedcert != null	&& trustedcert instanceof X509Certificate)
-			{
-				X509Certificate cert = (X509Certificate) trustedcert;
-				LOG.debug("  Subject DN: " + cert.getSubjectDN());
-				LOG.debug("  Signature Algorithm: " + cert.getSigAlgName());
-				LOG.debug("  Valid from: " + cert.getNotBefore());
-				LOG.debug("  Valid until: " + cert.getNotAfter());
-				LOG.debug("  Issuer: " + cert.getIssuerDN());
-			}
+			log.trace("Currently(!) trusted certificate:\n" + 
+					CertificateUtils.format(cert, FormatMode.FULL));
 		}
-		
 	}
 	
-	private void debugKS(KeyStore keystore) throws KeyStoreException
+	private void debugKS(X509Credential c) throws KeyStoreException
 	{
-		Enumeration<String> aliases = keystore.aliases();
-		while (aliases.hasMoreElements())
-		{
-			String alias = aliases.nextElement();
-			Certificate[] certs = keystore.getCertificateChain(alias);
-			if (certs != null)
-			{
-				LOG.debug("Certificate chain '"	+ alias	+ "':");
-				for (int c = 0; c < certs.length; c++)
-				{
-					if (certs[c] instanceof X509Certificate)
-					{
-						X509Certificate cert = (X509Certificate) certs[c];
-						LOG.debug(" Certificate " + (c + 1) + ":");
-						LOG.debug("  Subject DN: " + cert.getSubjectDN());
-						LOG.debug("  Signature Algorithm: " + cert.getSigAlgName());
-						LOG.debug("  Valid from: " + cert.getNotBefore());
-						LOG.debug("  Valid until: " + cert.getNotAfter());
-						LOG.debug("  Issuer: " + cert.getIssuerDN());
-					}
-				}
-			}
-		}
+		X509Certificate[] certs = c.getCertificateChain();
+		X509Certificate[] certs509 = CertificateUtils.convertToX509Chain(certs);
+		log.trace("Client's certificate chain:" + 
+				CertificateUtils.format(certs509, FormatMode.FULL));
 	}	
 	
 	private SSLContext getSSLContext()
@@ -368,24 +221,5 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 	{
 		return getSSLContext().getSocketFactory().createSocket(socket,
 				host, port, autoClose);
-	}
-	
-	public static class DummyTrustManager implements X509TrustManager
-	{
-
-		public void checkClientTrusted(X509Certificate[] chain, String authType) 
-			throws CertificateException
-		{
-		}
-
-		public void checkServerTrusted(X509Certificate[] chain, String authType) 
-			throws CertificateException
-		{
-		}
-
-		public X509Certificate[] getAcceptedIssuers()
-		{
-			return null;
-		}
 	}
 }

@@ -81,9 +81,10 @@ public interface ConsignorAPI
 	 * Checks if given assertion is valid with respect to given issuer.
 	 * Note that signature is checked if and only if assertion is signed. 
 	 * So if you want to be sure that assertion is valid AND signed use this method
-	 * AND additionaly check if assertion.isSigned().
+	 * AND additionally check if assertion.isSigned().
 	 * @param assertion to be checked
-	 * @param issuerCertificate hypotetical issuer of this assertion
+	 * @param issuerCertificate hypothetical issuer of this assertion. Warning:
+	 * this certificate is not validated, so ensure that you provide a trusted certificate.
 	 * @return result of verification
 	 */
 	public ValidationResult verifyConsignorToken(ConsignorAssertion assertion,

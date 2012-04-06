@@ -8,7 +8,6 @@
 
 package eu.unicore.security.util.client;
 
-import javax.net.ssl.SSLContext;
 
 /**
  * This is a helper implementation of {@link IAuthenticationConfiguration} interface
@@ -16,14 +15,11 @@ import javax.net.ssl.SSLContext;
  * <ul>
  * <li> no SSL and no HTTP auth
  * <li> no SSL and HTTP auth
- * <li> SSL initialized with {@link SSLContext} and no HTTP auth
- * <li> SSL initialized with {@link SSLContext} and HTTP auth 
  * </ul>
  * @author golbi
  */
 public class SimpleAuthnConfigurationImpl extends AbstractSecurityConfigurationImpl
 {
-	private SSLContext ctx;
 	private String httpUser, httpPasswd;
 	
 	/**
@@ -31,7 +27,7 @@ public class SimpleAuthnConfigurationImpl extends AbstractSecurityConfigurationI
 	 */
 	public SimpleAuthnConfigurationImpl()
 	{
-		this(null, null, null);
+		this(null, null);
 	}
 	
 	/**
@@ -41,28 +37,6 @@ public class SimpleAuthnConfigurationImpl extends AbstractSecurityConfigurationI
 	 */
 	public SimpleAuthnConfigurationImpl(String httpUser, String httpPasswd)
 	{
-		this(null, httpUser, httpPasswd);
-	}
-	
-	/**
-	 * Configuration with SSL and without HTTP authn
-	 * @param sslContext
-	 */
-	public SimpleAuthnConfigurationImpl(SSLContext sslContext)
-	{
-		this(sslContext, null, null);
-	}
-
-	/**
-	 * Configuration with SSL and with HTTP authn
-	 * @param sslContext
-	 * @param httpUser
-	 * @param httpPasswd
-	 */
-	public SimpleAuthnConfigurationImpl(SSLContext sslContext, 
-			String httpUser, String httpPasswd)
-	{
-		this.ctx = sslContext;
 		this.httpUser = httpUser;
 		this.httpPasswd = httpPasswd;
 	}
@@ -87,13 +61,8 @@ public class SimpleAuthnConfigurationImpl extends AbstractSecurityConfigurationI
 		return httpUser;
 	}
 
-	public SSLContext getSSLContext()
-	{
-		return ctx;
-	}
-
 	public IAuthenticationConfiguration clone()
 	{
-		return new SimpleAuthnConfigurationImpl(ctx, httpUser, httpPasswd);
+		return new SimpleAuthnConfigurationImpl(httpUser, httpPasswd);
 	}
 }

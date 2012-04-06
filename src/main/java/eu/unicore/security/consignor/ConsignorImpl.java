@@ -10,24 +10,20 @@ package eu.unicore.security.consignor;
 
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.apache.xml.security.utils.RFC2253Parser;
-
+import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.samly2.SAMLConstants.AuthNClasses;
-import eu.unicore.security.CertificateUtils;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.dsig.DSigException;
 
 /**
  * Implements logic to generate and validate consignor tokens.
  * <p>
- * TODO: add (optional) AuthN context setting (mostly in underlaying SAMLAssertion) 
  * @author K. Benedyczak
  */
 public class ConsignorImpl implements ConsignorAPI
@@ -44,15 +40,6 @@ public class ConsignorImpl implements ConsignorAPI
 		assertion.setX509Issuer(issuerDN);
 		if (consignorCert != null)
 		{
-			try
-			{
-				CertificateUtils.verifyCertificate(consignorCert, 
-					true, true);
-			} catch (Exception e)
-			{
-				throw new DSigException("Consignor certificate is not " +
-						"valid: " + e);
-			}
 			assertion.setX509Subject(
 				consignorCert[0].getSubjectX500Principal().getName());
 			try
@@ -98,9 +85,9 @@ public class ConsignorImpl implements ConsignorAPI
 	public ValidationResult verifyConsignorToken(ConsignorAssertion assertion,
 			X509Certificate issuerCertificate)
 	{
-		String i1 = RFC2253Parser.xmldsigtoRFC2253(assertion.getIssuerDN());
+		String i1 = assertion.getIssuerDN();
 		X500Principal i2 = issuerCertificate.getSubjectX500Principal();
-		if (!CertificateUtils.dnEqual(i2, i1))
+		if (!X500NameUtils.equal(i2, i1))
 			return new ValidationResult(false, "Wrong issuer");
 		if (!assertion.checkTimeConditions())
 			return new ValidationResult(false, "Lifetime conditions are not met");
@@ -110,15 +97,9 @@ public class ConsignorImpl implements ConsignorAPI
 					!assertion.isCorrectlySigned(
 					issuerCertificate.getPublicKey()))
 				return new ValidationResult(false, "Signature is invalid");
-			CertificateUtils.verifyCertificate(issuerCertificate, 
-					true, false);
 		} catch (DSigException e)
 		{
 			return new ValidationResult(false, e.getMessage());
-		} catch (CertificateException e)
-		{
-			return new ValidationResult(false, "Consignor certificate is not " +
-				"valid: " + e);
 		}
 		return new ValidationResult(true, "OK");
 	}

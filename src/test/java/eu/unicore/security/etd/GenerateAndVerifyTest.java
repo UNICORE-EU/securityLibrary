@@ -10,7 +10,8 @@ package eu.unicore.security.etd;
 
 import javax.security.auth.x500.X500Principal;
 
-import eu.unicore.security.CertificateUtils;
+import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
+import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.etd.TrustDelegation;
 
@@ -19,8 +20,6 @@ import eu.unicore.security.etd.TrustDelegation;
  */
 public class GenerateAndVerifyTest extends ETDTestBase
 {
-
-	
 	public void testRSACert3()
 	{
 		try
@@ -31,11 +30,11 @@ public class GenerateAndVerifyTest extends ETDTestBase
 			String dnsubFromTD = new X500Principal(td.getSubjectDN()).getName();
 			String dnsubOrig = issuerCert3[0].getSubjectX500Principal().getName();
 			
-			assertTrue(CertificateUtils.dnEqual(dnsubFromTD, dnsubOrig));
+			assertTrue(X500NameUtils.equal(dnsubFromTD, dnsubOrig));
 			
 			ValidationResult result = 
 				etdEngine.validateTD(td, issuerCert1[0], issuerCert1, 
-						issuerCert3);
+						issuerCert3, new BinaryCertChainValidator(true));
 			if (!result.isValid())
 				fail(result.getInvalidResaon());
 		} catch (Exception e)
@@ -54,7 +53,7 @@ public class GenerateAndVerifyTest extends ETDTestBase
 					privKey4, receiverCert1, null);
 			ValidationResult result = 
 				etdEngine.validateTD(td, issuerCert3[0], issuerCert3, 
-						receiverCert1);
+						receiverCert1, new BinaryCertChainValidator(true));
 			if (!result.isValid())
 				fail(result.getInvalidResaon());
 		} catch (Exception e)
@@ -74,7 +73,7 @@ public class GenerateAndVerifyTest extends ETDTestBase
 
 			ValidationResult result = 
 				etdEngine.validateTD(td, issuerCert1[0], issuerCert1, 
-						receiverCert1);
+						receiverCert1, new BinaryCertChainValidator(true));
 			if (!result.isValid())
 				fail(result.getInvalidResaon());
 		} catch (Exception e)
@@ -92,7 +91,8 @@ public class GenerateAndVerifyTest extends ETDTestBase
 					issuerCert2[0], issuerCert2, privKey2, receiverCert2, null);
 
 			ValidationResult result = 
-				etdEngine.validateTD(td, issuerCert2[0], issuerCert2, receiverCert2);
+				etdEngine.validateTD(td, issuerCert2[0], issuerCert2, receiverCert2, 
+					new BinaryCertChainValidator(true));
 			if (!result.isValid())
 				fail(result.getInvalidResaon());		
 		} catch (Exception e)
@@ -109,7 +109,8 @@ public class GenerateAndVerifyTest extends ETDTestBase
 			TrustDelegation td = etdEngine.generateTD(issuerDN1, issuerCert1,
 					privKey1, receiverDN1, null);
 			ValidationResult result = 
-				etdEngine.validateTD(td, issuerDN1, issuerDN1, receiverDN1);
+				etdEngine.validateTD(td, issuerDN1, issuerDN1, receiverDN1, 
+					new BinaryCertChainValidator(true));
 			if (!result.isValid())
 				fail(result.getInvalidResaon());		
 		} catch (Exception e)
@@ -126,7 +127,8 @@ public class GenerateAndVerifyTest extends ETDTestBase
 			TrustDelegation td = etdEngine.generateTD(
 					issuerDN2, issuerCert2, privKey2, receiverDN2, null);
 			ValidationResult result = 
-				etdEngine.validateTD(td, issuerDN2, issuerDN2, receiverDN2);
+				etdEngine.validateTD(td, issuerDN2, issuerDN2, receiverDN2, 
+					new BinaryCertChainValidator(true));
 			if (!result.isValid())
 				fail(result.getInvalidResaon());		
 		} catch (Exception e)

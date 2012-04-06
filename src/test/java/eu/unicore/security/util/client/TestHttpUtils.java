@@ -10,9 +10,18 @@ package eu.unicore.security.util.client;
 import java.net.SocketTimeoutException;
 import java.util.Properties;
 
+import javax.net.ssl.SSLHandshakeException;
+
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.params.HttpMethodParams;
+
+import eu.emi.security.authn.x509.X509CertChainValidator;
+import eu.emi.security.authn.x509.X509Credential;
+import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
+import eu.emi.security.authn.x509.impl.KeystoreCredential;
 
 import junit.framework.TestCase;
 
@@ -22,7 +31,7 @@ public class TestHttpUtils extends TestCase
 	
 	public void setUp() throws Exception
 	{
-		server = new JettyServer(-1);
+		server = new JettyServer(1);
 		server.addServlet(SimpleServlet.class.getName(), "/servlet1");
 		server.addServlet(RedirectServlet.class.getName(), "/servlet2");
 		server.start();
@@ -92,45 +101,11 @@ public class TestHttpUtils extends TestCase
 	
 	public void testHttps() throws Exception
 	{
-		IAuthenticationConfiguration secCfg = new SimpleAuthnConfigurationImpl()
-		{
-			public boolean doSSLAuthn()
-			{
-				return true;
-			}
-			public String getKeystore()
-			{
-				return getTruststore();
-			}
-			public String getKeystoreAlias()
-			{
-				return null;
-			}
-			public String getKeystoreKeyPassword()
-			{
-				return getTruststorePassword();
-			}
-			public String getKeystorePassword()
-			{
-				return getTruststorePassword();
-			}
-			public String getKeystoreType()
-			{
-				return "JKS";
-			}
-			public String getTruststore()
-			{
-				return "src/test/resources/client/httpclient.jks";
-			}
-			public String getTruststorePassword()
-			{
-				return "the!client";
-			}
-			public String getTruststoreType()
-			{
-				return "JKS";
-			}
-		};
+		X509Credential cred = new KeystoreCredential("src/test/resources/client/httpclient.jks",
+			"the!client".toCharArray(), "the!client".toCharArray(), null, "JKS");
+		X509CertChainValidator validator = new KeystoreCertChainValidator("src/test/resources/client/httpclient.jks",
+			"the!client".toCharArray(), "JKS", -1);
+		IAuthenticationConfiguration secCfg = new DefaultAuthnConfigurationImpl(validator, cred);
 		
 		String url = server.getSecUrl()+"/servlet1";
 		HttpClient client = HttpUtils.createClient(url, secCfg, new Properties());
@@ -140,4 +115,32 @@ public class TestHttpUtils extends TestCase
 		assertTrue("Got: " + resp, SimpleServlet.OK_GET.equals(resp));
 	}
 
+	public void testHttpsInvalidClient() throws Exception
+	{
+		X509Credential cred = new KeystoreCredential("src/test/resources/client/combined.jks",
+			"the!client".toCharArray(), "the!client".toCharArray(), "mykey", "JKS");
+		X509CertChainValidator validator = new KeystoreCertChainValidator("src/test/resources/client/combined.jks",
+			"the!client".toCharArray(), "JKS", -1);
+		IAuthenticationConfiguration secCfg = new DefaultAuthnConfigurationImpl(validator, cred);
+		
+		String url = server.getSecUrl()+"/servlet1";
+		
+		HttpClient client = HttpUtils.createClient(url, secCfg, new Properties());
+		client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, 
+			new DefaultHttpMethodRetryHandler(0, false));
+
+		GetMethod get = new GetMethod(url);
+		try
+		{
+			client.executeMethod(get);
+			fail("Managed to conenct with untrusted certificate!!!!!");
+		} catch (SSLHandshakeException e)
+		{
+			//OK
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}
 }

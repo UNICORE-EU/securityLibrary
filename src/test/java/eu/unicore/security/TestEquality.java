@@ -26,15 +26,16 @@ public class TestEquality extends TestCase
 	{
 		try
 		{
-			MockSecurityConfig cfg = new MockSecurityConfig(false, false, true);
+			MockSecurityConfig cfg = new MockSecurityConfig(false, true, true);
+			MockSecurityConfig cfgWrong = new MockSecurityConfig(false, true, false);
 			CertificateFactory factory = CertificateFactory.getInstance("X.509");
 			
 			ArrayList<Certificate> certs1 = new ArrayList<Certificate>();
-			certs1.add(cfg.getUserCert(MockSecurityConfig.KS_ALIAS));
+			certs1.add(cfg.getCredential().getCertificate());
 			CertPath cp1 = factory.generateCertPath(certs1);
 
 			ArrayList<Certificate> certs2 = new ArrayList<Certificate>();
-			certs2.add(cfg.getUserCert(MockSecurityConfig.KS_ALIAS_WRONG));
+			certs2.add(cfgWrong.getCredential().getCertificate());
 			CertPath cp2 = factory.generateCertPath(certs2);
 
 			SecurityTokens t1 = new SecurityTokens();

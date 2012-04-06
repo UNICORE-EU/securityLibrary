@@ -77,10 +77,6 @@ public class Client implements Serializable {
 	public static final String ATTRIBUTE_CREDENTIALS_USERNAME="creds.username";
 	public static final String ATTRIBUTE_CREDENTIALS_PASSWORD="creds.password";
 	
-	//proxy cert : TODO
-	public static final String ATTRIBUTE_CREDENTIALS_PROXY="creds.proxy";
-	public static final String ATTRIBUTE_CREDENTIALS_PROXYFORMAT="creds.proxyformat";
-	
 	//for storing the email address in the attributes
 	public static final String ATTRIBUTE_USER_EMAIL="user.email";
 	

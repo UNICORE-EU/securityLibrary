@@ -11,10 +11,10 @@ package eu.unicore.security.etd;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 
-import org.apache.xml.security.utils.RFC2253Parser;
 import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlException;
 
+import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.samly2.assertion.Assertion;
 import eu.unicore.samly2.elements.SAMLAttribute;
 import eu.unicore.samly2.exceptions.SAMLParseException;
@@ -43,7 +43,7 @@ public class TrustDelegation extends Assertion
 	public TrustDelegation(String custodian)
 	{
 		super();
-		String dn = RFC2253Parser.rfc2253toXMLdsig(custodian);
+		String dn = X500NameUtils.getPortableRFC2253Form(custodian);
 		custodianDN = dn;
 		hash = null;
 		SAMLAttribute custodianA = new SAMLAttribute(CUSTODIAN_NAME, 
@@ -56,8 +56,7 @@ public class TrustDelegation extends Assertion
 	{
 		super();
 		
-		String dn = RFC2253Parser.rfc2253toXMLdsig(
-				custodian.getSubjectX500Principal().getName());
+		String dn = custodian.getSubjectX500Principal().getName();
 		custodianDN = dn;
 		SAMLAttribute custodianA = new SAMLAttribute(CUSTODIAN_NAME, 
 			CUSTODIAN_NAME_FORMAT_DN);

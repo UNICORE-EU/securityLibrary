@@ -13,6 +13,7 @@ import java.util.Date;
 
 import org.apache.xmlbeans.XmlObject;
 
+import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.etd.TrustDelegation;
 import xmlbeans.org.oasis.saml2.assertion.ConditionAbstractType;
@@ -40,7 +41,7 @@ public class ParseTest extends ETDTestBase
 			System.out.println(td2.getXML().xmlText(xmlOpts));
 			
 			ValidationResult result = 
-				etdEngine.validateTD(td2, issuerDN3, issuerDN3, receiverDN1);
+				etdEngine.validateTD(td2, issuerDN3, issuerDN3, receiverDN1, new BinaryCertChainValidator(true));
 			if (!result.isValid())
 				fail(result.getInvalidResaon());
 		} catch (Exception e)
@@ -67,7 +68,7 @@ public class ParseTest extends ETDTestBase
 			
 			ValidationResult result = 
 				etdEngine.validateTD(td2, issuerCert1[0], issuerCert1, 
-						receiverCert1);
+						receiverCert1, new BinaryCertChainValidator(true));
 			if (!result.isValid())
 				fail(result.getInvalidResaon());
 		} catch (Exception e)
@@ -98,7 +99,7 @@ public class ParseTest extends ETDTestBase
 			System.out.println(td2.getXML().xmlText(xmlOpts));
 			
 			ValidationResult result = 
-				etdEngine.validateTD(td2, issuerDN1, issuerDN1, receiverDN1);
+				etdEngine.validateTD(td2, issuerDN1, issuerDN1, receiverDN1, new BinaryCertChainValidator(true));
 			if (!result.isValid())
 				fail(result.getInvalidResaon());
 			
