@@ -201,9 +201,8 @@ public class ETDClientSettings implements Cloneable
 	 * for creation of an initial assertion with default settings.
 	 * @param requestedUserDN
 	 * @param delegationReceiver
-	 * @param properties
 	 */
-	public void initializeSimple(X500Principal delegationReceiver,	IClientProperties properties)
+	public void initializeSimple(X500Principal delegationReceiver,	IAuthenticationConfiguration properties)
 	{
 		String requestedUserDN = properties.getCertificateChain()[0].getSubjectX500Principal().getName();
 		setRequestedUser(requestedUserDN);

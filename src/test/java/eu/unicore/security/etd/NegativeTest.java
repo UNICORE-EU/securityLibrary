@@ -205,7 +205,7 @@ public class NegativeTest extends ETDTestBase
 			ValidationResult result = 
 				etdEngine.validateTD(td, expiredDN, expiredDN, receiverDN1);
 			if (result.isValid() || 
-				!result.getInvalidResaon().startsWith("Issuer certificate is not valid"))
+				!result.getInvalidResaon().startsWith("Issuer certificate is FAILED"))
 				fail("Validation of ETD issued with expired issuer's certificate is wrong: " + 
 						result.getInvalidResaon());
 		} catch (Exception e)

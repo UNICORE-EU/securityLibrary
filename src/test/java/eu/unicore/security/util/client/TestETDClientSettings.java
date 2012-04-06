@@ -30,14 +30,12 @@ public class TestETDClientSettings extends TestCase
 		
 		ETDClientSettings settings = new ETDClientSettings();
 		X500Principal receiver = new X500Principal("CN=Lem");
-		IClientProperties properties = new SimpleClientPropertiesImpl()
-		{
-			public X509Certificate[] getCertificateChain()
-			{
-				return new X509Certificate[] {cert};
-			}
-		};
-		settings.initializeSimple(receiver, properties);
+		String requestedUserDN = cert.getSubjectX500Principal().getName();
+		settings.setRequestedUser(requestedUserDN);
+		settings.setReceiver(receiver);
+		settings.setExtendTrustDelegation(true);
+		settings.setIssuerCertificateChain(c.getCertificateChain());
+		
 		settings.setDelegationRestrictions(new DelegationRestrictions(null, null, 12));
 		settings = settings.clone();
 		

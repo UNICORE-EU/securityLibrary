@@ -106,7 +106,7 @@ public class Log {
 	 * @param throwable - the exception
 	 * @return datailed error message
 	 */
-	private static String getDetailMessage(Throwable throwable){
+	public static String getDetailMessage(Throwable throwable){
 		StringBuilder sb=new StringBuilder();
 		Throwable cause=throwable;
 		String message=null;

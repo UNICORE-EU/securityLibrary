@@ -145,8 +145,8 @@ public class TDChainTest extends ETDTestBase
 			
 			ValidationResult result = 
 				etdEngine.isTrustDelegated(chain, receiverDN2, issuerDN2);
-			if (result.isValid() || !result.getInvalidResaon().equals("Wrong user"))
-				fail("Chain with wrong issuer passed validation");
+			if (result.isValid() || !result.getInvalidResaon().contains("Wrong user"))
+				fail("Chain with wrong user passed validation: " + result);
 		} catch (Exception e)
 		{
 			fail(e.getMessage());

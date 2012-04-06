@@ -43,4 +43,10 @@ public class ValidationResult
 	{
 		this.valid = valid;
 	}
+	
+	public String toString()
+	{
+		return "Validation status: " + valid + ((!valid && invalidResaon != null) ? 
+				" " + invalidResaon : "");
+	}
 }

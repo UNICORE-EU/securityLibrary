@@ -4,7 +4,7 @@
 	<groupId>eu.unicore.security</groupId>
 	<artifactId>securityLibrary</artifactId>
 	<packaging>jar</packaging>
-	<version>2.1.2-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<name>securityLibrary</name>
 
 	<parent>
@@ -39,13 +39,23 @@
 			<version>3.8.1</version>
 			<scope>test</scope>
 		</dependency>
+
+
+		<!-- Jetty is required only if you use classes from the jetty package.
+		If you use them then you have Jetty on classpath. -->
 		<dependency>
 			<groupId>org.mortbay.jetty</groupId>
 			<artifactId>jetty</artifactId>
 			<version>6.1.26</version>
-			<scope>test</scope>
+			<optional>true</optional>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.mortbay.jetty</groupId>
+			<artifactId>jetty-sslengine</artifactId>
+			<version>6.1.26</version>
+			<optional>true</optional>
+		</dependency>
+				
  		<dependency>
 			<groupId>org.apache.xmlbeans</groupId>
 			<artifactId>xmlbeans</artifactId>
@@ -54,7 +64,7 @@
 		<dependency>
 			<groupId>pl.edu.icm.saml</groupId>
 			<artifactId>samly2</artifactId>
-			<version>1.3.6</version>
+			<version>1.4.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
