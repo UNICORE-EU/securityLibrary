@@ -121,7 +121,8 @@ public class TruststorePropertiesTest extends TestCase
 		p.setProperty(DEFAULT_PFX + PROP_KS_PASSWORD, "the!njs");
 		KeystoreCertChainValidator v = (KeystoreCertChainValidator) verify(p);
 		assertEquals(v.getTruststorePath(), PFX+"truststore1.jks");
-		assertEquals(v.getTruststoreUpdateInterval()+"", TruststorePropertiesConfig.DEFAULTS.get(PROP_UPDATE));
+		assertEquals(v.getTruststoreUpdateInterval()+"", 
+			TruststorePropertiesConfig.DEFAULTS.get(PROP_UPDATE)+"000");
 	}
 	
 	public void testPKCS12()
@@ -132,7 +133,8 @@ public class TruststorePropertiesTest extends TestCase
 		p.setProperty(DEFAULT_PFX + PROP_KS_PASSWORD, "the!njs");
 		KeystoreCertChainValidator v = (KeystoreCertChainValidator) verify(p);
 		assertEquals(v.getTruststorePath(), PFX+"keystore-1.p12");
-		assertEquals(v.getTruststoreUpdateInterval()+"", TruststorePropertiesConfig.DEFAULTS.get(PROP_UPDATE));
+		assertEquals(v.getTruststoreUpdateInterval()+"", 
+			TruststorePropertiesConfig.DEFAULTS.get(PROP_UPDATE)+"000");
 	}
 
 	private X509CertChainValidator verify(Properties p)
