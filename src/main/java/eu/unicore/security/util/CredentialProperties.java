@@ -32,25 +32,25 @@ import eu.emi.security.authn.x509.impl.PEMCredential;
  * 
  * @author K. Benedyczak
  */
-public class CredentialPropertiesConfig extends PropertiesHelper
+public class CredentialProperties extends PropertiesHelper
 {
-	private static final Logger log = Log.getLogger(Log.SECURITY, CredentialPropertiesConfig.class);
+	private static final Logger log = Log.getLogger(Log.SECURITY, CredentialProperties.class);
 
-	public static final String DEFAULT_PFX = "credential.";
+	public static final String DEFAULT_PREFIX = "credential.";
 
 	//common for all
-	public static final String PROP_TYPE = "type";
-	public static final String TYPE_JKS = "jks";
-	public static final String TYPE_PKCS12 = "pkcs12";
-	public static final String TYPE_DER = "der";
-	public static final String TYPE_PEM = "pem";
+	public static final String PROP_FORMAT = "format";
+	public static final String FORMAT_JKS = "jks";
+	public static final String FORMAT_PKCS12 = "pkcs12";
+	public static final String FORMAT_DER = "der";
+	public static final String FORMAT_PEM = "pem";
 
 	public static final String PROP_LOCATION = "path";
 	public static final String PROP_PASSWORD = "password";
 
 	//type-specific
 	public static final String PROP_KEY_LOCATION = "keyPath";
-	public static final String PROP_KS_ALIAS = "alias";
+	public static final String PROP_KS_ALIAS = "keyAlias";
 	public static final String PROP_KS_KEY_PASSWORD = "keyPassword";
 
 	private static final Map<String, String> MANDATORY = new HashMap<String, String>();
@@ -73,9 +73,9 @@ public class CredentialPropertiesConfig extends PropertiesHelper
 	 * @param properties properties object to read configuration from
 	 * @throws ConfigurationException 
 	 */
-	public CredentialPropertiesConfig(Properties properties) throws ConfigurationException
+	public CredentialProperties(Properties properties) throws ConfigurationException
 	{
-		this(properties, null, null, DEFAULT_PFX);
+		this(properties, null, null, DEFAULT_PREFIX);
 	}
 
 	/**
@@ -84,7 +84,7 @@ public class CredentialPropertiesConfig extends PropertiesHelper
 	 * @param pfx prefix to be used for properties. Should end with '.'!
 	 * @throws ConfigurationException 
 	 */
-	public CredentialPropertiesConfig(Properties properties, String pfx) 
+	public CredentialProperties(Properties properties, String pfx) 
 			throws ConfigurationException
 	{
 		this(properties, null, null, pfx);
@@ -99,11 +99,11 @@ public class CredentialPropertiesConfig extends PropertiesHelper
 	 * overrides property setting
 	 * @throws ConfigurationException 
 	 */
-	public CredentialPropertiesConfig(Properties properties, char[] mainPassword, 
+	public CredentialProperties(Properties properties, char[] mainPassword, 
 			char[] keyPassword) 
 			throws ConfigurationException
 	{
-		this(properties, mainPassword, keyPassword, DEFAULT_PFX);
+		this(properties, mainPassword, keyPassword, DEFAULT_PREFIX);
 	}
 
 	/**
@@ -116,7 +116,7 @@ public class CredentialPropertiesConfig extends PropertiesHelper
 	 * overrides property setting
 	 * @throws ConfigurationException 
 	 */
-	public CredentialPropertiesConfig(Properties properties, char[] mainPassword, 
+	public CredentialProperties(Properties properties, char[] mainPassword, 
 			char[] keyPassword, String pfx) 
 			throws ConfigurationException
 	{
@@ -180,7 +180,7 @@ public class CredentialPropertiesConfig extends PropertiesHelper
 		char[] credPassword = mainPassword;
 		if (mainPassword == null)
 		{
-			String pass = getValue(PROP_PASSWORD, true);
+			String pass = getValue(PROP_PASSWORD, true, true);
 			credPassword = pass == null ? null : pass.toCharArray();
 		} 
 		
@@ -189,11 +189,11 @@ public class CredentialPropertiesConfig extends PropertiesHelper
 		char[] ksKeyPassword = keyPassword;
 		if (keyPassword == null)
 		{
-			String pass = getValue(PROP_KS_KEY_PASSWORD, true);
+			String pass = getValue(PROP_KS_KEY_PASSWORD, true, true);
 			ksKeyPassword = pass == null ? null : pass.toCharArray();
 		}
 		
-		type = getValue(PROP_TYPE, true);
+		type = getValue(PROP_FORMAT, true);
 		if (type == null)
 		{
 			type = autodetectType(credPath, credPassword, keyLocation, 
@@ -203,7 +203,7 @@ public class CredentialPropertiesConfig extends PropertiesHelper
 		}
 		log.debug("Credential type configured as: " + type);
 
-		if (type.equalsIgnoreCase(TYPE_JKS) || type.equalsIgnoreCase(TYPE_PKCS12))
+		if (type.equalsIgnoreCase(FORMAT_JKS) || type.equalsIgnoreCase(FORMAT_PKCS12))
 		{
 			log.debug("Credential keystore alias: " + (ksAlias == null ? "NOT-SET" : ksAlias));
 			if (credPassword == null)
@@ -217,35 +217,35 @@ public class CredentialPropertiesConfig extends PropertiesHelper
 			}
 			credential = new KeystoreCredential(credPath, credPassword, 
 				ksKeyPassword, ksAlias, type.toUpperCase());
-		} else if (type.equalsIgnoreCase(TYPE_PEM))
+		} else if (type.equalsIgnoreCase(FORMAT_PEM))
 		{
 			log.debug("Credential's key file path: " + keyLocation);
 			if (keyLocation == null)
 				credential = new PEMCredential(credPath, credPassword);
 			else
 				credential = new PEMCredential(keyLocation, credPath, credPassword);
-		} else if (type.equalsIgnoreCase(TYPE_DER))
+		} else if (type.equalsIgnoreCase(FORMAT_DER))
 		{
 			log.debug("Credential's key file path: " + keyLocation);
 			if (keyLocation == null)
-				throw new ConfigurationException("For " + TYPE_DER + 
+				throw new ConfigurationException("For " + FORMAT_DER + 
 					" credential, the " + prefix + PROP_KEY_LOCATION + 
 					" property must be set and point at the DER encoded private key.");
 			credential = new DERCredential(keyLocation, credPath, credPassword);
 		} else
 			throw new ConfigurationException("Unknown type of credential used: " 
-					+ type + " must be one of: " + TYPE_JKS + ", " +
-					TYPE_PEM + ", " + TYPE_PKCS12 + ", " + TYPE_DER);
+					+ type + " must be one of: " + FORMAT_JKS + ", " +
+					FORMAT_PEM + ", " + FORMAT_PKCS12 + ", " + FORMAT_DER);
 	}
 	
 	private String autodetectType(String credPath, char[] credPassword,
 			String keyLocation, String ksAlias, char[] ksKeyPassword)
 	{
 		String errorPfx = "Credential type was not set with the property " 
-				+ prefix + PROP_TYPE;
+				+ prefix + PROP_FORMAT;
 		if (keyLocation != null && (ksAlias != null || ksKeyPassword != null))
 			new ConfigurationException(errorPfx + " and settings for both " + 
-					TYPE_PEM + " and JKS/PKCS12 keystore are present." +
+					FORMAT_PEM + " and JKS/PKCS12 keystore are present." +
 					" Either set the type explicitely or delete settings of not used credential type (" 
 					+ PROP_KEY_LOCATION + " or " + PROP_KS_ALIAS + " and " + PROP_KS_KEY_PASSWORD +")");
 		
@@ -273,7 +273,7 @@ public class CredentialPropertiesConfig extends PropertiesHelper
 		//only PEM or DER
 		if (credPath.endsWith("der") || (keyLocation != null && keyLocation.endsWith("der")) ||
 				credPath.endsWith("pkcs8") || credPath.endsWith("pk8"))
-			return TYPE_DER;
-		return TYPE_PEM;
+			return FORMAT_DER;
+		return FORMAT_PEM;
 	}
 }

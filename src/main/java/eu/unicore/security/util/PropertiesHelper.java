@@ -98,16 +98,27 @@ public class PropertiesHelper
 	
 	public String getValue(String name, boolean acceptNoVal) throws ConfigurationException
 	{
+		return getValue(name, acceptNoVal, false);
+	}	
+	
+	public String getValue(String name, boolean acceptNoVal, boolean hideValue) throws ConfigurationException
+	{
 		String val;
 		synchronized(this)
 		{
 			val = properties.getProperty(prefix + name);
 		}
-		boolean doLog = !warned.contains(name);
+		boolean doLog = (!warned.contains(name));
 		warned.add(name);
 		
-		if (doLog)
-			log.debug("Parameter " + prefix + name + " value is: " + val);
+		if (doLog) 
+		{
+			if (val == null)
+				log.debug("Parameter " + prefix + name + " value is not set");
+			else
+				log.debug("Parameter " + prefix + name + " value is: " + 
+					(hideValue ? "--SECRET--" : val));
+		}
 		if (val == null) 
 		{
 			String defaultVal = defaults.get(name);

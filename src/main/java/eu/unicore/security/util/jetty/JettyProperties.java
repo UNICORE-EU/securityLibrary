@@ -42,7 +42,7 @@ import eu.unicore.security.util.PropertiesHelper;
 
 public class JettyProperties extends PropertiesHelper
 {
-	private static final Logger log = Log.getLogger(Log.CONNECTIONS, JettyProperties.class);
+	private static final Logger log = Log.getLogger(Log.HTTP_SERVER, JettyProperties.class);
 	
 	public static final String DEFAULT_PREFIX = "jetty.";
 	
@@ -136,10 +136,10 @@ public class JettyProperties extends PropertiesHelper
 
 	public JettyProperties(Properties properties) throws ConfigurationException 
 	{
-		this("jetty.", properties);
+		this(properties, DEFAULT_PREFIX);
 	}
 	
-	public JettyProperties(String prefix, Properties properties) throws ConfigurationException 
+	public JettyProperties(Properties properties, String prefix) throws ConfigurationException 
 	{
 		super(prefix, properties, defaults, null, log);
 	}

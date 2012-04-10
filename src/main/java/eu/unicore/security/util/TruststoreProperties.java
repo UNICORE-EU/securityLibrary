@@ -45,11 +45,11 @@ import eu.emi.security.authn.x509.impl.ValidatorParamsExt;
  *  
  * @author K. Benedyczak
  */
-public class TruststorePropertiesConfig extends PropertiesHelper
+public class TruststoreProperties extends PropertiesHelper
 {
-	private static final Logger log = Log.getLogger(Log.SECURITY, TruststorePropertiesConfig.class);
+	private static final Logger log = Log.getLogger(Log.SECURITY, TruststoreProperties.class);
 
-	public static final String DEFAULT_PFX = "truststore.";
+	public static final String DEFAULT_PREFIX = "truststore.";
 	
 	//common for all
 	public static final String PROP_TYPE = "type";
@@ -59,26 +59,26 @@ public class TruststorePropertiesConfig extends PropertiesHelper
 
 	public static final String PROP_UPDATE = "updateInterval";
 	public static final String PROP_PROXY_SUPPORT = "allowProxy";
-	public static final String PROP_CRL_MODE = "crl.mode";
+	public static final String PROP_CRL_MODE = "crlMode";
 
 	//these are common for keystore and directory trust stores
-	public static final String PROP_CRL_LOCATIONS = "crl.locations";
-	public static final String PROP_CRL_UPDATE = "crl.updateInterval";
-	public static final String PROP_CRL_CONNECTION_TIMEOUT = "crl.connectionTimeout";
-	public static final String PROP_CRL_CACHE_PATH = "crl.diskCachePath";
+	public static final String PROP_CRL_LOCATIONS = "crlLocations";
+	public static final String PROP_CRL_UPDATE = "crlUpdateInterval";
+	public static final String PROP_CRL_CONNECTION_TIMEOUT = "crlConnectionTimeout";
+	public static final String PROP_CRL_CACHE_PATH = "crlDiskCachePath";
 	
 	//the rest is store dependent
-	public static final String PROP_KS_PATH = "keystore.path";
-	public static final String PROP_KS_PASSWORD = "keystore.password";
-	public static final String PROP_KS_TYPE = "keystore.format";
+	public static final String PROP_KS_PATH = "keystorePath";
+	public static final String PROP_KS_PASSWORD = "keystorePassword";
+	public static final String PROP_KS_TYPE = "keystoreFormat";
 
-	public static final String PROP_OPENSSL_DIR = "openssl.path";
-	public static final String PROP_OPENSSL_NS_MODE = "openssl.ns.mode";
+	public static final String PROP_OPENSSL_DIR = "opensslPath";
+	public static final String PROP_OPENSSL_NS_MODE = "opensslNsMode";
 	
-	public static final String PROP_DIRECTORY_LOCATIONS = "directory.locations";
-	public static final String PROP_DIRECTORY_ENCODING = "directory.encoding";
-	public static final String PROP_DIRECTORY_CONNECTION_TIMEOUT = "directory.connectionTimeout";
-	public static final String PROP_DIRECTORY_CACHE_PATH = "directory.diskCachePath";
+	public static final String PROP_DIRECTORY_LOCATIONS = "directoryLocations";
+	public static final String PROP_DIRECTORY_ENCODING = "directoryEncoding";
+	public static final String PROP_DIRECTORY_CONNECTION_TIMEOUT = "directoryConnectionTimeout";
+	public static final String PROP_DIRECTORY_CACHE_PATH = "directoryDiskCachePath";
 	
 	private Collection<? extends StoreUpdateListener> initialListeners;
 	private OpensslCertChainValidator opensslValidator = null;
@@ -131,11 +131,11 @@ public class TruststorePropertiesConfig extends PropertiesHelper
 	 * @throws ConfigurationException whenever configuration is wrong and validator can not be instantiated.
 	 * @throws KeyStoreException 
 	 */
-	public TruststorePropertiesConfig(Properties properties, 
+	public TruststoreProperties(Properties properties, 
 			Collection<? extends StoreUpdateListener> initialListeners) 
 				throws ConfigurationException
 	{
-		this(properties, initialListeners, DEFAULT_PFX);
+		this(properties, initialListeners, DEFAULT_PREFIX);
 	}
 
 	/**
@@ -146,7 +146,7 @@ public class TruststorePropertiesConfig extends PropertiesHelper
 	 * @throws ConfigurationException whenever configuration is wrong and validator can not be instantiated.
 	 * @throws KeyStoreException 
 	 */
-	public TruststorePropertiesConfig(Properties properties, 
+	public TruststoreProperties(Properties properties, 
 			Collection<? extends StoreUpdateListener> initialListeners, String pfx) 
 				throws ConfigurationException
 	{
@@ -317,7 +317,7 @@ public class TruststorePropertiesConfig extends PropertiesHelper
 					prefix + PROP_KS_PATH + " must be an EXISTING, READABLE file: " + 
 					ksPath);
 
-		String pass = getValue(PROP_KS_PASSWORD, true);
+		String pass = getValue(PROP_KS_PASSWORD, true, true);
 		if (pass == null)
 			throw new ConfigurationException("Keystore password must be set, property: " + 
 					prefix + PROP_KS_PASSWORD);

@@ -15,7 +15,7 @@ import eu.emi.security.authn.x509.impl.DirectoryCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.OpensslCertChainValidator;
 
-import static eu.unicore.security.util.TruststorePropertiesConfig.*;
+import static eu.unicore.security.util.TruststoreProperties.*;
 
 import junit.framework.TestCase;
 
@@ -27,12 +27,12 @@ public class TruststorePropertiesTest extends TestCase
 	public void testOpenssl()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PFX + PROP_TYPE, TYPE_OPENSSL);
-		p.setProperty(DEFAULT_PFX + PROP_OPENSSL_DIR, PFX+"openssl");
-		p.setProperty(DEFAULT_PFX + PROP_OPENSSL_NS_MODE, "EUGRIDPMA_GLOBUS_REQUIRE");
-		p.setProperty(DEFAULT_PFX + PROP_CRL_MODE, "REQUIRE");
-		p.setProperty(DEFAULT_PFX + PROP_UPDATE, "1234");
-		p.setProperty(DEFAULT_PFX + PROP_PROXY_SUPPORT, "DENY");
+		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TYPE_OPENSSL);
+		p.setProperty(DEFAULT_PREFIX + PROP_OPENSSL_DIR, PFX+"openssl");
+		p.setProperty(DEFAULT_PREFIX + PROP_OPENSSL_NS_MODE, "EUGRIDPMA_GLOBUS_REQUIRE");
+		p.setProperty(DEFAULT_PREFIX + PROP_CRL_MODE, "REQUIRE");
+		p.setProperty(DEFAULT_PREFIX + PROP_UPDATE, "1234");
+		p.setProperty(DEFAULT_PREFIX + PROP_PROXY_SUPPORT, "DENY");
 		
 		OpensslCertChainValidator v = (OpensslCertChainValidator) verify(p);
 		assertEquals(v.getTruststorePath(), PFX+"openssl");
@@ -46,17 +46,17 @@ public class TruststorePropertiesTest extends TestCase
 	public void testOpensslDefaults()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PFX + PROP_TYPE, TYPE_OPENSSL);
-		p.setProperty(DEFAULT_PFX + PROP_OPENSSL_DIR, PFX+"openssl");
+		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TYPE_OPENSSL);
+		p.setProperty(DEFAULT_PREFIX + PROP_OPENSSL_DIR, PFX+"openssl");
 		
 		OpensslCertChainValidator v = (OpensslCertChainValidator) verify(p);
 		assertEquals(v.getTruststorePath(), PFX+"openssl");
-		assertEquals(v.getUpdateInterval()+"", TruststorePropertiesConfig.DEFAULTS.get(PROP_UPDATE)+"000");
-		assertEquals(v.getProxySupport().name(), TruststorePropertiesConfig.DEFAULTS.get(PROP_PROXY_SUPPORT));
+		assertEquals(v.getUpdateInterval()+"", TruststoreProperties.DEFAULTS.get(PROP_UPDATE)+"000");
+		assertEquals(v.getProxySupport().name(), TruststoreProperties.DEFAULTS.get(PROP_PROXY_SUPPORT));
 		assertEquals(v.getNamespaceCheckingMode().name(), 
-			TruststorePropertiesConfig.DEFAULTS.get(PROP_OPENSSL_NS_MODE));
+			TruststoreProperties.DEFAULTS.get(PROP_OPENSSL_NS_MODE));
 		assertEquals(v.getRevocationCheckingMode().getCrlCheckingMode().name(), 
-			TruststorePropertiesConfig.DEFAULTS.get(PROP_CRL_MODE));
+			TruststoreProperties.DEFAULTS.get(PROP_CRL_MODE));
 		
 		v.dispose();
 	}
@@ -64,19 +64,19 @@ public class TruststorePropertiesTest extends TestCase
 	public void testDirectory()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PFX + PROP_TYPE, TYPE_DIRECTORY);
-		p.setProperty(DEFAULT_PFX + PROP_UPDATE, "1234");
-		p.setProperty(DEFAULT_PFX + PROP_CRL_MODE, "REQUIRE");
-		p.setProperty(DEFAULT_PFX + PROP_PROXY_SUPPORT, "DENY");
+		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TYPE_DIRECTORY);
+		p.setProperty(DEFAULT_PREFIX + PROP_UPDATE, "1234");
+		p.setProperty(DEFAULT_PREFIX + PROP_CRL_MODE, "REQUIRE");
+		p.setProperty(DEFAULT_PREFIX + PROP_PROXY_SUPPORT, "DENY");
 
-		p.setProperty(DEFAULT_PFX + PROP_DIRECTORY_LOCATIONS, PFX+"dir/*.pem");
-		p.setProperty(DEFAULT_PFX + PROP_DIRECTORY_CACHE_PATH, "/tmp");
-		p.setProperty(DEFAULT_PFX + PROP_DIRECTORY_CONNECTION_TIMEOUT, "100");
-		p.setProperty(DEFAULT_PFX + PROP_DIRECTORY_ENCODING, "PEM");
-		p.setProperty(DEFAULT_PFX + PROP_CRL_CACHE_PATH, "/tmp");
-		p.setProperty(DEFAULT_PFX + PROP_CRL_CONNECTION_TIMEOUT, "200");
-		p.setProperty(DEFAULT_PFX + PROP_CRL_LOCATIONS, PFX+"dir/*.crl");
-		p.setProperty(DEFAULT_PFX + PROP_CRL_UPDATE, "400");
+		p.setProperty(DEFAULT_PREFIX + PROP_DIRECTORY_LOCATIONS, PFX+"dir/*.pem");
+		p.setProperty(DEFAULT_PREFIX + PROP_DIRECTORY_CACHE_PATH, "/tmp");
+		p.setProperty(DEFAULT_PREFIX + PROP_DIRECTORY_CONNECTION_TIMEOUT, "100");
+		p.setProperty(DEFAULT_PREFIX + PROP_DIRECTORY_ENCODING, "PEM");
+		p.setProperty(DEFAULT_PREFIX + PROP_CRL_CACHE_PATH, "/tmp");
+		p.setProperty(DEFAULT_PREFIX + PROP_CRL_CONNECTION_TIMEOUT, "200");
+		p.setProperty(DEFAULT_PREFIX + PROP_CRL_LOCATIONS, PFX+"dir/*.crl");
+		p.setProperty(DEFAULT_PREFIX + PROP_CRL_UPDATE, "400");
 		
 		DirectoryCertChainValidator v = (DirectoryCertChainValidator) verify(p);
 		assertEquals(v.getTruststorePaths().get(0), PFX+"dir/*.pem");
@@ -96,17 +96,17 @@ public class TruststorePropertiesTest extends TestCase
 	public void testDirectoryDefaults()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PFX + PROP_TYPE, TYPE_DIRECTORY);
-		p.setProperty(DEFAULT_PFX + PROP_DIRECTORY_LOCATIONS, PFX+"dir/*.pem");
+		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TYPE_DIRECTORY);
+		p.setProperty(DEFAULT_PREFIX + PROP_DIRECTORY_LOCATIONS, PFX+"dir/*.pem");
 		
 		DirectoryCertChainValidator v = (DirectoryCertChainValidator) verify(p);
 		assertEquals(v.getTruststorePaths().get(0), PFX+"dir/*.pem");
-		assertEquals(v.getTruststoreUpdateInterval()+"", TruststorePropertiesConfig.DEFAULTS.get(PROP_UPDATE)+"000");
-		assertEquals(v.getProxySupport().name(), TruststorePropertiesConfig.DEFAULTS.get(PROP_PROXY_SUPPORT));
+		assertEquals(v.getTruststoreUpdateInterval()+"", TruststoreProperties.DEFAULTS.get(PROP_UPDATE)+"000");
+		assertEquals(v.getProxySupport().name(), TruststoreProperties.DEFAULTS.get(PROP_PROXY_SUPPORT));
 		assertEquals(v.getRevocationCheckingMode().getCrlCheckingMode().name(), 
-			TruststorePropertiesConfig.DEFAULTS.get(PROP_CRL_MODE));
+			TruststoreProperties.DEFAULTS.get(PROP_CRL_MODE));
 		assertEquals(v.getRevocationParameters().getCrlParameters().getCrlUpdateInterval() + "", 
-			TruststorePropertiesConfig.DEFAULTS.get(PROP_CRL_UPDATE));
+			TruststoreProperties.DEFAULTS.get(PROP_CRL_UPDATE));
 		assertEquals(v.getRevocationParameters().getCrlParameters().getDiskCachePath(), 
 				null);
 		assertTrue("Issuers: " + v.getTrustedIssuers().length, v.getTrustedIssuers().length == 1);
@@ -116,32 +116,32 @@ public class TruststorePropertiesTest extends TestCase
 	public void testJKS()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PFX + PROP_TYPE, TYPE_KEYSTORE);
-		p.setProperty(DEFAULT_PFX + PROP_KS_PATH, PFX+"truststore1.jks");
-		p.setProperty(DEFAULT_PFX + PROP_KS_PASSWORD, "the!njs");
+		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TYPE_KEYSTORE);
+		p.setProperty(DEFAULT_PREFIX + PROP_KS_PATH, PFX+"truststore1.jks");
+		p.setProperty(DEFAULT_PREFIX + PROP_KS_PASSWORD, "the!njs");
 		KeystoreCertChainValidator v = (KeystoreCertChainValidator) verify(p);
 		assertEquals(v.getTruststorePath(), PFX+"truststore1.jks");
 		assertEquals(v.getTruststoreUpdateInterval()+"", 
-			TruststorePropertiesConfig.DEFAULTS.get(PROP_UPDATE)+"000");
+			TruststoreProperties.DEFAULTS.get(PROP_UPDATE)+"000");
 	}
 	
 	public void testPKCS12()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PFX + PROP_TYPE, TYPE_KEYSTORE);
-		p.setProperty(DEFAULT_PFX + PROP_KS_PATH, PFX+"keystore-1.p12");
-		p.setProperty(DEFAULT_PFX + PROP_KS_PASSWORD, "the!njs");
+		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TYPE_KEYSTORE);
+		p.setProperty(DEFAULT_PREFIX + PROP_KS_PATH, PFX+"keystore-1.p12");
+		p.setProperty(DEFAULT_PREFIX + PROP_KS_PASSWORD, "the!njs");
 		KeystoreCertChainValidator v = (KeystoreCertChainValidator) verify(p);
 		assertEquals(v.getTruststorePath(), PFX+"keystore-1.p12");
 		assertEquals(v.getTruststoreUpdateInterval()+"", 
-			TruststorePropertiesConfig.DEFAULTS.get(PROP_UPDATE)+"000");
+			TruststoreProperties.DEFAULTS.get(PROP_UPDATE)+"000");
 	}
 
 	private X509CertChainValidator verify(Properties p)
 	{
 		try
 		{
-			TruststorePropertiesConfig cfg = new TruststorePropertiesConfig(p, 
+			TruststoreProperties cfg = new TruststoreProperties(p, 
 				Collections.singleton(new LoggingStoreUpdateListener()));
 			assertNotNull(cfg.getValidator());
 			return cfg.getValidator();

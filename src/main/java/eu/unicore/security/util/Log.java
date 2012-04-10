@@ -43,15 +43,15 @@ public class Log {
 	public static final String CLIENT="unicore.client";
 	
 	/**
-	 * logger prefix for connection problem debugging
+	 * logger prefix for connection logging
 	 */
 	public static final String CONNECTIONS="unicore.connections";
 
 	/**
-	 * logger prefix for configuration problem debugging
+	 * logger prefix for HTTP server logging
 	 */
-	public static final String CONFIG="unicore.configuration";
-	
+	public static final String HTTP_SERVER="unicore.httpserver";
+
 	/**
 	 * returns a logger name, using the given prefix and the simple name
 	 * of the given class

@@ -15,7 +15,7 @@ import eu.emi.security.authn.x509.X509Credential;
 /**
  * This is a helper implementation of {@link IAuthenticationConfiguration} interface
  * which can be used to setup socket using {@link X509CertChainValidator} and
- * {@link X509Credential}, without HTTP authentication.
+ * {@link X509Credential}, without HTTP authentication and with SSL client-side authentication turned on.
  * 
  * @author golbi
  */
@@ -30,12 +30,6 @@ public class DefaultAuthnConfigurationImpl extends AbstractSecurityConfiguration
 		this.credential = credential;
 	}
 
-	@Override
-	public boolean doSSLAuthn()
-	{
-		return true;
-	}
-	
 	@Override
 	public X509Credential getCredential()
 	{

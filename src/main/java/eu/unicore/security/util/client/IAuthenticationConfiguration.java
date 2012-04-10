@@ -1,16 +1,19 @@
 package eu.unicore.security.util.client;
 
-import eu.emi.security.authn.x509.X509CertChainValidator;
-import eu.emi.security.authn.x509.X509Credential;
+import eu.unicore.security.util.IAuthnAndTrustConfiguration;
 
 
 /**
  * Implementation of this interface provides data necessary for 
- * setting up transport level security and HTTP authentication.
+ * setting up transport level security and HTTP authentication on client side.
+ * It extends {@link IAuthnAndTrustConfiguration} by providing possibility to 
+ * perform HTTP authentication (what is very rarely used in UNICORE) and to turn on/off
+ * SSL authentication. Typical implementation is the {@link DefaultAuthnConfigurationImpl} 
+ * and its children.
  * 
  * @author K. Benedyczak
  */
-public interface IAuthenticationConfiguration
+public interface IAuthenticationConfiguration extends IAuthnAndTrustConfiguration
 {
 	/**
 	 * Returns true if the client-side TLS authentication should be done.
@@ -20,18 +23,6 @@ public interface IAuthenticationConfiguration
 	 */
 	public boolean doSSLAuthn();
 
-	/**
-	 * 
-	 * @return local credential, used if doSSLAuthn returns true
-	 */
-	public X509Credential getCredential();
-	
-	/**
-	 * Returns certificates validator.
-	 * @return
-	 */
-	public X509CertChainValidator getValidator();
-	
 	/**
 	 * Returns true if HTTP BASIC Auth should be used.
 	 * @return

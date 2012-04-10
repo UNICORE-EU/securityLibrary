@@ -29,62 +29,27 @@
 
 package eu.unicore.security.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Properties;
-
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
-import eu.unicore.security.util.client.DefaultAuthnConfigurationImpl;
-import eu.unicore.security.util.client.IAuthenticationConfiguration;
 
 
 /**
- * Class wrapping all security related settings for a UNICORE client or server:
- * truststore configuration and credentials. Additionally it is possible to retrieve 
- * {@link IAuthenticationConfiguration} implementation, which is the {@link DefaultAuthnConfigurationImpl}
- * based on the truststore and credentials.
+ * Interface providing access to all security related settings for a UNICORE client or server:
+ * truststore configuration and credentials. 
  * 
  * @author K. Benedyczak
  */
-public class AuthnAndTrustProperties
+public interface IAuthnAndTrustConfiguration
 {
-	private TruststorePropertiesConfig truststoreConfig;
-	private CredentialPropertiesConfig credentialConfig;
-	private IAuthenticationConfiguration authnConfiguration;
+	/**
+	 * 
+	 * @return Object used to verify certificate chains
+	 */
+	public X509CertChainValidator getValidator();
 	
-	public AuthnAndTrustProperties(String file) throws IOException, ConfigurationException
-	{
-		this(FilePropertiesHelper.load(file));
-	}
-
-	public AuthnAndTrustProperties(File f) throws IOException, ConfigurationException
-	{
-		this(f.getPath());
-	}
-	
-	public AuthnAndTrustProperties(Properties p) throws ConfigurationException
-	{
-		truststoreConfig = new TruststorePropertiesConfig(p, 
-			Collections.singleton(new LoggingStoreUpdateListener()));
-		credentialConfig = new CredentialPropertiesConfig(p);
-		authnConfiguration = new DefaultAuthnConfigurationImpl(
-			getValidator(), getCredential());
-	}
-
-	public X509CertChainValidator getValidator()
-	{
-		return truststoreConfig.getValidator();
-	}
-	
-	public X509Credential getCredential()
-	{
-		return credentialConfig.getCredential();
-	}
-	
-	public IAuthenticationConfiguration getAuthenticationConfiguration()
-	{
-		return authnConfiguration;
-	}
+	/**
+	 * 
+	 * @return object used to provide local credentias
+	 */
+	public X509Credential getCredential();
 }

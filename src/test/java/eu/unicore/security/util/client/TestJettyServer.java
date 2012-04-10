@@ -38,10 +38,9 @@ import java.util.Properties;
 
 import org.mortbay.jetty.servlet.Context;
 
-import eu.unicore.security.util.AuthnAndTrustProperties;
 import eu.unicore.security.util.ConfigurationException;
-import eu.unicore.security.util.CredentialPropertiesConfig;
-import eu.unicore.security.util.TruststorePropertiesConfig;
+import eu.unicore.security.util.CredentialProperties;
+import eu.unicore.security.util.TruststoreProperties;
 import eu.unicore.security.util.jetty.JettyLogger;
 import eu.unicore.security.util.jetty.JettyProperties;
 import eu.unicore.security.util.jetty.JettyServerBase;
@@ -50,18 +49,16 @@ import eu.unicore.security.util.jetty.JettyServerBase;
 /**
  * a Jetty server hosting an xfire servlet
  * 
- * @author schuller
+ * @author golbi
  */
 public class TestJettyServer extends JettyServerBase {
 	public static final String KEYSTORE = "src/test/resources/client/httpserver.jks";
 	public static final String KEYSTORE_P = "the!server";
 	
-	private Context root;
-
 	protected static final HashMap<String, Integer> defaults = new HashMap<String, Integer>();
 
 	
-	public TestJettyServer(URL[] listenUrls, AuthnAndTrustProperties secProperties,
+	public TestJettyServer(URL[] listenUrls, AuthenticationProperties secProperties,
 			JettyProperties extraSettings) throws ConfigurationException
 	{
 		super(listenUrls, secProperties, extraSettings, JettyLogger.class);
@@ -75,37 +72,26 @@ public class TestJettyServer extends JettyServerBase {
 		URL[] urls = new URL[] {new URL("http://" + host + ":" + port),
 				new URL("https://" + host + ":" + (port+1))};
 		Properties p = new Properties();
-		p.setProperty(JettyProperties.DEFAULT_PREFIX+JettyProperties.SO_LINGER_TIME, soLinger+"");
-		p.setProperty(JettyProperties.DEFAULT_PREFIX+JettyProperties.FAST_RANDOM, "true");
-		p.setProperty(CredentialPropertiesConfig.DEFAULT_PFX +
-			CredentialPropertiesConfig.PROP_LOCATION, KEYSTORE);
-		p.setProperty(CredentialPropertiesConfig.DEFAULT_PFX +
-			CredentialPropertiesConfig.PROP_TYPE, "JKS");
-		p.setProperty(CredentialPropertiesConfig.DEFAULT_PFX +
-			CredentialPropertiesConfig.PROP_PASSWORD, KEYSTORE_P);
-		p.setProperty(TruststorePropertiesConfig.DEFAULT_PFX + 
-			TruststorePropertiesConfig.PROP_TYPE, TruststorePropertiesConfig.TYPE_KEYSTORE);
-		p.setProperty(TruststorePropertiesConfig.DEFAULT_PFX + 
-			TruststorePropertiesConfig.PROP_KS_PATH, KEYSTORE);
-		p.setProperty(TruststorePropertiesConfig.DEFAULT_PFX + 
-			TruststorePropertiesConfig.PROP_KS_TYPE, "JKS");
-		p.setProperty(TruststorePropertiesConfig.DEFAULT_PFX + 
-			TruststorePropertiesConfig.PROP_KS_PASSWORD, KEYSTORE_P);
+		p.setProperty("j." + JettyProperties.SO_LINGER_TIME, soLinger+"");
+		p.setProperty("j." + JettyProperties.FAST_RANDOM, "true");
+		p.setProperty("k." + CredentialProperties.PROP_LOCATION, KEYSTORE);
+		p.setProperty("k." + CredentialProperties.PROP_FORMAT, "JKS");
+		p.setProperty("k." + CredentialProperties.PROP_PASSWORD, KEYSTORE_P);
+		p.setProperty("t." + TruststoreProperties.PROP_TYPE, TruststoreProperties.TYPE_KEYSTORE);
+		p.setProperty("t." + TruststoreProperties.PROP_KS_PATH, KEYSTORE);
+		p.setProperty("t." + TruststoreProperties.PROP_KS_TYPE, "JKS");
+		p.setProperty("t." + TruststoreProperties.PROP_KS_PASSWORD, KEYSTORE_P);
+		p.setProperty("t." + TruststoreProperties.PROP_UPDATE, "-1");
 	
-		AuthnAndTrustProperties secCfg = new AuthnAndTrustProperties(p);
-		JettyProperties extra = new JettyProperties(p);
+		AuthenticationProperties secCfg = new AuthenticationProperties(p, "t.", "k.");
+		JettyProperties extra = new JettyProperties(p, "j.");
 		return new TestJettyServer(urls, secCfg, extra);
 	}
 
 	@Override
-	public Context getRootContext() {
-		return root;
-	}
-
-	@Override
-	protected void addServlets() throws ConfigurationException
+	protected Context createRootContext() throws ConfigurationException
 	{
-		root = new Context(getServer(), "/", Context.SESSIONS);		
+		return new Context(getServer(), "/", Context.SESSIONS);		
 	}
 
 	public String getUrl() {
@@ -119,6 +105,6 @@ public class TestJettyServer extends JettyServerBase {
 	}
 
 	public void addServlet(String servlet, String path) throws Exception {
-		root.addServlet(Class.forName(servlet), path);
+		getRootContext().addServlet(Class.forName(servlet), path);
 	}
 }

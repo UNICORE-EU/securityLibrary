@@ -47,12 +47,13 @@ import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.HashSessionIdManager;
 import org.mortbay.thread.QueuedThreadPool;
 
-import eu.unicore.security.util.AuthnAndTrustProperties;
 import eu.unicore.security.util.ConfigurationException;
+import eu.unicore.security.util.IAuthnAndTrustConfiguration;
 import eu.unicore.security.util.Log;
+import eu.unicore.security.util.client.AuthenticationProperties;
 
 /**
- * Wraps a Jetty server and allows to configure it using {@link AuthnAndTrustProperties}<br/>
+ * Wraps a Jetty server and allows to configure it using {@link AuthenticationProperties}<br/>
  * This class is useful for subclassing when creating a custom Jetty server. Subclasses must call 
  * {@link #initServer()} method in constructor to initialize the server.
  * 
@@ -61,28 +62,29 @@ import eu.unicore.security.util.Log;
  */
 public abstract class JettyServerBase {
 
-	private static final Logger logger=Log.getLogger(Log.CONNECTIONS, JettyServerBase.class);
+	private static final Logger logger=Log.getLogger(Log.HTTP_SERVER, JettyServerBase.class);
 
 	protected final Class<JettyLogger> jettyLogger;
 	protected final URL[] listenUrls;
-	protected final AuthnAndTrustProperties securityProperties;
+	protected final IAuthnAndTrustConfiguration securityConfiguration;
 	protected final JettyProperties extraSettings;
 	
 	private Server theServer;
+	private Context rootContext;
 
 	public JettyServerBase(URL listenUrl,
-			AuthnAndTrustProperties secProperties,
+			IAuthnAndTrustConfiguration secConfiguration,
 			JettyProperties extraSettings) throws ConfigurationException
 	{
-		this(new URL[] {listenUrl}, secProperties, extraSettings, JettyLogger.class);
+		this(new URL[] {listenUrl}, secConfiguration, extraSettings, JettyLogger.class);
 	}
 	
 	public JettyServerBase(URL[] listenUrls,
-			AuthnAndTrustProperties secProperties,
+			IAuthnAndTrustConfiguration secConfiguration,
 			JettyProperties extraSettings,
 			Class<JettyLogger> jettyLogger) throws ConfigurationException
 	{
-		this.securityProperties=secProperties;
+		this.securityConfiguration=secConfiguration;
 		this.jettyLogger = jettyLogger;
 		this.listenUrls = listenUrls;
 		this.extraSettings = extraSettings;
@@ -120,7 +122,7 @@ public abstract class JettyServerBase {
 		}
 		
 		configureServer();
-		addServlets();
+		this.rootContext = createRootContext();
 		configureGzip();
 	}
 
@@ -162,7 +164,7 @@ public abstract class JettyServerBase {
 		
 		logger.debug("Creating SSL connector on: " + url);
 		CustomSslSocketConnector ssl = new CustomSslSocketConnector(
-			securityProperties.getValidator(), securityProperties.getCredential());
+			securityConfiguration.getValidator(), securityConfiguration.getCredential());
 		ssl.setNeedClientAuth(extraSettings.getBooleanValue(JettyProperties.REQUIRE_CLIENT_AUTHN));
 		ssl.setWantClientAuth(extraSettings.getBooleanValue(JettyProperties.WANT_CLIENT_AUTHN));
 		String disabledCiphers = extraSettings.getValue(JettyProperties.DISABLED_CIPHER_SUITES);
@@ -228,13 +230,16 @@ public abstract class JettyServerBase {
 	 * Implement this method to add servlets to the server.
 	 * @throws Exception
 	 */
-	protected abstract void addServlets() throws ConfigurationException;
+	protected abstract Context createRootContext() throws ConfigurationException;
 	
 	/**
 	 * 
 	 * @return the root context of this Jetty server. 
 	 */
-	public abstract Context getRootContext();
+	public Context getRootContext() 
+	{
+		return rootContext;
+	}
 
 	/**
 	 * @return server the Jetty server

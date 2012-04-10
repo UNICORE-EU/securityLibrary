@@ -26,7 +26,7 @@ public class JettyLogger implements Logger {
 	 * @return
 	 */
 	protected org.apache.log4j.Logger getLog4jLogger() {
-		return Log.getLogger(Log.CONNECTIONS, JettyLogger.class);
+		return Log.getLogger(Log.HTTP_SERVER, JettyLogger.class);
 	}
 	
 	public void debug(String msg, Throwable th) {
