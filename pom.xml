@@ -9,8 +9,8 @@
 
 	<parent>
 		<groupId>eu.unicore</groupId>
-		<artifactId>unicore-parent-endorsed</artifactId>
-		<version>1.9</version>
+		<artifactId>unicore-parent</artifactId>
+		<version>1.10</version>
 	</parent>
 	
 	<scm>
@@ -74,6 +74,7 @@
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
+			<version>1.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-httpclient</groupId>
