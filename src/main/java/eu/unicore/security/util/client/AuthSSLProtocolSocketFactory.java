@@ -93,7 +93,7 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 			if (log.isTraceEnabled())
 				debugTS(sec.getValidator());
 			
-			SSLContext sslcontext = SSLContext.getInstance("SSL");
+			SSLContext sslcontext = SSLContext.getInstance("TLS");
 			sslcontext.init(new KeyManager[] {km}, new TrustManager[] {tm}, null);
 			
 			return sslcontext;

@@ -47,6 +47,10 @@ import eu.emi.security.authn.x509.impl.X500NameUtils;
  * This class is decorating a wrapped trust manager with optional logging
  * on DEBUG level of certificates. It is a convenient way to log all (including failed)
  * connections.
+ * <p>
+ * The class adds a very short (20ms) grace period before sending an error, when client's certificate is not
+ * valid. This should minimize the chance of getting broken pipe error on client's side.
+ * 
  * @author golbi
  */
 public class LoggingX509TrustManager implements X509TrustManager {
@@ -75,6 +79,12 @@ public class LoggingX509TrustManager implements X509TrustManager {
 			logSuccessfulVerification("client", certificates);			
 		} catch (CertificateException e)
 		{
+			//let's wait so client has bigger chance to finish its sending of handshake material
+			//the 20ms is a quite random guess... 
+			try
+			{
+				Thread.sleep(20);
+			} catch (InterruptedException e1) { /*ignored*/ }
 			logFailedVerification("client", e);
 			throw e;
 		}
