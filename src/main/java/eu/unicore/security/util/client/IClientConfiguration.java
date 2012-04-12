@@ -10,27 +10,58 @@ package eu.unicore.security.util.client;
 import java.util.Map;
 import java.util.Properties;
 
+import eu.unicore.security.util.IAuthnAndTrustConfiguration;
 import eu.unicore.security.util.client.HttpUtils;
-import eu.unicore.security.util.client.IAuthenticationConfiguration;
 
 /**
- * Provides additional to pure security settings for the client:
+ * Extension of {@link IAuthnAndTrustConfiguration},
+ * provides (mostly) security related settings, useful for the client side:
  * <ul>
  *  <li> whether to initialize SSL or not
+ *  <li> whether to do client-side SSL authentication
+ *  <li> whether to perform HTTP authentication and settings for it
+ *  <li> whether to disable digital body signing
  *  <li> list of outgoing and incoming handlers
  *  <li> classloader to be used in case of loading handler classes
- *  <li> settings to automatically initialize signing of outgoing messages.
  *  <li> settings to automatically initialize ETD for outgoing messages.
+ *  <li> additional settings for handlers.
+ *  <li> additional properties for setting up HTTP client
  * </ul>
  * 
  * @author golbi
  */
-public interface IClientProperties extends IAuthenticationConfiguration
+public interface IClientConfiguration extends IAuthnAndTrustConfiguration
 {
 	/**
 	 * Makes a copy of these properties.
 	 */
-	public IClientProperties clone();
+	public IClientConfiguration clone();
+	
+	/**
+	 * Returns true if the client-side TLS authentication should be done.
+	 * If false then local credential retrieval method 
+	 * is not used at all.
+	 * @return
+	 */
+	public boolean doSSLAuthn();
+
+	/**
+	 * Returns true if HTTP BASIC Auth should be used.
+	 * @return
+	 */
+	public boolean doHttpAuthn();
+	
+	/**
+	 * Returns HTTP BASIC Auth user. Required if doHttpAuthn is true.
+	 * @return
+	 */
+	public String getHttpUser();
+	
+	/**
+	 * Returns HTTP BASIC Auth user's password. Required if doHttpAuthn is true.
+	 * @return
+	 */
+	public String getHttpPassword();
 	
 	/**
 	 * Returns the names of the security handler classes for outbound messages,
@@ -73,7 +104,6 @@ public interface IClientProperties extends IAuthenticationConfiguration
 	 * @see XFireClientFactory
 	 */
 	public Properties getExtraSettings();
-	
 	
 	/**
 	 * For outgoing calls, get extra security information. This map is used whenever 

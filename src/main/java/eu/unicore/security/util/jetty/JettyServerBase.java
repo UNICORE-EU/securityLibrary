@@ -47,13 +47,13 @@ import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.HashSessionIdManager;
 import org.mortbay.thread.QueuedThreadPool;
 
+import eu.unicore.security.util.AuthnAndTrustProperties;
 import eu.unicore.security.util.ConfigurationException;
 import eu.unicore.security.util.IAuthnAndTrustConfiguration;
 import eu.unicore.security.util.Log;
-import eu.unicore.security.util.client.AuthenticationProperties;
 
 /**
- * Wraps a Jetty server and allows to configure it using {@link AuthenticationProperties}<br/>
+ * Wraps a Jetty server and allows to configure it using {@link AuthnAndTrustProperties}<br/>
  * This class is useful for subclassing when creating a custom Jetty server. Subclasses must call 
  * {@link #initServer()} method in constructor to initialize the server.
  * 

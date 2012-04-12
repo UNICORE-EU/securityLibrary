@@ -15,6 +15,7 @@ import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
 
+import eu.emi.security.authn.x509.X509Credential;
 import eu.unicore.security.etd.DelegationRestrictions;
 import eu.unicore.security.etd.TrustDelegation;
 
@@ -197,18 +198,17 @@ public class ETDClientSettings implements Cloneable
 	}
 	
 	/**
-	 * Convenience method, allows for setting up ETD with one invocation. This is useful
-	 * for creation of an initial assertion with default settings.
-	 * @param requestedUserDN
-	 * @param delegationReceiver
+	 * Convenience method, allows for setting up an initial ETD with one invocation using default settings.
+	 * @param issuer credential of delegation issuer
+	 * @param delegationReceiver identity of delegation receiver
 	 */
-	public void initializeSimple(X500Principal delegationReceiver,	IAuthenticationConfiguration properties)
+	public void initializeSimple(X500Principal delegationReceiver,	X509Credential issuer)
 	{
-		String requestedUserDN = properties.getCredential().getCertificate().getSubjectX500Principal().getName();
+		String requestedUserDN = issuer.getCertificate().getSubjectX500Principal().getName();
 		setRequestedUser(requestedUserDN);
 		setReceiver(delegationReceiver);
 		setExtendTrustDelegation(true);
-		setIssuerCertificateChain(properties.getCredential().getCertificateChain());
+		setIssuerCertificateChain(issuer.getCertificateChain());
 	}
 	
 	public ETDClientSettings clone()

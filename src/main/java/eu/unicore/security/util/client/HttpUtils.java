@@ -95,7 +95,7 @@ public class HttpUtils {
 	 * @return a preconfigured http client
 	 */
 	public static synchronized HttpClient createClient(String uri, 
-			IAuthenticationConfiguration security, Properties properties)
+			IClientConfiguration security, Properties properties)
 	{
 		HttpClient client = createClient(properties);
 		configureSSL(client, security);
@@ -134,7 +134,7 @@ public class HttpUtils {
 		return client;
 	}
 
-	public static void configureSSL(HttpClient client, IAuthenticationConfiguration security)
+	public static void configureSSL(HttpClient client, IClientConfiguration security)
 	{
 		client.setHostConfiguration(getHostConfiguration(security));
 	}
@@ -182,7 +182,7 @@ public class HttpUtils {
 	 * @param sec - security (SSL) settings
 	 * @return {@link HostConfiguration}
 	 */
-	private static HostConfiguration getHostConfiguration(final IAuthenticationConfiguration sec) {
+	private static HostConfiguration getHostConfiguration(final IClientConfiguration sec) {
 		AuthSSLProtocolSocketFactory protocolFact=new AuthSSLProtocolSocketFactory(sec);
 		Protocol p=new Protocol(new String(HttpsURL.DEFAULT_SCHEME),
 				(ProtocolSocketFactory)protocolFact,

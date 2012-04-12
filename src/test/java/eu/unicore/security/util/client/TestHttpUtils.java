@@ -105,7 +105,7 @@ public class TestHttpUtils extends TestCase
 			"the!client".toCharArray(), "the!client".toCharArray(), null, "JKS");
 		X509CertChainValidator validator = new KeystoreCertChainValidator("src/test/resources/client/httpclient.jks",
 			"the!client".toCharArray(), "JKS", -1);
-		IAuthenticationConfiguration secCfg = new DefaultAuthnConfigurationImpl(validator, cred);
+		IClientConfiguration secCfg = new DefaultClientConfiguration(validator, cred);
 		
 		String url = server.getSecUrl()+"/servlet1";
 		HttpClient client = HttpUtils.createClient(url, secCfg, new Properties());
@@ -121,7 +121,7 @@ public class TestHttpUtils extends TestCase
 			"the!client".toCharArray(), "the!client".toCharArray(), "mykey", "JKS");
 		X509CertChainValidator validator = new KeystoreCertChainValidator("src/test/resources/client/combined.jks",
 			"the!client".toCharArray(), "JKS", -1);
-		IAuthenticationConfiguration secCfg = new DefaultAuthnConfigurationImpl(validator, cred);
+		IClientConfiguration secCfg = new DefaultClientConfiguration(validator, cred);
 		
 		String url = server.getSecUrl()+"/servlet1";
 		

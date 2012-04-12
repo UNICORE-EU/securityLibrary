@@ -65,9 +65,9 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 			AuthSSLProtocolSocketFactory.class);
 
 	private SSLContext sslcontext = null;
-	private IAuthenticationConfiguration sec;
+	private IClientConfiguration sec;
 
-	public AuthSSLProtocolSocketFactory(IAuthenticationConfiguration sec)
+	public AuthSSLProtocolSocketFactory(IClientConfiguration sec)
 	{
 		this.sec = sec;
 	}

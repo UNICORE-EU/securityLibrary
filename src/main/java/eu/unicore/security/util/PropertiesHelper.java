@@ -15,11 +15,12 @@ import org.apache.log4j.Logger;
 
 /**
  * Provides methods to parse properties and return them as ints, longs etc. 
- * Additionally logs when default value is used (INFO) and in case of parsing problems.
- * The class is configured with initial defaults and mandatory properties, so it is easier to call 
- * the 'get' methods.
+ * Additionally logs when default value is used (INFO) and in case of out of range values when defaults are present.
+ * The logging is performed only once per property.
+ * The object is configured with initial defaults and mandatory properties, so it is easier to call 
+ * the 'get' methods later.
  * <p> 
- * Can use a custom prefix for properties - such prefix is added for all queried properties, 
+ * The class can use a custom prefix for properties - such prefix is added for all queried properties, 
  * and therefore acts as a namespace in the configuration file.
  * <p>
  * The class never logs errors: if exception is thrown then logging must be performed by the using class.

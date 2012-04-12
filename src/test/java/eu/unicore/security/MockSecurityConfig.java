@@ -12,12 +12,13 @@ import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
-import eu.unicore.security.util.client.IAuthenticationConfiguration;
+import eu.unicore.security.util.client.DefaultClientConfiguration;
+import eu.unicore.security.util.client.IClientConfiguration;
 
 /**
  * @author K. Benedyczak
  */
-public class MockSecurityConfig implements IAuthenticationConfiguration
+public class MockSecurityConfig extends DefaultClientConfiguration
 {
 	public static final String HTTP_PASSWD = "123";
 	public static final String HTTP_USER = "qwer";
@@ -89,7 +90,7 @@ public class MockSecurityConfig implements IAuthenticationConfiguration
 	}
 	
 	@Override
-	public IAuthenticationConfiguration clone()
+	public IClientConfiguration clone()
 	{
 		try
 		{

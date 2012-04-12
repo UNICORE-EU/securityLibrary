@@ -38,6 +38,7 @@ import java.util.Properties;
 
 import org.mortbay.jetty.servlet.Context;
 
+import eu.unicore.security.util.AuthnAndTrustProperties;
 import eu.unicore.security.util.ConfigurationException;
 import eu.unicore.security.util.CredentialProperties;
 import eu.unicore.security.util.TruststoreProperties;
@@ -58,7 +59,7 @@ public class TestJettyServer extends JettyServerBase {
 	protected static final HashMap<String, Integer> defaults = new HashMap<String, Integer>();
 
 	
-	public TestJettyServer(URL[] listenUrls, AuthenticationProperties secProperties,
+	public TestJettyServer(URL[] listenUrls, AuthnAndTrustProperties secProperties,
 			JettyProperties extraSettings) throws ConfigurationException
 	{
 		super(listenUrls, secProperties, extraSettings, JettyLogger.class);
@@ -83,7 +84,7 @@ public class TestJettyServer extends JettyServerBase {
 		p.setProperty("t." + TruststoreProperties.PROP_KS_PASSWORD, KEYSTORE_P);
 		p.setProperty("t." + TruststoreProperties.PROP_UPDATE, "-1");
 	
-		AuthenticationProperties secCfg = new AuthenticationProperties(p, "t.", "k.");
+		AuthnAndTrustProperties secCfg = new AuthnAndTrustProperties(p, "t.", "k.");
 		JettyProperties extra = new JettyProperties(p, "j.");
 		return new TestJettyServer(urls, secCfg, extra);
 	}

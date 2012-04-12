@@ -11,7 +11,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 
 import eu.unicore.security.util.client.HttpUtils;
-import eu.unicore.security.util.client.SimpleAuthnConfigurationImpl;
 
 /**
  * this test requires a proxy server
@@ -65,7 +64,7 @@ public class TestProxyCalls extends TestCase{
 		props.setProperty(HttpUtils.HTTP_PROXY_HOST, "localhost");
 		props.setProperty(HttpUtils.HTTP_PROXY_PORT, String.valueOf(port));
 		String uri="http://www.verisign.com/";
-		HttpClient client=HttpUtils.createClient(uri, new SimpleAuthnConfigurationImpl(), 
+		HttpClient client=HttpUtils.createClient(uri, new DefaultClientConfiguration(), 
 				props);
 		GetMethod httpget = new GetMethod("http://www.verisign.com/");
 		try { 
