@@ -11,6 +11,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Properties;
 
+import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
 
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
@@ -163,6 +164,9 @@ public class TestHttpUtils extends TestCase
 		} catch (SocketException e)
 		{
 			//expected
+		} catch (SSLException e)
+		{
+			//also possible
 		} catch (Exception e)
 		{
 			e.printStackTrace();
