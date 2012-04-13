@@ -7,13 +7,12 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 
-import javax.net.SocketFactory;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
@@ -32,30 +31,18 @@ import eu.unicore.security.util.LoggingX509TrustManager;
 
 
 /**
- * Code from Commons HTTPClient "contrib" section <br/>
+ * Some (small) parts of this class can ramain from the code from Commons 
+ * HTTPClient "contrib" section, by Oleg Kalnichevski<br/>
  * 
  * 
  * <p>
- * AuthSSLProtocolSocketFactory can be used to validate the identity of the
- * HTTPS server against a list of trusted certificates and to authenticate to
- * the HTTPS server using a private key.
- * </p>
- * 
- * <p>
- * AuthSSLProtocolSocketFactory will enable server authentication when supplied
- * with a {@link KeyStore truststore} file containing one or several trusted
- * certificates. The client secure socket will reject the connection during the
- * SSL session handshake if the target HTTPS server attempts to authenticate
- * itself with a non-trusted certificate.
+ * AuthSSLProtocolSocketFactory validate the identity of the HTTPS server 
+ * using a provided {@link X509CertChainValidator}, can present {@link X509Credential} 
+ * to authenticate the client and install a standard 
  * </p>
  * 
  * @author <a href="mailto:oleg -at- ural.ru">Oleg Kalnichevski</a>
  * @author K. Benedyczak
- * 
- * <p>
- * DISCLAIMER: HttpClient developers DO NOT actively support this component. The
- * component is provided as a reference material, which may be inappropriate for
- * use without additional customization.
  * </p>
  */
 
@@ -104,7 +91,7 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 		}
 	}
 
-	private void debugTS(X509CertChainValidator validator) throws KeyStoreException
+	private void debugTS(X509CertChainValidator validator)
 	{
 		X509Certificate trustedCerts[] = validator.getTrustedIssuers();
 		for (X509Certificate cert: trustedCerts)
@@ -114,7 +101,7 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 		}
 	}
 	
-	private void debugKS(X509Credential c) throws KeyStoreException
+	private void debugKS(X509Credential c)
 	{
 		X509Certificate[] certs = c.getCertificateChain();
 		X509Certificate[] certs509 = CertificateUtils.convertToX509Chain(certs);
@@ -172,12 +159,14 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 					"Parameters may not be null");
 		}
 		int timeout = params.getConnectionTimeout();
-		SocketFactory socketfactory = getSSLContext()
+		SSLSocketFactory socketfactory = getSSLContext()
 				.getSocketFactory();
 		if (timeout == 0)
 		{
-			return socketfactory.createSocket(host, port,
-					localAddress, localPort);
+			Socket socket = socketfactory.createSocket(host, port,
+					localAddress, localPort); 
+			addListeners(socket);
+			return socket;
 		} else
 		{
 			Socket socket = socketfactory.createSocket();
@@ -187,10 +176,17 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 					port);
 			socket.bind(localaddr);
 			socket.connect(remoteaddr, timeout);
+			addListeners(socket);
 			return socket;
 		}
 	}
 
+	private void addListeners(Socket socket)
+	{
+		((SSLSocket)socket).addHandshakeCompletedListener(new HostnameToCertificateChecker(
+				sec.getServerHostnameCheckingMode()));
+	}
+	
 	/**
 	 * @see SecureProtocolSocketFactory#createSocket(java.lang.String,int,java.net.InetAddress,int)
 	 */
@@ -198,8 +194,10 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 			InetAddress clientHost, int clientPort)
 			throws IOException, UnknownHostException
 	{
-		return getSSLContext().getSocketFactory().createSocket(host,
+		Socket socket = getSSLContext().getSocketFactory().createSocket(host, 
 				port, clientHost, clientPort);
+		addListeners(socket);
+		return socket;
 	}
 
 	/**
@@ -208,8 +206,10 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 	public Socket createSocket(String host, int port) throws IOException,
 			UnknownHostException
 	{
-		return getSSLContext().getSocketFactory().createSocket(host,
+		Socket socket = getSSLContext().getSocketFactory().createSocket(host,
 				port);
+		addListeners(socket);
+		return socket;
 	}
 
 	/**
@@ -219,7 +219,9 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 			boolean autoClose) throws IOException,
 			UnknownHostException
 	{
-		return getSSLContext().getSocketFactory().createSocket(socket,
+		Socket socket2 = getSSLContext().getSocketFactory().createSocket(socket,
 				host, port, autoClose);
+		addListeners(socket2);		
+		return socket2;
 	}
 }

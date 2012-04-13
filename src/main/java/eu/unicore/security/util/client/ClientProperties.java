@@ -45,6 +45,11 @@ public class ClientProperties extends DefaultClientConfiguration
 	public static final String PROP_MESSAGE_SIGNING_ENABLED = "digitalSigningEnabled";
 	public static final String PROP_IN_HANDLERS = "inHandlers";
 	public static final String PROP_OUT_HANDLERS = "outHandlers";
+	public static final String PROP_SERVER_HOSTNAME_CHECKING = "serverHostnameChecking";
+	public static final String SERVER_HOSTNAME_CHECKING_NONE = "none";
+	public static final String SERVER_HOSTNAME_CHECKING_WARN = "warn";
+	public static final String SERVER_HOSTNAME_CHECKING_FAIL = "fail";
+	
 
 	public final static Map<String, String> DEFAULTS = new HashMap<String, String>();
 	public final static Map<String, String> MANDATORY = new HashMap<String, String>();
@@ -58,6 +63,7 @@ public class ClientProperties extends DefaultClientConfiguration
 		DEFAULTS.put(PROP_OUT_HANDLERS, "");
 		DEFAULTS.put(PROP_SSL_AUTHN_ENABLED, "true");
 		DEFAULTS.put(PROP_SSL_ENABLED, "true");
+		DEFAULTS.put(PROP_SERVER_HOSTNAME_CHECKING, SERVER_HOSTNAME_CHECKING_WARN);
 	}
 
 	//all those constructors sucks a bit- but there is no multi inheritance in Java, 
@@ -111,5 +117,22 @@ public class ClientProperties extends DefaultClientConfiguration
 		}
 		setInHandlerClassNames(properties.getValue(PROP_IN_HANDLERS));
 		setOutHandlerClassNames(properties.getValue(PROP_OUT_HANDLERS));
+		
+		String hostnameMode = properties.getValue(PROP_SERVER_HOSTNAME_CHECKING);
+		if (hostnameMode.equalsIgnoreCase(SERVER_HOSTNAME_CHECKING_NONE) || 
+				hostnameMode.equalsIgnoreCase("false"))
+			setServerHostnameCheckingMode(ServerHostnameCheckingMode.NONE);
+		else if (hostnameMode.equalsIgnoreCase(SERVER_HOSTNAME_CHECKING_WARN))
+			setServerHostnameCheckingMode(ServerHostnameCheckingMode.CHECK_WARN);
+		else if (hostnameMode.equalsIgnoreCase(SERVER_HOSTNAME_CHECKING_FAIL))
+			setServerHostnameCheckingMode(ServerHostnameCheckingMode.CHECK_FAIL);
+		
 	}
 }
+
+
+
+
+
+
+

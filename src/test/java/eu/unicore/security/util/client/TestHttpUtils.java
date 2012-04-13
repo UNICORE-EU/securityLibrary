@@ -7,6 +7,7 @@
  */
 package eu.unicore.security.util.client;
 
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Properties;
 
@@ -142,5 +143,44 @@ public class TestHttpUtils extends TestCase
 			e.printStackTrace();
 			fail(e.toString());
 		}
+	}
+	
+	public void testSSLHostnameChecking() throws Exception
+	{
+		X509Credential cred = new KeystoreCredential("src/test/resources/client/httpclient.jks",
+				"the!client".toCharArray(), "the!client".toCharArray(), null, "JKS");
+		X509CertChainValidator validator = new KeystoreCertChainValidator("src/test/resources/client/httpclient.jks",
+				"the!client".toCharArray(), "JKS", -1);
+		DefaultClientConfiguration secCfg = new DefaultClientConfiguration(validator, cred);
+		String url = server.getSecUrl()+"/servlet1";
+		
+		
+		try
+		{
+			performRequest(url, secCfg, ServerHostnameCheckingMode.CHECK_FAIL);
+			fail("Managed to make a connection to a server " +
+					"with cert subject different from its address");
+		} catch (SocketException e)
+		{
+			//expected
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+			fail("Got wrong exception: " + e);
+		}
+		
+		performRequest(url, secCfg, ServerHostnameCheckingMode.CHECK_WARN);
+
+		performRequest(url, secCfg, ServerHostnameCheckingMode.NONE);
+	}
+	
+	private void performRequest(String url, DefaultClientConfiguration secCfg, 
+			ServerHostnameCheckingMode mode) throws Exception
+	{
+		secCfg.setServerHostnameCheckingMode(mode);
+		HttpClient client = HttpUtils.createClient(url, secCfg, new Properties());
+		GetMethod get = new GetMethod(url);
+		client.executeMethod(get);
+		get.getResponseBodyAsString();
 	}
 }

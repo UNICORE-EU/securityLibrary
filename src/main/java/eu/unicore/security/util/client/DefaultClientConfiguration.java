@@ -36,6 +36,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	private ETDClientSettings etdSettings = new ETDClientSettings();
 	private Properties extraSettings = new Properties();
 	private Map<String, Object> extraSecurityTokens = new HashMap<String, Object>();
+	private ServerHostnameCheckingMode serverHostnameCheckingMode = ServerHostnameCheckingMode.NONE;
 	
 	/**
 	 * Only default settings, i.e. no security.
@@ -260,6 +261,23 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	}
 
 	/**
+	 * @return the serverHostnameCheckingMode
+	 */
+	@Override
+	public ServerHostnameCheckingMode getServerHostnameCheckingMode()
+	{
+		return serverHostnameCheckingMode;
+	}
+
+	/**
+	 * @param serverHostnameCheckingMode the serverHostnameCheckingMode to set
+	 */
+	public void setServerHostnameCheckingMode(ServerHostnameCheckingMode serverHostnameCheckingMode)
+	{
+		this.serverHostnameCheckingMode = serverHostnameCheckingMode;
+	}
+
+	/**
 	 * Note - credential and validator objects are not cloned - are copied by reference.
 	 * This doesn't affect threading (both are thread safe). Credential is usually immutable.
 	 * Changes to validator settings will be visible also in the validator of the cloned object.
@@ -286,8 +304,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 		ret.setSslAuthn(sslAuthn);
 		ret.setSslEnabled(sslEnabled);
 		ret.setValidator(getValidator());
+		ret.setServerHostnameCheckingMode(serverHostnameCheckingMode);
 		return ret;
 	}
-	
-	
 }

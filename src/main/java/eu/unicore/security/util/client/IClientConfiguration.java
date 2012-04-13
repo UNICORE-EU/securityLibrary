@@ -21,6 +21,7 @@ import eu.unicore.security.util.client.HttpUtils;
  *  <li> whether to do client-side SSL authentication
  *  <li> whether to perform HTTP authentication and settings for it
  *  <li> whether to disable digital body signing
+ *  <li> whether to check server hostnames
  *  <li> list of outgoing and incoming handlers
  *  <li> classloader to be used in case of loading handler classes
  *  <li> settings to automatically initialize ETD for outgoing messages.
@@ -45,6 +46,12 @@ public interface IClientConfiguration extends IAuthnAndTrustConfiguration
 	 */
 	public boolean doSSLAuthn();
 
+	/**
+	 * whether to check if server hostname matches server's certificate
+	 * @return
+	 */
+	public ServerHostnameCheckingMode getServerHostnameCheckingMode();
+	
 	/**
 	 * Returns true if HTTP BASIC Auth should be used.
 	 * @return
