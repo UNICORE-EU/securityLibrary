@@ -11,6 +11,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -21,6 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import eu.unicore.security.util.client.ISecurityConfiguration;
 
 /**
@@ -30,6 +33,12 @@ import eu.unicore.security.util.client.ISecurityConfiguration;
  */
 public class KeystoreUtil {
 
+        static{
+	    if(Security.getProvider("BC")==null){
+	        Security.addProvider(new BouncyCastleProvider());
+            }
+        }
+ 
 	private final static Logger log=Log.getLogger(Log.SECURITY,KeystoreUtil.class);
 
 	private KeystoreUtil(){}
