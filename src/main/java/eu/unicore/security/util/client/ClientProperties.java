@@ -30,6 +30,7 @@ import eu.unicore.security.util.TruststoreProperties;
  *  <li> extraSettings
  *  <li> extraSecurityTokens
  * </ul>
+ * TODO - extraSettings should be also setteable from the configuration file 
  * @author K. Benedyczak
  */
 public class ClientProperties extends DefaultClientConfiguration

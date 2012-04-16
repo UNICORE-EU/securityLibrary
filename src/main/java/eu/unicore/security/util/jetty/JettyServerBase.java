@@ -84,7 +84,7 @@ public abstract class JettyServerBase {
 			JettyProperties extraSettings,
 			Class<JettyLogger> jettyLogger) throws ConfigurationException
 	{
-		this.securityConfiguration=secConfiguration;
+		this.securityConfiguration = secConfiguration;
 		this.jettyLogger = jettyLogger;
 		this.listenUrls = listenUrls;
 		this.extraSettings = extraSettings;
