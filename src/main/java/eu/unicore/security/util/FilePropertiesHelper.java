@@ -8,7 +8,10 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -16,37 +19,30 @@ import java.util.Properties;
  * 
  * @author K. Benedyczak
  */
-public class FilePropertiesHelper
+public class FilePropertiesHelper extends PropertiesHelper
 {
-	protected PropertiesHelper wrapped;
 	protected File file;
 	protected long lastAccess;
 	
 
-	public FilePropertiesHelper(PropertiesHelper base, String file) throws ConfigurationException
+	public FilePropertiesHelper(String prefix, String file,
+			Map<String, String> defaults, Map<String, String> mandatory, Logger log)
+			throws ConfigurationException, IOException
 	{
-		this(base, new File(file));
+		this(prefix, new File(file), defaults, mandatory, log);
 	}
 
-	public FilePropertiesHelper(PropertiesHelper base, File file) throws ConfigurationException
+	public FilePropertiesHelper(String prefix, File file,
+			Map<String, String> defaults, Map<String, String> mandatory, Logger log)
+			throws ConfigurationException, IOException
 	{
+		super(prefix, load(file), defaults, mandatory, log);
 		this.file = file;
-		this.wrapped = base;
 	}
 
-	public synchronized PropertiesHelper reload() throws IOException, ConfigurationException
+	public synchronized void reload() throws IOException, ConfigurationException
 	{
-		if (file == null)
-			throw new IllegalStateException("Reloading is only possible if the object " +
-					"is backed up by a file");
-		
-		wrapped.setProperties(load(file));
-		return wrapped;
-	}
-	
-	public PropertiesHelper get()
-	{
-		return wrapped;
+		setProperties(load(file));
 	}
 	
 	public File getFile()
