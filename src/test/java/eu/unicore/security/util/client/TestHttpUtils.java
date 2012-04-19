@@ -146,6 +146,14 @@ public class TestHttpUtils extends TestCase
 		}
 	}
 	
+	/*
+	public void testSSLHostnameCheckingLoop() throws Exception
+	{
+		for (int i=0; i<100; i++)
+			testSSLHostnameChecking();
+	}
+	*/
+	
 	public void testSSLHostnameChecking() throws Exception
 	{
 		X509Credential cred = new KeystoreCredential("src/test/resources/client/httpclient.jks",

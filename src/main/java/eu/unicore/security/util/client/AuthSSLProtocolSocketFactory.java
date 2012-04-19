@@ -165,7 +165,7 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 		{
 			Socket socket = socketfactory.createSocket(host, port,
 					localAddress, localPort); 
-			addListeners(socket);
+			addListeners((SSLSocket) socket);
 			return socket;
 		} else
 		{
@@ -176,15 +176,19 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 					port);
 			socket.bind(localaddr);
 			socket.connect(remoteaddr, timeout);
-			addListeners(socket);
+			addListeners((SSLSocket) socket);
 			return socket;
 		}
 	}
 
-	private void addListeners(Socket socket)
+	private void addListeners(SSLSocket socket) throws IOException
 	{
-		((SSLSocket)socket).addHandshakeCompletedListener(new HostnameToCertificateChecker(
-				sec.getServerHostnameCheckingMode()));
+		HostnameToCertificateChecker checker = new HostnameToCertificateChecker(
+				sec.getServerHostnameCheckingMode());
+		socket.addHandshakeCompletedListener(checker);
+		socket.startHandshake();
+		socket.getSession();
+		checker.waitForFinished();
 	}
 	
 	/**
@@ -196,7 +200,7 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 	{
 		Socket socket = getSSLContext().getSocketFactory().createSocket(host, 
 				port, clientHost, clientPort);
-		addListeners(socket);
+		addListeners((SSLSocket) socket);
 		return socket;
 	}
 
@@ -208,7 +212,7 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 	{
 		Socket socket = getSSLContext().getSocketFactory().createSocket(host,
 				port);
-		addListeners(socket);
+		addListeners((SSLSocket) socket);
 		return socket;
 	}
 
@@ -221,7 +225,7 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 	{
 		Socket socket2 = getSSLContext().getSocketFactory().createSocket(socket,
 				host, port, autoClose);
-		addListeners(socket2);		
+		addListeners((SSLSocket) socket2);		
 		return socket2;
 	}
 }

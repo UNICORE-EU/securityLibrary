@@ -6,6 +6,9 @@ package eu.unicore.security.util.client;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.net.ssl.HandshakeCompletedEvent;
 
@@ -24,6 +27,9 @@ public class HostnameToCertificateChecker extends AbstractHostnameToCertificateC
 	private static final Logger log = Log.getLogger(Log.SECURITY, HostnameToCertificateChecker.class);
 	
 	private ServerHostnameCheckingMode mode;
+	private boolean finished = false;
+	private Lock finishedLock = new ReentrantLock();
+	private Condition finishedCond = finishedLock.newCondition();
 	
 	public HostnameToCertificateChecker(ServerHostnameCheckingMode mode) 
 	{
@@ -32,6 +38,18 @@ public class HostnameToCertificateChecker extends AbstractHostnameToCertificateC
 	
 	@Override
 	protected void nameMismatch(HandshakeCompletedEvent hce, X509Certificate peerCertificate,
+			String hostName)
+	{
+		try 
+		{
+			nameMismatchInternal(hce, peerCertificate, hostName);
+		} finally
+		{
+			setFinished();
+		}
+	}	
+	
+	protected void nameMismatchInternal(HandshakeCompletedEvent hce, X509Certificate peerCertificate,
 			String hostName)
 	{
 		if (mode == ServerHostnameCheckingMode.NONE)
@@ -58,5 +76,26 @@ public class HostnameToCertificateChecker extends AbstractHostnameToCertificateC
 			log.error("Problem closing socket: " + e.toString(), e);
 			throw new RuntimeException(e);
 		}
+	}
+	
+	public void waitForFinished()
+	{
+		finishedLock.lock();
+		while (!finished)
+		{
+			try
+			{
+				finishedCond.await();
+			} catch (InterruptedException e) { /*ignored */ }
+		}
+		finishedLock.unlock();
+	}
+	
+	private void setFinished()
+	{
+		finishedLock.lock();
+		finished = true;
+		finishedCond.signal();
+		finishedLock.unlock();
 	}
 }

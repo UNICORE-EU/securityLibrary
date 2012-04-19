@@ -42,6 +42,9 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.SessionIdManager;
 import org.mortbay.jetty.bio.SocketConnector;
+import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.jetty.security.SslSelectChannelConnector;
+import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.HashSessionIdManager;
@@ -152,7 +155,7 @@ public abstract class JettyServerBase {
 	 */
 	protected AbstractConnector createConnector(URL url) throws ConfigurationException {
 		AbstractConnector connector;
-		if (url.getProtocol().startsWith("https")){
+		if (url.getProtocol().startsWith("https")) {
 			connector = createSecureConnector(url);
 		} else {
 			connector = createPlainConnector(url);
@@ -160,33 +163,123 @@ public abstract class JettyServerBase {
 		return connector;
 	}
 	
-	protected AbstractConnector createSecureConnector(URL url) throws ConfigurationException {
-		
-		logger.debug("Creating SSL connector on: " + url);
-		CustomSslSocketConnector ssl = new CustomSslSocketConnector(
-			securityConfiguration.getValidator(), securityConfiguration.getCredential());
-		ssl.setNeedClientAuth(extraSettings.getBooleanValue(JettyProperties.REQUIRE_CLIENT_AUTHN));
-		ssl.setWantClientAuth(extraSettings.getBooleanValue(JettyProperties.WANT_CLIENT_AUTHN));
-		String disabledCiphers = extraSettings.getValue(JettyProperties.DISABLED_CIPHER_SUITES);
-		if (disabledCiphers != null) {
-			disabledCiphers = disabledCiphers.trim();
-			if (disabledCiphers.length() > 1)
-				ssl.setExcludeCipherSuites(disabledCiphers.split("[ ]+"));
-		}
-		
-		//fix for IBM JDK where default protocol "TLS" does not work
-		String vm=System.getProperty("java.vm.vendor");
-		if(vm!=null && vm.trim().startsWith("IBM")){
-			ssl.setProtocol("SSL_TLS");//works for clients using both SSLv3 and TLS
-			logger.info("For IBM JDK: Setting SSL protocol to '"+ssl.getProtocol()+"'");
-		}
+	/**
+	 * @return an instance of NIO secure connector. It uses proper validators and credentials
+	 * and lowResourcesConnections are set to the difference between MAX and LOW THREADS.
+	 */
+	protected SslSelectChannelConnector getNioSecuredConnectorInstance() {
+		NIOSSLSocketConnector ssl = new NIOSSLSocketConnector(
+				securityConfiguration.getValidator(), securityConfiguration.getCredential());
+		long lowResourcesConnections = extraSettings.getIntValue(JettyProperties.MAX_THREADS)-
+					extraSettings.getIntValue(JettyProperties.LOW_THREADS);
+		ssl.setLowResourcesConnections(lowResourcesConnections);
 		return ssl;
+	}
+	
+	/**
+	 * @return an instance of OIO (classic) secure connector. It uses proper validators and credentials
+	 * but is not configured in any other way.  
+	 */
+	protected SslSocketConnector getClassicSecuredConnectorInstance() {
+		return new CustomSslSocketConnector(
+				securityConfiguration.getValidator(), securityConfiguration.getCredential());
+	}
+	
+	/**
+	 * Try not to override this method. It is better to override {@link #getClassicSecuredConnectorInstance()}
+	 * and/or {@link #getNioSecuredConnectorInstance()} instead. 
+	 * This method creates a NIO or OIO (classic) secure connector and configures 
+	 * it with security-related settings.
+	 * @param url
+	 * @return
+	 * @throws ConfigurationException
+	 */
+	protected AbstractConnector createSecureConnector(URL url) throws ConfigurationException {
+		boolean useNio = extraSettings.getBooleanValue(JettyProperties.USE_NIO);
+
+		//WARNING!! this method contains a duplicated code, as secure NIO and OIO JettyConnectors
+		//do not share a common interface for security related settings. Nevertheless the methods
+		//are the same in both. Always fix both versions!
+		if (useNio) {
+			logger.debug("Creating SSL NIO connector on: " + url);
+			SslSelectChannelConnector ssl = getNioSecuredConnectorInstance();			
+			
+			//duplicated code start
+			ssl.setNeedClientAuth(extraSettings.getBooleanValue(JettyProperties.REQUIRE_CLIENT_AUTHN));
+			ssl.setWantClientAuth(extraSettings.getBooleanValue(JettyProperties.WANT_CLIENT_AUTHN));
+			String disabledCiphers = extraSettings.getValue(JettyProperties.DISABLED_CIPHER_SUITES);
+			if (disabledCiphers != null) {
+				disabledCiphers = disabledCiphers.trim();
+				if (disabledCiphers.length() > 1)
+					ssl.setExcludeCipherSuites(disabledCiphers.split("[ ]+"));
+			}
+			
+			//fix for IBM JDK where default protocol "TLS" does not work
+			String vm=System.getProperty("java.vm.vendor");
+			if(vm!=null && vm.trim().startsWith("IBM")){
+				ssl.setProtocol("SSL_TLS");//works for clients using both SSLv3 and TLS
+				logger.info("For IBM JDK: Setting SSL protocol to '"+ssl.getProtocol()+"'");
+			}
+			//end
+			return ssl;
+		} else {
+			logger.debug("Creating SSL connector on: " + url);
+			SslSocketConnector ssl = getClassicSecuredConnectorInstance();
+
+			//duplicated code start
+			ssl.setNeedClientAuth(extraSettings.getBooleanValue(JettyProperties.REQUIRE_CLIENT_AUTHN));
+			ssl.setWantClientAuth(extraSettings.getBooleanValue(JettyProperties.WANT_CLIENT_AUTHN));
+			String disabledCiphers = extraSettings.getValue(JettyProperties.DISABLED_CIPHER_SUITES);
+			if (disabledCiphers != null) {
+				disabledCiphers = disabledCiphers.trim();
+				if (disabledCiphers.length() > 1)
+					ssl.setExcludeCipherSuites(disabledCiphers.split("[ ]+"));
+			}
+			
+			//fix for IBM JDK where default protocol "TLS" does not work
+			String vm=System.getProperty("java.vm.vendor");
+			if(vm!=null && vm.trim().startsWith("IBM")){
+				ssl.setProtocol("SSL_TLS");//works for clients using both SSLv3 and TLS
+				logger.info("For IBM JDK: Setting SSL protocol to '"+ssl.getProtocol()+"'");
+			}
+			//end
+			return ssl;
+		}
 	}	
 
+	/**
+	 * @return an instance of NIO insecure connector. It is not configured in any way.  
+	 */
+	protected SelectChannelConnector getNioPlainConnectorInstance() {
+		return new SelectChannelConnector();
+	}
+	
+	/**
+	 * @return an instance of OIO (classic) insecure connector. It is not configured in any way.  
+	 */
+	protected SocketConnector getClassicPlainConnectorInstance() {
+		return new SocketConnector();
+	}
+
+	/**
+	 * Try not to override this method. It is better to override {@link #getClassicPlainConnectorInstance()}
+	 * and/or {@link #getNioPlainConnectorInstance()} instead. 
+	 * This method creates a NIO or OIO (classic) insecure connector. Currently it doesn't perform any
+	 * additional configuration but in future may configure settings which are specific 
+	 * to all insecure connectors.
+	 * 
+	 * @param url
+	 * @return
+	 */
 	protected AbstractConnector createPlainConnector(URL url){
-		logger.debug("Creating plain HTTP connector on: " + url);
-		AbstractConnector connector = new SocketConnector();
-		return connector;
+		boolean useNio = extraSettings.getBooleanValue(JettyProperties.USE_NIO);
+		if (useNio) {
+			logger.debug("Creating plain NIO HTTP connector on: " + url);
+			return getNioPlainConnectorInstance();
+		} else {
+			logger.debug("Creating plain HTTP connector on: " + url);
+			return getClassicPlainConnectorInstance();
+		}
 	}
 
 	/**

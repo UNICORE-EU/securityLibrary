@@ -53,6 +53,15 @@ public class JettyProperties extends PropertiesHelper
 	public static final String FAST_RANDOM = "fastRandom";
 
 	/**
+	 * Should the NIO connector be used?
+	 * NIO is best suited under high-load, when lots of connections
+	 * exist that are idle for long periods.
+	 * 
+	 * default: false
+	 */
+	public static final String USE_NIO = "useNIO";
+	
+	/**
 	 * minimum number of threads to have in the Jetty thread pool (default: 1)
 	 */
 	public static final String MIN_THREADS = "minThreads";
@@ -116,7 +125,7 @@ public class JettyProperties extends PropertiesHelper
 	 * Whether to enable compression? (default: false)
 	 */
 	public static final String ENABLE_GZIP = GZIP_PREFIX + "enable";
-
+	
 	protected final static Map<String, String> defaults=new HashMap<String, String>();
 	
 	static{
@@ -132,6 +141,7 @@ public class JettyProperties extends PropertiesHelper
 		defaults.put(DISABLED_CIPHER_SUITES, "");
 		defaults.put(MIN_GZIP_SIZE, "100000");
 		defaults.put(ENABLE_GZIP, "false");
+		defaults.put(USE_NIO, "false");
 	}
 
 	public JettyProperties(Properties properties) throws ConfigurationException 
