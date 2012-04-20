@@ -67,7 +67,7 @@ public abstract class JettyServerBase {
 
 	private static final Logger logger=Log.getLogger(Log.HTTP_SERVER, JettyServerBase.class);
 
-	protected final Class<JettyLogger> jettyLogger;
+	protected final Class<? extends JettyLogger> jettyLogger;
 	protected final URL[] listenUrls;
 	protected final IAuthnAndTrustConfiguration securityConfiguration;
 	protected final JettyProperties extraSettings;
@@ -85,7 +85,7 @@ public abstract class JettyServerBase {
 	public JettyServerBase(URL[] listenUrls,
 			IAuthnAndTrustConfiguration secConfiguration,
 			JettyProperties extraSettings,
-			Class<JettyLogger> jettyLogger) throws ConfigurationException
+			Class<? extends JettyLogger> jettyLogger) throws ConfigurationException
 	{
 		this.securityConfiguration = secConfiguration;
 		this.jettyLogger = jettyLogger;

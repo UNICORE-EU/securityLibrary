@@ -16,6 +16,7 @@ import eu.unicore.security.util.AuthnAndTrustProperties;
 import eu.unicore.security.util.ConfigurationException;
 import eu.unicore.security.util.CredentialProperties;
 import eu.unicore.security.util.FilePropertiesHelper;
+import eu.unicore.security.util.IAuthnAndTrustConfiguration;
 import eu.unicore.security.util.Log;
 import eu.unicore.security.util.PropertiesHelper;
 import eu.unicore.security.util.TruststoreProperties;
@@ -27,10 +28,8 @@ import eu.unicore.security.util.TruststoreProperties;
  * <ul>
  *  <li> classLoader
  *  <li> etdSettings
- *  <li> extraSettings
  *  <li> extraSecurityTokens
  * </ul>
- * TODO - extraSettings should be also setteable from the configuration file 
  * @author K. Benedyczak
  */
 public class ClientProperties extends DefaultClientConfiguration
@@ -50,6 +49,8 @@ public class ClientProperties extends DefaultClientConfiguration
 	public static final String SERVER_HOSTNAME_CHECKING_NONE = "none";
 	public static final String SERVER_HOSTNAME_CHECKING_WARN = "warn";
 	public static final String SERVER_HOSTNAME_CHECKING_FAIL = "fail";
+	
+	public static final String EXTRA_HTTP_LIB_PROPERTIES_PREFIX = "http.";
 	
 
 	public final static Map<String, String> DEFAULTS = new HashMap<String, String>();
@@ -96,13 +97,25 @@ public class ClientProperties extends DefaultClientConfiguration
 	{
 		this(p, TruststoreProperties.DEFAULT_PREFIX, CredentialProperties.DEFAULT_PREFIX, DEFAULT_PREFIX);
 	}
+
 	
 	public ClientProperties(Properties p, String trustPrefix, String credPrefix, String clientPrefix) 
 			throws ConfigurationException
 	{
-		AuthnAndTrustProperties helper = new AuthnAndTrustProperties(p, trustPrefix, credPrefix);
-		setValidator(helper.getValidator());
-		setCredential(helper.getCredential());
+		this(p, clientPrefix, new AuthnAndTrustProperties(p, trustPrefix, credPrefix));
+	}
+
+	public ClientProperties(Properties p, IAuthnAndTrustConfiguration authAndTrust) 
+			throws ConfigurationException
+	{
+		this(p, DEFAULT_PREFIX, authAndTrust);
+	}
+	
+	public ClientProperties(Properties p, String clientPrefix, IAuthnAndTrustConfiguration authAndTrust) 
+			throws ConfigurationException
+	{
+		setValidator(authAndTrust.getValidator());
+		setCredential(authAndTrust.getCredential());
 		PropertiesHelper properties = new PropertiesHelper(clientPrefix, p, DEFAULTS, null, log);
 		setSslEnabled(properties.getBooleanValue(PROP_SSL_ENABLED));
 		if (isSslEnabled()) 
@@ -128,6 +141,18 @@ public class ClientProperties extends DefaultClientConfiguration
 		else if (hostnameMode.equalsIgnoreCase(SERVER_HOSTNAME_CHECKING_FAIL))
 			setServerHostnameCheckingMode(ServerHostnameCheckingMode.CHECK_FAIL);
 		
+		//This is bit tricky: clientPrefix+EXTRA_... is the prefix for extra properties,
+		//but EXTRA_... must be left in the keys. 
+		String extraPrefix = clientPrefix + EXTRA_HTTP_LIB_PROPERTIES_PREFIX;
+		Properties extraSettings = new Properties();
+		for (Object k: p.keySet())
+		{
+			String key = (String)k;
+			if (key.startsWith(extraPrefix))
+				extraSettings.setProperty(key.substring(
+						clientPrefix.length()), p.getProperty(key));
+		}
+		setExtraSettings(extraSettings);
 	}
 }
 

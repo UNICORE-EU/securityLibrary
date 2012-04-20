@@ -231,7 +231,18 @@ public class PropertiesHelper
         		return false;
 		throw new ConfigurationException("Value " + val + " is not allowed for "
 				+ prefix + name + ", must be one of yes|true|no|false");
-	} 
+	}
+	
+	public boolean isSet(String name)
+	{
+		return properties.containsKey(prefix+name);
+	}
+	
+	public void setProperty(String key, String value)
+	{
+		properties.setProperty(prefix+key, value);
+		warned.remove(key);
+	}
 }
 
 

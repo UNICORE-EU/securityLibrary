@@ -32,7 +32,6 @@
 package eu.unicore.security.util.jetty;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -81,10 +80,7 @@ public class CustomSslSocketConnector extends SslSocketConnector
 
 	@Override
 	protected void configure(Socket socket)throws IOException{
-		InetSocketAddress peer=(InetSocketAddress)socket.getRemoteSocketAddress();
-		if(log.isDebugEnabled() && peer!=null && peer.getAddress()!=null){
-			log.debug("Connection attempt from "+peer.getAddress().getHostAddress());
-		}
+		NIOSSLSocketConnector.logConnection(socket, log);
 		super.configure(socket);
 	}
 
