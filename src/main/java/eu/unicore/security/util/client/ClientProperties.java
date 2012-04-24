@@ -6,6 +6,7 @@ package eu.unicore.security.util.client;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -15,9 +16,11 @@ import org.apache.log4j.Logger;
 import eu.unicore.security.util.AuthnAndTrustProperties;
 import eu.unicore.security.util.ConfigurationException;
 import eu.unicore.security.util.CredentialProperties;
+import eu.unicore.security.util.DefaultAuthnAndTrustConfiguration;
 import eu.unicore.security.util.FilePropertiesHelper;
 import eu.unicore.security.util.IAuthnAndTrustConfiguration;
 import eu.unicore.security.util.Log;
+import eu.unicore.security.util.LoggingStoreUpdateListener;
 import eu.unicore.security.util.PropertiesHelper;
 import eu.unicore.security.util.TruststoreProperties;
 
@@ -30,6 +33,16 @@ import eu.unicore.security.util.TruststoreProperties;
  *  <li> etdSettings
  *  <li> extraSecurityTokens
  * </ul>
+ * <p>
+ * If <i>not</i> using the most low level constructors 
+ * ({@link #ClientProperties(Properties, IAuthnAndTrustConfiguration)} or
+ * {@link #ClientProperties(Properties, String, IAuthnAndTrustConfiguration)})
+ * this class by default initializes {@link IAuthnAndTrustConfiguration} 
+ * (the interface is implemented by this class), i.e. credential and validator, using
+ * {@link AuthnAndTrustProperties} implementation. 
+ * However if SSL is disabled, neither credential nor validator is initialized,
+ * and if SSL authentication is disabled only the validator is loaded.
+ * 
  * @author K. Benedyczak
  */
 public class ClientProperties extends DefaultClientConfiguration
@@ -102,7 +115,7 @@ public class ClientProperties extends DefaultClientConfiguration
 	public ClientProperties(Properties p, String trustPrefix, String credPrefix, String clientPrefix) 
 			throws ConfigurationException
 	{
-		this(p, clientPrefix, new AuthnAndTrustProperties(p, trustPrefix, credPrefix));
+		this(p, clientPrefix, getDefaultAuthnAndTrust(p, trustPrefix, credPrefix, clientPrefix));
 	}
 
 	public ClientProperties(Properties p, IAuthnAndTrustConfiguration authAndTrust) 
@@ -112,12 +125,43 @@ public class ClientProperties extends DefaultClientConfiguration
 	}
 
 	/**
+	 * load only cred/validator settings which are relevant for our SSL requirements.
+	 * @param p
+	 * @param trustPrefix
+	 * @param credPrefix
+	 * @param clientPrefix
+	 * @return
+	 */
+	private static IAuthnAndTrustConfiguration getDefaultAuthnAndTrust(Properties p, String trustPrefix, 
+			String credPrefix, String clientPrefix)
+	{
+		String sslP = p.getProperty(clientPrefix + PROP_SSL_ENABLED);
+		if (sslP != null && (sslP.equalsIgnoreCase("false") || sslP.equalsIgnoreCase("no")))
+			return new DefaultAuthnAndTrustConfiguration();
+		String sslAuthnP = p.getProperty(clientPrefix + PROP_SSL_AUTHN_ENABLED);
+		if (sslAuthnP != null && (sslAuthnP.equalsIgnoreCase("false") || sslAuthnP.equalsIgnoreCase("no")))
+		{
+			TruststoreProperties trust = new TruststoreProperties(p, 
+					Collections.singleton(new LoggingStoreUpdateListener()), trustPrefix);
+			return new DefaultAuthnAndTrustConfiguration(trust.getValidator(), null);
+		}
+		return new AuthnAndTrustProperties(p, trustPrefix, credPrefix);
+	}
+	
+	/**
 	 * only for cloning
 	 */
 	protected ClientProperties()
 	{
 	}
 	
+	/**
+	 * Low level constructor - allow to pass properties, set prefix for client settings 
+	 * and a preloaded {@link IAuthnAndTrustConfiguration}
+	 * @param p
+	 * @param authAndTrust
+	 * @throws ConfigurationException
+	 */
 	public ClientProperties(Properties p, String clientPrefix, IAuthnAndTrustConfiguration authAndTrust) 
 			throws ConfigurationException
 	{
