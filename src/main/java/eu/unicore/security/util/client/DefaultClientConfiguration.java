@@ -286,6 +286,17 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	public IClientConfiguration clone()
 	{
 		DefaultClientConfiguration ret = new DefaultClientConfiguration();
+		cloneTo(ret);
+		return ret;
+	}
+
+	/**
+	 * for implementing clone in subclasses
+	 * @param ret
+	 * @return
+	 */
+	protected IClientConfiguration cloneTo(DefaultClientConfiguration ret)
+	{
 		ret.setClassLoader(classLoader);
 		ret.setCredential(getCredential());
 		ret.setDoSignMessage(doSignMessage);

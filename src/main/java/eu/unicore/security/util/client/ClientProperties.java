@@ -110,6 +110,13 @@ public class ClientProperties extends DefaultClientConfiguration
 	{
 		this(p, DEFAULT_PREFIX, authAndTrust);
 	}
+
+	/**
+	 * only for cloning
+	 */
+	protected ClientProperties()
+	{
+	}
 	
 	public ClientProperties(Properties p, String clientPrefix, IAuthnAndTrustConfiguration authAndTrust) 
 			throws ConfigurationException
@@ -153,6 +160,14 @@ public class ClientProperties extends DefaultClientConfiguration
 						clientPrefix.length()), p.getProperty(key));
 		}
 		setExtraSettings(extraSettings);
+	}
+	
+	@Override
+	public ClientProperties clone()
+	{
+		ClientProperties ret = new ClientProperties();
+		super.cloneTo(ret);
+		return ret;
 	}
 }
 
