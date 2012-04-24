@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 
 
 /**
@@ -21,6 +23,8 @@ import java.util.Properties;
  */
 public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 {
+	private static final Logger log = Log.getLogger(Log.SECURITY, AuthnAndTrustProperties.class);
+	
 	public AuthnAndTrustProperties(String file) throws IOException, ConfigurationException
 	{
 		this(new File(file));
@@ -38,22 +42,46 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 
 	public AuthnAndTrustProperties(File file, String trustPrefix, String credPrefix) throws IOException, ConfigurationException
 	{
-		this(FilePropertiesHelper.load(file), trustPrefix, credPrefix);
+		this(FilePropertiesHelper.load(file), trustPrefix, credPrefix, false, false);
 	}
 	
 	public AuthnAndTrustProperties(Properties p) throws ConfigurationException
 	{
-		this(p, TruststoreProperties.DEFAULT_PREFIX, CredentialProperties.DEFAULT_PREFIX);
+		this(p, TruststoreProperties.DEFAULT_PREFIX, CredentialProperties.DEFAULT_PREFIX, false, false);
 	}
-	
+
 	public AuthnAndTrustProperties(Properties p, String trustPrefix, String credPrefix) throws ConfigurationException
 	{
-		TruststoreProperties trustCfg = new TruststoreProperties(p, 
-			Collections.singleton(new LoggingStoreUpdateListener()),
-			trustPrefix);
-		setValidator(trustCfg.getValidator());
+		this(p, trustPrefix, credPrefix, false, false);
+	}
+	
+	public AuthnAndTrustProperties(Properties p, String trustPrefix, String credPrefix, 
+			boolean trustOptional, boolean credOptional) throws ConfigurationException
+	{
+		try
+		{
+			TruststoreProperties trustCfg = new TruststoreProperties(p, 
+					Collections.singleton(new LoggingStoreUpdateListener()),
+					trustPrefix);
+			setValidator(trustCfg.getValidator());
+		} catch (ConfigurationException e)
+		{
+			if (!trustOptional)
+				throw e;
+			else
+				log.info("Trust store settings (optional) were not loaded as: " + e.getMessage());
+		}
 		
-		CredentialProperties credProps = new CredentialProperties(p, credPrefix); 
-		setCredential(credProps.getCredential());
+		try
+		{
+			CredentialProperties credProps = new CredentialProperties(p, credPrefix); 
+			setCredential(credProps.getCredential());
+		} catch (ConfigurationException e)
+		{
+			if (!credOptional)
+				throw e;
+			else
+				log.info("Credential (optional) was not loaded as: " + e.getMessage());
+		} 
 	}
 }

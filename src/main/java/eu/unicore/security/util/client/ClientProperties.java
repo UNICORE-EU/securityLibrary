@@ -6,7 +6,6 @@ package eu.unicore.security.util.client;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -16,11 +15,9 @@ import org.apache.log4j.Logger;
 import eu.unicore.security.util.AuthnAndTrustProperties;
 import eu.unicore.security.util.ConfigurationException;
 import eu.unicore.security.util.CredentialProperties;
-import eu.unicore.security.util.DefaultAuthnAndTrustConfiguration;
 import eu.unicore.security.util.FilePropertiesHelper;
 import eu.unicore.security.util.IAuthnAndTrustConfiguration;
 import eu.unicore.security.util.Log;
-import eu.unicore.security.util.LoggingStoreUpdateListener;
 import eu.unicore.security.util.PropertiesHelper;
 import eu.unicore.security.util.TruststoreProperties;
 
@@ -40,8 +37,8 @@ import eu.unicore.security.util.TruststoreProperties;
  * this class by default initializes {@link IAuthnAndTrustConfiguration} 
  * (the interface is implemented by this class), i.e. credential and validator, using
  * {@link AuthnAndTrustProperties} implementation. 
- * However if SSL is disabled, neither credential nor validator is initialized,
- * and if SSL authentication is disabled only the validator is loaded.
+ * However if SSL is disabled, credential and validator are initialized only optionally,
+ * and if SSL authentication is disabled the credential initialization need not to be correct.
  * 
  * @author K. Benedyczak
  */
@@ -135,17 +132,15 @@ public class ClientProperties extends DefaultClientConfiguration
 	private static IAuthnAndTrustConfiguration getDefaultAuthnAndTrust(Properties p, String trustPrefix, 
 			String credPrefix, String clientPrefix)
 	{
+		boolean trustOptional = false, credOptional = false;
+		
 		String sslP = p.getProperty(clientPrefix + PROP_SSL_ENABLED);
-		if (sslP != null && (sslP.equalsIgnoreCase("false") || sslP.equalsIgnoreCase("no")))
-			return new DefaultAuthnAndTrustConfiguration();
 		String sslAuthnP = p.getProperty(clientPrefix + PROP_SSL_AUTHN_ENABLED);
-		if (sslAuthnP != null && (sslAuthnP.equalsIgnoreCase("false") || sslAuthnP.equalsIgnoreCase("no")))
-		{
-			TruststoreProperties trust = new TruststoreProperties(p, 
-					Collections.singleton(new LoggingStoreUpdateListener()), trustPrefix);
-			return new DefaultAuthnAndTrustConfiguration(trust.getValidator(), null);
-		}
-		return new AuthnAndTrustProperties(p, trustPrefix, credPrefix);
+		if (sslP != null && (sslP.equalsIgnoreCase("false") || sslP.equalsIgnoreCase("no")))
+			trustOptional = credOptional= true;
+		else if (sslAuthnP != null && (sslAuthnP.equalsIgnoreCase("false") || sslAuthnP.equalsIgnoreCase("no")))
+			credOptional = true;
+		return new AuthnAndTrustProperties(p, trustPrefix, credPrefix, trustOptional, credOptional);
 	}
 	
 	/**
