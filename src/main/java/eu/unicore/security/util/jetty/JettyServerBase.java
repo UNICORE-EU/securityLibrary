@@ -34,6 +34,7 @@
 package eu.unicore.security.util.jetty;
 
 import java.net.URL;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.mortbay.jetty.AbstractConnector;
@@ -339,5 +340,17 @@ public abstract class JettyServerBase {
 	 */
 	public Server getServer(){
 		return theServer;
+	}
+	
+	/**
+	 * @return Jetty settings useful for tests, with insecure random
+	 */
+	public static JettyProperties getSimpleTestSettings()
+	{
+		Properties p = new Properties();
+		JettyProperties ret = new JettyProperties(p);
+		ret.setProperty(JettyProperties.FAST_RANDOM, "true");
+		ret.setProperty(JettyProperties.SO_LINGER_TIME, "1");
+		return ret;
 	}
 }
