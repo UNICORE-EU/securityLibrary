@@ -15,10 +15,10 @@ import org.apache.log4j.Logger;
 
 /**
  * Provides methods to parse properties and return them as ints, longs etc. 
- * Additionally logs when default value is used (INFO) and in case of out of range values when defaults are present.
- * The logging is performed only once per property.
- * The object is configured with initial defaults and mandatory properties, so it is easier to call 
- * the 'get' methods later.
+ * Logs values read from Properties source, additionally logs when default value is used (on DEBUG level) 
+ * and in case when out of range values are found and defaults are present and used instead (WARN). 
+ * The logging is performed only once per property. The object is configured with initial defaults and mandatory 
+ * properties, so it is easier to call the 'get' methods later.
  * <p> 
  * The class can use a custom prefix for properties - such prefix is added for all queried properties, 
  * and therefore acts as a namespace in the configuration file.
@@ -126,8 +126,8 @@ public class PropertiesHelper
 			if (!defaults.containsKey(name) && !acceptNoVal)
 				throw new ConfigurationException("No value provided for " + prefix + name);
 			if (doLog) 
-				log.info("Using default value for " + prefix + name + 
-					": " + ((defaultVal == null) ? "--DISABLED--" : defaultVal));
+				log.debug("Using default value for " + prefix + name + 
+					": " + ((defaultVal == null) ? "--NOT SET--" : defaultVal));
 			val = defaultVal;
 		}
 		return val;
@@ -202,7 +202,7 @@ public class PropertiesHelper
 			if (defaultVal != null)
 			{
 				log.warn(prefix+name + " parameter value "
-						+ "is too bog, maximum is " + max 
+						+ "is too big, maximum is " + max 
 						+ ", using default: " + defaultVal);
 				return defaultVal;
 			} else
