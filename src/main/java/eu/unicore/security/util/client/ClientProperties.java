@@ -122,7 +122,8 @@ public class ClientProperties extends DefaultClientConfiguration
 	}
 
 	/**
-	 * load only cred/validator settings which are relevant for our SSL requirements.
+	 * Load cred/validator settings. If some SSL settings are optional, then do not force the loading 
+	 * of the not strictly required artifacts. However a try to load what is configured is made always.
 	 * @param p
 	 * @param trustPrefix
 	 * @param credPrefix
@@ -175,8 +176,9 @@ public class ClientProperties extends DefaultClientConfiguration
 			setHttpPassword(properties.getValue(PROP_HTTP_PASSWORD, true, true));
 			setHttpUser(properties.getValue(PROP_HTTP_USER));
 		}
-		setInHandlerClassNames(properties.getValue(PROP_IN_HANDLERS));
-		setOutHandlerClassNames(properties.getValue(PROP_OUT_HANDLERS));
+		
+		setInHandlerClassNames(parseHandlers(properties, PROP_IN_HANDLERS));
+		setOutHandlerClassNames(parseHandlers(properties, PROP_OUT_HANDLERS));
 		
 		String hostnameMode = properties.getValue(PROP_SERVER_HOSTNAME_CHECKING);
 		if (hostnameMode.equalsIgnoreCase(SERVER_HOSTNAME_CHECKING_NONE) || 
@@ -199,6 +201,16 @@ public class ClientProperties extends DefaultClientConfiguration
 						clientPrefix.length()), p.getProperty(key));
 		}
 		setExtraSettings(extraSettings);
+	}
+	
+	private String[] parseHandlers(PropertiesHelper properties, String key)
+	{
+		String handlers = properties.getValue(key);
+		if (handlers != null)
+			handlers.trim();
+		if (handlers != null)
+			return handlers.split("[ ]+");
+		return new String[0];
 	}
 	
 	@Override

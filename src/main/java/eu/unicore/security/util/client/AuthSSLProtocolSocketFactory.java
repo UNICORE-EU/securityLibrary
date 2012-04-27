@@ -31,7 +31,7 @@ import eu.unicore.security.util.LoggingX509TrustManager;
 
 
 /**
- * Some (small) parts of this class can ramain from the code from Commons 
+ * Some (small) parts of this class remains from the code from Commons 
  * HTTPClient "contrib" section, by Oleg Kalnichevski<br/>
  * 
  * 

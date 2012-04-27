@@ -202,16 +202,6 @@ public class Client implements Serializable {
 	}
 
 	/**
-	 * @param secTokens the security tokens used to authenticate this client
-	 * @deprecated Use {@link #setAuthenticatedClient(SecurityTokens)} instead!
-	 */
-	@Deprecated
-	public void setSecurityTokens(SecurityTokens secTokens) {
-		setAuthenticatedClient(secTokens);
-	}
-	
-
-	/**
 	 * @return Returns the {@link SecurityTokens} or null if 
 	 * the client is not of AUTHENTICATED type
 	 */
@@ -235,16 +225,6 @@ public class Client implements Serializable {
 			return secTokens.getEffectiveUserName().toString();
 	}
 	
-	
-	/**
-	 * Overrides the default DN of effective user.
-	 * @deprecated don't use this feature at all
-	 */
-	@Deprecated
-	public void setDistinguishedName(String dn) {
-		this.manuallySetDn = dn;
-	}
-
 	
 	//****************** INCARNATION AND AUTHZ PART *******************************
 	
@@ -302,26 +282,6 @@ public class Client implements Serializable {
 		xlogin.setSelectedLogin(userName);
 	}
 
-	/**
-	 * Convenience method returning the selected Xlogin name.
-	 * @deprecated Use {@link #getSelectedXloginName()} instead
-	 * @return
-	 */
-	@Deprecated
-	public String getUserName() {
-		return getSelectedXloginName();
-	}
-
-	/**
-	 * Convenience method setting the selected Xlogin name.
-	 * @param userName
-	 * @deprecated Use {@link #setSelectedXloginName(String)} instead
-	 */
-	@Deprecated
-	public void setUserName(String userName) {
-		setSelectedXloginName(userName);
-	}
-	
 	public String getUserEmail(){
 		return (String)extraAttributes.get(ATTRIBUTE_USER_EMAIL);
 	}

@@ -75,6 +75,7 @@ public class TestJettyServer extends JettyServerBase {
 		Properties p = new Properties();
 		p.setProperty("j." + JettyProperties.SO_LINGER_TIME, soLinger+"");
 		p.setProperty("j." + JettyProperties.FAST_RANDOM, "true");
+		
 		p.setProperty("k." + CredentialProperties.PROP_LOCATION, KEYSTORE);
 		p.setProperty("k." + CredentialProperties.PROP_FORMAT, "JKS");
 		p.setProperty("k." + CredentialProperties.PROP_PASSWORD, KEYSTORE_P);

@@ -34,14 +34,18 @@ import eu.unicore.security.util.client.HttpUtils;
 public interface IClientConfiguration extends IAuthnAndTrustConfiguration
 {
 	/**
-	 * Makes a copy of these properties.
+	 * Makes a copy of this object.
 	 */
 	public IClientConfiguration clone();
 	
 	/**
+	 * Returns true if SSL mode is enabled.
+	 */
+	public boolean isSslEnabled();
+	
+	/**
 	 * Returns true if the client-side TLS authentication should be done.
-	 * If false then local credential retrieval method 
-	 * is not used at all.
+	 * If false then the local credential won't be used.
 	 * @return
 	 */
 	public boolean doSSLAuthn();
@@ -71,26 +75,21 @@ public interface IClientConfiguration extends IAuthnAndTrustConfiguration
 	public String getHttpPassword();
 	
 	/**
-	 * Returns the names of the security handler classes for outbound messages,
-	 * separated by a single space.
+	 * Returns the handler classes for outbound messages. Those classes in general 
+	 * are used only in XFire stack.
 	 */
-	public String getOutHandlerClassNames();
+	public String[] getOutHandlerClassNames();
 	
 	/**
-	 * Returns the names of the security handler classes for incoming messages,
-	 * separated by a single space.
+	 * Returns the handler classes for incoming messages. Those classes in general 
+	 * are used only in XFire stack.
 	 */
-	public String getInHandlerClassNames();
+	public String[] getInHandlerClassNames();
 	
 	/**
 	 * Get the classloader to be used e.g. for dynamically loading security handlers.
 	 */
 	public ClassLoader getClassLoader();
-	
-	/**
-	 * Returns true if SSL mode is enabled.
-	 */
-	public boolean isSslEnabled();
 	
 	/**
 	 * Digital signature mechanism can be disabled with this method returning false.
@@ -108,7 +107,6 @@ public interface IClientConfiguration extends IAuthnAndTrustConfiguration
 	 * 
 	 * @return see above
 	 * @see HttpUtils
-	 * @see XFireClientFactory
 	 */
 	public Properties getExtraSettings();
 	

@@ -240,7 +240,11 @@ public class PropertiesHelper
 	
 	public void setProperty(String key, String value)
 	{
-		properties.setProperty(prefix+key, value);
+		//value == null can not be set
+		if (value == null)
+			properties.remove(prefix+key);
+		else
+			properties.setProperty(prefix+key, value);
 		warned.remove(key);
 	}
 }

@@ -33,6 +33,7 @@
 
 package eu.unicore.security.util.jetty;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
 
@@ -97,6 +98,7 @@ public abstract class JettyServerBase {
 	public void start() throws Exception{
 		logger.debug("Starting Jetty HTTP server");
 		theServer.start();
+		updatePortsIfNeeded();
 		logger.info("Jetty HTTP server was started");
 	}
 
@@ -321,6 +323,28 @@ public abstract class JettyServerBase {
 	}
 
 	/**
+	 * Invoked after server is started: updates the listen URLs with the actual port,
+	 * if originally it was set to 0, what means that server should choose a random one
+	 */
+	protected void updatePortsIfNeeded() {
+		Connector[] conns = theServer.getConnectors();
+
+		for (int i=0; i<listenUrls.length; i++) {
+			URL url = listenUrls[i];
+			if (url.getPort() == 0) {
+				int port = conns[i].getPort();
+				try {
+					listenUrls[i] = new URL(url.getProtocol(), 
+							url.getHost(), port, url.getFile());
+				} catch (MalformedURLException e) {
+					throw new RuntimeException("Ups, URL can not " +
+							"be reconstructed, while it should", e);
+				}
+			}
+		}
+	}
+		
+	/**
 	 * Implement this method to add servlets to the server.
 	 * @throws Exception
 	 */
@@ -340,6 +364,13 @@ public abstract class JettyServerBase {
 	 */
 	public Server getServer(){
 		return theServer;
+	}
+	
+	/**
+	 * @return array of URLs where the server is listening
+	 */
+	public URL[] getUrls() {
+		return listenUrls;
 	}
 	
 	/**

@@ -39,7 +39,15 @@ import eu.unicore.security.util.ConfigurationException;
 import eu.unicore.security.util.Log;
 import eu.unicore.security.util.PropertiesHelper;
 
-
+/**
+ * Defines constants and defaults for Jetty settings, so simplifies properties handling
+ * for Jetty server setup.
+ * <p>
+ * Note that as Jetty configuration is simplistic (all settings can be derived directly
+ * from the properties source) there is no need to define a specialized interface
+ * and bean classes as other, more complicated configuration providers in this module do.  
+ * @author K. Benedyczak
+ */
 public class JettyProperties extends PropertiesHelper
 {
 	private static final Logger log = Log.getLogger(Log.HTTP_SERVER, JettyProperties.class);

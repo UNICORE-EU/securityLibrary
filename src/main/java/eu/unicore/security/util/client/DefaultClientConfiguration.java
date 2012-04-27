@@ -28,8 +28,8 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	private String httpPassword;
 	private boolean sslAuthn;
 	private boolean httpAuthn;
-	private String inHandlerClassNames;
-	private String outHandlerClassNames;
+	private String[] inHandlerClassNames;
+	private String[] outHandlerClassNames;
 	private ClassLoader classLoader;
 	private boolean sslEnabled;
 	private boolean doSignMessage;
@@ -128,7 +128,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	 * @return the inHandlerClassNames
 	 */
 	@Override
-	public String getInHandlerClassNames()
+	public String[] getInHandlerClassNames()
 	{
 		return inHandlerClassNames;
 	}
@@ -136,7 +136,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	/**
 	 * @param inHandlerClassNames the inHandlerClassNames to set
 	 */
-	public void setInHandlerClassNames(String inHandlerClassNames)
+	public void setInHandlerClassNames(String[] inHandlerClassNames)
 	{
 		this.inHandlerClassNames = inHandlerClassNames;
 	}
@@ -145,7 +145,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	 * @return the outHandlerClassNames
 	 */
 	@Override
-	public String getOutHandlerClassNames()
+	public String[] getOutHandlerClassNames()
 	{
 		return outHandlerClassNames;
 	}
@@ -153,7 +153,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	/**
 	 * @param outHandlerClassNames the outHandlerClassNames to set
 	 */
-	public void setOutHandlerClassNames(String outHandlerClassNames)
+	public void setOutHandlerClassNames(String[] outHandlerClassNames)
 	{
 		this.outHandlerClassNames = outHandlerClassNames;
 	}
@@ -311,6 +311,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 		ret.setHttpPassword(httpPassword);
 		ret.setHttpUser(httpUser);
 		ret.setInHandlerClassNames(inHandlerClassNames);
+		ret.setOutHandlerClassNames(outHandlerClassNames);
 		ret.setSslAuthn(sslAuthn);
 		ret.setSslAuthn(sslAuthn);
 		ret.setSslEnabled(sslEnabled);

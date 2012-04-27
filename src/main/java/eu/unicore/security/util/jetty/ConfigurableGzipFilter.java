@@ -11,16 +11,9 @@ import org.mortbay.servlet.GzipFilter;
 import eu.unicore.security.util.ConfigurationException;
 
 /**
- * wrapper around Jetty's {@link GzipFilter} that allows configuration
- * using {@link JettyProperties} <br/>
- * 
- * The following configuration options exist.
- * 
- * <ul>
- * <li>gateway.jetty.gzip.minGzipSize  The minimum size of a data chunk that is gzipped (default: 65535</li>
- * <li>gateway.jetty.gzip.bufferSize  The size of the buffer used for gzipping (default: 8192)</li>
- * </ul>
- * 
+ * Wrapper around Jetty's {@link GzipFilter} that allows to be configured
+ * using {@link JettyProperties}
+ * @see JettyProperties
  * @author schuller
  */
 public class ConfigurableGzipFilter extends GzipFilter
