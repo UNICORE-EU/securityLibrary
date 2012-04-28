@@ -107,7 +107,7 @@ public class PropertiesHelper
 			boolean hasDefault = meta != null ? meta.hasDefault() : false;
 			if (hasDefault)
 			{
-				String defaultVal = meta.getDefaultValue();
+				String defaultVal = meta.getDefault();
 				if (doLog) 
 					log.debug("Using default value for " + prefix + name + ": " + 
 						((defaultVal == null) ? "--BY DEFAULT NOT SET--" : defaultVal));

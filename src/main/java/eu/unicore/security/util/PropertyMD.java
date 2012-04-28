@@ -41,10 +41,10 @@ public class PropertyMD
 		this.secret = true;
 		return this;
 	}
-	public String getDefaultValue() {
+	public String getDefault() {
 		return defaultValue;
 	}
-	public PropertyMD setDefaultValue(String defaultValue) {
+	public PropertyMD setDefault(String defaultValue) {
 		if (isMandatory())
 			throw new IllegalStateException("A property can not have a default " +
 					"value and be mandatory at the same time");

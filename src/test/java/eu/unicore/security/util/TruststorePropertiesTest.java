@@ -52,13 +52,13 @@ public class TruststorePropertiesTest extends TestCase
 		OpensslCertChainValidator v = (OpensslCertChainValidator) verify(p);
 		assertEquals(v.getTruststorePath(), PFX+"openssl");
 		assertEquals(v.getUpdateInterval()+"", 
-				TruststoreProperties.META.get(PROP_UPDATE).getDefaultValue()+"000");
+				TruststoreProperties.META.get(PROP_UPDATE).getDefault()+"000");
 		assertEquals(v.getProxySupport().name(), 
-				TruststoreProperties.META.get(PROP_PROXY_SUPPORT).getDefaultValue());
+				TruststoreProperties.META.get(PROP_PROXY_SUPPORT).getDefault());
 		assertEquals(v.getNamespaceCheckingMode().name(), 
-			TruststoreProperties.META.get(PROP_OPENSSL_NS_MODE).getDefaultValue());
+			TruststoreProperties.META.get(PROP_OPENSSL_NS_MODE).getDefault());
 		assertEquals(v.getRevocationCheckingMode().getCrlCheckingMode().name(), 
-			TruststoreProperties.META.get(PROP_CRL_MODE).getDefaultValue());
+			TruststoreProperties.META.get(PROP_CRL_MODE).getDefault());
 		
 		v.dispose();
 	}
@@ -104,13 +104,13 @@ public class TruststorePropertiesTest extends TestCase
 		DirectoryCertChainValidator v = (DirectoryCertChainValidator) verify(p);
 		assertEquals(v.getTruststorePaths().get(0), PFX+"dir/*.pem");
 		assertEquals(v.getTruststoreUpdateInterval()+"", 
-				TruststoreProperties.META.get(PROP_UPDATE).getDefaultValue()+"000");
+				TruststoreProperties.META.get(PROP_UPDATE).getDefault()+"000");
 		assertEquals(v.getProxySupport().name(), 
-				TruststoreProperties.META.get(PROP_PROXY_SUPPORT).getDefaultValue());
+				TruststoreProperties.META.get(PROP_PROXY_SUPPORT).getDefault());
 		assertEquals(v.getRevocationCheckingMode().getCrlCheckingMode().name(), 
-			TruststoreProperties.META.get(PROP_CRL_MODE).getDefaultValue());
+			TruststoreProperties.META.get(PROP_CRL_MODE).getDefault());
 		assertEquals(v.getRevocationParameters().getCrlParameters().getCrlUpdateInterval() + "", 
-			TruststoreProperties.META.get(PROP_CRL_UPDATE).getDefaultValue());
+			TruststoreProperties.META.get(PROP_CRL_UPDATE).getDefault());
 		assertEquals(v.getRevocationParameters().getCrlParameters().getDiskCachePath(), 
 				null);
 		assertTrue("Issuers: " + v.getTrustedIssuers().length, v.getTrustedIssuers().length == 1);
@@ -126,7 +126,7 @@ public class TruststorePropertiesTest extends TestCase
 		KeystoreCertChainValidator v = (KeystoreCertChainValidator) verify(p);
 		assertEquals(v.getTruststorePath(), PFX+"truststore1.jks");
 		assertEquals(v.getTruststoreUpdateInterval()+"", 
-			TruststoreProperties.META.get(PROP_UPDATE).getDefaultValue()+"000");
+			TruststoreProperties.META.get(PROP_UPDATE).getDefault()+"000");
 	}
 	
 	public void testPKCS12()
@@ -138,7 +138,7 @@ public class TruststorePropertiesTest extends TestCase
 		KeystoreCertChainValidator v = (KeystoreCertChainValidator) verify(p);
 		assertEquals(v.getTruststorePath(), PFX+"keystore-1.p12");
 		assertEquals(v.getTruststoreUpdateInterval()+"", 
-			TruststoreProperties.META.get(PROP_UPDATE).getDefaultValue()+"000");
+			TruststoreProperties.META.get(PROP_UPDATE).getDefault()+"000");
 	}
 
 	private X509CertChainValidator verify(Properties p)
