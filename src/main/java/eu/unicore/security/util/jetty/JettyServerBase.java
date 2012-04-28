@@ -120,7 +120,7 @@ public abstract class JettyServerBase {
 		}
 		theServer = new Server();
 
-		configureSessionIdManager(extraSettings.getBooleanValue(JettyProperties.FAST_RANDOM, false));
+		configureSessionIdManager(extraSettings.getBooleanValue(JettyProperties.FAST_RANDOM));
 
 		Connector[] connectors = createConnectors();
 		for (Connector connector: connectors) {

@@ -26,17 +26,17 @@ public class FilePropertiesHelper extends PropertiesHelper
 	
 
 	public FilePropertiesHelper(String prefix, String file,
-			Map<String, String> defaults, Map<String, String> mandatory, Logger log)
+			Map<String, PropertyMD> meta, Logger log)
 			throws ConfigurationException, IOException
 	{
-		this(prefix, new File(file), defaults, mandatory, log);
+		this(prefix, new File(file), meta, log);
 	}
 
 	public FilePropertiesHelper(String prefix, File file,
-			Map<String, String> defaults, Map<String, String> mandatory, Logger log)
+			Map<String, PropertyMD> meta, Logger log)
 			throws ConfigurationException, IOException
 	{
-		super(prefix, load(file), defaults, mandatory, log);
+		super(prefix, load(file), meta, log);
 		this.file = file;
 	}
 

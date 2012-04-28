@@ -38,6 +38,7 @@ import org.apache.log4j.Logger;
 import eu.unicore.security.util.ConfigurationException;
 import eu.unicore.security.util.Log;
 import eu.unicore.security.util.PropertiesHelper;
+import eu.unicore.security.util.PropertyMD;
 
 /**
  * Defines constants and defaults for Jetty settings, so simplifies properties handling
@@ -134,22 +135,22 @@ public class JettyProperties extends PropertiesHelper
 	 */
 	public static final String ENABLE_GZIP = GZIP_PREFIX + "enable";
 	
-	protected final static Map<String, String> defaults=new HashMap<String, String>();
+	protected final static Map<String, PropertyMD> defaults=new HashMap<String, PropertyMD>();
 	
 	static{
-		defaults.put(MAX_THREADS, "255");
-		defaults.put(MIN_THREADS, "1");
-		defaults.put(LOW_THREADS, "50");
-		defaults.put(MAX_IDLE_TIME, "3000");
-		defaults.put(LOW_RESOURCE_MAX_IDLE_TIME, "100");
-		defaults.put(FAST_RANDOM, "false");
-		defaults.put(SO_LINGER_TIME, "-1");
-		defaults.put(WANT_CLIENT_AUTHN, "true");
-		defaults.put(REQUIRE_CLIENT_AUTHN, "true");
-		defaults.put(DISABLED_CIPHER_SUITES, "");
-		defaults.put(MIN_GZIP_SIZE, "100000");
-		defaults.put(ENABLE_GZIP, "false");
-		defaults.put(USE_NIO, "false");
+		defaults.put(MAX_THREADS, new PropertyMD("255").setPositive());
+		defaults.put(MIN_THREADS, new PropertyMD("1").setPositive());
+		defaults.put(LOW_THREADS, new PropertyMD("50").setPositive());
+		defaults.put(MAX_IDLE_TIME, new PropertyMD("3000").setPositive());
+		defaults.put(LOW_RESOURCE_MAX_IDLE_TIME, new PropertyMD("100").setPositive());
+		defaults.put(FAST_RANDOM, new PropertyMD("false"));
+		defaults.put(SO_LINGER_TIME, new PropertyMD("-1"));
+		defaults.put(WANT_CLIENT_AUTHN, new PropertyMD("true"));
+		defaults.put(REQUIRE_CLIENT_AUTHN, new PropertyMD("true"));
+		defaults.put(DISABLED_CIPHER_SUITES, new PropertyMD(""));
+		defaults.put(MIN_GZIP_SIZE, new PropertyMD("100000"));
+		defaults.put(ENABLE_GZIP, new PropertyMD("false"));
+		defaults.put(USE_NIO, new PropertyMD("false"));
 	}
 
 	public JettyProperties(Properties properties) throws ConfigurationException 
@@ -159,7 +160,7 @@ public class JettyProperties extends PropertiesHelper
 	
 	public JettyProperties(Properties properties, String prefix) throws ConfigurationException 
 	{
-		super(prefix, properties, defaults, null, log);
+		super(prefix, properties, defaults, log);
 	}
 }
 

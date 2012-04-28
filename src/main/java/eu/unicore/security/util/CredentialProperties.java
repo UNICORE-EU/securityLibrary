@@ -53,10 +53,13 @@ public class CredentialProperties extends PropertiesHelper
 	public static final String PROP_KS_ALIAS = "keyAlias";
 	public static final String PROP_KS_KEY_PASSWORD = "keyPassword";
 
-	private static final Map<String, String> MANDATORY = new HashMap<String, String>();
+	private static final Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
 	static
 	{
-		MANDATORY.put(PROP_LOCATION, "credential location");
+		META.put(PROP_LOCATION, new PropertyMD().setMandatory().
+				setDescription("credential location"));
+		META.put(PROP_PASSWORD, new PropertyMD().setSecret());
+		META.put(PROP_KS_KEY_PASSWORD, new PropertyMD().setSecret());
 	}
 	
 
@@ -120,7 +123,7 @@ public class CredentialProperties extends PropertiesHelper
 			char[] keyPassword, String pfx) 
 			throws ConfigurationException
 	{
-		super(pfx, properties, null, MANDATORY, log);
+		super(pfx, properties, META, log);
 		this.keyPassword = keyPassword;
 		this.mainPassword = mainPassword;
 		createCredentialSafe();
@@ -169,7 +172,7 @@ public class CredentialProperties extends PropertiesHelper
 	private void createCredential() throws ConfigurationException, 
 		KeyStoreException, IOException, CertificateException
 	{
-		credPath = getValue(PROP_LOCATION);
+		credPath = getFileValueAsString(PROP_LOCATION, false);
 		log.debug("Credential file path: " + credPath);
 		File ks = new File(credPath);
 		if (!ks.exists() || !ks.canRead() || !ks.isFile())
@@ -180,20 +183,20 @@ public class CredentialProperties extends PropertiesHelper
 		char[] credPassword = mainPassword;
 		if (mainPassword == null)
 		{
-			String pass = getValue(PROP_PASSWORD, true, true);
+			String pass = getValue(PROP_PASSWORD);
 			credPassword = pass == null ? null : pass.toCharArray();
 		} 
 		
-		String keyLocation = getValue(PROP_KEY_LOCATION, true);
-		String ksAlias = getValue(PROP_KS_ALIAS, true);
+		String keyLocation = getFileValueAsString(PROP_KEY_LOCATION, false);
+		String ksAlias = getValue(PROP_KS_ALIAS);
 		char[] ksKeyPassword = keyPassword;
 		if (keyPassword == null)
 		{
-			String pass = getValue(PROP_KS_KEY_PASSWORD, true, true);
+			String pass = getValue(PROP_KS_KEY_PASSWORD);
 			ksKeyPassword = pass == null ? null : pass.toCharArray();
 		}
 		
-		type = getValue(PROP_FORMAT, true);
+		type = getValue(PROP_FORMAT);
 		if (type == null)
 		{
 			type = autodetectType(credPath, credPassword, keyLocation, 

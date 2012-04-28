@@ -7,14 +7,12 @@ package eu.unicore.security.util;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyStoreException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -85,23 +83,24 @@ public class TruststoreProperties extends PropertiesHelper
 	private DirectoryCertChainValidator directoryValidator = null;
 	private KeystoreCertChainValidator ksValidator = null;
 		
-	public final static Map<String, String> DEFAULTS = new HashMap<String, String>();
-	public final static Map<String, String> MANDATORY = new HashMap<String, String>();
+	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
 	static 
 	{
-		DEFAULTS.put(PROP_PROXY_SUPPORT, "ALLOW");
-		DEFAULTS.put(PROP_CRL_MODE, CrlCheckingMode.IF_VALID.name());
-		DEFAULTS.put(PROP_UPDATE, "600");
-		DEFAULTS.put(PROP_OPENSSL_NS_MODE, NamespaceCheckingMode.EUGRIDPMA_GLOBUS.name());
-		DEFAULTS.put(PROP_OPENSSL_DIR, "/etc/grid-security/certificates" );
-		DEFAULTS.put(PROP_CRL_UPDATE, "600");
-		DEFAULTS.put(PROP_CRL_CONNECTION_TIMEOUT, "15");
-		DEFAULTS.put(PROP_CRL_CACHE_PATH, null);
-		DEFAULTS.put(PROP_DIRECTORY_ENCODING, "PEM");
-		DEFAULTS.put(PROP_DIRECTORY_CONNECTION_TIMEOUT, "15");
-		DEFAULTS.put(PROP_DIRECTORY_CACHE_PATH, null);
+
+		META.put(PROP_PROXY_SUPPORT, new PropertyMD("ALLOW"));
+		META.put(PROP_CRL_MODE, new PropertyMD(CrlCheckingMode.IF_VALID.name()));
+		META.put(PROP_UPDATE, new PropertyMD("600").setLong());
+		META.put(PROP_OPENSSL_NS_MODE, new PropertyMD(NamespaceCheckingMode.EUGRIDPMA_GLOBUS.name()));
+		META.put(PROP_OPENSSL_DIR, new PropertyMD("/etc/grid-security/certificates"));
+		META.put(PROP_CRL_UPDATE, new PropertyMD("600").setLong());
+		META.put(PROP_CRL_CONNECTION_TIMEOUT, new PropertyMD("15"));
+		META.put(PROP_CRL_CACHE_PATH, new PropertyMD(null));
+		META.put(PROP_DIRECTORY_ENCODING, new PropertyMD("PEM"));
+		META.put(PROP_DIRECTORY_CONNECTION_TIMEOUT, new PropertyMD("15"));
+		META.put(PROP_DIRECTORY_CACHE_PATH, new PropertyMD(null));
 		
-		MANDATORY.put(PROP_TYPE, "truststore type");
+		META.put(PROP_TYPE, new PropertyMD().setMandatory().setDescription("truststore type"));
+		META.put(PROP_KS_PASSWORD, new PropertyMD().setSecret());
 	}
 
 	private String type;
@@ -150,7 +149,7 @@ public class TruststoreProperties extends PropertiesHelper
 			Collection<? extends StoreUpdateListener> initialListeners, String pfx) 
 				throws ConfigurationException
 	{
-		super(pfx, properties, DEFAULTS, MANDATORY, log);
+		super(pfx, properties, META, log);
 		this.initialListeners = initialListeners;
 		createValidatorSafe();
 	}
@@ -196,7 +195,7 @@ public class TruststoreProperties extends PropertiesHelper
 		if (opensslValidator != null)
 			return;
 		
-		long newCrlUpdateInterval = getLongValue(PROP_CRL_UPDATE, true);
+		long newCrlUpdateInterval = getLongValue(PROP_CRL_UPDATE);
 		if (newCrlUpdateInterval != crlUpdateInterval)
 		{
 			if (directoryValidator != null)
@@ -207,7 +206,7 @@ public class TruststoreProperties extends PropertiesHelper
 			log.info("Updated " + prefix+PROP_CRL_UPDATE + " value to " + crlUpdateInterval);
 		}
 		
-		List<String> newCrlLocations = getLocations(PROP_CRL_LOCATIONS);
+		List<String> newCrlLocations = getListOfValues(PROP_CRL_LOCATIONS, false);
 		if (!newCrlLocations.equals(crlLocations))
 		{
 			if (directoryValidator != null)
@@ -221,7 +220,7 @@ public class TruststoreProperties extends PropertiesHelper
 		if (ksValidator != null)
 			return;
 		
-		List<String> newDirectoryLocations = getLocations(PROP_DIRECTORY_LOCATIONS);
+		List<String> newDirectoryLocations = getListOfValues(PROP_DIRECTORY_LOCATIONS, false);
 		if (!newDirectoryLocations.equals(directoryLocations))
 		{
 			directoryValidator.setCrls(newDirectoryLocations);
@@ -279,10 +278,10 @@ public class TruststoreProperties extends PropertiesHelper
 			throws ConfigurationException, KeyStoreException, IOException
 	{
 		setCrlSettings();
-		directoryLocations = getLocations(PROP_DIRECTORY_LOCATIONS);
+		directoryLocations = getListOfValues(PROP_DIRECTORY_LOCATIONS, false);
 		setDirectoryEncoding();
 		caConnectionTimeout = getIntValue(PROP_DIRECTORY_CONNECTION_TIMEOUT);
-		caDiskCache = getDirectoryValue(PROP_DIRECTORY_CACHE_PATH, true);
+		caDiskCache = getFileValueAsString(PROP_DIRECTORY_CACHE_PATH, true);
 		
 		ValidatorParamsExt params = getValidatorParamsExt();
 		return new DirectoryCertChainValidator(directoryLocations, directoryEncoding, 
@@ -292,7 +291,7 @@ public class TruststoreProperties extends PropertiesHelper
 	private OpensslCertChainValidator getOpensslValidator() throws ConfigurationException
 	{
 		setNsCheckingMode();
-		opensslDir = getDirectoryValue(PROP_OPENSSL_DIR, false);
+		opensslDir = getFileValueAsString(PROP_OPENSSL_DIR, true);
 
 		RevocationParameters revocationSettings = new RevocationParameters(crlMode);
 		ValidatorParams params = new ValidatorParams(revocationSettings, 
@@ -305,7 +304,7 @@ public class TruststoreProperties extends PropertiesHelper
 			throws ConfigurationException, KeyStoreException, IOException
 	{
 		setCrlSettings();
-		ksPath = getValue(PROP_KS_PATH, true);
+		ksPath = getValue(PROP_KS_PATH);
 		if (ksPath == null)
 			throw new ConfigurationException("Keystore path must be set, property: " + 
 					prefix + PROP_KS_PATH);
@@ -317,13 +316,13 @@ public class TruststoreProperties extends PropertiesHelper
 					prefix + PROP_KS_PATH + " must be an EXISTING, READABLE file: " + 
 					ksPath);
 
-		String pass = getValue(PROP_KS_PASSWORD, true, true);
+		String pass = getValue(PROP_KS_PASSWORD);
 		if (pass == null)
 			throw new ConfigurationException("Keystore password must be set, property: " + 
 					prefix + PROP_KS_PASSWORD);
 		ksPassword = pass.toCharArray();
 		
-		ksType = getValue(PROP_KS_TYPE, true);
+		ksType = getValue(PROP_KS_TYPE);
 		log.debug("Trust store keystore format: " + ksType);
 		if (ksType == null)
 			autodetectKeystoreType();
@@ -393,8 +392,8 @@ public class TruststoreProperties extends PropertiesHelper
 	{
 		crlUpdateInterval = getLongValue(PROP_CRL_UPDATE);
 		crlConnectionTimeout = getIntValue(PROP_CRL_CONNECTION_TIMEOUT);
-		crlDiskCache = getDirectoryValue(PROP_CRL_CACHE_PATH, true);
-		crlLocations = getLocations(PROP_CRL_LOCATIONS);
+		crlDiskCache = getFileValueAsString(PROP_CRL_CACHE_PATH, true);
+		crlLocations = getListOfValues(PROP_CRL_LOCATIONS, false);
 	}
 	
 	private ValidatorParamsExt getValidatorParamsExt()
@@ -418,39 +417,5 @@ public class TruststoreProperties extends PropertiesHelper
 					" and its autodetection failed. Try to set it and also " +
 					"review password and location - most probably those are wrong.");
 		}
-	}
-	
-	private String getDirectoryValue(String name, boolean acceptNoVal) 
-			throws ConfigurationException
-	{
-		String val = getValue(name, acceptNoVal);
-		if (val == null)
-			return val;
-			
-		File f = new File(val);
-		if (!f.exists() || !f.isDirectory() || !f.canRead())
-			throw new ConfigurationException("Value of "
-					+ prefix + name + ", must be a path of an EXISTING and READABLE directory.");
-		return val;
-	}
-	
-	private List<String> getLocations(String prefix2)
-	{
-		List<String> ret = new ArrayList<String>();
-		String base = prefix + prefix2;
-		Set<Object> keys = properties.keySet();
-		for (Object keyO: keys)
-		{
-			String key = (String) keyO;
-			if (key.startsWith(base))
-			{
-				String v = properties.getProperty(key);
-				log.debug("Trust store parameter " + key + 
-					", value of location is: " + v);
-				ret.add(v);
-			}
-		}
-		
-		return ret;
 	}
 }

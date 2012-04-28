@@ -19,6 +19,7 @@ import eu.unicore.security.util.FilePropertiesHelper;
 import eu.unicore.security.util.IAuthnAndTrustConfiguration;
 import eu.unicore.security.util.Log;
 import eu.unicore.security.util.PropertiesHelper;
+import eu.unicore.security.util.PropertyMD;
 import eu.unicore.security.util.TruststoreProperties;
 
 /**
@@ -63,19 +64,18 @@ public class ClientProperties extends DefaultClientConfiguration
 	public static final String EXTRA_HTTP_LIB_PROPERTIES_PREFIX = "http.";
 	
 
-	public final static Map<String, String> DEFAULTS = new HashMap<String, String>();
-	public final static Map<String, String> MANDATORY = new HashMap<String, String>();
+	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
 	static 
 	{
-		DEFAULTS.put(PROP_HTTP_AUTHN_ENABLED, "false");
-		DEFAULTS.put(PROP_HTTP_PASSWORD, "");
-		DEFAULTS.put(PROP_HTTP_USER, "");
-		DEFAULTS.put(PROP_IN_HANDLERS, "");
-		DEFAULTS.put(PROP_MESSAGE_SIGNING_ENABLED, "true");
-		DEFAULTS.put(PROP_OUT_HANDLERS, "");
-		DEFAULTS.put(PROP_SSL_AUTHN_ENABLED, "true");
-		DEFAULTS.put(PROP_SSL_ENABLED, "true");
-		DEFAULTS.put(PROP_SERVER_HOSTNAME_CHECKING, SERVER_HOSTNAME_CHECKING_WARN);
+		META.put(PROP_HTTP_AUTHN_ENABLED, new PropertyMD("false"));
+		META.put(PROP_HTTP_PASSWORD, new PropertyMD("").setSecret());
+		META.put(PROP_HTTP_USER, new PropertyMD(""));
+		META.put(PROP_IN_HANDLERS, new PropertyMD(""));
+		META.put(PROP_MESSAGE_SIGNING_ENABLED, new PropertyMD("true"));
+		META.put(PROP_OUT_HANDLERS, new PropertyMD(""));
+		META.put(PROP_SSL_AUTHN_ENABLED, new PropertyMD("true"));
+		META.put(PROP_SSL_ENABLED, new PropertyMD("true"));
+		META.put(PROP_SERVER_HOSTNAME_CHECKING, new PropertyMD(SERVER_HOSTNAME_CHECKING_WARN));
 	}
 
 	//all those constructors sucks a bit- but there is no multi inheritance in Java, 
@@ -163,7 +163,7 @@ public class ClientProperties extends DefaultClientConfiguration
 	{
 		setValidator(authAndTrust.getValidator());
 		setCredential(authAndTrust.getCredential());
-		PropertiesHelper properties = new PropertiesHelper(clientPrefix, p, DEFAULTS, null, log);
+		PropertiesHelper properties = new PropertiesHelper(clientPrefix, p, META, log);
 		setSslEnabled(properties.getBooleanValue(PROP_SSL_ENABLED));
 		if (isSslEnabled()) 
 		{
@@ -173,7 +173,7 @@ public class ClientProperties extends DefaultClientConfiguration
 		setHttpAuthn(properties.getBooleanValue(PROP_HTTP_AUTHN_ENABLED));
 		if (doHttpAuthn())
 		{
-			setHttpPassword(properties.getValue(PROP_HTTP_PASSWORD, true, true));
+			setHttpPassword(properties.getValue(PROP_HTTP_PASSWORD));
 			setHttpUser(properties.getValue(PROP_HTTP_USER));
 		}
 		
