@@ -88,23 +88,22 @@ public class HttpUtils {
 
 	/**
 	 * Convenience method for getting a {@link HttpClient} configured 
-	 * with HTTP proxy support and SSL setup. 
+	 * with HTTP proxy support and SSL setup. Whenever possible use this method.
 	 * @param uri -  URI to connect to
 	 * @param security - security (i.e. SSL) properties
-	 * @param properties - additional properties used to customize the client
 	 * @return a preconfigured http client
 	 */
-	public static synchronized HttpClient createClient(String uri, 
-			IClientConfiguration security, Properties properties)
+	public static synchronized HttpClient createClient(String uri, IClientConfiguration security)
 	{
-		HttpClient client = createClient(properties);
+		HttpClient client = createClient(security.getExtraSettings());
 		configureSSL(client, security);
-		configureProxy(client, uri, properties);
+		configureProxy(client, uri, security.getExtraSettings());
 		return client;
 	}
 
 	/**
-	 * create a HTTP client (code is based on XFire's {@link CommonsHttpMessageSender}
+	 * Create a HTTP client (code is based on XFire's {@link CommonsHttpMessageSender}.
+	 * The returned client has neither SSL nor HTTP proxy support configured.
 	 */
 	public static synchronized HttpClient createClient(Properties properties)
 	{

@@ -110,7 +110,7 @@ public class TestHttpUtils extends TestCase
 		IClientConfiguration secCfg = new DefaultClientConfiguration(validator, cred);
 		
 		String url = server.getSecUrl()+"/servlet1";
-		HttpClient client = HttpUtils.createClient(url, secCfg, new Properties());
+		HttpClient client = HttpUtils.createClient(url, secCfg);
 		GetMethod get = new GetMethod(url);
 		client.executeMethod(get);
 		String resp = get.getResponseBodyAsString();
@@ -127,7 +127,7 @@ public class TestHttpUtils extends TestCase
 		
 		String url = server.getSecUrl()+"/servlet1";
 		
-		HttpClient client = HttpUtils.createClient(url, secCfg, new Properties());
+		HttpClient client = HttpUtils.createClient(url, secCfg);
 		client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, 
 			new DefaultHttpMethodRetryHandler(0, false));
 
@@ -190,7 +190,7 @@ public class TestHttpUtils extends TestCase
 			ServerHostnameCheckingMode mode) throws Exception
 	{
 		secCfg.setServerHostnameCheckingMode(mode);
-		HttpClient client = HttpUtils.createClient(url, secCfg, new Properties());
+		HttpClient client = HttpUtils.createClient(url, secCfg);
 		GetMethod get = new GetMethod(url);
 		client.executeMethod(get);
 		get.getResponseBodyAsString();

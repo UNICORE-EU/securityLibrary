@@ -64,8 +64,9 @@ public class TestProxyCalls extends TestCase{
 		props.setProperty(HttpUtils.HTTP_PROXY_HOST, "localhost");
 		props.setProperty(HttpUtils.HTTP_PROXY_PORT, String.valueOf(port));
 		String uri="http://www.verisign.com/";
-		HttpClient client=HttpUtils.createClient(uri, new DefaultClientConfiguration(), 
-				props);
+		DefaultClientConfiguration config = new DefaultClientConfiguration();
+		config.setExtraSettings(props);
+		HttpClient client=HttpUtils.createClient(uri, config);
 		GetMethod httpget = new GetMethod("http://www.verisign.com/");
 		try { 
 			client.executeMethod(httpget);
