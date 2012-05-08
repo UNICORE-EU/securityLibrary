@@ -90,13 +90,14 @@ public class HttpUtils {
 	 * Convenience method for getting a {@link HttpClient} configured 
 	 * with HTTP proxy support and SSL setup. Whenever possible use this method.
 	 * @param uri -  URI to connect to
-	 * @param security - security (i.e. SSL) properties
+	 * @param security - Security settings. Note that SSL can be turned off there.
 	 * @return a preconfigured http client
 	 */
 	public static synchronized HttpClient createClient(String uri, IClientConfiguration security)
 	{
 		HttpClient client = createClient(security.getExtraSettings());
-		configureSSL(client, security);
+		if (security.isSslEnabled())
+			configureSSL(client, security);
 		configureProxy(client, uri, security.getExtraSettings());
 		return client;
 	}

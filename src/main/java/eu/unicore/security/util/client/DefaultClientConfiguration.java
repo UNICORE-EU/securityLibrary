@@ -46,7 +46,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	}
 
 	/**
-	 * This constructor is the typical for UNICORE: ssl authN is on, http authn is off. 
+	 * This constructor is the typical for UNICORE: SSL and ssl authN is on, http authn is off. 
 	 * @param validator
 	 * @param credential
 	 */
@@ -54,6 +54,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	{
 		super(validator, credential);
 		this.sslAuthn = true;
+		this.sslEnabled = true;
 	}
 
 	/**

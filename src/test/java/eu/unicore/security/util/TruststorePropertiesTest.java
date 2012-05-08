@@ -27,7 +27,7 @@ public class TruststorePropertiesTest extends TestCase
 	public void testOpenssl()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TYPE_OPENSSL);
+		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TruststoreType.openssl.toString());
 		p.setProperty(DEFAULT_PREFIX + PROP_OPENSSL_DIR, PFX+"openssl");
 		p.setProperty(DEFAULT_PREFIX + PROP_OPENSSL_NS_MODE, "EUGRIDPMA_GLOBUS_REQUIRE");
 		p.setProperty(DEFAULT_PREFIX + PROP_CRL_MODE, "REQUIRE");
@@ -46,7 +46,7 @@ public class TruststorePropertiesTest extends TestCase
 	public void testOpensslDefaults()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TYPE_OPENSSL);
+		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TruststoreType.openssl.toString());
 		p.setProperty(DEFAULT_PREFIX + PROP_OPENSSL_DIR, PFX+"openssl");
 		
 		OpensslCertChainValidator v = (OpensslCertChainValidator) verify(p);
@@ -66,7 +66,7 @@ public class TruststorePropertiesTest extends TestCase
 	public void testDirectory()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TYPE_DIRECTORY);
+		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TruststoreType.directory.toString());
 		p.setProperty(DEFAULT_PREFIX + PROP_UPDATE, "1234");
 		p.setProperty(DEFAULT_PREFIX + PROP_CRL_MODE, "REQUIRE");
 		p.setProperty(DEFAULT_PREFIX + PROP_PROXY_SUPPORT, "DENY");
@@ -98,7 +98,7 @@ public class TruststorePropertiesTest extends TestCase
 	public void testDirectoryDefaults()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TYPE_DIRECTORY);
+		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TruststoreType.directory.toString());
 		p.setProperty(DEFAULT_PREFIX + PROP_DIRECTORY_LOCATIONS, PFX+"dir/*.pem");
 		
 		DirectoryCertChainValidator v = (DirectoryCertChainValidator) verify(p);
@@ -120,7 +120,7 @@ public class TruststorePropertiesTest extends TestCase
 	public void testJKS()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TYPE_KEYSTORE);
+		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TruststoreType.keystore.toString());
 		p.setProperty(DEFAULT_PREFIX + PROP_KS_PATH, PFX+"truststore1.jks");
 		p.setProperty(DEFAULT_PREFIX + PROP_KS_PASSWORD, "the!njs");
 		KeystoreCertChainValidator v = (KeystoreCertChainValidator) verify(p);
@@ -132,7 +132,7 @@ public class TruststorePropertiesTest extends TestCase
 	public void testPKCS12()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TYPE_KEYSTORE);
+		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TruststoreType.keystore.toString());
 		p.setProperty(DEFAULT_PREFIX + PROP_KS_PATH, PFX+"keystore-1.p12");
 		p.setProperty(DEFAULT_PREFIX + PROP_KS_PASSWORD, "the!njs");
 		KeystoreCertChainValidator v = (KeystoreCertChainValidator) verify(p);

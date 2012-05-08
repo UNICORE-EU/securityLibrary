@@ -166,7 +166,7 @@ public class TestHttpUtils extends TestCase
 		
 		try
 		{
-			performRequest(url, secCfg, ServerHostnameCheckingMode.CHECK_FAIL);
+			performRequest(url, secCfg, ServerHostnameCheckingMode.FAIL);
 			fail("Managed to make a connection to a server " +
 					"with cert subject different from its address");
 		} catch (SocketException e)
@@ -181,7 +181,7 @@ public class TestHttpUtils extends TestCase
 			fail("Got wrong exception: " + e);
 		}
 		
-		performRequest(url, secCfg, ServerHostnameCheckingMode.CHECK_WARN);
+		performRequest(url, secCfg, ServerHostnameCheckingMode.WARN);
 
 		performRequest(url, secCfg, ServerHostnameCheckingMode.NONE);
 	}

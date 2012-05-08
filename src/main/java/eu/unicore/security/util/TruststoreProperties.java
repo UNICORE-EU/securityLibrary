@@ -7,7 +7,6 @@ package eu.unicore.security.util;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyStoreException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -49,11 +48,9 @@ public class TruststoreProperties extends PropertiesHelper
 
 	public static final String DEFAULT_PREFIX = "truststore.";
 	
+	public enum TruststoreType {keystore, openssl, directory};
 	//common for all
 	public static final String PROP_TYPE = "type";
-	public static final String TYPE_KEYSTORE = "keystore";
-	public static final String TYPE_OPENSSL = "openssl";
-	public static final String TYPE_DIRECTORY = "directory";
 
 	public static final String PROP_UPDATE = "updateInterval";
 	public static final String PROP_PROXY_SUPPORT = "allowProxy";
@@ -87,23 +84,24 @@ public class TruststoreProperties extends PropertiesHelper
 	static 
 	{
 
-		META.put(PROP_PROXY_SUPPORT, new PropertyMD("ALLOW"));
-		META.put(PROP_CRL_MODE, new PropertyMD(CrlCheckingMode.IF_VALID.name()));
+		META.put(PROP_PROXY_SUPPORT, new PropertyMD(ProxySupport.ALLOW));
+		META.put(PROP_CRL_MODE, new PropertyMD(CrlCheckingMode.IF_VALID));
 		META.put(PROP_UPDATE, new PropertyMD("600").setLong());
-		META.put(PROP_OPENSSL_NS_MODE, new PropertyMD(NamespaceCheckingMode.EUGRIDPMA_GLOBUS.name()));
-		META.put(PROP_OPENSSL_DIR, new PropertyMD("/etc/grid-security/certificates"));
+		META.put(PROP_OPENSSL_NS_MODE, new PropertyMD(NamespaceCheckingMode.EUGRIDPMA_GLOBUS));
+		META.put(PROP_OPENSSL_DIR, new PropertyMD("/etc/grid-security/certificates").setPath());
 		META.put(PROP_CRL_UPDATE, new PropertyMD("600").setLong());
 		META.put(PROP_CRL_CONNECTION_TIMEOUT, new PropertyMD("15"));
-		META.put(PROP_CRL_CACHE_PATH, new PropertyMD(null));
-		META.put(PROP_DIRECTORY_ENCODING, new PropertyMD("PEM"));
+		META.put(PROP_CRL_CACHE_PATH, new PropertyMD(null).setPath());
+		META.put(PROP_DIRECTORY_ENCODING, new PropertyMD(Encoding.PEM));
 		META.put(PROP_DIRECTORY_CONNECTION_TIMEOUT, new PropertyMD("15"));
-		META.put(PROP_DIRECTORY_CACHE_PATH, new PropertyMD(null));
+		META.put(PROP_DIRECTORY_CACHE_PATH, new PropertyMD(null).setPath());
 		
-		META.put(PROP_TYPE, new PropertyMD().setMandatory().setDescription("truststore type"));
+		META.put(PROP_TYPE, new PropertyMD().setEnum(TruststoreType.directory).
+				setMandatory().setDescription("truststore type"));
 		META.put(PROP_KS_PASSWORD, new PropertyMD().setSecret());
 	}
 
-	private String type;
+	private TruststoreType type;
 	
 	private ProxySupport proxySupport;
 	private CrlCheckingMode crlMode;
@@ -159,17 +157,17 @@ public class TruststoreProperties extends PropertiesHelper
 	 */
 	public X509CertChainValidator getValidator()
 	{
-		if (type.equalsIgnoreCase(TYPE_KEYSTORE))
+		if (type.equals(TruststoreType.keystore))
 		{
 			return ksValidator;
-		} else if (type.equalsIgnoreCase(TYPE_OPENSSL))
+		} else if (type.equals(TruststoreType.openssl))
 		{
 			return opensslValidator;
-		} else if (type.equalsIgnoreCase(TYPE_DIRECTORY))
+		} else if (type.equals(TruststoreType.directory))
 		{
 			return directoryValidator;
 		}
-		throw new RuntimeException("BUG! After object construction type value is unknown: " + type);
+		throw new RuntimeException("BUG: not all truststore types are handled in the code");
 	}
 
 	/**
@@ -250,26 +248,22 @@ public class TruststoreProperties extends PropertiesHelper
 	private void createValidator() throws ConfigurationException,
 			KeyStoreException, IOException
 	{
-		type = getValue(PROP_TYPE);
-		log.debug("Truststore type configured as: " + type);
+		type = getEnumValue(PROP_TYPE, TruststoreType.class);
 		storeUpdateInterval = getLongValue(PROP_UPDATE);
 		
-		setCrlCheckingMode();
-		setProxySupport();
+		crlMode = getEnumValue(PROP_CRL_MODE, CrlCheckingMode.class);
+		proxySupport = getEnumValue(PROP_PROXY_SUPPORT, ProxySupport.class);
 		
-		if (type.equals(TYPE_KEYSTORE))
+		if (type.equals(TruststoreType.keystore))
 		{
 			ksValidator = getKeystoreValidator();
-		} else if (type.equals(TYPE_OPENSSL))
+		} else if (type.equals(TruststoreType.openssl))
 		{
 			opensslValidator = getOpensslValidator();
-		} else if (type.equals(TYPE_DIRECTORY))
+		} else if (type.equals(TruststoreType.directory))
 		{
 			directoryValidator = getDirectoryValidator();
-		} else
-			throw new ConfigurationException("Unknown type of keystore used: " 
-					+ type + " must be one of: " + TYPE_DIRECTORY + ", " +
-					TYPE_KEYSTORE + ", " + TYPE_OPENSSL);
+		}
 	}
 
 	
@@ -279,7 +273,7 @@ public class TruststoreProperties extends PropertiesHelper
 	{
 		setCrlSettings();
 		directoryLocations = getListOfValues(PROP_DIRECTORY_LOCATIONS, false);
-		setDirectoryEncoding();
+		directoryEncoding = getEnumValue(PROP_DIRECTORY_ENCODING, Encoding.class);
 		caConnectionTimeout = getIntValue(PROP_DIRECTORY_CONNECTION_TIMEOUT);
 		caDiskCache = getFileValueAsString(PROP_DIRECTORY_CACHE_PATH, true);
 		
@@ -290,7 +284,7 @@ public class TruststoreProperties extends PropertiesHelper
 
 	private OpensslCertChainValidator getOpensslValidator() throws ConfigurationException
 	{
-		setNsCheckingMode();
+		nsMode = getEnumValue(PROP_OPENSSL_NS_MODE, NamespaceCheckingMode.class);
 		opensslDir = getFileValueAsString(PROP_OPENSSL_DIR, true);
 
 		RevocationParameters revocationSettings = new RevocationParameters(crlMode);
@@ -308,7 +302,6 @@ public class TruststoreProperties extends PropertiesHelper
 		if (ksPath == null)
 			throw new ConfigurationException("Keystore path must be set, property: " + 
 					prefix + PROP_KS_PATH);
-		log.debug("Trust store keystore file path: " + ksPath);
 
 		File ks = new File(ksPath);
 		if (!ks.exists() || !ks.canRead() || !ks.isFile())
@@ -323,7 +316,6 @@ public class TruststoreProperties extends PropertiesHelper
 		ksPassword = pass.toCharArray();
 		
 		ksType = getValue(PROP_KS_TYPE);
-		log.debug("Trust store keystore format: " + ksType);
 		if (ksType == null)
 			autodetectKeystoreType();
 		
@@ -331,62 +323,6 @@ public class TruststoreProperties extends PropertiesHelper
 		return new KeystoreCertChainValidator(ksPath, ksPassword, 
 			ksType, storeUpdateInterval*1000, params);
 	}	
-	
-	private void setCrlCheckingMode() throws ConfigurationException
-	{
-		String val = getValue(PROP_CRL_MODE);
-		try
-		{
-			crlMode = CrlCheckingMode.valueOf(val);
-		} catch (IllegalArgumentException e)
-		{
-			throw new ConfigurationException("Value " + val + " is not allowed for "
-					+ prefix + PROP_CRL_MODE + ", valid values are: " + 
-					Arrays.toString(CrlCheckingMode.values()));
-		}
-	}
-	
-	private void setProxySupport() throws ConfigurationException
-	{
-		String val = getValue(PROP_PROXY_SUPPORT);
-		try
-		{
-			proxySupport = ProxySupport.valueOf(val);
-		} catch (IllegalArgumentException e)
-		{
-			throw new ConfigurationException("Value " + val + " is not allowed for "
-					+ prefix + PROP_PROXY_SUPPORT + ", valid values are: " + 
-					Arrays.toString(ProxySupport.values()));
-		}
-	}
-
-	private void setNsCheckingMode() throws ConfigurationException
-	{
-		String val = getValue(PROP_OPENSSL_NS_MODE);
-		try
-		{
-			nsMode = NamespaceCheckingMode.valueOf(val);
-		} catch (IllegalArgumentException e)
-		{
-			throw new ConfigurationException("Value " + val + " is not allowed for "
-					+ prefix + PROP_OPENSSL_NS_MODE + ", valid values are: " + 
-					Arrays.toString(NamespaceCheckingMode.values()));
-		}
-	}
-
-	private void setDirectoryEncoding() throws ConfigurationException
-	{
-		String val = getValue(PROP_DIRECTORY_ENCODING);
-		try
-		{
-			directoryEncoding = Encoding.valueOf(val);
-		} catch (IllegalArgumentException e)
-		{
-			throw new ConfigurationException("Value " + val + " is not allowed for "
-					+ prefix + PROP_DIRECTORY_ENCODING + ", valid values are: " + 
-					Arrays.toString(Encoding.values()));
-		}
-	}
 	
 	private void setCrlSettings() throws ConfigurationException
 	{

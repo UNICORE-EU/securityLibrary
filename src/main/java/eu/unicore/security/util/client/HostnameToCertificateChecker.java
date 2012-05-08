@@ -60,7 +60,7 @@ public class HostnameToCertificateChecker extends AbstractHostnameToCertificateC
 				" the server uses a certificate which was not associated with its address." +
 				" The server DNS name is: '" + hostName + "' and its certificate subject is: '" +
 				X500NameUtils.getReadableForm(peerCertificate.getSubjectX500Principal()) + "'.";
-		if (mode == ServerHostnameCheckingMode.CHECK_WARN)
+		if (mode == ServerHostnameCheckingMode.WARN)
 		{
 			log.warn(message);
 			return;

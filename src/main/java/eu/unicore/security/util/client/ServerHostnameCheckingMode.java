@@ -21,10 +21,10 @@ public enum ServerHostnameCheckingMode
 	 * Checking will be performed but a failure will only result in a message presented to the user
 	 * or logged.
 	 */
-	CHECK_WARN, 
+	WARN, 
 	
 	/**
 	 * Checking will be performed and a failure will result in closing the connection.
 	 */
-	CHECK_FAIL 
+	FAIL 
 }

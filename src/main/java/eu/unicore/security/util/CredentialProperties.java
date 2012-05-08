@@ -57,7 +57,7 @@ public class CredentialProperties extends PropertiesHelper
 	static
 	{
 		META.put(PROP_LOCATION, new PropertyMD().setMandatory().
-				setDescription("credential location"));
+				setDescription("credential location").setPath());
 		META.put(PROP_PASSWORD, new PropertyMD().setSecret());
 		META.put(PROP_KS_KEY_PASSWORD, new PropertyMD().setSecret());
 	}
@@ -173,7 +173,6 @@ public class CredentialProperties extends PropertiesHelper
 		KeyStoreException, IOException, CertificateException
 	{
 		credPath = getFileValueAsString(PROP_LOCATION, false);
-		log.debug("Credential file path: " + credPath);
 		File ks = new File(credPath);
 		if (!ks.exists() || !ks.canRead() || !ks.isFile())
 			throw new ConfigurationException("Credential specified in the property " + 
@@ -204,7 +203,6 @@ public class CredentialProperties extends PropertiesHelper
 			log.info("Will use autodetected credential type >" + type + 
 				"< for " + credPath);
 		}
-		log.debug("Credential type configured as: " + type);
 
 		if (type.equalsIgnoreCase(FORMAT_JKS) || type.equalsIgnoreCase(FORMAT_PKCS12))
 		{
@@ -222,14 +220,12 @@ public class CredentialProperties extends PropertiesHelper
 				ksKeyPassword, ksAlias, type.toUpperCase());
 		} else if (type.equalsIgnoreCase(FORMAT_PEM))
 		{
-			log.debug("Credential's key file path: " + keyLocation);
 			if (keyLocation == null)
 				credential = new PEMCredential(credPath, credPassword);
 			else
 				credential = new PEMCredential(keyLocation, credPath, credPassword);
 		} else if (type.equalsIgnoreCase(FORMAT_DER))
 		{
-			log.debug("Credential's key file path: " + keyLocation);
 			if (keyLocation == null)
 				throw new ConfigurationException("For " + FORMAT_DER + 
 					" credential, the " + prefix + PROP_KEY_LOCATION + 

@@ -57,9 +57,6 @@ public class ClientProperties extends DefaultClientConfiguration
 	public static final String PROP_IN_HANDLERS = "inHandlers";
 	public static final String PROP_OUT_HANDLERS = "outHandlers";
 	public static final String PROP_SERVER_HOSTNAME_CHECKING = "serverHostnameChecking";
-	public static final String SERVER_HOSTNAME_CHECKING_NONE = "none";
-	public static final String SERVER_HOSTNAME_CHECKING_WARN = "warn";
-	public static final String SERVER_HOSTNAME_CHECKING_FAIL = "fail";
 	
 	public static final String EXTRA_HTTP_LIB_PROPERTIES_PREFIX = "http.";
 	
@@ -75,10 +72,10 @@ public class ClientProperties extends DefaultClientConfiguration
 		META.put(PROP_OUT_HANDLERS, new PropertyMD(""));
 		META.put(PROP_SSL_AUTHN_ENABLED, new PropertyMD("true"));
 		META.put(PROP_SSL_ENABLED, new PropertyMD("true"));
-		META.put(PROP_SERVER_HOSTNAME_CHECKING, new PropertyMD(SERVER_HOSTNAME_CHECKING_WARN));
+		META.put(PROP_SERVER_HOSTNAME_CHECKING, new PropertyMD(ServerHostnameCheckingMode.WARN));
 	}
 
-	//all those constructors sucks a bit- but there is no multi inheritance in Java, 
+	//all those constructors suck a bit- but there is no multi inheritance in Java, 
 	//so we can't reuse code from AuthAndTrustProperties...
 	
 	public ClientProperties(String file) throws IOException, ConfigurationException
@@ -180,14 +177,8 @@ public class ClientProperties extends DefaultClientConfiguration
 		setInHandlerClassNames(parseHandlers(properties, PROP_IN_HANDLERS));
 		setOutHandlerClassNames(parseHandlers(properties, PROP_OUT_HANDLERS));
 		
-		String hostnameMode = properties.getValue(PROP_SERVER_HOSTNAME_CHECKING);
-		if (hostnameMode.equalsIgnoreCase(SERVER_HOSTNAME_CHECKING_NONE) || 
-				hostnameMode.equalsIgnoreCase("false"))
-			setServerHostnameCheckingMode(ServerHostnameCheckingMode.NONE);
-		else if (hostnameMode.equalsIgnoreCase(SERVER_HOSTNAME_CHECKING_WARN))
-			setServerHostnameCheckingMode(ServerHostnameCheckingMode.CHECK_WARN);
-		else if (hostnameMode.equalsIgnoreCase(SERVER_HOSTNAME_CHECKING_FAIL))
-			setServerHostnameCheckingMode(ServerHostnameCheckingMode.CHECK_FAIL);
+		ServerHostnameCheckingMode hostnameMode = properties.getEnumValue(PROP_SERVER_HOSTNAME_CHECKING, ServerHostnameCheckingMode.class);
+		setServerHostnameCheckingMode(hostnameMode);
 		
 		//This is bit tricky: clientPrefix+EXTRA_... is the prefix for extra properties,
 		//but EXTRA_... must be left in the keys. 

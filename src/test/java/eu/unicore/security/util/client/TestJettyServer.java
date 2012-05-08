@@ -41,6 +41,7 @@ import org.mortbay.jetty.servlet.Context;
 import eu.unicore.security.util.AuthnAndTrustProperties;
 import eu.unicore.security.util.ConfigurationException;
 import eu.unicore.security.util.CredentialProperties;
+import eu.unicore.security.util.IAuthnAndTrustConfiguration;
 import eu.unicore.security.util.TruststoreProperties;
 import eu.unicore.security.util.jetty.JettyLogger;
 import eu.unicore.security.util.jetty.JettyProperties;
@@ -79,7 +80,8 @@ public class TestJettyServer extends JettyServerBase {
 		p.setProperty("k." + CredentialProperties.PROP_LOCATION, KEYSTORE);
 		p.setProperty("k." + CredentialProperties.PROP_FORMAT, "JKS");
 		p.setProperty("k." + CredentialProperties.PROP_PASSWORD, KEYSTORE_P);
-		p.setProperty("t." + TruststoreProperties.PROP_TYPE, TruststoreProperties.TYPE_KEYSTORE);
+		p.setProperty("t." + TruststoreProperties.PROP_TYPE, 
+				TruststoreProperties.TruststoreType.keystore.toString());
 		p.setProperty("t." + TruststoreProperties.PROP_KS_PATH, KEYSTORE);
 		p.setProperty("t." + TruststoreProperties.PROP_KS_TYPE, "JKS");
 		p.setProperty("t." + TruststoreProperties.PROP_KS_PASSWORD, KEYSTORE_P);
@@ -108,5 +110,9 @@ public class TestJettyServer extends JettyServerBase {
 
 	public void addServlet(String servlet, String path) throws Exception {
 		getRootContext().addServlet(Class.forName(servlet), path);
+	}
+	
+	public IAuthnAndTrustConfiguration getSecSettings() {
+		return securityConfiguration;
 	}
 }

@@ -162,6 +162,12 @@ public class JettyProperties extends PropertiesHelper
 	{
 		super(prefix, properties, defaults, log);
 	}
+	
+	protected JettyProperties(Properties properties, String prefix, Map<String, PropertyMD> defaults) 
+			throws ConfigurationException 
+	{
+		super(prefix, properties, defaults, log);
+	}
 }
 
 

@@ -20,7 +20,8 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 
 /**
- * Provides methods to parse properties and return them as String, ints, longs, Files or Lists of strings. 
+ * Provides methods to parse properties and return them as String, ints, longs, Files, arbitrary Enums 
+ * or Lists of strings. 
  * Logs values read from Properties source, additionally logs when default value is used (on DEBUG level) 
  * and in case when out of range values are found and defaults are present and used instead (WARN). 
  * The logging is performed only once per property. The object is configured with initial defaults and mandatory 
@@ -59,34 +60,87 @@ public class PropertiesHelper
 		this.metadata = propertiesMD;
 		if (this.metadata == null)
 			this.metadata = Collections.emptyMap();
-		checkMandatoryProperties(properties);
+		checkConstraints(properties);
 	}
 
 	public synchronized void setProperties(Properties properties) throws IOException, ConfigurationException
 	{
-		checkMandatoryProperties(properties);
+		checkConstraints(properties);
 		this.properties = properties;
 	}
 	
-	protected void checkMandatoryProperties(Properties properties) throws ConfigurationException
+	protected void checkConstraints(Properties properties) throws ConfigurationException
 	{
 		StringBuilder builder = new StringBuilder();
+		
 		for (Map.Entry<String, PropertyMD> o : metadata.entrySet())
 		{
-			if (o.getValue().isMandatory() && properties.get(prefix+o.getKey()) == null) 
+			PropertyMD meta = o.getValue();
+			try 
 			{
-				String description = o.getValue().getDescription();
-				if (description != null && description.length() > 0)
-					builder.append(prefix+o.getKey() + 
-						" (" + description + ")").append(" ");
-				else
-					builder.append(prefix+o.getKey()).append(" ");
+				checkPropertyConstraints(meta, o.getKey());
+			} catch (ConfigurationException e)
+			{
+				builder.append(e.toString() + "\n");
 			}
 		}
 		String warns = builder.toString().trim();
 		if (warns.length() > 0)
-			throw new ConfigurationException("The following mandatory properties are missing" +
-					" in the configuration: " + warns);
+			throw new ConfigurationException("The following problems were found in the configuration: "
+					+ warns);
+	}
+	
+	protected void checkPropertyConstraints(PropertyMD meta, String key) throws ConfigurationException {
+		if (meta.isMandatory() && !isSet(key)) 
+			throw new ConfigurationException("The property" + getKeyDescription(key) + 
+					" is mandatory");
+		
+		String value = properties.getProperty(prefix + key);
+		if (value == null)
+			return;
+		switch (meta.getType()) 
+		{
+		case PATH:
+			try
+			{
+				new File(value).getCanonicalPath();
+			} catch (IOException e1)
+			{
+				throw new ConfigurationException("The property" + getKeyDescription(key) + 
+						" must be a filesystem path, but is not: " + e1.getMessage());
+			}
+			break;
+		case INT:
+			getIntValue(key);
+			break;
+		case LONG:
+			getLongValue(key);
+			break;
+		case BOOLEAN:
+			getBooleanValue(key);
+			break;
+		case ENUM:
+			getEnumValue(key, meta.getEnumTypeInstance().getDeclaringClass());
+			break;
+		}
+	}
+	
+	/**
+	 * 
+	 * @param key
+	 * @return string with a full name of the key and its description if set.
+	 */
+	public String getKeyDescription(String key) 
+	{
+		PropertyMD meta = metadata.get(key);
+		if (meta == null)
+			return prefix + key;
+		
+		String description = meta.getDescription();
+		if (description != null && description.length() > 0)
+			return prefix + key + " (" + description + ")";
+		else
+			return prefix + key;
 	}
 	
 	public String getValue(String name)
@@ -98,9 +152,6 @@ public class PropertiesHelper
 		}
 		boolean doLog = (!warned.contains(name));
 		
-		if (doLog) 
-			logValue(name, val);
-
 		if (val == null) 
 		{
 			PropertyMD meta = metadata.get(name);
@@ -108,11 +159,18 @@ public class PropertiesHelper
 			if (hasDefault)
 			{
 				String defaultVal = meta.getDefault();
-				if (doLog) 
-					log.debug("Using default value for " + prefix + name + ": " + 
+				if (doLog)
+				{
+					log.debug("Parameter " + getKeyDescription(name) + " value is not set, using default value: " +
 						((defaultVal == null) ? "--BY DEFAULT NOT SET--" : defaultVal));
+					warned.add(name);
+				}
 				val = defaultVal;
 			}
+		} else
+		{
+			if (doLog) 
+				logValue(name, val);
 		}
 		return val;
 	}
@@ -128,7 +186,7 @@ public class PropertiesHelper
 		} catch (NumberFormatException e)
 		{
 			throw new ConfigurationException("Value " + val + " is not allowed for "
-					+ prefix + name + ", must be an integer number");
+					+ getKeyDescription(name) + ", must be an integer number");
 		}
 	}
 
@@ -143,23 +201,23 @@ public class PropertiesHelper
 		} catch (NumberFormatException e)
 		{
 			throw new ConfigurationException("Value " + val + " is not allowed for "
-					+ prefix + name + ", must be an integer number");
+					+ getKeyDescription(name) + ", must be an integer number");
 		}
 	}
 
 	protected <T extends Number> T checkBounds(String name, T current) throws ConfigurationException
 	{
-		PropertyMD meta = metadata.get(prefix+name);
+		PropertyMD meta = metadata.get(name);
 		if (meta == null)
 			return current;
 		if (current.longValue() < meta.getMin())
 		{
-			throw new ConfigurationException(prefix+name + " parameter value "
+			throw new ConfigurationException(getKeyDescription(name) + " parameter value "
 					+ "is too small, minimum is " + meta.getMin());
 		}
 		if (current.longValue() > meta.getMax())
 		{
-			throw new ConfigurationException(prefix+name + " parameter value "
+			throw new ConfigurationException(getKeyDescription(name) + " parameter value "
 					+ "is too big, maximum is " + meta.getMax());
 		}
 		
@@ -189,9 +247,34 @@ public class PropertiesHelper
         	if (val.equalsIgnoreCase("false") || val.equalsIgnoreCase("no"))
         		return false;
 		throw new ConfigurationException("Value " + val + " is not allowed for "
-				+ prefix + name + ", must be one of yes|true|no|false");
+				+ getKeyDescription(name) + ", must be one of yes|true|no|false");
 	}
 
+	/**
+	 * Returns the value of name key as a provided enum class instance. Important: mapping of string
+	 * value to enum label is done in case insensitive way. Therefore if your enum constants differ
+	 * only in case, do not use this method.
+	 * @param name
+	 * @param type
+	 * @return
+	 * @throws ConfigurationException
+	 */
+	public <T extends Enum<T>> T getEnumValue(String name, Class<T> type) throws ConfigurationException
+	{
+		String val = getValue(name);
+		if (val == null)
+			return null;
+		T[] constants = type.getEnumConstants();
+		StringBuilder allowed = new StringBuilder();
+		for (T label: constants) 
+		{
+			if (val.equalsIgnoreCase(label.name()))
+				return label;
+			allowed.append(label.name() + " ");
+		}
+		throw new ConfigurationException("Value " + val + " is not allowed for "
+				+ getKeyDescription(name) + ", must be one of " + allowed);
+	}
 	
 	/**
 	 * See {@link #getFileValue(String, boolean, boolean)}. This version converts the result
@@ -224,15 +307,15 @@ public class PropertiesHelper
 		
 		if (!f.exists() || !f.canRead())
 			throw new ConfigurationException("The value of "
-					+ prefix + name + "= '" + val + 
+					+ getKeyDescription(name) + "= '" + val + 
 					"', must represent an EXISTING and READABLE filesystem path.");
 		if (!f.isDirectory() && isDirectory)
 			throw new ConfigurationException("Value of "
-					+ prefix + name + "= '" + val +
+					+ getKeyDescription(name) + "= '" + val +
 					"', must be a path of a directory, not a file.");
 		if (!f.isFile() && !isDirectory)
 			throw new ConfigurationException("Value of "
-					+ prefix + name + "= '" + val +
+					+ getKeyDescription(name) + "= '" + val +
 					"', must be a path of an ordinary file.");
 		return f;
 	}
@@ -325,9 +408,9 @@ public class PropertiesHelper
 			hideValue = true;
 			
 		if (val == null)
-			log.debug("Parameter " + prefix + name + " value is not set");
+			log.debug("Parameter " + getKeyDescription(name) + " value is not set");
 		else
-			log.debug("Parameter " + prefix + name + " value is: " + 
+			log.debug("Parameter " + getKeyDescription(name) + " value is: " + 
 				(hideValue ? "--SECRET--" : val));
 	}
 	
@@ -338,15 +421,19 @@ public class PropertiesHelper
 	
 	public synchronized void setProperty(String key, String value)
 	{
+		PropertyMD meta = metadata.get(key);
 		//value == null can not be set
 		if (value == null)
 		{
-			PropertyMD meta = metadata.get(key);
 			if (meta != null && meta.isMandatory())
 				throw new IllegalArgumentException("Can not remove a mandatory property");
 			properties.remove(prefix+key);
 		} else
+		{
+			if (meta != null)
+				checkPropertyConstraints(meta, key);
 			properties.setProperty(prefix+key, value);
+		}
 		warned.remove(key);
 	}
 }
