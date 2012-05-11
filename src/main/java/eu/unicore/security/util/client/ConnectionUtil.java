@@ -4,7 +4,9 @@
  */
 package eu.unicore.security.util.client;
 
+import java.io.IOException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLSocket;
@@ -27,40 +29,39 @@ public class ConnectionUtil
 
 	/**
 	 * Utility method to get a certificate of an SSL peer. The SSL connection is established and if 
-	 * successful, the peers identity is returned.  
+	 * successful, the peers identity is returned.
+	 * TODO add timeout  
 	 * @param securityCfg
 	 * @param url
-	 * @return
+	 * @return certificate
+	 * @throws IOException 
+	 * @throws UnknownHostException 
 	 */
-	public static X509Certificate getPeerCertificate(IAuthnAndTrustConfiguration securityCfg, String url, Logger logger) {
+	public static X509Certificate getPeerCertificate(IAuthnAndTrustConfiguration securityCfg, String url, 
+			Logger logger) throws UnknownHostException, IOException {
 		if (securityCfg == null || securityCfg.getValidator() == null ||
 				securityCfg.getCredential() == null)
 			throw new IllegalArgumentException("Can not establish peer's identity " +
 					"without having credential and validator set.");
-		try {
-			URL u=new URL(url);
-			SSLSocketFactory socketFactory = SocketFactoryCreator.getSocketFactory(
-					securityCfg.getCredential(), 
-					securityCfg.getValidator()); 
-			SSLSocket s = (SSLSocket) socketFactory.createSocket(u.getHost(), u.getPort());
-			X509Certificate peer = (X509Certificate)s.getSession().getPeerCertificates()[0];
-			if (logger.isDebugEnabled()) {
-				try{
-					logger.debug("Got peer cert of <"+url+">,\n" +
-							"Name: "+
-							X500NameUtils.getReadableForm(peer.getSubjectX500Principal())+
-							"\nIssued by: "+
-							X500NameUtils.getReadableForm(peer.getIssuerX500Principal()));
-				} catch(Exception e) {
-					Log.logException("Problem with certificate for <"+url+">",e,logger);
-					return null;
-				}
+		URL u=new URL(url);
+		SSLSocketFactory socketFactory = SocketFactoryCreator.getSocketFactory(
+				securityCfg.getCredential(), 
+				securityCfg.getValidator()); 
+		SSLSocket s = (SSLSocket) socketFactory.createSocket(u.getHost(), u.getPort());
+		X509Certificate peer = (X509Certificate)s.getSession().getPeerCertificates()[0];
+		if (logger.isDebugEnabled()) {
+			try{
+				logger.debug("Got peer cert of <"+url+">,\n" +
+						"Name: "+
+						X500NameUtils.getReadableForm(peer.getSubjectX500Principal())+
+						"\nIssued by: "+
+						X500NameUtils.getReadableForm(peer.getIssuerX500Principal()));
+			} catch(Exception e) {
+				Log.logException("Problem with certificate for <"+url+">",e,logger);
+				return null;
 			}
-			s.close();
-			return peer;
-		} catch(Exception e) {
-			Log.logException("Can't get certificate for <"+url+">",e,logger);
 		}
-		return null;
+		s.close();
+		return peer;
 	}
 }
