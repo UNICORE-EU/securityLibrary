@@ -91,10 +91,10 @@ public class TruststoreProperties extends PropertiesHelper
 		META.put(PROP_OPENSSL_DIR, new PropertyMD("/etc/grid-security/certificates").setPath());
 		META.put(PROP_CRL_UPDATE, new PropertyMD("600").setLong());
 		META.put(PROP_CRL_CONNECTION_TIMEOUT, new PropertyMD("15"));
-		META.put(PROP_CRL_CACHE_PATH, new PropertyMD(null).setPath());
+		META.put(PROP_CRL_CACHE_PATH, new PropertyMD().setPath());
 		META.put(PROP_DIRECTORY_ENCODING, new PropertyMD(Encoding.PEM));
 		META.put(PROP_DIRECTORY_CONNECTION_TIMEOUT, new PropertyMD("15"));
-		META.put(PROP_DIRECTORY_CACHE_PATH, new PropertyMD(null).setPath());
+		META.put(PROP_DIRECTORY_CACHE_PATH, new PropertyMD().setPath());
 		
 		META.put(PROP_TYPE, new PropertyMD().setEnum(TruststoreType.directory).
 				setMandatory().setDescription("truststore type"));
