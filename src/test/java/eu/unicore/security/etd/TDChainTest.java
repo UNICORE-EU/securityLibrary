@@ -181,7 +181,66 @@ public class TDChainTest extends ETDTestBase
 		assertTrue(true);
 	}
 
-	
+	public void testWrongCustodianDN()
+	{
+		try
+		{
+			DelegationRestrictions restrictions = new DelegationRestrictions(
+					new Date(), 1, 3);
+			Vector<TrustDelegation> td = new Vector<TrustDelegation>();
+			td.add(etdEngine.generateTD("CN=fake", issuerCert1,
+					privKey1, issuerDN2, restrictions));
+			List<TrustDelegation> chain = etdEngine.issueChainedTD(td, 
+					issuerCert2, privKey2, receiverDN1, restrictions);
+			chain = etdEngine.issueChainedTD(chain, 
+					receiverCert1, privKey3, receiverDN2, restrictions);
+			
+			ValidationResult result = etdEngine.isTrustDelegated(chain, receiverDN2, "CN=fake", 
+						new BinaryCertChainValidator(true));
+			if (result.isValid() || !result.getInvalidResaon().contains("declared custodian (subject)"))
+				fail("Chain with wrong custodian passed validation: " + result);
+
+			ValidationResult result2 = etdEngine.isTrustDelegated(chain, receiverDN2, issuerDN2, 
+					new BinaryCertChainValidator(true));
+			if (result2.isValid() || !result2.getInvalidResaon().contains("Wrong user"))
+				fail("Chain with wrong custodian passed validation: " + result2);
+		} catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+		assertTrue(true);
+	}
+
+	public void testWrongCustodianCert()
+	{
+		try
+		{
+			DelegationRestrictions restrictions = new DelegationRestrictions(
+					new Date(), 1, 3);
+			Vector<TrustDelegation> td = new Vector<TrustDelegation>();
+			td.add(etdEngine.generateTD(issuerCert3[0], issuerCert1,
+					privKey1, issuerCert2, restrictions));
+			List<TrustDelegation> chain = etdEngine.issueChainedTD(td, 
+					issuerCert2, privKey2, receiverCert1, restrictions);
+			chain = etdEngine.issueChainedTD(chain, 
+					receiverCert1, privKey3, receiverCert2, null);
+			
+			ValidationResult result = etdEngine.isTrustDelegated(chain, receiverCert2, issuerCert2, 
+						new BinaryCertChainValidator(true));
+			if (result.isValid() || !result.getInvalidResaon().equals("Wrong user"))
+				fail("Chain with wrong custodian passed validation: " + result);
+
+			ValidationResult result2 = etdEngine.isTrustDelegated(chain, receiverCert2, issuerCert3, 
+					new BinaryCertChainValidator(true));
+			if (result2.isValid() || !result2.getInvalidResaon().contains("declared custodian (subject)"))
+				fail("Chain with wrong custodian passed validation: " + result);
+		} catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+		assertTrue(true);
+	}
+
 	public void testProxyLimit()
 	{
 		try

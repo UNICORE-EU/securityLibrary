@@ -8,10 +8,7 @@
 
 package eu.unicore.security;
 
-import java.security.cert.CertPath;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
-import java.util.ArrayList;
+import java.security.cert.X509Certificate;
 
 import junit.framework.TestCase;
 import eu.unicore.security.SecurityTokens;
@@ -28,15 +25,10 @@ public class TestEquality extends TestCase
 		{
 			MockSecurityConfig cfg = new MockSecurityConfig(false, true, true);
 			MockSecurityConfig cfgWrong = new MockSecurityConfig(false, true, false);
-			CertificateFactory factory = CertificateFactory.getInstance("X.509");
 			
-			ArrayList<Certificate> certs1 = new ArrayList<Certificate>();
-			certs1.add(cfg.getCredential().getCertificate());
-			CertPath cp1 = factory.generateCertPath(certs1);
+			X509Certificate cp1[] = new X509Certificate[] {cfg.getCredential().getCertificate()};
 
-			ArrayList<Certificate> certs2 = new ArrayList<Certificate>();
-			certs2.add(cfgWrong.getCredential().getCertificate());
-			CertPath cp2 = factory.generateCertPath(certs2);
+			X509Certificate[] cp2 = new X509Certificate[] {cfgWrong.getCredential().getCertificate()};
 
 			SecurityTokens t1 = new SecurityTokens();
 			SecurityTokens t2 = new SecurityTokens();

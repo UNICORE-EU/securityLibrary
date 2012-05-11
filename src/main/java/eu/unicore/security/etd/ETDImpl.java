@@ -26,6 +26,7 @@ import eu.unicore.security.dsig.DSigException;
 
 /**
  * Implements logic to generate and validate trust delegation assertions.
+ * FIXME! cert mode Java hash should be changed to a SHA2 hash! With backwards compatibility 
  * @author K. Benedyczak
  */
 public class ETDImpl implements ETDApi
@@ -304,10 +305,23 @@ public class ETDImpl implements ETDApi
 			return new ValidationResult(false, "Some of arguments are null");
 		if (td.size() == 0)
 			return new ValidationResult(false, "Delegation chain is empty");
-		String custodian = td.get(0).getCustodianDN();
+		TrustDelegation initial = td.get(0);
+		String custodian = initial.getCustodianDN();
 		if (!X500NameUtils.equal(user, custodian))
 			return new ValidationResult(false, "Wrong user, it is not equal to custodian, user is: " + 
 					user + " while custodian is: " + custodian);
+		X509Certificate []custodianCert = initial.getIssuerFromSignature();
+		if (custodianCert == null || custodianCert.length == 0)
+			return new ValidationResult(false, "No issuer certificate at position 1.");
+		
+		if (!X500NameUtils.equal(custodianCert[0].getSubjectX500Principal(), custodian))
+			return new ValidationResult(false, "The issuer's certificate of the initial trust delegation" +
+					" is not consistent with the declared custodian (subject)");
+		if (!X500NameUtils.equal(custodian, initial.getIssuerDN()))
+			return new ValidationResult(false, "The signer's certificate of the initial trust delegation" +
+					" is not consistent with the declared assertion issuer");
+
+		
 		int i=0;
 		int []maxProxies = new int[td.size()]; 
 		for (; i<td.size(); i++)
@@ -385,6 +399,16 @@ public class ETDImpl implements ETDApi
 		X509Certificate []custodianCert = initial.getIssuerFromSignature();
 		if (custodianCert == null || custodianCert.length == 0)
 			return new ValidationResult(false, "No issuer certificate at position 1.");
+		
+		if (!X500NameUtils.equal(custodianCert[0].getSubjectX500Principal(), custodian))
+			return new ValidationResult(false, "The issuer's certificate of the initial trust delegation" +
+					" is not consistent with the declared custodian (subject)");
+		if (custodianCert[0].hashCode() != custodianHash)
+			return new ValidationResult(false, "The issuer's certificate of the initial trust delegation" +
+					" is not consistent with the declared custodian (hash)");
+		if (!X500NameUtils.equal(custodianCert[0].getIssuerX500Principal(), initial.getIssuerDN()))
+			return new ValidationResult(false, "The signer's certificate of the initial trust delegation" +
+					" is not consistent with the declared assertion issuer");
 		
 		int i=0;
 		int []maxProxies = new int[td.size()]; 

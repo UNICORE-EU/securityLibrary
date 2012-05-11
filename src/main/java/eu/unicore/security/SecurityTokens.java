@@ -40,7 +40,6 @@
 package eu.unicore.security;
 
 import java.io.Serializable;
-import java.security.cert.CertPath;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +47,8 @@ import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
 
+import eu.emi.security.authn.x509.impl.X500NameUtils;
+import eu.emi.security.authn.x509.proxy.ProxyUtils;
 import eu.unicore.security.etd.TrustDelegation;
 
 /**
@@ -56,7 +57,15 @@ import eu.unicore.security.etd.TrustDelegation;
  * and digital signature status are kept here. The additional data  
  * can be stored in a <i>context</i> map. Some keys of objects that can 
  * be found in the context are defined here too 
- * (e.g. HTTP BASIC Auth login and password).  
+ * (e.g. HTTP BASIC Auth login and password).
+ * <p>
+ * Note about proxy certificates:
+ * This class can recognize proxy certificates (for both user and consignor).
+ * By default this support is turned on. When proxy support is turned on 
+ * the object will return an EEC (or EEC DN) for all calls to methods returning 
+ * a final identity. Still it is possible to get also the proxy certificate(s) when
+ * using the methods returning full certificate chains. 
+ * 
  * @author K. Benedyczak
  * @author Bernd Schuller
  */
@@ -92,11 +101,12 @@ public class SecurityTokens implements Serializable
 	 */
 	public static final String SCOPE_REQUEST = "request";
 
-	private CertPath user;
-	private CertPath consignor;
+	private X509Certificate[] user;
+	private X509Certificate[] consignor;
 	private SignatureStatus signatureStatus = SignatureStatus.UNCHECKED;
 	private Map<String, Object> context;
 	private X500Principal userName;
+	
 	/**
 	 * If true then tdTokens confirmed that the User allowed the Consignor to act 
 	 * on her behalf or Consignor is equal to User or this is a local call.
@@ -107,39 +117,58 @@ public class SecurityTokens implements Serializable
 	 */
 	private boolean trustDelegationValidated;
 	private List<TrustDelegation> tdTokens;
+	
+	private boolean supportProxy;
 
+	/**
+	 * With proxy support turned on
+	 */
 	public SecurityTokens()
 	{
-		context = new HashMap<String, Object>();
+		this(true);
 	}
 
+	/**
+	 * Allows to set proxy support
+	 */
+	public SecurityTokens(boolean supportProxy)
+	{
+		context = new HashMap<String, Object>();
+		this.supportProxy = supportProxy;
+	}
 
 	/**
 	 * Sets a consignor. It should be a VALIDATED identity.
 	 * @param consignor
 	 */
-	public void setConsignor(CertPath consignor)
+	public void setConsignor(X509Certificate[] consignor)
 	{
-		this.consignor = consignor;
+		this.consignor = consignor; 
 	}
 
 	/**
 	 * Retrieves the stored consignor as a certificate path.
 	 * @return
 	 */
-	public CertPath getConsignor()
+	public X509Certificate[] getConsignor()
 	{
 		return consignor;
 	}
 
 	/**
-	 * Retrieves stored consignor as X509 certificate.
+	 * Retrieves stored consignor as X509 certificate. In proxy mode the EEC certificate
+	 * is returned.
 	 * @return
 	 */
 	public X509Certificate getConsignorCertificate()
 	{
 		if (consignor != null)
-			return (X509Certificate) consignor.getCertificates().get(0);
+		{
+			if (supportProxy)
+				return ProxyUtils.getEndUserCertificate(consignor);
+			else
+				return consignor[0];
+		}
 		return null;
 	}
 	
@@ -147,14 +176,13 @@ public class SecurityTokens implements Serializable
 	/**
 	 * Sets user identity in terms of certificates. It is an identity of a user on 
 	 * whose behalf consignor wishes to execute the request. 
-	 * It has not to be verified, i.e. it can be just a requested user. 
+	 * It has not to be verified, i.e. it can be just a requested user.
 	 * @param user
 	 */
-	public void setUser(CertPath user)
+	public void setUser(X509Certificate[] user)
 	{
 		this.user = user;
-		this.userName = ((X509Certificate) user.getCertificates().get(0))
-			.getSubjectX500Principal();
+		this.userName = getUserCertificate().getSubjectX500Principal();
 	}
 
 	/**
@@ -163,7 +191,7 @@ public class SecurityTokens implements Serializable
 	 * be no trust delegation chain from the returned user to the actual consignor.
 	 * @return
 	 */
-	public CertPath getUser()
+	public X509Certificate[] getUser()
 	{
 		return user;
 	}
@@ -188,20 +216,27 @@ public class SecurityTokens implements Serializable
 	 * Returns a user's X509 certificate. Note that it <b>may not represent a 
 	 * valid user</b>, i.e. there might 
 	 * be no trust delegation chain from the returned user to the actual consignor.
-	 * @return
+	 * In proxy mode the EEC certificate is returned.
+	 * @return null if user is not set as certificate, user certificate otherwise
 	 */
 	public X509Certificate getUserCertificate()
 	{
-		if (user != null)
-			return (X509Certificate) user.getCertificates().get(0);
-		else
+		if (user == null)
 			return null;
+
+		if (supportProxy)
+			return ProxyUtils.getEndUserCertificate(user); 
+		else
+			return user[0];
 	}
 
 	/**
 	 * Returns a user's DN. Note that it <b>may not represent a 
 	 * valid user</b>, i.e. there may 
-	 * not be trust delegation chain from the returned user to the actual consignor.
+	 * be no trust delegation chain from the returned user to the actual consignor.
+	 * In proxy mode this method will return DN of EEC only if certificate (with proxies)
+	 * was also set. Otherwise the same userName as was set is returned.
+	 * 
 	 * @return
 	 */
 	public X500Principal getUserName()
@@ -209,8 +244,19 @@ public class SecurityTokens implements Serializable
 		if (userName != null)
 			return userName;
 		else if (user != null)
-			return ((X509Certificate) user.getCertificates().get(0))
-					.getSubjectX500Principal();
+			return getUserCertificate().getSubjectX500Principal();
+		else
+			return null;
+	}
+
+	/**
+	 * Returns a consignor's DN. In proxy mode the consignor's EEC DN is returned.
+	 * @return
+	 */
+	public X500Principal getConsignorName()
+	{
+		if (consignor != null)
+			return getConsignorCertificate().getSubjectX500Principal();
 		else
 			return null;
 	}
@@ -236,12 +282,9 @@ public class SecurityTokens implements Serializable
 	 */
 	public X500Principal getEffectiveUserName()
 	{
-		if (userName != null && consignorTrusted)
+		if (user != null && consignorTrusted)
 			return getUserName();
-		X509Certificate cc = getConsignorCertificate();
-		if (cc == null)
-			return null;
-		return cc.getSubjectX500Principal();
+		return getConsignorName();
 	}
 
 
@@ -251,13 +294,31 @@ public class SecurityTokens implements Serializable
 	{
 		StringBuilder sb = new StringBuilder();
 		if (userName != null)
-		    sb.append("User name: ").append(userName.getName()).append(lineSep);
-		if (user != null)
+		    sb.append("User name: ").append(X500NameUtils.getReadableForm(userName)).append(lineSep);
+		if (user != null) 
+		{
 		    sb.append("(have user cert)").append(lineSep);
+		    if (ProxyUtils.isProxy(user))
+		    {
+			    sb.append("User certificate is a proxy certificate");
+			    if (supportProxy)
+				    sb.append(")" + lineSep);
+			    else
+				    sb.append(" but proxy handling is NOT enabled)" + lineSep);
+		    }
+		}
 		if (consignor != null)
 		{
-		    X509Certificate cc = (X509Certificate)consignor.getCertificates().get(0); 
-		    sb.append("Consignor DN: ").append(cc.getSubjectX500Principal().getName());
+		    X500Principal consignor = getConsignorName(); 
+		    sb.append("Consignor DN: ").append(X500NameUtils.getReadableForm(consignor));
+		    if (ProxyUtils.isProxy(this.consignor))
+		    {
+			    sb.append("Consignor's certificate is a proxy certificate");
+			    if (supportProxy)
+				    sb.append(")" + lineSep);
+			    else
+				    sb.append(" but proxy handling is NOT enabled)" + lineSep);
+		    }
 		}
 		if (signatureStatus != null)
 		{
@@ -355,6 +416,7 @@ public class SecurityTokens implements Serializable
 	/**
 	 * Two sets of tokes are considered equal if their effective user names, 
 	 * consignor certs, delegation statuses and signature status are equal.
+	 * Also proxy mode must be the same.
 	 */
 	public boolean equals(Object otherO)
 	{
@@ -384,6 +446,10 @@ public class SecurityTokens implements Serializable
 				return false;
 		} else if (!other.getEffectiveUserName().equals(getEffectiveUserName()))
 			return false;
+		
+		if (other.supportProxy != supportProxy)
+			return false;
+		
 		return true;
 	}
 
