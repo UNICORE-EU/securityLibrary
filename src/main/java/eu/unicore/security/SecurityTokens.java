@@ -182,7 +182,10 @@ public class SecurityTokens implements Serializable
 	public void setUser(X509Certificate[] user)
 	{
 		this.user = user;
-		this.userName = getUserCertificate().getSubjectX500Principal();
+		//this way as we can have troubles related to proxies
+		X509Certificate userCert = getUserCertificate();
+		if (userCert != null)
+			this.userName = userCert.getSubjectX500Principal();
 	}
 
 	/**
@@ -224,9 +227,15 @@ public class SecurityTokens implements Serializable
 		if (user == null)
 			return null;
 
-		if (supportProxy)
-			return ProxyUtils.getEndUserCertificate(user); 
-		else
+		if (supportProxy) 
+		{
+			X509Certificate userCert = ProxyUtils.getEndUserCertificate(user);
+			//this is bad... somehow we got as an user a chain which has only proxy certs
+			if (userCert == null)
+				return user[0]; 
+			else
+				return userCert;
+		} else
 			return user[0];
 	}
 
@@ -243,10 +252,7 @@ public class SecurityTokens implements Serializable
 	{
 		if (userName != null)
 			return userName;
-		else if (user != null)
-			return getUserCertificate().getSubjectX500Principal();
-		else
-			return null;
+		return null;
 	}
 
 	/**
