@@ -11,6 +11,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -40,10 +41,7 @@ public class CredentialProperties extends PropertiesHelper
 
 	//common for all
 	public static final String PROP_FORMAT = "format";
-	public static final String FORMAT_JKS = "jks";
-	public static final String FORMAT_PKCS12 = "pkcs12";
-	public static final String FORMAT_DER = "der";
-	public static final String FORMAT_PEM = "pem";
+	public enum CredentialFormat {jks, pkcs12, der, pem};
 
 	public static final String PROP_LOCATION = "path";
 	public static final String PROP_PASSWORD = "password";
@@ -60,10 +58,11 @@ public class CredentialProperties extends PropertiesHelper
 				setDescription("credential location").setPath());
 		META.put(PROP_PASSWORD, new PropertyMD().setSecret());
 		META.put(PROP_KS_KEY_PASSWORD, new PropertyMD().setSecret());
+		META.put(PROP_FORMAT, new PropertyMD().setEnum(CredentialFormat.jks));
 	}
 	
 
-	private String type;
+	private CredentialFormat type;
 	private String credPath;
 	
 	private X509Credential credential;
@@ -195,7 +194,7 @@ public class CredentialProperties extends PropertiesHelper
 			ksKeyPassword = pass == null ? null : pass.toCharArray();
 		}
 		
-		type = getValue(PROP_FORMAT);
+		type = getEnumValue(PROP_FORMAT, CredentialFormat.class);
 		if (type == null)
 		{
 			type = autodetectType(credPath, credPassword, keyLocation, 
@@ -204,7 +203,7 @@ public class CredentialProperties extends PropertiesHelper
 				"< for " + credPath);
 		}
 
-		if (type.equalsIgnoreCase(FORMAT_JKS) || type.equalsIgnoreCase(FORMAT_PKCS12))
+		if (type.equals(CredentialFormat.jks) || type.equals(CredentialFormat.pkcs12))
 		{
 			log.debug("Credential keystore alias: " + (ksAlias == null ? "NOT-SET" : ksAlias));
 			if (credPassword == null)
@@ -217,34 +216,34 @@ public class CredentialProperties extends PropertiesHelper
 				ksKeyPassword = credPassword;
 			}
 			credential = new KeystoreCredential(credPath, credPassword, 
-				ksKeyPassword, ksAlias, type.toUpperCase());
-		} else if (type.equalsIgnoreCase(FORMAT_PEM))
+				ksKeyPassword, ksAlias, type.name());
+		} else if (type.equals(CredentialFormat.pem))
 		{
 			if (keyLocation == null)
 				credential = new PEMCredential(credPath, credPassword);
 			else
 				credential = new PEMCredential(keyLocation, credPath, credPassword);
-		} else if (type.equalsIgnoreCase(FORMAT_DER))
+		} else if (type.equals(CredentialFormat.der))
 		{
 			if (keyLocation == null)
-				throw new ConfigurationException("For " + FORMAT_DER + 
+				throw new ConfigurationException("For " + CredentialFormat.der + 
 					" credential, the " + prefix + PROP_KEY_LOCATION + 
 					" property must be set and point at the DER encoded private key.");
 			credential = new DERCredential(keyLocation, credPath, credPassword);
 		} else
 			throw new ConfigurationException("Unknown type of credential used: " 
-					+ type + " must be one of: " + FORMAT_JKS + ", " +
-					FORMAT_PEM + ", " + FORMAT_PKCS12 + ", " + FORMAT_DER);
+					+ type + " must be one of: " + 
+					Arrays.toString(CredentialFormat.values()));
 	}
 	
-	private String autodetectType(String credPath, char[] credPassword,
+	private CredentialFormat autodetectType(String credPath, char[] credPassword,
 			String keyLocation, String ksAlias, char[] ksKeyPassword)
 	{
 		String errorPfx = "Credential type was not set with the property " 
 				+ prefix + PROP_FORMAT;
 		if (keyLocation != null && (ksAlias != null || ksKeyPassword != null))
 			new ConfigurationException(errorPfx + " and settings for both " + 
-					FORMAT_PEM + " and JKS/PKCS12 keystore are present." +
+					CredentialFormat.pem + " and JKS/PKCS12 keystore are present." +
 					" Either set the type explicitely or delete settings of not used credential type (" 
 					+ PROP_KEY_LOCATION + " or " + PROP_KS_ALIAS + " and " + PROP_KS_KEY_PASSWORD +")");
 		
@@ -253,7 +252,13 @@ public class CredentialProperties extends PropertiesHelper
 			//ok - only JKS/PKCS12 possible
 			try
 			{
-				return KeystoreCredential.autodetectType(credPath, credPassword);
+				String type = KeystoreCredential.autodetectType(credPath, credPassword);
+				if (type.equalsIgnoreCase("jks"))
+					return CredentialFormat.jks;
+				if (type.equalsIgnoreCase("pkcs12"))
+					return CredentialFormat.pkcs12;
+				else
+					throw new ConfigurationException("Unknown keystore type found: " + type);
 			} catch (KeyStoreException e)
 			{
 				new ConfigurationException(errorPfx + ". Tried to load JKS/PKCS12 keystore as " +
@@ -272,7 +277,7 @@ public class CredentialProperties extends PropertiesHelper
 		//only PEM or DER
 		if (credPath.endsWith("der") || (keyLocation != null && keyLocation.endsWith("der")) ||
 				credPath.endsWith("pkcs8") || credPath.endsWith("pk8"))
-			return FORMAT_DER;
-		return FORMAT_PEM;
+			return CredentialFormat.der;
+		return CredentialFormat.pem;
 	}
 }

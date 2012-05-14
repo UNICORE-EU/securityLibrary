@@ -42,7 +42,7 @@ public class TestConnectionUtil extends TestCase
 					"the!client".toCharArray(), "JKS", -1);
 			DefaultClientConfiguration secCfg = new DefaultClientConfiguration(validator, cred);
 			X509Certificate cert = ConnectionUtil.getPeerCertificate(secCfg,
-					server.getSecUrl(), Logger.getLogger(TestConnectionUtil.class));
+					server.getSecUrl(), 10000, Logger.getLogger(TestConnectionUtil.class));
 			assertNotNull(cert);
 			assertTrue(X500NameUtils.equal(cert.getSubjectX500Principal(), 
 					server.getSecSettings().getCredential().getCertificate().getSubjectX500Principal().getName()));

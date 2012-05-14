@@ -18,7 +18,7 @@ public class CredentialPropertiesTest extends TestCase
 	public void testPEM()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, FORMAT_PEM);
+		p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, CredentialFormat.pem.toString());
 		p.setProperty(DEFAULT_PREFIX + PROP_LOCATION, PFX+"cert-1.pem");
 		p.setProperty(DEFAULT_PREFIX + PROP_PASSWORD, "the!njs");
 		p.setProperty(DEFAULT_PREFIX + PROP_KEY_LOCATION, PFX+"pk-1.pem");
@@ -28,7 +28,7 @@ public class CredentialPropertiesTest extends TestCase
 	public void testPEM2()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, FORMAT_PEM);
+		p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, CredentialFormat.pem.toString());
 		p.setProperty(DEFAULT_PREFIX + PROP_LOCATION, PFX+"keystore-1.pem");
 		p.setProperty(DEFAULT_PREFIX + PROP_PASSWORD, "the!njs");
 		verify(p);
@@ -37,7 +37,7 @@ public class CredentialPropertiesTest extends TestCase
 	public void testDER()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, FORMAT_DER);
+		p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, CredentialFormat.der.toString());
 		p.setProperty(DEFAULT_PREFIX + PROP_LOCATION, PFX+"cert-1.der");
 		p.setProperty(DEFAULT_PREFIX + PROP_KEY_LOCATION, PFX+"pk-1.der");
 		p.setProperty(DEFAULT_PREFIX + PROP_PASSWORD, "the!njs");
@@ -47,7 +47,7 @@ public class CredentialPropertiesTest extends TestCase
 	public void testJKS()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, FORMAT_JKS);
+		p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, CredentialFormat.jks.toString());
 		p.setProperty(DEFAULT_PREFIX + PROP_LOCATION, PFX+"keystore-1.jks");
 		p.setProperty(DEFAULT_PREFIX + PROP_PASSWORD, "the!njs");
 		verify(p);
@@ -56,7 +56,7 @@ public class CredentialPropertiesTest extends TestCase
 	public void testPKCS12()
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, FORMAT_PKCS12);
+		p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, CredentialFormat.pkcs12.toString());
 		p.setProperty(DEFAULT_PREFIX + PROP_LOCATION, PFX+"keystore-1.p12");
 		p.setProperty(DEFAULT_PREFIX + PROP_PASSWORD, "the!njs");
 		p.setProperty(DEFAULT_PREFIX + PROP_KS_KEY_PASSWORD, "the!njs");

@@ -25,12 +25,9 @@ import eu.unicore.security.util.Log;
  */
 public class ConnectionUtil
 {
-	
-
 	/**
 	 * Utility method to get a certificate of an SSL peer. The SSL connection is established and if 
 	 * successful, the peers identity is returned.
-	 * TODO add timeout  
 	 * @param securityCfg
 	 * @param url
 	 * @return certificate
@@ -38,7 +35,7 @@ public class ConnectionUtil
 	 * @throws UnknownHostException 
 	 */
 	public static X509Certificate getPeerCertificate(IAuthnAndTrustConfiguration securityCfg, String url, 
-			Logger logger) throws UnknownHostException, IOException {
+			int timeout, Logger logger) throws UnknownHostException, IOException {
 		if (securityCfg == null || securityCfg.getValidator() == null ||
 				securityCfg.getCredential() == null)
 			throw new IllegalArgumentException("Can not establish peer's identity " +
@@ -46,8 +43,10 @@ public class ConnectionUtil
 		URL u=new URL(url);
 		SSLSocketFactory socketFactory = SocketFactoryCreator.getSocketFactory(
 				securityCfg.getCredential(), 
-				securityCfg.getValidator()); 
+				securityCfg.getValidator());
 		SSLSocket s = (SSLSocket) socketFactory.createSocket(u.getHost(), u.getPort());
+		s.setSoTimeout(timeout);
+		
 		X509Certificate peer = (X509Certificate)s.getSession().getPeerCertificates()[0];
 		if (logger.isDebugEnabled()) {
 			try{
