@@ -7,6 +7,8 @@
  */
 package eu.unicore.security;
 
+import javax.security.auth.x500.X500Principal;
+
 import junit.framework.TestCase;
 
 public class TestClient extends TestCase
@@ -33,5 +35,14 @@ public class TestClient extends TestCase
 		xlogin.setSelectedSupplementaryGroups(new String[] {"gid3"});
 		c.setXlogin(xlogin);
 		System.out.println(c);
+	}
+	
+	public void testAuthenticatedWithDnOnly()throws InterruptedException{
+		Client c=new Client();
+		SecurityTokens t=new SecurityTokens();
+		t.setUserName(new X500Principal("CN=dummy"));
+		t.setConsignorTrusted(true);
+		c.setAuthenticatedClient(t);
+		assertEquals(Client.Type.AUTHENTICATED, c.getType());
 	}
 }

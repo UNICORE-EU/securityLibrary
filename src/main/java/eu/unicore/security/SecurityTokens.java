@@ -288,7 +288,7 @@ public class SecurityTokens implements Serializable
 	 */
 	public X500Principal getEffectiveUserName()
 	{
-		if (user != null && consignorTrusted)
+		if (userName != null && consignorTrusted)
 			return getUserName();
 		return getConsignorName();
 	}

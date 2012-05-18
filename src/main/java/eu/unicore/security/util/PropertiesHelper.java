@@ -81,18 +81,18 @@ public class PropertiesHelper
 				checkPropertyConstraints(meta, o.getKey());
 			} catch (ConfigurationException e)
 			{
-				builder.append(e.toString() + "\n");
+				builder.append(e.getMessage() + "\n");
 			}
 		}
 		String warns = builder.toString().trim();
 		if (warns.length() > 0)
-			throw new ConfigurationException("The following problems were found in the configuration: "
+			throw new ConfigurationException("The following problems were found in the configuration:\n"
 					+ warns);
 	}
 	
 	protected void checkPropertyConstraints(PropertyMD meta, String key) throws ConfigurationException {
 		if (meta.isMandatory() && !isSet(key)) 
-			throw new ConfigurationException("The property" + getKeyDescription(key) + 
+			throw new ConfigurationException("The property " + getKeyDescription(key) + 
 					" is mandatory");
 		
 		String value = properties.getProperty(prefix + key);
@@ -207,6 +207,8 @@ public class PropertiesHelper
 
 	protected <T extends Number> T checkBounds(String name, T current) throws ConfigurationException
 	{
+		if (current == null)
+			return current;
 		PropertyMD meta = metadata.get(name);
 		if (meta == null)
 			return current;
@@ -320,7 +322,79 @@ public class PropertiesHelper
 		return f;
 	}
 
+	/**
+	 * Gets a property that can be defined with a subkey.<br/> 
+	 * As primary fallback, gets the "general" property. 
+	 * Thus, the lookup sequence to find the property is:
+	 * <ul>
+	 * <li>key.subkey</li>
+	 * <li>key</li>
+	 * <li>key's default value</li>
+	 * </ul>
+	 * 
+	 * @param key the property key
+	 * @param subKey the sub key
+	 * @return property value or null if not set and there is no default
+	 */
+	public String getSubkeyValue(String key, String subKey) {
+		String perServiceKey = key + "." + subKey; 
+		if (isSet(perServiceKey))
+			return getValue(perServiceKey);
+		return getValue(key);
+	}
+
+	/**
+	 * @see #getSubkeyValue(String, String)
+	 * @param key
+	 * @param subKey
+	 * @return
+	 */
+	public Boolean getSubkeyBooleanValue(String key, String subKey) {
+		String perServiceKey = key + "." + subKey; 
+		if (isSet(perServiceKey))
+			return getBooleanValue(perServiceKey);
+		return getBooleanValue(key);
+	}
+
+	/**
+	 * @see #getSubkeyValue(String, String)
+	 * @param key
+	 * @param subKey
+	 * @return
+	 */
+	public Integer getSubkeyIntValue(String key, String subKey) {
+		String perServiceKey = key + "." + subKey; 
+		if (isSet(perServiceKey))
+			return getIntValue(perServiceKey);
+		return getIntValue(key);
+	}
 	
+	/**
+	 * @see #getSubkeyValue(String, String)
+	 * @param key
+	 * @param subKey
+	 * @return
+	 */
+	public Long getSubkeyLongValue(String key, String subKey) {
+		String perServiceKey = key + "." + subKey; 
+		if (isSet(perServiceKey))
+			return getLongValue(perServiceKey);
+		return getLongValue(key);
+	}
+	
+	/**
+	 * @see #getSubkeyValue(String, String)
+	 * @param key
+	 * @param subKey
+	 * @return
+	 */
+	public <T extends Enum<T>> T getSubkeyEnumValue(String key, String subKey, Class<T> type) {
+		String perServiceKey = key + "." + subKey; 
+		if (isSet(perServiceKey))
+			return getEnumValue(perServiceKey, type);
+		return getEnumValue(key, type);
+	}
+
 	/**
 	 * Returns a sorted list of values. Each value corresponds to a property
 	 * with a key with a specified prefix and arbitrary ending. Usually this prefix should end with '.'

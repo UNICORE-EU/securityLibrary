@@ -165,6 +165,7 @@ public class ClientProperties extends DefaultClientConfiguration
 		if (isSslEnabled()) 
 		{
 			setSslAuthn(properties.getBooleanValue(PROP_SSL_AUTHN_ENABLED));
+			getETDSettings().setIssuerCertificateChain(getCredential().getCertificateChain());
 		}
 		setDoSignMessage(properties.getBooleanValue(PROP_MESSAGE_SIGNING_ENABLED));
 		setHttpAuthn(properties.getBooleanValue(PROP_HTTP_AUTHN_ENABLED));
@@ -177,7 +178,8 @@ public class ClientProperties extends DefaultClientConfiguration
 		setInHandlerClassNames(parseHandlers(properties, PROP_IN_HANDLERS));
 		setOutHandlerClassNames(parseHandlers(properties, PROP_OUT_HANDLERS));
 		
-		ServerHostnameCheckingMode hostnameMode = properties.getEnumValue(PROP_SERVER_HOSTNAME_CHECKING, ServerHostnameCheckingMode.class);
+		ServerHostnameCheckingMode hostnameMode = properties.getEnumValue(PROP_SERVER_HOSTNAME_CHECKING, 
+				ServerHostnameCheckingMode.class);
 		setServerHostnameCheckingMode(hostnameMode);
 		
 		//This is bit tricky: clientPrefix+EXTRA_... is the prefix for extra properties,

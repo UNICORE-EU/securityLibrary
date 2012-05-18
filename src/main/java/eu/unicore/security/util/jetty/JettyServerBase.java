@@ -332,7 +332,7 @@ public abstract class JettyServerBase {
 		for (int i=0; i<listenUrls.length; i++) {
 			URL url = listenUrls[i];
 			if (url.getPort() == 0) {
-				int port = conns[i].getPort();
+				int port = conns[i].getLocalPort();
 				try {
 					listenUrls[i] = new URL(url.getProtocol(), 
 							url.getHost(), port, url.getFile());

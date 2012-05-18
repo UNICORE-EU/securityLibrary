@@ -41,6 +41,7 @@ import org.mortbay.jetty.servlet.Context;
 import eu.unicore.security.util.AuthnAndTrustProperties;
 import eu.unicore.security.util.ConfigurationException;
 import eu.unicore.security.util.CredentialProperties;
+import eu.unicore.security.util.DefaultAuthnAndTrustConfiguration;
 import eu.unicore.security.util.IAuthnAndTrustConfiguration;
 import eu.unicore.security.util.TruststoreProperties;
 import eu.unicore.security.util.jetty.JettyLogger;
@@ -60,14 +61,13 @@ public class TestJettyServer extends JettyServerBase {
 	protected static final HashMap<String, Integer> defaults = new HashMap<String, Integer>();
 
 	
-	public TestJettyServer(URL[] listenUrls, AuthnAndTrustProperties secProperties,
+	public TestJettyServer(URL[] listenUrls, IAuthnAndTrustConfiguration secProperties,
 			JettyProperties extraSettings) throws ConfigurationException
 	{
 		super(listenUrls, secProperties, extraSettings, JettyLogger.class);
 		initServer();
 	}
 
-	
 	public static TestJettyServer getInstance(int soLinger) throws Exception {
 		int port = 62407;
 		String host = "127.0.0.1";
@@ -88,6 +88,19 @@ public class TestJettyServer extends JettyServerBase {
 		p.setProperty("t." + TruststoreProperties.PROP_UPDATE, "-1");
 	
 		AuthnAndTrustProperties secCfg = new AuthnAndTrustProperties(p, "t.", "k.");
+		JettyProperties extra = new JettyProperties(p, "j.");
+		return new TestJettyServer(urls, secCfg, extra);
+	}
+	
+	public static TestJettyServer getAnyPortInstance(int soLinger) throws Exception {
+		int port = 0;
+		String host = "127.0.0.1";
+		URL[] urls = new URL[] {new URL("http://" + host + ":" + port)};
+		Properties p = new Properties();
+		p.setProperty("j." + JettyProperties.SO_LINGER_TIME, soLinger+"");
+		p.setProperty("j." + JettyProperties.FAST_RANDOM, "true");
+		
+		IAuthnAndTrustConfiguration secCfg = new DefaultAuthnAndTrustConfiguration();
 		JettyProperties extra = new JettyProperties(p, "j.");
 		return new TestJettyServer(urls, secCfg, extra);
 	}

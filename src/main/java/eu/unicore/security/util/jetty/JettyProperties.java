@@ -153,6 +153,11 @@ public class JettyProperties extends PropertiesHelper
 		defaults.put(USE_NIO, new PropertyMD("false"));
 	}
 
+	public JettyProperties() throws ConfigurationException 
+	{
+		this(new Properties(), DEFAULT_PREFIX);
+	}
+	
 	public JettyProperties(Properties properties) throws ConfigurationException 
 	{
 		this(properties, DEFAULT_PREFIX);
