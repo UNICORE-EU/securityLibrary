@@ -134,9 +134,12 @@ public class ClientProperties extends DefaultClientConfiguration
 		
 		String sslP = p.getProperty(clientPrefix + PROP_SSL_ENABLED);
 		String sslAuthnP = p.getProperty(clientPrefix + PROP_SSL_AUTHN_ENABLED);
+		String signP = p.getProperty(clientPrefix + PROP_MESSAGE_SIGNING_ENABLED);
+		//FIXME this is bit not nice...
 		if (sslP != null && (sslP.equalsIgnoreCase("false") || sslP.equalsIgnoreCase("no")))
 			trustOptional = credOptional= true;
-		else if (sslAuthnP != null && (sslAuthnP.equalsIgnoreCase("false") || sslAuthnP.equalsIgnoreCase("no")))
+		else if (sslAuthnP != null && (sslAuthnP.equalsIgnoreCase("false") || sslAuthnP.equalsIgnoreCase("no"))
+			&& signP != null && (signP.equalsIgnoreCase("false") || signP.equalsIgnoreCase("no")))
 			credOptional = true;
 		return new AuthnAndTrustProperties(p, trustPrefix, credPrefix, trustOptional, credOptional);
 	}
@@ -164,10 +167,16 @@ public class ClientProperties extends DefaultClientConfiguration
 		setSslEnabled(properties.getBooleanValue(PROP_SSL_ENABLED));
 		if (isSslEnabled()) 
 		{
+			if (getValidator() == null || getCredential() == null)
+				throw new ConfigurationException("When SSL mode is enabled, both credential " +
+						"and trust settings must be provided");
 			setSslAuthn(properties.getBooleanValue(PROP_SSL_AUTHN_ENABLED));
 			getETDSettings().setIssuerCertificateChain(getCredential().getCertificateChain());
 		}
 		setDoSignMessage(properties.getBooleanValue(PROP_MESSAGE_SIGNING_ENABLED));
+		if (doSignMessage() && getCredential() == null)
+			throw new ConfigurationException("When message signing is enabled, the credential " +
+						"must be provided");
 		setHttpAuthn(properties.getBooleanValue(PROP_HTTP_AUTHN_ENABLED));
 		if (doHttpAuthn())
 		{
