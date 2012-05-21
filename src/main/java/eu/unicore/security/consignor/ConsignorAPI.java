@@ -28,13 +28,14 @@ public interface ConsignorAPI
 	 * @param negativeTolerance backwards validity in seconds form current time
 	 * @param validity lifetime of assertion in seconds from current time
 	 * @param acClass authentication context class choice (not implemented right now)
+	 * @param ip clieent's IP address in dotted decimal form
 	 * @return created assertion
 	 * @throws DSigException if there are problems with signing assertion
 	 */
 	public ConsignorAssertion generateConsignorToken(
 			String issuerDN, X509Certificate []consignorCert,
 			PrivateKey pk, int negativeTolerance,
-			int validity, AuthNClasses acClass)
+			int validity, AuthNClasses acClass, String ip)
 			throws DSigException;
 
 	/**
@@ -42,12 +43,13 @@ public interface ConsignorAPI
 	 * @param issuerDN issuer (usually gateway) DN
 	 * @param consignorCert certificate of consignor
 	 * @param acClass authentication context class choice (not implemented right now)
+	 * @param ip clieent's IP address in dotted decimal form
 	 * @return created assertion
 	 * @throws DSigException 
 	 */
 	public ConsignorAssertion generateConsignorToken(
 			String issuerDN, X509Certificate []consignorCert,
-			AuthNClasses acClass) throws DSigException;
+			AuthNClasses acClass, String ip) throws DSigException;
 
 	/**
 	 * Generates signed consignor assertion without a subject. Used by gateway
@@ -58,17 +60,18 @@ public interface ConsignorAPI
 	 * @param negativeTolerance backwards validity in seconds form current time
 	 * @param validity lifetime of assertion in seconds from current time
 	 * @param acClass authentication context class choice (not implemented right now)
+	 * @param ip clieent's IP address in dotted decimal form
 	 * @return created assertion
 	 * @throws DSigException if there are problems with signing assertion
 	 */
 	public ConsignorAssertion generateConsignorToken(
 			String issuerDN, int negativeTolerance,
-			int validity, PrivateKey pk)
+			int validity, PrivateKey pk, String ip)
 			throws DSigException;
 
 	/**
-	 * Generates unsigned consignor assertion without a subject. Used by gateway
-	 * to state that connection is NOT AUTHENTICATED. 
+	 * Generates unsigned consignor assertion with an anonymous subject (without any confirmation). 
+	 * Used by gateway to state that connection is NOT AUTHENTICATED. 
 	 * @param issuerDN issuer (usually gateway) DN
 	 * @param consignorCert certificate of consignor
 	 * @param acClass authentication context class choice (not implemented right now)

@@ -16,8 +16,13 @@ import java.util.Date;
 
 import javax.security.auth.x500.X500Principal;
 
+import xmlbeans.org.oasis.saml2.assertion.AuthnContextDocument;
+import xmlbeans.org.oasis.saml2.assertion.SubjectLocalityDocument;
+import xmlbeans.org.oasis.saml2.assertion.SubjectLocalityType;
+
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.samly2.SAMLConstants.AuthNClasses;
+import eu.unicore.security.Client;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.dsig.DSigException;
 
@@ -33,7 +38,7 @@ public class ConsignorImpl implements ConsignorAPI
 	 */
 	public ConsignorAssertion generateConsignorToken(String issuerDN, 
 			X509Certificate []consignorCert, PrivateKey pk, int negativeTolerance,
-			int validity, AuthNClasses acClass) 
+			int validity, AuthNClasses acClass, String ip) 
 		throws DSigException
 	{
 		ConsignorAssertion assertion = new ConsignorAssertion();
@@ -49,30 +54,34 @@ public class ConsignorImpl implements ConsignorAPI
 			{
 				throw new DSigException(e);
 			}
-		}
-		if (!acClass.equals(AuthNClasses.NONE))
+		} else
 		{
-			if (acClass.equals(AuthNClasses.TLS))
-			{
-				
-			}
+			assertion.setX509Subject(Client.ANONYMOUS_CLIENT_DN);
+		}
+		Calendar cur = Calendar.getInstance();
+		if (acClass.equals(AuthNClasses.TLS))
+		{
+			AuthnContextDocument dummyCtx = AuthnContextDocument.Factory.newInstance();
+			SubjectLocalityDocument locDoc = SubjectLocalityDocument.Factory.newInstance();
+			SubjectLocalityType loc = locDoc.addNewSubjectLocality();
+			loc.setAddress(ip);
+			assertion.addAuthStatement(cur, dummyCtx.addNewAuthnContext(), null, null, loc);
 		}
 		Date notBefore = null;
 		Date notOnOrAfter = null;
 		if (negativeTolerance >= 0)
 		{
-			Calendar cur = Calendar.getInstance();
 			cur.add(Calendar.SECOND, -negativeTolerance);
 			notBefore = cur.getTime();
 		}
 		if (validity >= 0)
 		{
-			Calendar cur = Calendar.getInstance();
 			cur.add(Calendar.SECOND, validity);
 			notOnOrAfter = cur.getTime();
 		}
 		if (notBefore != null || notOnOrAfter != null)
 			assertion.setTimeConditions(notBefore, notOnOrAfter);
+		
 		
 		if (pk != null)
 			assertion.sign(pk);
@@ -105,19 +114,19 @@ public class ConsignorImpl implements ConsignorAPI
 	}
 
 	public ConsignorAssertion generateConsignorToken(String issuerDN, 
-			X509Certificate []consignorCert, AuthNClasses acClass) 
+			X509Certificate []consignorCert, AuthNClasses acClass, String ip) 
 		throws DSigException
 	{
 		return generateConsignorToken(issuerDN, consignorCert, null, 
-					-1, -1, acClass);
+					-1, -1, acClass, ip);
 	}
 
 	public ConsignorAssertion generateConsignorToken(String issuerDN, 
-			int negativeTolerance, int validity, PrivateKey pk) 
+			int negativeTolerance, int validity, PrivateKey pk, String ip) 
 		throws DSigException
 	{
 		return generateConsignorToken(issuerDN, null, pk, negativeTolerance,
-				validity, AuthNClasses.NONE);
+				validity, AuthNClasses.NONE, ip);
 	}
 
 	public ConsignorAssertion generateConsignorToken(String issuerDN)
@@ -125,7 +134,7 @@ public class ConsignorImpl implements ConsignorAPI
 		try
 		{
 			return generateConsignorToken(issuerDN, null, null, 
-					-1, -1, AuthNClasses.NONE);
+					-1, -1, AuthNClasses.NONE, null);
 		} catch (DSigException e)
 		{
 			// can't happen

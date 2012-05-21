@@ -26,7 +26,6 @@ import xmlbeans.org.oasis.saml2.assertion.AttributeType;
  * Java representation of gateway produced consignor token. Usually gateway produces it
  * form TLS certificate, sign with own private key and attach to request before forwarding it to 
  * target system. 
- * <p>Note that those tokens can be cached to improve performance.
  * @author K. Benedyczak
  */
 public class ConsignorAssertion extends Assertion

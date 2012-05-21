@@ -31,7 +31,7 @@ public class SimpleGenerateTest extends TestBase
 			ConsignorAPI impl = UnicoreSecurityFactory.getConsignorAPI();
 			ConsignorAssertion token = 
 				impl.generateConsignorToken(issuerDN2, issuerCert1, privKey2,
-						0, 5, AuthNClasses.TLS);
+						0, 5, AuthNClasses.TLS, "127.0.0.1");
 			
 			System.out.println("-------------------------------------------\n" + 
 					"Consignor token:");
@@ -45,6 +45,7 @@ public class SimpleGenerateTest extends TestBase
 				impl.verifyConsignorToken(parsedToken, issuerCert2[0]);
 			if (!res.isValid())
 				fail(res.getInvalidResaon());
+			assertEquals("127.0.0.1", parsedToken.getAuthStatements()[0].getSubjectLocality().getAddress());
 		} catch (Exception e)
 		{
 			e.printStackTrace();
@@ -61,7 +62,7 @@ public class SimpleGenerateTest extends TestBase
 			X500Principal c1 = issuerCert1[0].getSubjectX500Principal();
 			ConsignorAssertion token = 
 				impl.generateConsignorToken(issuerDN2, issuerCert1,
-						AuthNClasses.TLS);
+						AuthNClasses.TLS, "127.0.0.1");
 			
 			System.out.println("-------------------------------------------\n" + 
 					"Consignor token:");
@@ -95,7 +96,7 @@ public class SimpleGenerateTest extends TestBase
 			ConsignorAPI impl = UnicoreSecurityFactory.getConsignorAPI();
 			ConsignorAssertion token = 
 				impl.generateConsignorToken(issuerDN2, expiredCert,
-						AuthNClasses.TLS);
+						AuthNClasses.TLS, "127.0.0.1");
 			
 			AssertionDocument doc = token.getXML();
 			ConsignorAssertion parsedToken = new ConsignorAssertion(doc);
