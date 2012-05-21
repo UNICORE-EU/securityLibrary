@@ -510,6 +510,15 @@ public class PropertiesHelper
 		}
 		warned.remove(key);
 	}
+	
+	/**
+	 * @param key a full key
+	 * @return value of a raw property, i.e. without any metadata checking, usage of prefix etc.
+	 */
+	public synchronized String getRawProperty(String key)
+	{
+		return properties.getProperty(key);
+	}
 }
 
 
