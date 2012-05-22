@@ -297,45 +297,49 @@ public class SecurityTokens implements Serializable
 
         private static final String lineSep=System.getProperty("line.separator");
 
-	public String toString()
-	{
-		StringBuilder sb = new StringBuilder();
-		if (userName != null)
-		    sb.append("User name: ").append(X500NameUtils.getReadableForm(userName)).append(lineSep);
-		if (user != null) 
-		{
-		    sb.append("(have user cert)").append(lineSep);
-		    if (ProxyUtils.isProxy(user))
-		    {
-			    sb.append("User certificate is a proxy certificate");
-			    if (supportProxy)
-				    sb.append(")" + lineSep);
-			    else
-				    sb.append(" but proxy handling is NOT enabled)" + lineSep);
-		    }
-		}
-		if (consignor != null)
-		{
-		    X500Principal consignor = getConsignorName(); 
-		    sb.append("Consignor DN: ").append(X500NameUtils.getReadableForm(consignor));
-		    if (ProxyUtils.isProxy(this.consignor))
-		    {
-			    sb.append("Consignor's certificate is a proxy certificate");
-			    if (supportProxy)
-				    sb.append(")" + lineSep);
-			    else
-				    sb.append(" but proxy handling is NOT enabled)" + lineSep);
-		    }
-		}
-		if (signatureStatus != null)
-		{
-		    sb.append(lineSep+"Message signature status: ").append(signatureStatus.toString());
-		}
-		String res = sb.toString();
-		if (res.length() == 0)
-			return super.toString() + " [no details available]";
-		return res;
-	}
+        public String toString()
+        {
+        	StringBuilder sb = new StringBuilder();
+        	if (userName != null)
+        		sb.append("User name: ").append(X500NameUtils.getReadableForm(userName)).append(lineSep);
+        	if (user != null) 
+        	{
+        		sb.append("(have user cert)").append(lineSep);
+        		if (ProxyUtils.isProxy(user))
+        		{
+        			sb.append("User certificate is a proxy certificate");
+        			if (supportProxy)
+        				sb.append(")" + lineSep);
+        			else
+        				sb.append(" but proxy handling is NOT enabled)" + lineSep);
+        		}
+        	}
+        	if (consignor != null)
+        	{
+        		X500Principal consignor = getConsignorName(); 
+        		sb.append("Consignor DN: ").append(X500NameUtils.getReadableForm(consignor));
+        		if (ProxyUtils.isProxy(this.consignor))
+        		{
+        			sb.append("Consignor's certificate is a proxy certificate");
+        			if (supportProxy)
+        				sb.append(")" + lineSep);
+        			else
+        				sb.append(" but proxy handling is NOT enabled)" + lineSep);
+        		}
+        	}
+        	if (signatureStatus != null)
+        	{
+        		sb.append(lineSep+"Message signature status: ").append(signatureStatus.toString());
+        	}
+        	if (clientIP != null)
+        	{
+        		sb.append(lineSep+"Client's original IP: ").append(clientIP);
+        	}
+        	String res = sb.toString();
+        	if (res.length() == 0)
+        		return super.toString() + " [no details available]";
+        	return res;
+        }
 
 	/**
 	 * Returns a map with additional security related settings. This can be used 
