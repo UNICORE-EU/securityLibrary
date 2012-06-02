@@ -94,8 +94,6 @@ public class Client implements Serializable {
 	//the token by which a client is identified
 	private SecurityTokens secTokens;
 	
-	private String manuallySetDn;
-	
 	//what kind of client
 	private Type type; 
 	
@@ -215,8 +213,6 @@ public class Client implements Serializable {
 	 * of predefined constants is returned. This method never returns null.
 	 */
 	public String getDistinguishedName() {
-		if (manuallySetDn != null)
-			return manuallySetDn;
 		if (type == Type.ANONYMOUS)
 			return ANONYMOUS_CLIENT_DN;
 		else if (type == Type.LOCAL)
