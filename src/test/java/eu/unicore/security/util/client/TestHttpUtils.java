@@ -12,7 +12,7 @@ import java.net.SocketTimeoutException;
 import java.util.Properties;
 
 import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLPeerUnverifiedException;
 
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
@@ -136,7 +136,7 @@ public class TestHttpUtils extends TestCase
 		{
 			client.executeMethod(get);
 			fail("Managed to conenct with untrusted certificate!!!!!");
-		} catch (SSLHandshakeException e)
+		} catch (SSLPeerUnverifiedException e)
 		{
 			//OK
 		} catch (Exception e)

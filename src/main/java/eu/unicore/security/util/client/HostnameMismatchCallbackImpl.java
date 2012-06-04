@@ -6,15 +6,13 @@ package eu.unicore.security.util.client;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import javax.net.ssl.HandshakeCompletedEvent;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSocket;
 
 import org.apache.log4j.Logger;
 
-import eu.emi.security.authn.x509.impl.AbstractHostnameToCertificateChecker;
+import eu.emi.security.authn.x509.impl.HostnameMismatchCallback;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.util.Log;
 
@@ -22,35 +20,20 @@ import eu.unicore.security.util.Log;
  * Depending on the configured mode either log problems or log problems and close connections. 
  * @author K. Benedyczak
  */
-public class HostnameToCertificateChecker extends AbstractHostnameToCertificateChecker
+public class HostnameMismatchCallbackImpl implements HostnameMismatchCallback
 {
-	private static final Logger log = Log.getLogger(Log.SECURITY, HostnameToCertificateChecker.class);
+	private static final Logger log = Log.getLogger(Log.SECURITY, HostnameMismatchCallbackImpl.class);
 	
 	private ServerHostnameCheckingMode mode;
-	private boolean finished = false;
-	private Lock finishedLock = new ReentrantLock();
-	private Condition finishedCond = finishedLock.newCondition();
 	
-	public HostnameToCertificateChecker(ServerHostnameCheckingMode mode) 
+	public HostnameMismatchCallbackImpl(ServerHostnameCheckingMode mode) 
 	{
 		this.mode = mode;
 	}
 	
 	@Override
-	protected void nameMismatch(HandshakeCompletedEvent hce, X509Certificate peerCertificate,
-			String hostName)
-	{
-		try 
-		{
-			nameMismatchInternal(hce, peerCertificate, hostName);
-		} finally
-		{
-			setFinished();
-		}
-	}	
-	
-	protected void nameMismatchInternal(HandshakeCompletedEvent hce, X509Certificate peerCertificate,
-			String hostName)
+	public void nameMismatch(SSLSocket socket, X509Certificate peerCertificate, String hostName)
+			throws SSLException
 	{
 		if (mode == ServerHostnameCheckingMode.NONE)
 			return;
@@ -70,32 +53,11 @@ public class HostnameToCertificateChecker extends AbstractHostnameToCertificateC
 		log.error("Closing the connection.");
 		try
 		{
-			hce.getSocket().close();
+			socket.close();
 		} catch (IOException e)
 		{
 			log.error("Problem closing socket: " + e.toString(), e);
 			throw new RuntimeException(e);
 		}
-	}
-	
-	public void waitForFinished()
-	{
-		finishedLock.lock();
-		while (!finished)
-		{
-			try
-			{
-				finishedCond.await();
-			} catch (InterruptedException e) { /*ignored */ }
-		}
-		finishedLock.unlock();
-	}
-	
-	private void setFinished()
-	{
-		finishedLock.lock();
-		finished = true;
-		finishedCond.signal();
-		finishedLock.unlock();
 	}
 }

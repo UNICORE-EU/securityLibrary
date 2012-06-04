@@ -165,7 +165,7 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 		{
 			Socket socket = socketfactory.createSocket(host, port,
 					localAddress, localPort); 
-			addListeners((SSLSocket) socket);
+			checkHostname((SSLSocket) socket);
 			return socket;
 		} else
 		{
@@ -176,19 +176,17 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 					port);
 			socket.bind(localaddr);
 			socket.connect(remoteaddr, timeout);
-			addListeners((SSLSocket) socket);
+			checkHostname((SSLSocket) socket);
 			return socket;
 		}
 	}
 
-	private void addListeners(SSLSocket socket) throws IOException
+	private void checkHostname(SSLSocket socket) throws IOException
 	{
-		HostnameToCertificateChecker checker = new HostnameToCertificateChecker(
+		
+		HostnameMismatchCallbackImpl callback = new HostnameMismatchCallbackImpl(
 				sec.getServerHostnameCheckingMode());
-		socket.addHandshakeCompletedListener(checker);
-		socket.startHandshake();
-		socket.getSession();
-		checker.waitForFinished();
+		SocketFactoryCreator.connectWithHostnameChecking(socket, callback);
 	}
 	
 	/**
@@ -200,7 +198,7 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 	{
 		Socket socket = getSSLContext().getSocketFactory().createSocket(host, 
 				port, clientHost, clientPort);
-		addListeners((SSLSocket) socket);
+		checkHostname((SSLSocket) socket);
 		return socket;
 	}
 
@@ -212,7 +210,7 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 	{
 		Socket socket = getSSLContext().getSocketFactory().createSocket(host,
 				port);
-		addListeners((SSLSocket) socket);
+		checkHostname((SSLSocket) socket);
 		return socket;
 	}
 
@@ -225,7 +223,7 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 	{
 		Socket socket2 = getSSLContext().getSocketFactory().createSocket(socket,
 				host, port, autoClose);
-		addListeners((SSLSocket) socket2);		
+		checkHostname((SSLSocket) socket2);		
 		return socket2;
 	}
 }
