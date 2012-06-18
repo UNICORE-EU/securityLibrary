@@ -19,6 +19,8 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
+import eu.unicore.security.util.HelpFormatter.HelpFormat;
+
 /**
  * Provides methods to parse properties and return them as String, ints, longs, Files, arbitrary Enums 
  * or Lists of strings. 
@@ -61,6 +63,7 @@ public class PropertiesHelper
 		if (this.metadata == null)
 			this.metadata = Collections.emptyMap();
 		checkConstraints(properties);
+		findUnknown();
 	}
 
 	public synchronized void setProperties(Properties properties) throws IOException, ConfigurationException
@@ -122,6 +125,41 @@ public class PropertiesHelper
 		case ENUM:
 			getEnumValue(key, meta.getEnumTypeInstance().getDeclaringClass());
 			break;
+		}
+	}
+	
+	protected void findUnknown()
+	{
+		Set<Object> keys = properties.keySet();
+		StringBuilder sb = new StringBuilder();
+		for (Object keyO: keys)
+		{
+			String key = (String) keyO;
+			if (key.startsWith(prefix))
+			{
+				String noPfxKey = key.substring(prefix.length());
+				if (!isSet(noPfxKey))
+					sb.append(" ").append(key);
+			}
+		}
+		if (sb.length() > 0)
+			throw new ConfigurationException("The following properties are not known:" + sb.toString() + 
+					". Remove them or use correct property names if there are mistakes.");
+	}
+
+	/**
+	 * Returns a string with help in the desired format.
+	 * @param format
+	 * @return
+	 */
+	public String createHelp(HelpFormat format)
+	{
+		switch (format)
+		{
+		case asciidoc: 
+			return new AsciidocFormater().format(prefix, metadata);
+		default:
+			throw new IllegalStateException("Unknown help format - no formatter wired up");
 		}
 	}
 	

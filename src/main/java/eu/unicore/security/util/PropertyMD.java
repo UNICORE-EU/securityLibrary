@@ -4,6 +4,8 @@
  */
 package eu.unicore.security.util;
 
+import java.util.Arrays;
+
 /**
  * Provides an optional metadata for properties retrieved using {@link PropertiesHelper}.
  * Uses the fluent style and shortened syntax
@@ -11,7 +13,7 @@ package eu.unicore.security.util;
  */
 public class PropertyMD
 {
-	public enum Type {INT, LONG, BOOLEAN, STRING, PATH, ENUM}
+	public enum Type {INT, LONG, BOOLEAN, STRING, PATH, ENUM, LIST}
 	
 	private boolean secret;
 	private String defaultValue;
@@ -36,11 +38,12 @@ public class PropertyMD
 		this.hasDefault = true;
 		if (isInt(defaultValue))
 			this.type = Type.INT;
-		if (isLong(defaultValue))
+		else if (isLong(defaultValue))
 			this.type = Type.LONG;
-		if (isBoolean(defaultValue))
+		else if (isBoolean(defaultValue))
 			this.type = Type.BOOLEAN;
-		this.type = Type.STRING;
+		else
+			this.type = Type.STRING;
 	}
 
 	/**
@@ -154,6 +157,10 @@ public class PropertyMD
 		this.type = Type.PATH;
 		return this;
 	}
+	public PropertyMD setList() {
+		this.type = Type.LIST;
+		return this;
+	}
 
 	
 	
@@ -203,6 +210,45 @@ public class PropertyMD
 		} catch (NumberFormatException e)
 		{
 			return false;
+		}
+	}
+	
+	/**
+	 * Returns human friendly description of the property type
+	 * @return
+	 */
+	public String getTypeDecription() {
+		switch(type)
+		{
+		case STRING:
+			return "string";
+		case BOOLEAN:
+			return "[true, false]";
+		case ENUM:
+			Object[] allValues = (enumTypeInstance.getDeclaringClass()).getEnumConstants();
+			return Arrays.toString(allValues);
+		case INT:
+		case LONG:
+			boolean hasMin = false;
+			if (min != Integer.MIN_VALUE && min != Long.MIN_VALUE)
+				hasMin = true;
+			boolean hasMax = false;
+			if (max != Integer.MAX_VALUE && max != Long.MAX_VALUE)
+				hasMax = true;
+			if (!hasMin && !hasMax)
+				return "integer number";
+			if (hasMin && hasMax)
+				return "integer [" + min + " -- " + max + "]";
+			if (hasMin)
+				return "integer > " + min;
+			if (hasMax)
+				return "integer < " + max;
+		case PATH:
+			return "filesystem path";
+		case LIST:
+			return "list of properties with a common prefix";
+		default:
+			return "UNKNOWN";
 		}
 	}
 }
