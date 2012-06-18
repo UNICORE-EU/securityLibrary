@@ -157,7 +157,7 @@ public class PropertiesHelper
 		switch (format)
 		{
 		case asciidoc: 
-			return new AsciidocFormater().format(prefix, metadata);
+			return new AsciidocFormatter().format(prefix, metadata);
 		default:
 			throw new IllegalStateException("Unknown help format - no formatter wired up");
 		}
