@@ -36,6 +36,7 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import eu.unicore.security.util.ConfigurationException;
+import eu.unicore.security.util.DocumentationReferenceMeta;
 import eu.unicore.security.util.Log;
 import eu.unicore.security.util.PropertiesHelper;
 import eu.unicore.security.util.PropertyMD;
@@ -131,6 +132,7 @@ public class JettyProperties extends PropertiesHelper
 	 */
 	public static final String ENABLE_GZIP = GZIP_PREFIX + "enable";
 	
+	@DocumentationReferenceMeta
 	protected final static Map<String, PropertyMD> defaults=new HashMap<String, PropertyMD>();
 	
 	static{
