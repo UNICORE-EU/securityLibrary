@@ -56,9 +56,16 @@ public class CredentialProperties extends PropertiesHelper
 	{
 		META.put(PROP_LOCATION, new PropertyMD().setMandatory().
 				setDescription("credential location").setPath());
-		META.put(PROP_PASSWORD, new PropertyMD().setSecret());
-		META.put(PROP_KS_KEY_PASSWORD, new PropertyMD().setSecret());
-		META.put(PROP_FORMAT, new PropertyMD().setEnum(CredentialFormat.jks));
+		META.put(PROP_PASSWORD, new PropertyMD().setSecret().
+				setDescription("password required to load the credential"));
+		META.put(PROP_KS_KEY_PASSWORD, new PropertyMD().setSecret().
+				setDescription("private key password in keystore (if different from the main credential password)"));
+		META.put(PROP_FORMAT, new PropertyMD().setEnum(CredentialFormat.jks).
+				setDescription("format of the credential"));
+		META.put(PROP_KEY_LOCATION, new PropertyMD().
+				setDescription("location of the private key if stored separately from the main credential"));
+		META.put(PROP_KS_ALIAS, new PropertyMD().
+				setDescription("keystore alias of the key entry to be used (can be ignored if the keystore contains only one key entry)"));
 	}
 	
 

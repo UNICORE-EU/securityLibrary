@@ -70,12 +70,12 @@ public class TruststoreProperties extends PropertiesHelper
 	public static final String PROP_OCSP_TIMEOUT = "ocspTimeout";
 	public static final String PROP_OCSP_CACHE_TTL = "ocspCacheTtl";
 	public static final String PROP_OCSP_DISK_CACHE = "ocspDiskCache";
-	public static final String PROP_OCSP_LOCAL_RESPONDERS = "ocspLocalResponders";
+	public static final String PROP_OCSP_LOCAL_RESPONDERS = "ocspLocalResponders.";
 	public static final String PROP_REVOCATION_ORDER = "revocationOrder";
 	public static final String PROP_REVOCATION_USE_ALL = "revocationUseAll";
 	
 	//these are common for keystore and directory trust stores
-	public static final String PROP_CRL_LOCATIONS = "crlLocations";
+	public static final String PROP_CRL_LOCATIONS = "crlLocations.";
 	public static final String PROP_CRL_UPDATE = "crlUpdateInterval";
 	public static final String PROP_CRL_CONNECTION_TIMEOUT = "crlConnectionTimeout";
 	public static final String PROP_CRL_CACHE_PATH = "crlDiskCachePath";
@@ -88,7 +88,7 @@ public class TruststoreProperties extends PropertiesHelper
 	public static final String PROP_OPENSSL_DIR = "opensslPath";
 	public static final String PROP_OPENSSL_NS_MODE = "opensslNsMode";
 	
-	public static final String PROP_DIRECTORY_LOCATIONS = "directoryLocations";
+	public static final String PROP_DIRECTORY_LOCATIONS = "directoryLocations.";
 	public static final String PROP_DIRECTORY_ENCODING = "directoryEncoding";
 	public static final String PROP_DIRECTORY_CONNECTION_TIMEOUT = "directoryConnectionTimeout";
 	public static final String PROP_DIRECTORY_CACHE_PATH = "directoryDiskCachePath";
@@ -101,28 +101,55 @@ public class TruststoreProperties extends PropertiesHelper
 	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
 	static 
 	{
-		META.put(PROP_PROXY_SUPPORT, new PropertyMD(ProxySupport.ALLOW));
-		META.put(PROP_CRL_MODE, new PropertyMD(CrlCheckingMode.IF_VALID));
-		META.put(PROP_UPDATE, new PropertyMD("600").setLong());
-		META.put(PROP_OPENSSL_NS_MODE, new PropertyMD(NamespaceCheckingMode.EUGRIDPMA_GLOBUS));
-		META.put(PROP_OPENSSL_DIR, new PropertyMD("/etc/grid-security/certificates").setPath());
-		META.put(PROP_CRL_UPDATE, new PropertyMD("600").setLong());
-		META.put(PROP_CRL_CONNECTION_TIMEOUT, new PropertyMD("15"));
-		META.put(PROP_CRL_CACHE_PATH, new PropertyMD().setPath());
-		META.put(PROP_DIRECTORY_ENCODING, new PropertyMD(Encoding.PEM));
-		META.put(PROP_DIRECTORY_CONNECTION_TIMEOUT, new PropertyMD("15"));
-		META.put(PROP_DIRECTORY_CACHE_PATH, new PropertyMD().setPath());
-		META.put(PROP_REVOCATION_ORDER, new PropertyMD(RevocationCheckingOrder.OCSP_CRL));
-		META.put(PROP_REVOCATION_USE_ALL, new PropertyMD("false"));
-		META.put(PROP_OCSP_MODE, new PropertyMD(OCSPCheckingMode.IF_AVAILABLE));
-		META.put(PROP_OCSP_LOCAL_RESPONDERS, new PropertyMD());
-		META.put(PROP_OCSP_TIMEOUT, new PropertyMD(""+OCSPParametes.DEFAULT_TIMEOUT));
-		META.put(PROP_OCSP_CACHE_TTL, new PropertyMD(""+OCSPParametes.DEFAULT_CACHE));
-		META.put(PROP_OCSP_DISK_CACHE, new PropertyMD().setPath());
+		META.put(PROP_PROXY_SUPPORT, new PropertyMD(ProxySupport.ALLOW).
+				setDescription("controls whether proxy certificates are supported"));
+		META.put(PROP_CRL_MODE, new PropertyMD(CrlCheckingMode.IF_VALID).
+				setDescription("General CRL handling mode. The IF_VALID setting turns on CRL checking only in case the CRL is present."));
+		META.put(PROP_UPDATE, new PropertyMD("600").setLong().
+				setDescription("how often the truststore should be reloaded, in seconds."));
+		META.put(PROP_OPENSSL_NS_MODE, new PropertyMD(NamespaceCheckingMode.EUGRIDPMA_GLOBUS).
+				setDescription("in case of openssl truststore, controls which (and in which order) namespace checking rules should be applied"));
+		META.put(PROP_OPENSSL_DIR, new PropertyMD("/etc/grid-security/certificates").setPath().
+				setDescription("directory to be used for opeenssl truststore"));
+		META.put(PROP_CRL_UPDATE, new PropertyMD("600").setLong().
+				setDescription("How often CRLs should be updated, in seconds."));
+		META.put(PROP_CRL_CONNECTION_TIMEOUT, new PropertyMD("15").
+				setDescription("Connection timeout for fetching the remote CRLs in seconds."));
+		META.put(PROP_CRL_CACHE_PATH, new PropertyMD().setPath().
+				setDescription("Directory where CRLs should be cached, after downloading them from remote source. Can be left undefined if no disk cache should be used. Note that directory should be secured, i.e. normal users should not be allowed to write to it."));
+		META.put(PROP_CRL_LOCATIONS, new PropertyMD().setList(false).
+				setDescription("List of CRLs locations. Can contain URLs, local files and wildcard expressions."));
+		META.put(PROP_DIRECTORY_LOCATIONS, new PropertyMD().setList(false).
+				setDescription("List of CA certificates locations. Can contain URLs, local files and wildcard expressions."));
+		META.put(PROP_DIRECTORY_ENCODING, new PropertyMD(Encoding.PEM).
+				setDescription("For directory truststore controls whether certificates are encoded in PEM or DER."));
+		META.put(PROP_DIRECTORY_CONNECTION_TIMEOUT, new PropertyMD("15").
+				setDescription("Connection timeout for fetching the remote CA certificates in seconds."));
+		META.put(PROP_DIRECTORY_CACHE_PATH, new PropertyMD().setPath().
+				setDescription("Directory where CA certificates should be cached, after downloading them from a remote source. Can be left undefined if no disk cache should be used. Note that directory should be secured, i.e. normal users should not be allowed to write to it."));
+		META.put(PROP_REVOCATION_ORDER, new PropertyMD(RevocationCheckingOrder.OCSP_CRL).
+				setDescription("Controls overal revocation sources order"));
+		META.put(PROP_REVOCATION_USE_ALL, new PropertyMD("false").
+				setDescription("Controls whether all defined revocation sources should be always checked, even if one the first one already confirmed that a checked certificate is not revoked."));
+		META.put(PROP_OCSP_MODE, new PropertyMD(OCSPCheckingMode.IF_AVAILABLE).
+				setDescription("General OCSP ckecking mode. REQUIRE should not be used unless it is guaranteed that for all certificates an OCSP responder is defined."));
+		META.put(PROP_OCSP_LOCAL_RESPONDERS, new PropertyMD().setList(true).
+				setDescription("Optional list of local OCSP responders"));
+		META.put(PROP_OCSP_TIMEOUT, new PropertyMD(""+OCSPParametes.DEFAULT_TIMEOUT).
+				setDescription("Timeout for OCSP connections in miliseconds."));
+		META.put(PROP_OCSP_CACHE_TTL, new PropertyMD(""+OCSPParametes.DEFAULT_CACHE).
+				setDescription("For how long the OCSP responses should be locally cached in seconds (this is a maximum value, responses won't be cached after expiration)"));
+		META.put(PROP_OCSP_DISK_CACHE, new PropertyMD().setPath().
+				setDescription("If this property is defined then OCSP responses will be cached on disk in the defined folder."));
 		
 		META.put(PROP_TYPE, new PropertyMD().setEnum(TruststoreType.directory).
-				setMandatory().setDescription("truststore type"));
-		META.put(PROP_KS_PASSWORD, new PropertyMD().setSecret());
+				setMandatory().setDescription("The truststore type."));
+		META.put(PROP_KS_PASSWORD, new PropertyMD().setSecret().
+				setDescription("The password of the keystore type truststore."));
+		META.put(PROP_KS_TYPE, new PropertyMD().
+				setDescription("The keystore type (jks, pkcs12) in case of truststore of keystore type."));
+		META.put(PROP_KS_PATH, new PropertyMD().
+				setDescription("The keystore path in case of truststore of keystore type."));
 	}
 
 	private TruststoreType type;
@@ -228,7 +255,7 @@ public class TruststoreProperties extends PropertiesHelper
 			log.info("Updated " + prefix+PROP_CRL_UPDATE + " value to " + crlUpdateInterval);
 		}
 		
-		List<String> newCrlLocations = getListOfValues(PROP_CRL_LOCATIONS, false);
+		List<String> newCrlLocations = getListOfValues(PROP_CRL_LOCATIONS);
 		if (!newCrlLocations.equals(crlLocations))
 		{
 			if (directoryValidator != null)
@@ -242,10 +269,10 @@ public class TruststoreProperties extends PropertiesHelper
 		if (ksValidator != null)
 			return;
 		
-		List<String> newDirectoryLocations = getListOfValues(PROP_DIRECTORY_LOCATIONS, false);
+		List<String> newDirectoryLocations = getListOfValues(PROP_DIRECTORY_LOCATIONS);
 		if (!newDirectoryLocations.equals(directoryLocations))
 		{
-			directoryValidator.setCrls(newDirectoryLocations);
+			directoryValidator.setTruststorePaths(newDirectoryLocations);
 			directoryLocations = newDirectoryLocations;
 			log.info("Updated " + prefix+PROP_DIRECTORY_LOCATIONS);
 		}
@@ -296,7 +323,7 @@ public class TruststoreProperties extends PropertiesHelper
 			throws ConfigurationException, KeyStoreException, IOException
 	{
 		setCrlSettings();
-		directoryLocations = getListOfValues(PROP_DIRECTORY_LOCATIONS, false);
+		directoryLocations = getListOfValues(PROP_DIRECTORY_LOCATIONS);
 		directoryEncoding = getEnumValue(PROP_DIRECTORY_ENCODING, Encoding.class);
 		caConnectionTimeout = getIntValue(PROP_DIRECTORY_CONNECTION_TIMEOUT);
 		caDiskCache = getFileValueAsString(PROP_DIRECTORY_CACHE_PATH, true);
@@ -356,12 +383,12 @@ public class TruststoreProperties extends PropertiesHelper
 		crlUpdateInterval = getLongValue(PROP_CRL_UPDATE);
 		crlConnectionTimeout = getIntValue(PROP_CRL_CONNECTION_TIMEOUT);
 		crlDiskCache = getFileValueAsString(PROP_CRL_CACHE_PATH, true);
-		crlLocations = getListOfValues(PROP_CRL_LOCATIONS, false);
+		crlLocations = getListOfValues(PROP_CRL_LOCATIONS);
 	}
 	
 	private ValidatorParamsExt getValidatorParamsExt()
 	{
-		CRLParameters crlParameters = new CRLParameters(crlLocations, crlUpdateInterval, 
+		CRLParameters crlParameters = new CRLParameters(crlLocations, crlUpdateInterval*1000, 
 			crlConnectionTimeout, crlDiskCache);
 		RevocationCheckingOrder order = getEnumValue(PROP_REVOCATION_ORDER, RevocationCheckingOrder.class);
 		boolean useAll = getBooleanValue(PROP_REVOCATION_USE_ALL);
@@ -377,7 +404,7 @@ public class TruststoreProperties extends PropertiesHelper
 		int cacheTtl = getIntValue(PROP_OCSP_CACHE_TTL);
 		String diskCachePath = getFileValueAsString(PROP_OCSP_DISK_CACHE, true);
 		
-		List<String> localRespondersCfg = getListOfValues(PROP_OCSP_LOCAL_RESPONDERS, true);
+		List<String> localRespondersCfg = getListOfValues(PROP_OCSP_LOCAL_RESPONDERS);
 		OCSPResponder[] localResponders = new OCSPResponder[localRespondersCfg.size()];
 		for (int i=0; i<localResponders.length; i++)
 		{
@@ -386,7 +413,7 @@ public class TruststoreProperties extends PropertiesHelper
 			String[] arr = cfg.split("[ ]+");
 			BufferedInputStream is = null;
 			if (arr.length != 2)
-				throw new ConfigurationException("Local responder's number " + i + 
+				throw new ConfigurationException("Local responder's number " + (i+1) + 
 						" configuration is invalid, must be: " +
 						"'<responderURL> <responderPemCertificatePath>'");
 			try
@@ -396,7 +423,7 @@ public class TruststoreProperties extends PropertiesHelper
 				localResponders[i] = new OCSPResponder(new URL(arr[0]), cert);			
 			} catch (FileNotFoundException e)
 			{
-				throw new ConfigurationException("Local responder's number " + i + 
+				throw new ConfigurationException("Local responder's number " + (i+1) + 
 						" certificate can not be loaded, file " + arr[1] + " not found.", e);
 			} catch (MalformedURLException e)
 			{
@@ -404,7 +431,7 @@ public class TruststoreProperties extends PropertiesHelper
 						+ e.getMessage(), e);
 			} catch (IOException e)
 			{
-				throw new ConfigurationException("Local responder's number " + i + 
+				throw new ConfigurationException("Local responder's number " + (i+1) + 
 						" certificate can not be loaded: " + e.getMessage(), e);
 			} finally
 			{

@@ -35,11 +35,19 @@ public class AsciidocFormatter implements HelpFormatter
 		for (String key: keys)
 		{
 			PropertyMD md = metadata.get(key);
+
 			ret.append("|" + pfx + key);
 			if (md.getType() == Type.LIST)
-				ret.append("*");
+				ret.append(md.numericalListKeys() ? "<NUMBER>" : "*");
+			if (md.canHaveSubkeys())
+				ret.append("[.*]");
 			ret.append(" |");
-			ret.append(md.getTypeDecription() + " |");
+			
+			ret.append(md.getTypeDescription());
+			if (md.canHaveSubkeys())
+				ret.append(" _can have subkeys_");
+			ret.append(" |");
+			
 			if (md.isMandatory())
 				ret.append("_mandatory to be set_ |");
 			else if (md.hasDefault())

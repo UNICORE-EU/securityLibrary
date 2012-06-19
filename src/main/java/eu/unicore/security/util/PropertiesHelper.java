@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
@@ -19,7 +20,7 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
-import eu.unicore.security.util.HelpFormatter.HelpFormat;
+import eu.unicore.security.util.PropertyMD.Type;
 
 /**
  * Provides methods to parse properties and return them as String, ints, longs, Files, arbitrary Enums 
@@ -99,7 +100,7 @@ public class PropertiesHelper
 					" is mandatory");
 		
 		String value = properties.getProperty(prefix + key);
-		if (value == null)
+		if (value == null && meta.getType() != Type.LIST)
 			return;
 		switch (meta.getType()) 
 		{
@@ -125,6 +126,24 @@ public class PropertiesHelper
 		case ENUM:
 			getEnumValue(key, meta.getEnumTypeInstance().getDeclaringClass());
 			break;
+		case LIST:
+			if (meta.numericalListKeys())
+			{
+				Set<String> listKeys = getSortedStringKeys(prefix+key);
+				int l = (prefix+key).length();
+				for (String k: listKeys)
+				{
+					try
+					{
+						Integer.parseInt(k.substring(l));
+					} catch (NumberFormatException e)
+					{
+						throw new ConfigurationException("For the " + prefix + key + 
+								" list property only the numerical subkeys are allowed, and " + k + " doesn't end with a numerical value.");
+					}
+				}
+			}
+			break;
 		}
 	}
 	
@@ -138,7 +157,7 @@ public class PropertiesHelper
 			if (key.startsWith(prefix))
 			{
 				String noPfxKey = key.substring(prefix.length());
-				if (!isSet(noPfxKey))
+				if (getMetadata(noPfxKey) == null)
 					sb.append(" ").append(key);
 			}
 		}
@@ -146,23 +165,22 @@ public class PropertiesHelper
 			throw new ConfigurationException("The following properties are not known:" + sb.toString() + 
 					". Remove them or use correct property names if there are mistakes.");
 	}
-
-	/**
-	 * Returns a string with help in the desired format.
-	 * @param format
-	 * @return
-	 */
-	public String createHelp(HelpFormat format)
-	{
-		switch (format)
-		{
-		case asciidoc: 
-			return new AsciidocFormatter().format(prefix, metadata);
-		default:
-			throw new IllegalStateException("Unknown help format - no formatter wired up");
-		}
-	}
 	
+	protected PropertyMD getMetadata(String key)
+	{
+		if (metadata.containsKey(key))
+			return metadata.get(key);
+		
+		Set<Entry<String, PropertyMD>> entries = metadata.entrySet();
+		for (Entry<String, PropertyMD> entry: entries)
+		{
+			if (key.startsWith(entry.getKey()) && 
+					(entry.getValue().getType() == Type.LIST || entry.getValue().canHaveSubkeys()))
+				return entry.getValue();
+		}
+		return null;
+	}
+
 	/**
 	 * 
 	 * @param key
@@ -444,16 +462,17 @@ public class PropertiesHelper
 	 * generalPrefix.ourListProperty.1=val1
 	 * </pre>
 	 * will result in (val1, val2) if invoked with 'ourListProperty.' as argument.
-	 *   
+	 * <p>
+	 * property metadata defines whether list sub keys should be restricted to numerical values only.
+	 * If so list keys are sorted as numbers and keys which are not numbers are skipped with warning.  
 	 * @param prefix2 the prefix to be used.
-	 * @param numericalKeys whether to use only integer keys, sorted numerically. 
-	 * Keys which are not numbers are skipped with a warning. 
-	 * If false, sorting is lexical and all keys are used. 
 	 * @return
 	 */
-	public synchronized List<String> getListOfValues(String prefix2, boolean numericalKeys)
+	public synchronized List<String> getListOfValues(String prefix2)
 	{
 		String base = prefix + prefix2;
+		PropertyMD meta = metadata.get(prefix2);
+		boolean numericalKeys = meta == null ? false : meta.numericalListKeys();
 		Set<String> keys = numericalKeys ? getSortedNumKeys(base) : getSortedStringKeys(base);
 		
 		List<String> ret = new ArrayList<String>();

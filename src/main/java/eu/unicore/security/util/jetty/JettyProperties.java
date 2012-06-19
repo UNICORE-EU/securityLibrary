@@ -57,7 +57,6 @@ public class JettyProperties extends PropertiesHelper
 	
 	/**
 	 * use java.util.Random to generate session ids instead of SecureRandom (for SSL sockets)
-	 * default: true
 	 */
 	public static final String FAST_RANDOM = "fastRandom";
 
@@ -65,18 +64,16 @@ public class JettyProperties extends PropertiesHelper
 	 * Should the NIO connector be used?
 	 * NIO is best suited under high-load, when lots of connections
 	 * exist that are idle for long periods.
-	 * 
-	 * default: false
 	 */
 	public static final String USE_NIO = "useNIO";
 	
 	/**
-	 * minimum number of threads to have in the Jetty thread pool (default: 1)
+	 * minimum number of threads to have in the Jetty thread pool
 	 */
 	public static final String MIN_THREADS = "minThreads";
 
 	/**
-	 * maximum number of threads to have in the Jetty thread pool (default: 255)
+	 * maximum number of threads to have in the Jetty thread pool
 	 */
 	public static final String MAX_THREADS = "maxThreads";
 
@@ -85,38 +82,37 @@ public class JettyProperties extends PropertiesHelper
 	 * of threads in the pool dips under this value (especially when max 
 	 * threads is reached), per connection max idle time will be cut 
 	 * from normal to low-resource
-	 * (default: 50)
 	 */
 	public static final String LOW_THREADS = "lowThreads";
 
 	/**
-	 * time (in ms.) before an idle connection will time out (default: 3000)
+	 * time (in ms.) before an idle connection will time out
 	 */
 	public static final String MAX_IDLE_TIME = "maxIdleTime";
 
 	/**
-	 * in low resource conditions, time (in ms.) before an idle connection will time out (default: 100)
+	 * in low resource conditions, time (in ms.) before an idle connection will time out
 	 * @see #LOW_THREADS
 	 */
 	public static final String LOW_RESOURCE_MAX_IDLE_TIME = "lowResourceMaxIdleTime";
 
 	/**
-	 * Socket linger time default: not set
+	 * Socket linger time
 	 */
 	public static final String SO_LINGER_TIME = "soLingerTime";
 
 	/**
-	 * Whether the SSL socket accept client-side authentication (default: true)
+	 * Whether the SSL socket accept client-side authentication
 	 */
 	public static final String WANT_CLIENT_AUTHN = "wantClientAuthn";
 
 	/**
-	 * Whether the SSL socket require client-side authentication (default: true)
+	 * Whether the SSL socket require client-side authentication
 	 */
 	public static final String REQUIRE_CLIENT_AUTHN = "requireClientAuthn";
 
 	/**
-	 * Space separated list of SSL cipher suites to be disabled (default: empty)
+	 * Space separated list of SSL cipher suites to be disabled
 	 */
 	public static final String DISABLED_CIPHER_SUITES = "disabledCipherSuites";
 
@@ -126,31 +122,44 @@ public class JettyProperties extends PropertiesHelper
 	public static final String GZIP_PREFIX = "gzip.";
 	
 	/**
-	 * What is the minimal size of message that should be compressed (default: 100000)
+	 * What is the minimal size of message that should be compressed
 	 */
 	public static final String MIN_GZIP_SIZE = GZIP_PREFIX + "minGzipSize";
 	
 	/**
-	 * Whether to enable compression? (default: false)
+	 * Whether to enable compression?
 	 */
 	public static final String ENABLE_GZIP = GZIP_PREFIX + "enable";
 	
 	protected final static Map<String, PropertyMD> defaults=new HashMap<String, PropertyMD>();
 	
 	static{
-		defaults.put(MAX_THREADS, new PropertyMD("255").setPositive());
-		defaults.put(MIN_THREADS, new PropertyMD("1").setPositive());
-		defaults.put(LOW_THREADS, new PropertyMD("50").setPositive());
-		defaults.put(MAX_IDLE_TIME, new PropertyMD("3000").setPositive());
-		defaults.put(LOW_RESOURCE_MAX_IDLE_TIME, new PropertyMD("100").setPositive());
-		defaults.put(FAST_RANDOM, new PropertyMD("false"));
-		defaults.put(SO_LINGER_TIME, new PropertyMD("-1"));
-		defaults.put(WANT_CLIENT_AUTHN, new PropertyMD("true"));
-		defaults.put(REQUIRE_CLIENT_AUTHN, new PropertyMD("true"));
-		defaults.put(DISABLED_CIPHER_SUITES, new PropertyMD(""));
-		defaults.put(MIN_GZIP_SIZE, new PropertyMD("100000"));
-		defaults.put(ENABLE_GZIP, new PropertyMD("false"));
-		defaults.put(USE_NIO, new PropertyMD("false"));
+		defaults.put(MAX_THREADS, new PropertyMD("255").setPositive().
+				setDescription("Maximum number of threads to have in the Jetty thread pool."));
+		defaults.put(MIN_THREADS, new PropertyMD("1").setPositive().
+				setDescription("Minimum number of threads to have in the Jetty thread pool."));
+		defaults.put(LOW_THREADS, new PropertyMD("50").setPositive().
+				setDescription("It is a threshold indicator.  If the available number of threads in the pool dips under this value (especially when max threads is reached), per connection max idle time will be cut from normal to low-resource"));
+		defaults.put(MAX_IDLE_TIME, new PropertyMD("3000").setPositive().
+				setDescription("Time (in ms.) before an idle connection will time out"));
+		defaults.put(LOW_RESOURCE_MAX_IDLE_TIME, new PropertyMD("100").setPositive().
+				setDescription("In low resource conditions, time (in ms.) before an idle connection will time out."));
+		defaults.put(FAST_RANDOM, new PropertyMD("false").
+				setDescription("Use insecure, but fast pseudo random generator to generate session ids instead of slow and secure generator for SSL sockets. Useful for testing."));
+		defaults.put(SO_LINGER_TIME, new PropertyMD("-1").
+				setDescription("Socket linger time."));
+		defaults.put(WANT_CLIENT_AUTHN, new PropertyMD("true").
+				setDescription("Controls whether the SSL socket accepts client-side authentication."));
+		defaults.put(REQUIRE_CLIENT_AUTHN, new PropertyMD("true").
+				setDescription("Controls whether the SSL socket requires client-side authentication."));
+		defaults.put(DISABLED_CIPHER_SUITES, new PropertyMD("").
+				setDescription("Space separated list of SSL cipher suites to be disabled."));
+		defaults.put(MIN_GZIP_SIZE, new PropertyMD("100000").
+				setDescription("Specifies the minimal size of message that should be compressed."));
+		defaults.put(ENABLE_GZIP, new PropertyMD("false").
+				setDescription("Controls whether to enable compression of HTTP responses."));
+		defaults.put(USE_NIO, new PropertyMD("false").
+				setDescription("Controls whether the NIO connector be used. NIO is best suited under high-load, when lots of connections exist that are idle for long periods."));
 	}
 
 	public JettyProperties() throws ConfigurationException 

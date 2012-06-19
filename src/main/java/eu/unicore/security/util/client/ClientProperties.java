@@ -64,15 +64,26 @@ public class ClientProperties extends DefaultClientConfiguration
 	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
 	static 
 	{
-		META.put(PROP_HTTP_AUTHN_ENABLED, new PropertyMD("false"));
-		META.put(PROP_HTTP_PASSWORD, new PropertyMD("").setSecret());
-		META.put(PROP_HTTP_USER, new PropertyMD(""));
-		META.put(PROP_IN_HANDLERS, new PropertyMD(""));
-		META.put(PROP_MESSAGE_SIGNING_ENABLED, new PropertyMD("true"));
-		META.put(PROP_OUT_HANDLERS, new PropertyMD(""));
-		META.put(PROP_SSL_AUTHN_ENABLED, new PropertyMD("true"));
-		META.put(PROP_SSL_ENABLED, new PropertyMD("true"));
-		META.put(PROP_SERVER_HOSTNAME_CHECKING, new PropertyMD(ServerHostnameCheckingMode.WARN));
+		META.put(PROP_HTTP_AUTHN_ENABLED, new PropertyMD("false").
+				setDescription("Whether HTTP basic authentication should be used."));
+		META.put(PROP_HTTP_PASSWORD, new PropertyMD("").setSecret().
+				setDescription("Password for use with HTTP basic authentication (if enabled)."));
+		META.put(PROP_HTTP_USER, new PropertyMD("").
+				setDescription("Username for use with HTTP basic authentication (if enabled)."));
+		META.put(PROP_IN_HANDLERS, new PropertyMD("").
+				setDescription("Space separated list of additional handler class names for handling incoming WS messages"));
+		META.put(PROP_MESSAGE_SIGNING_ENABLED, new PropertyMD("true").
+				setDescription("Controls whether signing of key web service requests should be performed."));
+		META.put(PROP_OUT_HANDLERS, new PropertyMD("").
+				setDescription("Space separated list of additional handler class names for handling outgoing WS messages"));
+		META.put(PROP_SSL_AUTHN_ENABLED, new PropertyMD("true").
+				setDescription("Controls whether SSL authentication of the client should be performed."));
+		META.put(PROP_SSL_ENABLED, new PropertyMD("true").
+				setDescription("Controls whether the SSL/TLS connection mode is enabled."));
+		META.put(PROP_SERVER_HOSTNAME_CHECKING, new PropertyMD(ServerHostnameCheckingMode.WARN).
+				setDescription("Controls whether server's hostname should be checked for matching its certificate subject. This verification prevents man-in-the-middle attacks. If enabled WARN will only print warning in log, FAIL will close the connection."));
+		META.put(EXTRA_HTTP_LIB_PROPERTIES_PREFIX, new PropertyMD().setCanHaveSubkeys().
+				setDescription("Additional settings to be used by the HTTP client."));
 	}
 
 	//all those constructors suck a bit- but there is no multi inheritance in Java, 

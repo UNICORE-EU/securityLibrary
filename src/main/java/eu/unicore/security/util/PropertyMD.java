@@ -19,6 +19,8 @@ public class PropertyMD
 	private String defaultValue;
 	private boolean hasDefault;
 	private boolean mandatory;
+	private boolean canHaveSubkeys = false;
+	private boolean numericalListKeys = false;
 	private String description;
 	private long min = Integer.MIN_VALUE;
 	private long max = Integer.MAX_VALUE;
@@ -157,13 +159,25 @@ public class PropertyMD
 		this.type = Type.PATH;
 		return this;
 	}
-	public PropertyMD setList() {
+	public PropertyMD setList(boolean numericalKeys) {
 		this.type = Type.LIST;
+		this.numericalListKeys = numericalKeys;
+		return this;
+	}
+	public boolean numericalListKeys() {
+		return numericalListKeys;
+	}
+	
+	
+	public boolean canHaveSubkeys() {
+		return canHaveSubkeys;
+	}
+	public PropertyMD setCanHaveSubkeys()
+	{
+		this.canHaveSubkeys = true;
 		return this;
 	}
 
-	
-	
 	public String getDescription() {
 		return description;
 	}
@@ -217,7 +231,7 @@ public class PropertyMD
 	 * Returns human friendly description of the property type
 	 * @return
 	 */
-	public String getTypeDecription() {
+	public String getTypeDescription() {
 		switch(type)
 		{
 		case STRING:

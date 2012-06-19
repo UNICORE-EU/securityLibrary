@@ -38,6 +38,7 @@ public class FilePropertiesHelper extends PropertiesHelper
 	{
 		super(prefix, load(file), meta, log);
 		this.file = file;
+		lastAccess = file.lastModified();
 	}
 
 	public synchronized void reload() throws IOException, ConfigurationException
