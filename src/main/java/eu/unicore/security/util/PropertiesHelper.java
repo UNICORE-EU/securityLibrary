@@ -157,6 +157,8 @@ public class PropertiesHelper
 			if (key.startsWith(prefix))
 			{
 				String noPfxKey = key.substring(prefix.length());
+				if (noPfxKey.contains("."))
+					continue;
 				if (getMetadata(noPfxKey) == null)
 					sb.append(" ").append(key);
 			}
