@@ -218,7 +218,7 @@ public class Client implements Serializable {
 		else if (type == Type.LOCAL)
 			return LOCAL_CLIENT_DN;
 		else
-			return secTokens.getEffectiveUserName().toString();
+			return secTokens.getEffectiveUserName().getName();
 	}
 	
 	
