@@ -1,0 +1,88 @@
+Configuring PKI trust settings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Public Key Infrastructure (PKI) trust settings are used to validate certificates. This is performed, 
+in the first place when a connection with a remote peer is initiated over the network, using the SSL (or TLS) protocol.
+Additionally certificate validation can happen in few other situations, e.g. when checking digital signatures 
+of various sensitive pieces of data.
+
+Certificates validation is primarily configured using a set of initially trusted certificates of so called 
+Certificate Authorities (CAs). Those trusted certificates are also known as _trust anchors_ and their collection
+is called as a _trust store_.
+
+Except of _trust anchors_ validation mechanism can use additional input for checking if a certificate being checked 
+was not revoked and if its subject is in a permitted namesapce. 
+
+UNICORE allows for different types of trust stores. All of them are configured using a set of properties.
+
+include::sec-ref-trustProperties.txt[]
+
+Examples
+^^^^^^^^
+
+[NOTE]
+Various UNICORE modules use different property prefixes. Here we don't put any, but in practice you have
+to use the prefix (see the reference table above for the actual prefix). Also properties might need to be provided
+using different syntax, as XML. However in all cases the properties to use and values are the same. 
+ 
+Directory truststore, with complete set of options:
+
+ truststore.type=directory
+ truststore.allowProxy=DENY
+ truststore.updateInterval=1234
+ truststore.directoryLocations=/trust/dir/*.pem http://caserver/ca.pem
+ truststore.directoryEncoding=PEM
+ truststore.directoryConnectionTimeout=100
+ truststore.directoryDiskCachePath=/tmp
+ truststore.crlLocations=/trust/dir/*.crl http://caserver/crl.pem
+ truststore.crlUpdateInterval=400
+ truststore.crlMode=REQUIRE
+ truststore.crlConnectionTimeout=200
+ truststore.crlDiskCachePath=/tmp
+
+Openssl truststore:
+
+ truststore.type=openssl
+ truststore.opensslPath=/truststores/openssl
+ truststore.opensslNsMode=EUGRIDPMA_GLOBUS_REQUIRE
+ truststore.allowProxy=ALLOW
+ truststore.updateInterval=1234
+ truststore.crlMode=IF_VALID
+
+Java keystore used as a trust store:
+
+ truststore.type=keystore
+ truststore.keystorePath=src/test/resources/certs/truststore.jks
+ truststore.keystoreFormat=JKS
+ truststore.keystorePassword=xxxxxx
+
+
+Configuring the credential
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+UNICORE uses private key and a corresponding certificate (called together as a _credential_) 
+to identify users and servers. Credentials might be provided in several formats. The following table list all possible 
+variants and corresponding parameters.
+
+include::sec-ref-credProperties.txt[]
+
+Examples
+^^^^^^^^
+
+[NOTE]
+Various UNICORE modules use different property prefixes. Here we don't put any, but in practice you have
+to use the prefix (see the reference table above for the actual prefix). Also properties might need to be provided
+using different syntax, as XML. However in all cases the properties to use and values are the same.
+
+Credential as a pair of DER files:
+
+ credential.format=der
+ credential.password=the\!njs
+ credential.path=src/test/resources/credentials/cert-1.der
+ credential.keyPath=src/test/resources/credentials/pk-1.der
+
+Credential as a JKS file (type can be autodetected in almost every case):
+
+ credential.path=src/test/resources/certs/server1.jks
+ credential.password=xxxxxx
+
