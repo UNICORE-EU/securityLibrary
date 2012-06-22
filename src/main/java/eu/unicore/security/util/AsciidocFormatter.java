@@ -69,10 +69,16 @@ public class AsciidocFormatter implements HelpFormatter
 	
 	public static void main(String... args) throws Exception
 	{
-		if (args.length < 3)
-			throw new IllegalArgumentException("Args: <target directory> <list of pairs: class and target file>");
-		for (int i=1; i<args.length; i+=2)
-			processFile(args[0], args[i], args[i+1]);
+		if (args.length < 2)
+			throw new IllegalArgumentException("Args: <target directory> <triple as one string: class|target file|prefix where prefix is optional>");
+		for (int i=1; i<args.length; i++)
+		{
+			String[] genArgs = args[i].split("\\|");
+			if (genArgs.length < 2 || genArgs.length > 3)
+				throw new IllegalArgumentException("Args: <target directory> <triple as one string: class|target file|prefix where prefix is optional>");
+			String prefix = genArgs.length == 3 ? genArgs[2] : null;
+			processFile(args[0], genArgs[0], genArgs[1], prefix);
+		}
 	}
 	
 	private static Field getField(Class<?> clazz, String defaultName, 
@@ -100,18 +106,23 @@ public class AsciidocFormatter implements HelpFormatter
 		return field;
 	}
 	
-	private static void processFile(String folder, String clazzName, String destination) throws Exception
+	public static void processFile(String folder, String clazzName, String destination, String prefix) throws Exception
 	{
+		System.out.println("Generating from: " + clazzName + " to " + destination + " prefix: " + prefix);
 		ClassLoader loader = AsciidocFormatter.class.getClassLoader();
 		Class<?> clazz = loader.loadClass(clazzName);
 		
 		
 		Field fMeta = getField(clazz, "META", DocumentationReferenceMeta.class, Map.class);
-		Field fPrefix = getField(clazz, "DEFAULT_PREFIX", DocumentationReferencePrefix.class, String.class);
+		if (prefix == null)
+		{
+			Field fPrefix = getField(clazz, "DEFAULT_PREFIX", DocumentationReferencePrefix.class, String.class);
+			prefix = (String) fPrefix.get(null);
+		}
 		
 		@SuppressWarnings("unchecked")
 		Map<String, PropertyMD> meta = (Map<String, PropertyMD>) fMeta.get(null);
-		String prefix = (String) fPrefix.get(null);
+
 		AsciidocFormatter formatter = new AsciidocFormatter();
 		String result = formatter.format(prefix, meta);
 		BufferedWriter w = new BufferedWriter(new FileWriter(new File(folder, destination)));

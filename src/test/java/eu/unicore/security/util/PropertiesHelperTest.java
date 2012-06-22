@@ -232,8 +232,7 @@ public class PropertiesHelperTest extends TestCase
 		{
 			File f = new File("target/generated-doc.txt");
 			f.delete();
-			AsciidocFormatter.main("target", PropertiesHelperTest.class.getName(), 
-					f.getName());
+			AsciidocFormatter.main("target", PropertiesHelperTest.class.getName()+"|"+f.getName());
 			assertTrue(f.exists());
 		} catch (Exception e)
 		{
