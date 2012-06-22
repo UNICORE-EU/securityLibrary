@@ -22,6 +22,7 @@ public class PropertyMD
 	private boolean canHaveSubkeys = false;
 	private boolean numericalListKeys = false;
 	private String description;
+	private String category;
 	private long min = Integer.MIN_VALUE;
 	private long max = Integer.MAX_VALUE;
 	private Type type = Type.STRING; 
@@ -264,5 +265,20 @@ public class PropertyMD
 		default:
 			return "UNKNOWN";
 		}
+	}
+
+	/**
+	 * @return the category
+	 */
+	public String getCategory() {
+		return category;
+	}
+
+	/**
+	 * @param optional property category
+	 */
+	public PropertyMD setCategory(String category) {
+		this.category = category;
+		return this;
 	}
 }

@@ -10,8 +10,9 @@ import java.io.FileWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedSet;
+import java.util.Set;
 import java.util.TreeSet;
 
 import eu.unicore.security.util.PropertyMD.Type;
@@ -25,13 +26,46 @@ public class AsciidocFormatter implements HelpFormatter
 	@Override
 	public String format(String pfx, Map<String, PropertyMD> metadata)
 	{
-		SortedSet<String> keys = new TreeSet<String>(metadata.keySet());
-		if (keys.size() == 0)
+		if (metadata.size() == 0)
 			return "";
+		
+		Set<String> keys = metadata.keySet();
+		Map<String, Set<String>> keysInCats = new HashMap<String, Set<String>>();
+		for (String key: keys)
+		{
+			String cat = metadata.get(key).getCategory();
+			Set<String> current = keysInCats.get(cat);
+			if (current == null)
+			{
+				current = new TreeSet<String>();
+				keysInCats.put(cat, current);
+			}
+			current.add(key);
+		}
+		
+		
 		StringBuilder ret = new StringBuilder();
-		ret.append("[width=\"100%\",cols=\"<m,<,<,<\",frame=\"topbot\",options=\"header\"]\n");
+		ret.append("[width=\"100%\",cols=\"<30%m,20%<,15%<,<35%\",frame=\"topbot\",options=\"header\"]\n");
 		ret.append("|=====================================================================\n");
 		ret.append("|Property name |Type |Default value / mandatory |Description \n");
+
+		Set<String> noCat = keysInCats.remove(null);
+		if (noCat != null)
+			ret.append(formatCategory(noCat, pfx, metadata));
+		
+		Set<String> catsSet = new TreeSet<String>(keysInCats.keySet());
+		for (String cat: catsSet)
+		{
+			ret.append("4+^e| --- " + cat + " ---");
+			ret.append(formatCategory(keysInCats.get(cat), pfx, metadata));
+		}
+		ret.append("|=====================================================================\n");
+		return ret.toString();
+	}
+	
+	private String formatCategory(Set<String> keys, String pfx, Map<String, PropertyMD> metadata)
+	{
+		StringBuilder ret = new StringBuilder();
 		for (String key: keys)
 		{
 			PropertyMD md = metadata.get(key);
@@ -41,29 +75,28 @@ public class AsciidocFormatter implements HelpFormatter
 				ret.append(md.numericalListKeys() ? "<NUMBER>" : "*");
 			if (md.canHaveSubkeys())
 				ret.append("[.*]");
-			ret.append(" |");
+			ret.append("|");
 			
 			ret.append(md.getTypeDescription());
 			if (md.canHaveSubkeys())
 				ret.append(" _can have subkeys_");
-			ret.append(" |");
+			ret.append("|");
 			
 			if (md.isMandatory())
-				ret.append("_mandatory to be set_ |");
+				ret.append("_mandatory to be set_|");
 			else if (md.hasDefault())
 			{
 				if (md.getDefault().equals(""))
-					ret.append("_empty string_ |");
+					ret.append("_empty string_|");
 				else
-					ret.append("`" + md.getDefault() +"` |");
+					ret.append("`" + md.getDefault() +"`|");
 			} else
-				ret.append("- |");
+				ret.append("-|");
 			String desc = md.getDescription();
 			if (desc == null)
 				desc = " ";
 			ret.append(desc + " \n");
 		}
-		ret.append("|=====================================================================\n");
 		return ret.toString();
 	}
 	
