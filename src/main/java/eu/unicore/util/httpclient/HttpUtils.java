@@ -15,6 +15,7 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.log4j.Logger;
@@ -129,6 +130,7 @@ public class HttpUtils {
 		
 		HttpClientParams  params = client.getParams();
 		params.setParameter("http.useragent", USER_AGENT);
+		params.setParameter(HttpMethodParams.RETRY_HANDLER, new RetryHandler());
 		
 		params.setVersion(HttpVersion.HTTP_1_1);
 		return client;

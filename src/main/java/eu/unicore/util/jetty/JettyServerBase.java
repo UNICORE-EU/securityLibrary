@@ -36,7 +36,6 @@ package eu.unicore.util.jetty;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.EnumSet;
-import java.util.Properties;
 
 import javax.servlet.DispatcherType;
 
@@ -81,7 +80,6 @@ public abstract class JettyServerBase {
 	protected final JettyProperties extraSettings;
 	
 	private Server theServer;
-	private Handler rootContext;
 
 	public JettyServerBase(URL listenUrl,
 			IAuthnAndTrustConfiguration secConfiguration,
@@ -135,8 +133,7 @@ public abstract class JettyServerBase {
 		}
 		
 		configureServer();
-		this.rootContext = createRootContext();
-		theServer.setHandler(rootContext);
+		theServer.setHandler(createRootHandler());
 		configureGzip();
 	}
 
@@ -291,8 +288,12 @@ public abstract class JettyServerBase {
 
 	protected void configureServer() throws ConfigurationException {
 		QueuedThreadPool btPool=new QueuedThreadPool();
-		btPool.setMaxThreads(extraSettings.getIntValue(JettyProperties.MAX_THREADS));
-		btPool.setMinThreads(extraSettings.getIntValue(JettyProperties.MIN_THREADS));
+		int connectorsNum = getUrls().length;
+		boolean useNio = extraSettings.getBooleanValue(JettyProperties.USE_NIO);
+		if (useNio)
+			connectorsNum *= 2;
+		btPool.setMaxThreads(extraSettings.getIntValue(JettyProperties.MAX_THREADS) + connectorsNum);
+		btPool.setMinThreads(extraSettings.getIntValue(JettyProperties.MIN_THREADS) + connectorsNum);
 		theServer.setThreadPool(btPool);
 	}
 
@@ -308,14 +309,14 @@ public abstract class JettyServerBase {
 			FilterHolder gzipHolder = new FilterHolder(
 					new ConfigurableGzipFilter(extraSettings));
 			logger.info("Enabling GZIP compression filter");
-			tryToAddGzipFilter(gzipHolder, getRootContext());
+			tryToAddGzipFilter(gzipHolder, getRootHandler());
 		}
 	}
 	
 	protected void tryToAddGzipFilter(FilterHolder gzipHolder, Handler h) {
 		if (h instanceof ServletContextHandler)
 		{
-			((ServletContextHandler)h).addFilter(gzipHolder, "/", 
+			((ServletContextHandler)h).addFilter(gzipHolder, "/*", 
 					EnumSet.of(DispatcherType.REQUEST));
 		} else if (h instanceof HandlerContainer)
 		{
@@ -351,15 +352,15 @@ public abstract class JettyServerBase {
 	 * Implement this method to create server's handlers - usually returning Servlet's handler.
 	 * @throws Exception
 	 */
-	protected abstract Handler createRootContext() throws ConfigurationException;
+	protected abstract Handler createRootHandler() throws ConfigurationException;
 	
 	/**
 	 * 
 	 * @return the root handler of this Jetty server. 
 	 */
-	public Handler getRootContext() 
+	public Handler getRootHandler() 
 	{
-		return rootContext;
+		return theServer.getHandler();
 	}
 
 	/**
@@ -374,17 +375,5 @@ public abstract class JettyServerBase {
 	 */
 	public URL[] getUrls() {
 		return listenUrls;
-	}
-	
-	/**
-	 * @return Jetty settings useful for tests, with insecure random
-	 */
-	public static JettyProperties getSimpleTestSettings()
-	{
-		Properties p = new Properties();
-		JettyProperties ret = new JettyProperties(p);
-		ret.setProperty(JettyProperties.FAST_RANDOM, "true");
-		ret.setProperty(JettyProperties.SO_LINGER_TIME, "1");
-		return ret;
 	}
 }

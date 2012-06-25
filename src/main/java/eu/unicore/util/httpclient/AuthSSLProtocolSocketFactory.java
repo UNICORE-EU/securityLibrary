@@ -176,6 +176,9 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 					port);
 			socket.bind(localaddr);
 			socket.connect(remoteaddr, timeout);
+			//this is intended: we set socket timeout to connect timeout
+			//as we assume that reading of TLS handshake material is part of connecting process.
+			socket.setSoTimeout(timeout);
 			checkHostname((SSLSocket) socket);
 			return socket;
 		}

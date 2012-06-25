@@ -10,7 +10,7 @@ public class TestAnyPort extends TestCase
 {
 	public void testAnyPort() throws Exception
 	{
-		TestJettyServer server = TestJettyServer.getAnyPortInstance(1);
+		JettyServer4Testing server = JettyServer4Testing.getAnyPortInstance(1);
 		assertEquals(0, server.getUrls()[0].getPort());
 		server.start();
 		assertNotSame(0, server.getUrls()[0].getPort());

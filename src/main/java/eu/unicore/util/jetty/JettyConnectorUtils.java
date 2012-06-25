@@ -73,21 +73,24 @@ public class JettyConnectorUtils
 			final String hostAddress = peer.getAddress().getHostAddress();
 			log.debug("Connection attempt from " + hostAddress);
 
-			SSLSocket ssl = (SSLSocket) socket;
-			ssl.addHandshakeCompletedListener(new HandshakeCompletedListener() {
-				public void handshakeCompleted(HandshakeCompletedEvent hce) {
-					try {
-						X509Certificate[] peer = CertificateUtils.convertToX509Chain(
-								hce.getPeerCertificates());
-						String msg = X500NameUtils.getReadableForm(peer[0].getSubjectX500Principal());
-						log.debug("SSL connection with " + msg + ", connected from " + 
-								hostAddress + " was established.");
-					} catch (SSLPeerUnverifiedException spe) {
-						log.debug("An identity of the peer connecting from " + hostAddress + 
-								" was not established on TLS layer");
+			if (socket instanceof SSLSocket)
+			{
+				SSLSocket ssl = (SSLSocket) socket;
+				ssl.addHandshakeCompletedListener(new HandshakeCompletedListener() {
+					public void handshakeCompleted(HandshakeCompletedEvent hce) {
+						try {
+							X509Certificate[] peer = CertificateUtils.convertToX509Chain(
+									hce.getPeerCertificates());
+							String msg = X500NameUtils.getReadableForm(peer[0].getSubjectX500Principal());
+							log.debug("SSL connection with " + msg + ", connected from " + 
+									hostAddress + " was established.");
+						} catch (SSLPeerUnverifiedException spe) {
+							log.debug("An identity of the peer connecting from " + hostAddress + 
+									" was not established on TLS layer");
+						}
 					}
-				}
-			});
+				});
+			}
 		}
 	}
 

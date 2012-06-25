@@ -135,9 +135,9 @@ public class JettyProperties extends PropertiesHelper
 	
 	static{
 		defaults.put(MAX_THREADS, new PropertyMD("255").setPositive().
-				setDescription("Maximum number of threads to have in the Jetty thread pool. Threads are used to serve connections."));
+				setDescription("Maximum number of threads to have in the Jetty thread pool for connections serving."));
 		defaults.put(MIN_THREADS, new PropertyMD("1").setPositive().
-				setDescription("Minimum number of threads to have in the Jetty thread pool. Threads are used to serve connections."));
+				setDescription("Minimum number of threads to have in the Jetty thread pool for connections serving."));
 		defaults.put(HIGH_LOAD_CONNECTIONS, new PropertyMD("200").setPositive().
 				setDescription("If the number of connections exceeds this amount, then connector is put into a special 'low on resources' state. Existing connections will be closed faster. Note that this value is honored only for NIO connectors. Legacy connectors go into low resources mode when no more threads are available."));
 		defaults.put(MAX_IDLE_TIME, new PropertyMD("3000").setPositive().
@@ -181,6 +181,19 @@ public class JettyProperties extends PropertiesHelper
 			throws ConfigurationException 
 	{
 		super(prefix, properties, defaults, log);
+	}
+	
+	
+	/**
+	 * @return Jetty settings useful for tests, with insecure random
+	 */
+	public static JettyProperties getSimpleTestSettings()
+	{
+		Properties p = new Properties();
+		JettyProperties ret = new JettyProperties(p);
+		ret.setProperty(JettyProperties.FAST_RANDOM, "true");
+		ret.setProperty(JettyProperties.SO_LINGER_TIME, "1");
+		return ret;
 	}
 }
 

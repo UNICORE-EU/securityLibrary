@@ -21,11 +21,19 @@ public class SimpleServlet extends HttpServlet
 
 	public static final String OK_GET = "OK-GET";
 	public static final String OK_POST = "OK-POST";
+	public static final String BIG_GET = "OK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GET" +
+			"OK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GET" +
+			"OK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GET" +
+			"OK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GETOK-GET";
 	
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
 		throws ServletException, IOException
 	{
-		write(OK_GET, resp);
+		String bigResp = req.getParameter("gobig");
+		if (bigResp == null)
+			write(OK_GET, resp);
+		else
+			write(BIG_GET, resp);
 	}
 	
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
@@ -35,18 +43,22 @@ public class SimpleServlet extends HttpServlet
 		if (timeoutS != null)
 		{
 			int timeout = Integer.parseInt(timeoutS);
+			System.out.println("Sleeping for " + timeout);
 			try
 			{
 				Thread.sleep(timeout);
 			} catch (InterruptedException e)
 			{
 			}
+			System.out.println("Woke up!");
 		}
 		write(OK_POST, resp);
 	}
 	
 	private void write(String what, HttpServletResponse resp) throws IOException
 	{
+		resp.setContentType("text/plain");
+		resp.setContentLength(what.length());
 		PrintStream out = new PrintStream(resp.getOutputStream());
 		out.print(what);
 		out.flush();

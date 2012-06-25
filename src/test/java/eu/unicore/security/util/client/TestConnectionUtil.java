@@ -23,11 +23,11 @@ import eu.unicore.util.httpclient.DefaultClientConfiguration;
  */
 public class TestConnectionUtil extends TestCase
 {
-	private TestJettyServer server;
+	private JettyServer4Testing server;
 	
 	public void setUp() throws Exception
 	{
-		server = TestJettyServer.getInstance(1);
+		server = JettyServer4Testing.getInstance(1);
 		server.start();
 	}
 	

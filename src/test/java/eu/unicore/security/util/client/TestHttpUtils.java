@@ -33,11 +33,11 @@ import junit.framework.TestCase;
 
 public class TestHttpUtils extends TestCase
 {
-	private TestJettyServer server;
+	private JettyServer4Testing server;
 	
 	public void setUp() throws Exception
 	{
-		server = TestJettyServer.getInstance(1);
+		server = JettyServer4Testing.getInstance(1);
 		server.addServlet(SimpleServlet.class.getName(), "/servlet1");
 		server.addServlet(RedirectServlet.class.getName(), "/servlet2");
 		server.start();
@@ -132,8 +132,6 @@ public class TestHttpUtils extends TestCase
 		String url = server.getSecUrl()+"/servlet1";
 		
 		HttpClient client = HttpUtils.createClient(url, secCfg);
-		client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, 
-			new DefaultHttpMethodRetryHandler(0, false));
 
 		GetMethod get = new GetMethod(url);
 		try
