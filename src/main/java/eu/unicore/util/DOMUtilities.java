@@ -6,7 +6,7 @@
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
 
-package eu.unicore.security.util;
+package eu.unicore.util;
 
 import java.io.IOException;
 

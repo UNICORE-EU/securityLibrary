@@ -1,4 +1,4 @@
-package eu.unicore.security.util;
+package eu.unicore.util;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;

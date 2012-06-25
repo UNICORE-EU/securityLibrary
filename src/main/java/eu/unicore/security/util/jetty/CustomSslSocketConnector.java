@@ -36,22 +36,13 @@ import java.net.Socket;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
-
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.apache.log4j.Logger;
-import org.mortbay.jetty.security.SslSocketConnector;
+import org.eclipse.jetty.server.ssl.SslSocketConnector;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
-import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
-import eu.unicore.security.util.Log;
-import eu.unicore.security.util.LoggingX509TrustManager;
+import eu.unicore.util.Log;
 
 
 /**
@@ -63,53 +54,24 @@ public class CustomSslSocketConnector extends SslSocketConnector
 {
 	private final static Logger log = Log.getLogger(Log.CONNECTIONS, CustomSslSocketConnector.class);
 
-	private final X509CertChainValidator validator;
-	private final X509Credential credential;
-
 	/**
 	 * Creates Socket connector with provided validator and credential
 	 * @param validator
 	 * @param credential
+	 * @throws NoSuchProviderException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyManagementException 
 	 */
 	public CustomSslSocketConnector(X509CertChainValidator validator,
-			X509Credential credential)
+			X509Credential credential) throws KeyManagementException, NoSuchAlgorithmException, 
+			NoSuchProviderException
 	{
-		this.credential = credential;
-		this.validator = validator;
+		super(JettyConnectorUtils.createJettyContextFactory(validator, credential));
 	}
 
 	@Override
 	protected void configure(Socket socket)throws IOException{
-		NIOSSLSocketConnector.logConnection(socket, log);
+		JettyConnectorUtils.logConnection(socket, log);
 		super.configure(socket);
-	}
-
-	@Override
-	protected SSLServerSocketFactory createFactory() throws Exception  {
-		SSLContext context = createSSLContext(validator, credential, getProtocol(), 
-			getProvider(), getSecureRandomAlgorithm());
-		return context.getServerSocketFactory();
-	}
-	
-	public static SSLContext createSSLContext(X509CertChainValidator validator,
-			X509Credential credential, String protocol, String provider,
-			String secRandomAlg) throws NoSuchAlgorithmException, 
-			NoSuchProviderException, KeyManagementException
-	{
-		KeyManager[] keyManagers = new KeyManager[] {credential.getKeyManager()};
-
-		X509TrustManager trustManager = SocketFactoryCreator.getSSLTrustManager(validator);
-		X509TrustManager decoratedTrustManager = new LoggingX509TrustManager(trustManager);
-		TrustManager[] trustManagers = new X509TrustManager[] {decoratedTrustManager};;
-
-		SecureRandom secureRandom = (secRandomAlg == null) ? 
-				null : 
-				SecureRandom.getInstance(secRandomAlg);
-		SSLContext context = (provider == null) ? 
-				SSLContext.getInstance(protocol) :
-				SSLContext.getInstance(protocol, provider);
-
-		context.init(keyManagers, trustManagers, secureRandom);
-		return context;
 	}
 }

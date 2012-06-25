@@ -50,6 +50,14 @@ public class TestConnectionUtil extends TestCase
 		{
 			e.printStackTrace();
 			fail();
+		} finally 
+		{
+			try
+			{
+				server.stop();
+			} catch (Exception e)
+			{
+			}
 		}
 		
 	}

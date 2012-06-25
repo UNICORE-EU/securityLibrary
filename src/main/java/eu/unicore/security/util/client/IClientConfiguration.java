@@ -10,7 +10,7 @@ package eu.unicore.security.util.client;
 import java.util.Map;
 import java.util.Properties;
 
-import eu.unicore.security.util.IAuthnAndTrustConfiguration;
+import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
 import eu.unicore.security.util.client.HttpUtils;
 
 /**

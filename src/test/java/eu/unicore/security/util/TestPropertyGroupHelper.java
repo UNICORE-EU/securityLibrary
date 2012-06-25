@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import eu.unicore.util.configuration.PropertyGroupHelper;
+
 import junit.framework.TestCase;
 
 public class TestPropertyGroupHelper extends TestCase {

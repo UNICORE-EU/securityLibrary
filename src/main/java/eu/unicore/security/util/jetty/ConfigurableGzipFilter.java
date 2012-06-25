@@ -6,9 +6,9 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import org.mortbay.servlet.GzipFilter;
+import org.eclipse.jetty.servlets.GzipFilter;
 
-import eu.unicore.security.util.ConfigurationException;
+import eu.unicore.util.configuration.ConfigurationException;
 
 /**
  * Wrapper around Jetty's {@link GzipFilter} that allows to be configured
@@ -53,7 +53,7 @@ public class ConfigurableGzipFilter extends GzipFilter
 				}
 			return val;
 		}
-		public Enumeration<?> getInitParameterNames() {
+		public Enumeration<String> getInitParameterNames() {
 			return config.getInitParameterNames();
 		}
 		public ServletContext getServletContext() {

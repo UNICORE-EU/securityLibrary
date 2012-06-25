@@ -35,11 +35,11 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import eu.unicore.security.util.ConfigurationException;
-import eu.unicore.security.util.DocumentationReferenceMeta;
-import eu.unicore.security.util.Log;
-import eu.unicore.security.util.PropertiesHelper;
-import eu.unicore.security.util.PropertyMD;
+import eu.unicore.util.Log;
+import eu.unicore.util.configuration.ConfigurationException;
+import eu.unicore.util.configuration.DocumentationReferenceMeta;
+import eu.unicore.util.configuration.PropertiesHelper;
+import eu.unicore.util.configuration.PropertyMD;
 
 /**
  * Defines constants and defaults for Jetty settings, so simplifies properties handling
@@ -79,12 +79,10 @@ public class JettyProperties extends PropertiesHelper
 	public static final String MAX_THREADS = "maxThreads";
 
 	/**
-	 * lowThreads is a threshold indicator.  If the available number 
-	 * of threads in the pool dips under this value (especially when max 
-	 * threads is reached), per connection max idle time will be cut 
-	 * from normal to low-resource
+	 * If the number of connections exceeds this amount, then connector is put into a special 
+	 * "low on resources" state. Existing connections will be closed faster. 
 	 */
-	public static final String LOW_THREADS = "lowThreads";
+	public static final String HIGH_LOAD_CONNECTIONS = "highLoadConnections";
 
 	/**
 	 * time (in ms.) before an idle connection will time out
@@ -137,11 +135,11 @@ public class JettyProperties extends PropertiesHelper
 	
 	static{
 		defaults.put(MAX_THREADS, new PropertyMD("255").setPositive().
-				setDescription("Maximum number of threads to have in the Jetty thread pool."));
+				setDescription("Maximum number of threads to have in the Jetty thread pool. Threads are used to serve connections."));
 		defaults.put(MIN_THREADS, new PropertyMD("1").setPositive().
-				setDescription("Minimum number of threads to have in the Jetty thread pool."));
-		defaults.put(LOW_THREADS, new PropertyMD("50").setPositive().
-				setDescription("It is a threshold indicator.  If the available number of threads in the pool dips under this value (especially when max threads is reached), per connection max idle time will be cut from normal to low-resource"));
+				setDescription("Minimum number of threads to have in the Jetty thread pool. Threads are used to serve connections."));
+		defaults.put(HIGH_LOAD_CONNECTIONS, new PropertyMD("200").setPositive().
+				setDescription("If the number of connections exceeds this amount, then connector is put into a special 'low on resources' state. Existing connections will be closed faster. Note that this value is honored only for NIO connectors. Legacy connectors go into low resources mode when no more threads are available."));
 		defaults.put(MAX_IDLE_TIME, new PropertyMD("3000").setPositive().
 				setDescription("Time (in ms.) before an idle connection will time out"));
 		defaults.put(LOW_RESOURCE_MAX_IDLE_TIME, new PropertyMD("100").setPositive().

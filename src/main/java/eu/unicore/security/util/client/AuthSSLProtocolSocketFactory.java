@@ -26,8 +26,8 @@ import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.FormatMode;
 import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
-import eu.unicore.security.util.Log;
-import eu.unicore.security.util.LoggingX509TrustManager;
+import eu.unicore.security.canl.LoggingX509TrustManager;
+import eu.unicore.util.Log;
 
 
 /**

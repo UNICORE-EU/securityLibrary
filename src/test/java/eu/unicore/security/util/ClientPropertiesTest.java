@@ -7,6 +7,7 @@ package eu.unicore.security.util;
 import java.util.Arrays;
 import java.util.Properties;
 
+import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
 import eu.unicore.security.util.client.ClientProperties;
 import eu.unicore.security.util.client.ServerHostnameCheckingMode;
 import static eu.unicore.security.util.client.ClientProperties.*;

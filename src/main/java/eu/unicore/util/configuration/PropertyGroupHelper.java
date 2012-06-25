@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ********************************************************************************/
 
-package eu.unicore.security.util;
+package eu.unicore.util.configuration;
 
 import java.util.HashMap;
 import java.util.Iterator;

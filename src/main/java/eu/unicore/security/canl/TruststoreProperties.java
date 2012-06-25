@@ -2,7 +2,7 @@
  * Copyright (c) 2011-2012 ICM Uniwersytet Warszawski All rights reserved.
  * See LICENCE.txt file for licensing information.
  */
-package eu.unicore.security.util;
+package eu.unicore.security.canl;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -41,6 +41,10 @@ import eu.emi.security.authn.x509.impl.OpensslCertChainValidator;
 import eu.emi.security.authn.x509.impl.RevocationParametersExt;
 import eu.emi.security.authn.x509.impl.ValidatorParams;
 import eu.emi.security.authn.x509.impl.ValidatorParamsExt;
+import eu.unicore.util.Log;
+import eu.unicore.util.configuration.ConfigurationException;
+import eu.unicore.util.configuration.PropertiesHelper;
+import eu.unicore.util.configuration.PropertyMD;
 
 
 

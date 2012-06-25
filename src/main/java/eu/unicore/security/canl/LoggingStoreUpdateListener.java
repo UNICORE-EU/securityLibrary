@@ -2,11 +2,12 @@
  * Copyright (c) 2011-2012 ICM Uniwersytet Warszawski All rights reserved.
  * See LICENCE.txt file for licensing information.
  */
-package eu.unicore.security.util;
+package eu.unicore.security.canl;
 
 import org.apache.log4j.Logger;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
+import eu.unicore.util.Log;
 
 /**
  * Logs loudly problems with store updates and on debug level normal events.

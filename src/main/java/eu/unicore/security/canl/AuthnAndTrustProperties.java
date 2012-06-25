@@ -4,7 +4,7 @@
  *
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
-package eu.unicore.security.util;
+package eu.unicore.security.canl;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +12,10 @@ import java.util.Collections;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+
+import eu.unicore.util.Log;
+import eu.unicore.util.configuration.ConfigurationException;
+import eu.unicore.util.configuration.FilePropertiesHelper;
 
 
 

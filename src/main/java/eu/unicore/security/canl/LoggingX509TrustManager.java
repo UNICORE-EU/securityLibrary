@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ********************************************************************************/
 
-package eu.unicore.security.util;
+package eu.unicore.security.canl;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -42,6 +42,7 @@ import org.apache.log4j.Logger;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.FormatMode;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
+import eu.unicore.util.Log;
 
 /**
  * This class is decorating a wrapped trust manager with optional logging

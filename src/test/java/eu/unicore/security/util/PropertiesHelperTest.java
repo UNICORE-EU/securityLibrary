@@ -18,6 +18,13 @@ import org.apache.log4j.Logger;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.ProxySupport;
+import eu.unicore.util.configuration.AsciidocFormatter;
+import eu.unicore.util.configuration.ConfigurationException;
+import eu.unicore.util.configuration.DocumentationReferenceMeta;
+import eu.unicore.util.configuration.DocumentationReferencePrefix;
+import eu.unicore.util.configuration.FilePropertiesHelper;
+import eu.unicore.util.configuration.PropertiesHelper;
+import eu.unicore.util.configuration.PropertyMD;
 import junit.framework.TestCase;
 
 public class PropertiesHelperTest extends TestCase

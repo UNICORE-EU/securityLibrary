@@ -17,8 +17,8 @@ import org.apache.log4j.Logger;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
-import eu.unicore.security.util.IAuthnAndTrustConfiguration;
-import eu.unicore.security.util.Log;
+import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
+import eu.unicore.util.Log;
 
 /**
  * Additional connection related utility methods

@@ -36,17 +36,18 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
 
-import org.mortbay.jetty.servlet.Context;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 
-import eu.unicore.security.util.AuthnAndTrustProperties;
-import eu.unicore.security.util.ConfigurationException;
-import eu.unicore.security.util.CredentialProperties;
-import eu.unicore.security.util.DefaultAuthnAndTrustConfiguration;
-import eu.unicore.security.util.IAuthnAndTrustConfiguration;
-import eu.unicore.security.util.TruststoreProperties;
+import eu.unicore.security.canl.AuthnAndTrustProperties;
+import eu.unicore.security.canl.CredentialProperties;
+import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
+import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
+import eu.unicore.security.canl.TruststoreProperties;
 import eu.unicore.security.util.jetty.JettyLogger;
 import eu.unicore.security.util.jetty.JettyProperties;
 import eu.unicore.security.util.jetty.JettyServerBase;
+import eu.unicore.util.configuration.ConfigurationException;
 
 
 /**
@@ -106,9 +107,9 @@ public class TestJettyServer extends JettyServerBase {
 	}
 
 	@Override
-	protected Context createRootContext() throws ConfigurationException
+	protected ContextHandler createRootContext() throws ConfigurationException
 	{
-		return new Context(getServer(), "/", Context.SESSIONS);		
+		return new ServletContextHandler(getServer(), "/", ServletContextHandler.SESSIONS);		
 	}
 
 	public String getUrl() {
@@ -122,7 +123,7 @@ public class TestJettyServer extends JettyServerBase {
 	}
 
 	public void addServlet(String servlet, String path) throws Exception {
-		getRootContext().addServlet(Class.forName(servlet), path);
+		((ServletContextHandler)getRootContext()).addServlet(servlet, path);
 	}
 	
 	public IAuthnAndTrustConfiguration getSecSettings() {

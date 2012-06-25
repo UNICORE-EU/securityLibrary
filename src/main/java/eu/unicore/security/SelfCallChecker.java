@@ -5,7 +5,7 @@
  * Created on May 12, 2008
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
-package eu.unicore.security.util;
+package eu.unicore.security;
 import java.security.cert.X509Certificate;
 
 /**

@@ -19,7 +19,7 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.log4j.Logger;
 
-import eu.unicore.security.util.Log;
+import eu.unicore.util.Log;
 
 /**
  * Contains helper code to create HttpClient instances. The following settings are always set

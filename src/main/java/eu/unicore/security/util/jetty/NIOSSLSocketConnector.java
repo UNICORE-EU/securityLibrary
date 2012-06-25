@@ -33,24 +33,14 @@
 package eu.unicore.security.util.jetty;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.security.cert.X509Certificate;
-
-import javax.net.ssl.HandshakeCompletedEvent;
-import javax.net.ssl.HandshakeCompletedListener;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLPeerUnverifiedException;
-import javax.net.ssl.SSLSocket;
 
 import org.apache.log4j.Logger;
-import org.mortbay.jetty.security.SslSelectChannelConnector;
+import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
-import eu.emi.security.authn.x509.impl.CertificateUtils;
-import eu.emi.security.authn.x509.impl.X500NameUtils;
-import eu.unicore.security.util.Log;
+import eu.unicore.util.Log;
 
 /**
  * Extension of the Jetty {@link SslSelectChannelConnector}, allowing to customise trust
@@ -64,51 +54,16 @@ public class NIOSSLSocketConnector extends SslSelectChannelConnector {
 	
 	private final static Logger log = Log.getLogger(Log.CONNECTIONS, NIOSSLSocketConnector.class);
 	
-	private final X509CertChainValidator validator;
-	private final X509Credential credential;
-	
 	public NIOSSLSocketConnector(X509CertChainValidator validator,
-			X509Credential credential)
+			X509Credential credential) throws Exception
 	{
-		this.credential = credential;
-		this.validator = validator;
+		super(JettyConnectorUtils.createJettyContextFactory(validator, credential));
 	}
 	
-	@Override
-	protected SSLContext createSSLContext() throws Exception
-	{
-		return CustomSslSocketConnector.createSSLContext(validator, credential, 
-			getProtocol(), getProvider(), getSecureRandomAlgorithm());
-	}
-
 	@Override
 	protected void configure(Socket socket)throws IOException{
-		logConnection(socket, log);
+		JettyConnectorUtils.logConnection(socket, log);
 		super.configure(socket);
-	}
-	
-	public static void logConnection(final Socket socket, final Logger log) {
-		InetSocketAddress peer=(InetSocketAddress)socket.getRemoteSocketAddress();
-		if(log.isDebugEnabled() && peer!=null && peer.getAddress()!=null){
-			final String hostAddress = peer.getAddress().getHostAddress();
-			log.debug("Connection attempt from " + hostAddress);
-
-			SSLSocket ssl = (SSLSocket) socket;
-			ssl.addHandshakeCompletedListener(new HandshakeCompletedListener() {
-				public void handshakeCompleted(HandshakeCompletedEvent hce) {
-					try {
-						X509Certificate[] peer = CertificateUtils.convertToX509Chain(
-								hce.getPeerCertificates());
-						String msg = X500NameUtils.getReadableForm(peer[0].getSubjectX500Principal());
-						log.debug("SSL connection with " + msg + ", connected from " + 
-								hostAddress + " was established.");
-					} catch (SSLPeerUnverifiedException spe) {
-						log.debug("An identity of the peer connecting from " + hostAddress + 
-								" was not established on TLS layer");
-					}
-				}
-			});
-		}
 	}
 }
 

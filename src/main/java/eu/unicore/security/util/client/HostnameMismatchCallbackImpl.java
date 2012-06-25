@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 
 import eu.emi.security.authn.x509.impl.HostnameMismatchCallback;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
-import eu.unicore.security.util.Log;
+import eu.unicore.util.Log;
 
 /**
  * Depending on the configured mode either log problems or log problems and close connections. 

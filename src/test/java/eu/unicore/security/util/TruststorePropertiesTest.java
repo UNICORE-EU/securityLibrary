@@ -13,8 +13,10 @@ import eu.emi.security.authn.x509.ProxySupport;
 import eu.emi.security.authn.x509.impl.DirectoryCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.OpensslCertChainValidator;
+import eu.unicore.security.canl.LoggingStoreUpdateListener;
+import eu.unicore.security.canl.TruststoreProperties;
 
-import static eu.unicore.security.util.TruststoreProperties.*;
+import static eu.unicore.security.canl.TruststoreProperties.*;
 
 import junit.framework.TestCase;
 

@@ -35,27 +35,33 @@ package eu.unicore.security.util.jetty;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.EnumSet;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
-import org.mortbay.jetty.AbstractConnector;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.SessionIdManager;
-import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.SslSelectChannelConnector;
-import org.mortbay.jetty.security.SslSocketConnector;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.FilterHolder;
-import org.mortbay.jetty.servlet.HashSessionIdManager;
-import org.mortbay.thread.QueuedThreadPool;
+import javax.servlet.DispatcherType;
 
-import eu.unicore.security.util.AuthnAndTrustProperties;
-import eu.unicore.security.util.ConfigurationException;
-import eu.unicore.security.util.IAuthnAndTrustConfiguration;
-import eu.unicore.security.util.Log;
+import org.apache.log4j.Logger;
+import org.eclipse.jetty.server.AbstractConnector;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HandlerContainer;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.SessionIdManager;
+import org.eclipse.jetty.server.bio.SocketConnector;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.session.HashSessionIdManager;
+import org.eclipse.jetty.server.ssl.SslConnector;
+import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
+import org.eclipse.jetty.server.ssl.SslSocketConnector;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
+
+import eu.unicore.security.canl.AuthnAndTrustProperties;
+import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
+import eu.unicore.util.Log;
+import eu.unicore.util.configuration.ConfigurationException;
 
 /**
  * Wraps a Jetty server and allows to configure it using {@link AuthnAndTrustProperties}<br/>
@@ -75,7 +81,7 @@ public abstract class JettyServerBase {
 	protected final JettyProperties extraSettings;
 	
 	private Server theServer;
-	private Context rootContext;
+	private Handler rootContext;
 
 	public JettyServerBase(URL listenUrl,
 			IAuthnAndTrustConfiguration secConfiguration,
@@ -109,7 +115,7 @@ public abstract class JettyServerBase {
 	}
 
 	protected void initServer() throws ConfigurationException{
-		System.setProperty("org.mortbay.log.class", jettyLogger.getName()); 
+		System.setProperty("org.eclipse.jetty.util.log.class", jettyLogger.getName()); 
 		if (listenUrls.length == 1 && "0.0.0.0".equals(listenUrls[0].getHost())) {
 			logger.info("Creating Jetty HTTP server, will listen on all network interfaces");
 		} else {
@@ -119,6 +125,7 @@ public abstract class JettyServerBase {
 			logger.info("Creating Jetty HTTP server, will listen on: " + allAddresses);	
 		}
 		theServer = new Server();
+		
 
 		configureSessionIdManager(extraSettings.getBooleanValue(JettyProperties.FAST_RANDOM));
 
@@ -129,6 +136,7 @@ public abstract class JettyServerBase {
 		
 		configureServer();
 		this.rootContext = createRootContext();
+		theServer.setHandler(rootContext);
 		configureGzip();
 	}
 
@@ -171,11 +179,16 @@ public abstract class JettyServerBase {
 	 * and lowResourcesConnections are set to the difference between MAX and LOW THREADS.
 	 */
 	protected SslSelectChannelConnector getNioSecuredConnectorInstance() {
-		NIOSSLSocketConnector ssl = new NIOSSLSocketConnector(
-				securityConfiguration.getValidator(), securityConfiguration.getCredential());
-		long lowResourcesConnections = extraSettings.getIntValue(JettyProperties.MAX_THREADS)-
-					extraSettings.getIntValue(JettyProperties.LOW_THREADS);
-		ssl.setLowResourcesConnections(lowResourcesConnections);
+		NIOSSLSocketConnector ssl;
+		try
+		{
+			ssl = new NIOSSLSocketConnector(securityConfiguration.getValidator(), 
+					securityConfiguration.getCredential());
+		} catch (Exception e)
+		{
+			throw new RuntimeException("Can not create Jetty NIO SSL connector, shouldn't happen.", e);
+		}
+		ssl.setLowResourcesConnections(extraSettings.getIntValue(JettyProperties.HIGH_LOAD_CONNECTIONS));
 		return ssl;
 	}
 	
@@ -184,8 +197,14 @@ public abstract class JettyServerBase {
 	 * but is not configured in any other way.  
 	 */
 	protected SslSocketConnector getClassicSecuredConnectorInstance() {
-		return new CustomSslSocketConnector(
-				securityConfiguration.getValidator(), securityConfiguration.getCredential());
+		try
+		{
+			return new CustomSslSocketConnector(
+					securityConfiguration.getValidator(), securityConfiguration.getCredential());
+		} catch (Exception e)
+		{
+			throw new RuntimeException("Can not create Jetty SSL connector, shouldn't happen.", e);
+		}
 	}
 	
 	/**
@@ -199,55 +218,26 @@ public abstract class JettyServerBase {
 	 */
 	protected AbstractConnector createSecureConnector(URL url) throws ConfigurationException {
 		boolean useNio = extraSettings.getBooleanValue(JettyProperties.USE_NIO);
-
-		//WARNING!! this method contains a duplicated code, as secure NIO and OIO JettyConnectors
-		//do not share a common interface for security related settings. Nevertheless the methods
-		//are the same in both. Always fix both versions!
+		SslConnector ssl;
 		if (useNio) {
 			logger.debug("Creating SSL NIO connector on: " + url);
-			SslSelectChannelConnector ssl = getNioSecuredConnectorInstance();			
-			
-			//duplicated code start
-			ssl.setNeedClientAuth(extraSettings.getBooleanValue(JettyProperties.REQUIRE_CLIENT_AUTHN));
-			ssl.setWantClientAuth(extraSettings.getBooleanValue(JettyProperties.WANT_CLIENT_AUTHN));
-			String disabledCiphers = extraSettings.getValue(JettyProperties.DISABLED_CIPHER_SUITES);
-			if (disabledCiphers != null) {
-				disabledCiphers = disabledCiphers.trim();
-				if (disabledCiphers.length() > 1)
-					ssl.setExcludeCipherSuites(disabledCiphers.split("[ ]+"));
-			}
-			
-			//fix for IBM JDK where default protocol "TLS" does not work
-			String vm=System.getProperty("java.vm.vendor");
-			if(vm!=null && vm.trim().startsWith("IBM")){
-				ssl.setProtocol("SSL_TLS");//works for clients using both SSLv3 and TLS
-				logger.info("For IBM JDK: Setting SSL protocol to '"+ssl.getProtocol()+"'");
-			}
-			//end
-			return ssl;
+			ssl = getNioSecuredConnectorInstance();			
 		} else {
 			logger.debug("Creating SSL connector on: " + url);
-			SslSocketConnector ssl = getClassicSecuredConnectorInstance();
-
-			//duplicated code start
-			ssl.setNeedClientAuth(extraSettings.getBooleanValue(JettyProperties.REQUIRE_CLIENT_AUTHN));
-			ssl.setWantClientAuth(extraSettings.getBooleanValue(JettyProperties.WANT_CLIENT_AUTHN));
-			String disabledCiphers = extraSettings.getValue(JettyProperties.DISABLED_CIPHER_SUITES);
-			if (disabledCiphers != null) {
-				disabledCiphers = disabledCiphers.trim();
-				if (disabledCiphers.length() > 1)
-					ssl.setExcludeCipherSuites(disabledCiphers.split("[ ]+"));
-			}
-			
-			//fix for IBM JDK where default protocol "TLS" does not work
-			String vm=System.getProperty("java.vm.vendor");
-			if(vm!=null && vm.trim().startsWith("IBM")){
-				ssl.setProtocol("SSL_TLS");//works for clients using both SSLv3 and TLS
-				logger.info("For IBM JDK: Setting SSL protocol to '"+ssl.getProtocol()+"'");
-			}
-			//end
-			return ssl;
+			ssl = getClassicSecuredConnectorInstance();
 		}
+
+		SslContextFactory factory = ssl.getSslContextFactory();
+		factory.setNeedClientAuth(extraSettings.getBooleanValue(JettyProperties.REQUIRE_CLIENT_AUTHN));
+		factory.setWantClientAuth(extraSettings.getBooleanValue(JettyProperties.WANT_CLIENT_AUTHN));
+		String disabledCiphers = extraSettings.getValue(JettyProperties.DISABLED_CIPHER_SUITES);
+		if (disabledCiphers != null) {
+			disabledCiphers = disabledCiphers.trim();
+			if (disabledCiphers.length() > 1)
+				factory.setExcludeCipherSuites(disabledCiphers.split("[ ]+"));
+		}
+		logger.debug("SSL protocol was set to: '"+factory.getProtocol()+"'");
+		return (AbstractConnector) ssl;
 	}	
 
 	/**
@@ -267,9 +257,7 @@ public abstract class JettyServerBase {
 	/**
 	 * Try not to override this method. It is better to override {@link #getClassicPlainConnectorInstance()}
 	 * and/or {@link #getNioPlainConnectorInstance()} instead. 
-	 * This method creates a NIO or OIO (classic) insecure connector. Currently it doesn't perform any
-	 * additional configuration but in future may configure settings which are specific 
-	 * to all insecure connectors.
+	 * This method creates a NIO or OIO (classic) insecure connector and configures it.
 	 * 
 	 * @param url
 	 * @return
@@ -278,7 +266,9 @@ public abstract class JettyServerBase {
 		boolean useNio = extraSettings.getBooleanValue(JettyProperties.USE_NIO);
 		if (useNio) {
 			logger.debug("Creating plain NIO HTTP connector on: " + url);
-			return getNioPlainConnectorInstance();
+			SelectChannelConnector ret = getNioPlainConnectorInstance();
+			ret.setLowResourcesConnections(extraSettings.getIntValue(JettyProperties.HIGH_LOAD_CONNECTIONS));
+			return ret;
 		} else {
 			logger.debug("Creating plain HTTP connector on: " + url);
 			return getClassicPlainConnectorInstance();
@@ -294,31 +284,44 @@ public abstract class JettyServerBase {
 		connector.setHost(url.getHost());
 		connector.setPort(url.getPort() == -1 ? url.getDefaultPort() : url.getPort());
 		connector.setSoLingerTime(extraSettings.getIntValue(JettyProperties.SO_LINGER_TIME));
-		connector.setLowResourceMaxIdleTime(extraSettings.getIntValue(
+		connector.setLowResourcesMaxIdleTime(extraSettings.getIntValue(
 			JettyProperties.LOW_RESOURCE_MAX_IDLE_TIME));
+		connector.setMaxIdleTime(extraSettings.getIntValue(JettyProperties.MAX_IDLE_TIME));
 	}
 
-	
 	protected void configureServer() throws ConfigurationException {
 		QueuedThreadPool btPool=new QueuedThreadPool();
 		btPool.setMaxThreads(extraSettings.getIntValue(JettyProperties.MAX_THREADS));
 		btPool.setMinThreads(extraSettings.getIntValue(JettyProperties.MIN_THREADS));
-		btPool.setMaxIdleTimeMs(extraSettings.getIntValue(JettyProperties.MAX_IDLE_TIME));
-		btPool.setLowThreads(extraSettings.getIntValue(JettyProperties.LOW_THREADS));
-		if(btPool.getLowThreads()>btPool.getMaxThreads()){
-			logger.warn("Resetting lowThreads parameter to '0' (must be smaller than maxThreads)");
-			btPool.setLowThreads(0);
-		}
 		theServer.setThreadPool(btPool);
 	}
 
+	/**
+	 * Configures Gzip filter if gzipping is enabled, for all servlet handlers which are configured.
+	 * Warning: if you use a complex setup of handlers it might be better to override this method and
+	 * set the filter for the propert handlers.
+	 * @throws ConfigurationException
+	 */
 	protected void configureGzip() throws ConfigurationException {
 		boolean enableGzip = extraSettings.getBooleanValue(JettyProperties.ENABLE_GZIP);
 		if (enableGzip) {
 			FilterHolder gzipHolder = new FilterHolder(
 					new ConfigurableGzipFilter(extraSettings));
-			getRootContext().addFilter(gzipHolder, "/", Handler.REQUEST);
 			logger.info("Enabling GZIP compression filter");
+			tryToAddGzipFilter(gzipHolder, getRootContext());
+		}
+	}
+	
+	protected void tryToAddGzipFilter(FilterHolder gzipHolder, Handler h) {
+		if (h instanceof ServletContextHandler)
+		{
+			((ServletContextHandler)h).addFilter(gzipHolder, "/", 
+					EnumSet.of(DispatcherType.REQUEST));
+		} else if (h instanceof HandlerContainer)
+		{
+			Handler[] handlers = ((HandlerContainer)h).getChildHandlers();
+			for (Handler handler: handlers)
+				tryToAddGzipFilter(gzipHolder, handler);
 		}
 	}
 
@@ -345,16 +348,16 @@ public abstract class JettyServerBase {
 	}
 		
 	/**
-	 * Implement this method to add servlets to the server.
+	 * Implement this method to create server's handlers - usually returning Servlet's handler.
 	 * @throws Exception
 	 */
-	protected abstract Context createRootContext() throws ConfigurationException;
+	protected abstract Handler createRootContext() throws ConfigurationException;
 	
 	/**
 	 * 
-	 * @return the root context of this Jetty server. 
+	 * @return the root handler of this Jetty server. 
 	 */
-	public Context getRootContext() 
+	public Handler getRootContext() 
 	{
 		return rootContext;
 	}

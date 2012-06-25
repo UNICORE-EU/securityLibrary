@@ -12,15 +12,15 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import eu.unicore.security.util.AuthnAndTrustProperties;
-import eu.unicore.security.util.ConfigurationException;
-import eu.unicore.security.util.CredentialProperties;
-import eu.unicore.security.util.FilePropertiesHelper;
-import eu.unicore.security.util.IAuthnAndTrustConfiguration;
-import eu.unicore.security.util.Log;
-import eu.unicore.security.util.PropertiesHelper;
-import eu.unicore.security.util.PropertyMD;
-import eu.unicore.security.util.TruststoreProperties;
+import eu.unicore.security.canl.AuthnAndTrustProperties;
+import eu.unicore.security.canl.CredentialProperties;
+import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
+import eu.unicore.security.canl.TruststoreProperties;
+import eu.unicore.util.Log;
+import eu.unicore.util.configuration.ConfigurationException;
+import eu.unicore.util.configuration.FilePropertiesHelper;
+import eu.unicore.util.configuration.PropertiesHelper;
+import eu.unicore.util.configuration.PropertyMD;
 
 /**
  * Properties based implementation of {@link IClientConfiguration}.

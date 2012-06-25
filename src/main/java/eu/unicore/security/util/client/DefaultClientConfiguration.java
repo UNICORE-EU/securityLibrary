@@ -13,7 +13,7 @@ import java.util.Properties;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
-import eu.unicore.security.util.DefaultAuthnAndTrustConfiguration;
+import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
 
 
 /**

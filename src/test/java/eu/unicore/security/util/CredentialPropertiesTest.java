@@ -6,7 +6,9 @@ package eu.unicore.security.util;
 
 import java.util.Properties;
 
-import static eu.unicore.security.util.CredentialProperties.*;
+import eu.unicore.security.canl.CredentialProperties;
+
+import static eu.unicore.security.canl.CredentialProperties.*;
 
 import junit.framework.TestCase;
 

@@ -2,7 +2,7 @@
  * Copyright (c) 2011-2012 ICM Uniwersytet Warszawski All rights reserved.
  * See LICENCE.txt file for licensing information.
  */
-package eu.unicore.security.util;
+package eu.unicore.util.configuration;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
-import eu.unicore.security.util.PropertyMD.Type;
+import eu.unicore.util.configuration.PropertyMD.Type;
 
 /**
  * Provides methods to parse properties and return them as String, ints, longs, Files, arbitrary Enums 
