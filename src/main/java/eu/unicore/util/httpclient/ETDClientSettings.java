@@ -5,7 +5,7 @@
  * Created on 17-01-2011
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
-package eu.unicore.security.util.client;
+package eu.unicore.util.httpclient;
 
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;

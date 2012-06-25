@@ -15,6 +15,7 @@ import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.etd.DelegationRestrictions;
+import eu.unicore.util.httpclient.ETDClientSettings;
 
 import junit.framework.TestCase;
 

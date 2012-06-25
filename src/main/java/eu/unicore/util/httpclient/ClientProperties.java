@@ -2,7 +2,7 @@
  * Copyright (c) 2011-2012 ICM Uniwersytet Warszawski All rights reserved.
  * See LICENCE.txt file for licensing information.
  */
-package eu.unicore.security.util.client;
+package eu.unicore.util.httpclient;
 
 import java.io.File;
 import java.io.IOException;

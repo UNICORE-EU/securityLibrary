@@ -15,7 +15,8 @@ import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
-import eu.unicore.security.util.client.ConnectionUtil;
+import eu.unicore.util.httpclient.ConnectionUtil;
+import eu.unicore.util.httpclient.DefaultClientConfiguration;
 
 /**
  * @author K. Benedyczak

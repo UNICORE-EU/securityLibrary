@@ -2,7 +2,7 @@
  * Copyright (c) 2012 ICM Uniwersytet Warszawski All rights reserved.
  * See LICENCE.txt file for licensing information.
  */
-package eu.unicore.security.util.jetty;
+package eu.unicore.util.jetty;
 
 import java.net.InetSocketAddress;
 import java.net.Socket;

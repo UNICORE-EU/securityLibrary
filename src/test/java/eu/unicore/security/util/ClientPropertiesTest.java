@@ -8,9 +8,9 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
-import eu.unicore.security.util.client.ClientProperties;
-import eu.unicore.security.util.client.ServerHostnameCheckingMode;
-import static eu.unicore.security.util.client.ClientProperties.*;
+import eu.unicore.util.httpclient.ClientProperties;
+import eu.unicore.util.httpclient.ServerHostnameCheckingMode;
+import static eu.unicore.util.httpclient.ClientProperties.*;
 
 import junit.framework.TestCase;
 

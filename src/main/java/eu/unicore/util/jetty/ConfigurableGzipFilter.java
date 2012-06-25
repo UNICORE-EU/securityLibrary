@@ -1,4 +1,4 @@
-package eu.unicore.security.util.jetty;
+package eu.unicore.util.jetty;
 
 import java.util.Enumeration;
 

@@ -24,6 +24,10 @@ import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
+import eu.unicore.util.httpclient.DefaultClientConfiguration;
+import eu.unicore.util.httpclient.HttpUtils;
+import eu.unicore.util.httpclient.IClientConfiguration;
+import eu.unicore.util.httpclient.ServerHostnameCheckingMode;
 
 import junit.framework.TestCase;
 

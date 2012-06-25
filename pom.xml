@@ -39,12 +39,37 @@
 			<version>3.8.1</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.16</version>
+		</dependency>
+		<dependency>
+			<groupId>eu.eu-emi.security</groupId>
+			<artifactId>canl</artifactId>
+			<version>1.1.0-SNAPSHOT</version>
+		</dependency>
 
+		<!-- XMLBeans and samly2 are required only if you use classes from the 
+		         eu.unicore.security and eu.unicore.security.{consignor|etd|user} 
+		     packages.
+		     If you use them then you need the below dependencies. -->
+ 		<dependency>
+			<groupId>org.apache.xmlbeans</groupId>
+			<artifactId>xmlbeans</artifactId>
+			<version>2.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>pl.edu.icm.saml</groupId>
+			<artifactId>samly2</artifactId>
+			<version>1.4.0-SNAPSHOT</version>
+		</dependency>
 
 		<!-- Jetty is required only if you use classes from the 
-		         eu.unicore.security.util.jetty 
+		         eu.unicore.util.jetty 
 		     package.
-		     If you use them then you have Jetty on classpath as below. -->
+		     If you use them then you need Jetty on classpath as below. -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
@@ -57,38 +82,25 @@
 			<version>8.1.4.v20120524</version>
 			<optional>true</optional>
 		</dependency>
-				
-		<!-- XMLBeans and samly2 are required only if you use classes from the 
-		         eu.unicore.security.util.jetty 
+
+		<!-- commons-httpclient is required only if you use classes from the 
+		         eu.unicore.util.httpclient 
 		     package.
-		     If you use them then you have Jetty on classpath as below. -->
- 		<dependency>
-			<groupId>org.apache.xmlbeans</groupId>
-			<artifactId>xmlbeans</artifactId>
-			<version>2.4.0</version>
-		</dependency>
+		     If you use them then you need the below dependencies. 
+			 Note that commons-logging is also inherited from samly2, so if you use 
+			 samly2 then commons-logging will be included anyway.
+		-->
 		<dependency>
-			<groupId>pl.edu.icm.saml</groupId>
-			<artifactId>samly2</artifactId>
-			<version>1.4.0-SNAPSHOT</version>
-		</dependency>
-		
-		
-		
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.16</version>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 			<version>1.1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
-			<version>3.1</version>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
 

@@ -44,10 +44,10 @@ import eu.unicore.security.canl.CredentialProperties;
 import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
 import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
 import eu.unicore.security.canl.TruststoreProperties;
-import eu.unicore.security.util.jetty.JettyLogger;
-import eu.unicore.security.util.jetty.JettyProperties;
-import eu.unicore.security.util.jetty.JettyServerBase;
 import eu.unicore.util.configuration.ConfigurationException;
+import eu.unicore.util.jetty.JettyLogger;
+import eu.unicore.util.jetty.JettyProperties;
+import eu.unicore.util.jetty.JettyServerBase;
 
 
 /**

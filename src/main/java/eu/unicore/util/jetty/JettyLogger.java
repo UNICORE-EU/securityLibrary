@@ -1,4 +1,4 @@
-package eu.unicore.security.util.jetty;
+package eu.unicore.util.jetty;
 
 import org.apache.log4j.Level;
 import org.eclipse.jetty.util.log.AbstractLogger;

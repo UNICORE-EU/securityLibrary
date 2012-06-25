@@ -31,7 +31,7 @@
  ********************************************************************************/
 
 
-package eu.unicore.security.util.jetty;
+package eu.unicore.util.jetty;
 
 import java.net.MalformedURLException;
 import java.net.URL;

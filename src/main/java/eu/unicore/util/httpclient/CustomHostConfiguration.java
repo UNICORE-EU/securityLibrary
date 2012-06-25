@@ -1,4 +1,4 @@
-package eu.unicore.security.util.client;
+package eu.unicore.util.httpclient;
 
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpURL;

@@ -1,4 +1,4 @@
-package eu.unicore.security.util.client;
+package eu.unicore.util.httpclient;
 
 import java.net.URI;
 import java.net.URISyntaxException;

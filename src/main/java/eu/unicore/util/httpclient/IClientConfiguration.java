@@ -5,13 +5,13 @@
  * Created on 16-01-2011
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
-package eu.unicore.security.util.client;
+package eu.unicore.util.httpclient;
 
 import java.util.Map;
 import java.util.Properties;
 
 import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
-import eu.unicore.security.util.client.HttpUtils;
+import eu.unicore.util.httpclient.HttpUtils;
 
 /**
  * Extension of {@link IAuthnAndTrustConfiguration},

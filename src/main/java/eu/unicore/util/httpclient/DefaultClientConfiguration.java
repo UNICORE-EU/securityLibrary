@@ -5,7 +5,7 @@
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
 
-package eu.unicore.security.util.client;
+package eu.unicore.util.httpclient;
 
 import java.util.HashMap;
 import java.util.Map;
