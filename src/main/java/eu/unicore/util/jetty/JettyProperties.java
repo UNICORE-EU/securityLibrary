@@ -140,8 +140,8 @@ public class JettyProperties extends PropertiesHelper
 				setDescription("Minimum number of threads to have in the Jetty thread pool for connections serving."));
 		defaults.put(HIGH_LOAD_CONNECTIONS, new PropertyMD("200").setPositive().
 				setDescription("If the number of connections exceeds this amount, then connector is put into a special 'low on resources' state. Existing connections will be closed faster. Note that this value is honored only for NIO connectors. Legacy connectors go into low resources mode when no more threads are available."));
-		defaults.put(MAX_IDLE_TIME, new PropertyMD("3000").setPositive().
-				setDescription("Time (in ms.) before an idle connection will time out"));
+		defaults.put(MAX_IDLE_TIME, new PropertyMD("200000").setPositive().
+				setDescription("Time (in ms.) before an idle connection will time out. It should be large enough not to expire connections with slow clients, values below 30s are getting quite risky."));
 		defaults.put(LOW_RESOURCE_MAX_IDLE_TIME, new PropertyMD("100").setPositive().
 				setDescription("In low resource conditions, time (in ms.) before an idle connection will time out."));
 		defaults.put(FAST_RANDOM, new PropertyMD("false").
