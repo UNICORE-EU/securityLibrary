@@ -81,6 +81,15 @@ public abstract class JettyServerBase {
 	
 	private Server theServer;
 
+	/**
+	 * Simplified constructor: only one listen URL, standard {@link JettyLogger} is used which is logging to log4j 
+	 * without SLF.
+	 * @param listenUrl listen URL
+	 * @param secConfiguration security configuration, providing local credential and trust settings.
+	 * Useful only for https:// URLs
+	 * @param extraSettings additional Jetty settings
+	 * @throws ConfigurationException
+	 */
 	public JettyServerBase(URL listenUrl,
 			IAuthnAndTrustConfiguration secConfiguration,
 			JettyProperties extraSettings) throws ConfigurationException
@@ -88,6 +97,17 @@ public abstract class JettyServerBase {
 		this(new URL[] {listenUrl}, secConfiguration, extraSettings, JettyLogger.class);
 	}
 	
+	/**
+	 * 
+	 * @param listenUrl listen URL
+	 * @param secConfiguration security configuration, providing local credential and trust settings.
+	 * Useful only for https:// URLs
+	 * @param extraSettings additional Jetty settings
+	 * @param jettyLogger either a custom extension of {@link JettyLogger} or null. In latter case a default
+	 * Jetty logging will be used, which is either SLF or trivial logging to standard error if SLF 
+	 * is not present. 
+	 * @throws ConfigurationException
+	 */
 	public JettyServerBase(URL[] listenUrls,
 			IAuthnAndTrustConfiguration secConfiguration,
 			JettyProperties extraSettings,
@@ -113,7 +133,10 @@ public abstract class JettyServerBase {
 	}
 
 	protected void initServer() throws ConfigurationException{
-		System.setProperty("org.eclipse.jetty.util.log.class", jettyLogger.getName()); 
+		if (jettyLogger != null) {
+			logger.debug("Setting a custom class for handling Jetty logging: " + jettyLogger.getName());
+			System.setProperty("org.eclipse.jetty.util.log.class", jettyLogger.getName());
+		}
 		if (listenUrls.length == 1 && "0.0.0.0".equals(listenUrls[0].getHost())) {
 			logger.info("Creating Jetty HTTP server, will listen on all network interfaces");
 		} else {
