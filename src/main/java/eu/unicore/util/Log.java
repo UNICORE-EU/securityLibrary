@@ -4,7 +4,28 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;
 
 public class Log {
-
+	private static LoggerFactory spi;
+	static {
+		String factName = System.getProperty(LoggerFactory.LOGGER_FACTORY_PROPERTY);
+		if (factName != null) {
+			try
+			{
+				Class<?> factClazz = Class.forName(factName);
+				Object factRaw = factClazz.newInstance();
+				spi = (LoggerFactory) factRaw;
+			} catch (Exception e)
+			{
+				e.printStackTrace();
+				System.err.println("Can't instantiate logger factory class: " + factName + 
+						" using default");
+				spi = new DefaultLogFactory();
+			}
+			
+		} else
+			spi = new DefaultLogFactory();
+	}
+	
+			
 	protected Log(){}
 
 	/**
@@ -15,42 +36,42 @@ public class Log {
 	/**
 	 * logger prefix for admin stuff
 	 */
-	public static final String ADMIN="unicore.admin";
+	public static final String ADMIN=UNICORE+".admin";
 
 	/**
 	 * logger prefix for general WSRFlite code
 	 */
-	public static final String WSRFLITE="unicore.wsrflite";
+	public static final String WSRFLITE=UNICORE+".wsrflite";
 
 	/**
 	 * logger prefix for persistence related code
 	 */
-	public static final String PERSISTENCE="unicore.wsrflite.persistence";
+	public static final String PERSISTENCE=UNICORE+".wsrflite.persistence";
 	
 	/**
 	 * logger prefix for services
 	 */
-	public static final String SERVICES="unicore.services";
+	public static final String SERVICES=UNICORE+".services";
 	
 	/**
 	 * logger prefix for security
 	 */
-	public static final String SECURITY="unicore.security";
+	public static final String SECURITY=UNICORE+".security";
 
 	/**
 	 * logger prefix for client stack
 	 */
-	public static final String CLIENT="unicore.client";
+	public static final String CLIENT=UNICORE+".client";
 	
 	/**
 	 * logger prefix for connection logging
 	 */
-	public static final String CONNECTIONS="unicore.connections";
+	public static final String CONNECTIONS=UNICORE+".connections";
 
 	/**
 	 * logger prefix for HTTP server logging
 	 */
-	public static final String HTTP_SERVER="unicore.httpserver";
+	public static final String HTTP_SERVER=UNICORE+".httpserver";
 
 	/**
 	 * returns a logger name, using the given prefix and the simple name
@@ -61,7 +82,7 @@ public class Log {
 	 * @return logger name
 	 */
 	public static String getLoggerName(String prefix, Class<?>clazz){
-		return prefix+"."+clazz.getSimpleName();
+		return spi.getLoggerName(prefix, clazz);
 	}
 	
 	/**
@@ -73,8 +94,9 @@ public class Log {
 	 * @return logger
 	 */
 	public static Logger getLogger(String prefix, Class<?>clazz){
-		return Logger.getLogger(prefix+"."+clazz.getSimpleName());
+		return spi.getLogger(prefix, clazz);
 	}
+	
 	
 	/** 
 	 * log an error message to the default logger ("unicore.wsrflite")
