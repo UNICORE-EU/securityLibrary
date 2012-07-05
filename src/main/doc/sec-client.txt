@@ -1,9 +1,13 @@
+
 Configuring advanced HTTP client settings
 -----------------------------------------
 
 TODO write me!
 
+include::sec-ref-clientProperties.txt[]
+
 Examples
 ~~~~~~~~
 
 TODO write me!
+

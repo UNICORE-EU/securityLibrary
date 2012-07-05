@@ -1,9 +1,13 @@
+
 Configuring advanced HTTP server settings
 -----------------------------------------
 
 TODO write me!
 
+include::sec-ref-jettyProperties.txt[]
+
 Examples
 ~~~~~~~~
 
 TODO write me!
+
