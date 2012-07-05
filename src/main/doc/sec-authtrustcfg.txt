@@ -1,5 +1,5 @@
 Configuring PKI trust settings
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------
 
 Public Key Infrastructure (PKI) trust settings are used to validate certificates. This is performed, 
 in the first place when a connection with a remote peer is initiated over the network, using the SSL (or TLS) protocol.
@@ -18,7 +18,7 @@ UNICORE allows for different types of trust stores. All of them are configured u
 include::sec-ref-trustProperties.txt[]
 
 Examples
-^^^^^^^^
+~~~~~~~~
 
 [NOTE]
 Various UNICORE modules use different property prefixes. Here we don't put any, but in practice you have
@@ -58,7 +58,7 @@ Java keystore used as a trust store:
 
 
 Configuring the credential
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 UNICORE uses private key and a corresponding certificate (called together as a _credential_) 
 to identify users and servers. Credentials might be provided in several formats. The following table list all possible 
@@ -67,7 +67,7 @@ variants and corresponding parameters.
 include::sec-ref-credProperties.txt[]
 
 Examples
-^^^^^^^^
+~~~~~~~~
 
 [NOTE]
 Various UNICORE modules use different property prefixes. Here we don't put any, but in practice you have
