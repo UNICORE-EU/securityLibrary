@@ -61,7 +61,7 @@ the publicly available documentation, for example the
 http://logging.apache.org/log4j/1.2/manual.html[Log4j manual].
  
 
-==== Logger categories, names and levels
+=== Logger categories, names and levels
 
 Logger names are hierarchical. In UNICORE, prefixes are used (e.g. "unicore.security") 
 to which the Java class name is appended. For example, the XUUDB connector in UNICORE/X logs to 
