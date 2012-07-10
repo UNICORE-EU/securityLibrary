@@ -9,12 +9,31 @@ of various sensitive pieces of data.
 
 Certificates validation is primarily configured using a set of initially trusted certificates of so called 
 Certificate Authorities (CAs). Those trusted certificates are also known as _trust anchors_ and their collection
-is called as a _trust store_.
+is called a _trust store_.
 
 Except of _trust anchors_ validation mechanism can use additional input for checking if a certificate being checked 
-was not revoked and if its subject is in a permitted namesapce. 
+was not revoked and if its subject is in a permitted namespace. 
 
 UNICORE allows for different types of trust stores. All of them are configured using a set of properties.
+ - _Keystore trust store_ - the only format supported in older UNICORE versions. Trusted certificates are
+ stored in a single binary file in JKS or PKCS12 format. The file can be only manipulated using a special tool
+ like JDK 'keytool' or openssl (in case of PKCS12 format). This format is great if trust store should be in a 
+ single file or when compatibility with other Java solutions or older UNICORE releases is desired.   
+ - _OpenSSL trust store_ - allows to use a directory with CA certificates stored in PEM format, under precisely
+ defined names: the CA certificates, CRLs, signing policy files and namespaces files are named 
+ <hash>.0, <hash>.r0, <hash>.signing_policy and <hash>.namespaces. Hash is the old hash of the trusted CA certificate
+ subject name (in Openssl version > 1.0.0 use -suject_hash_old switch to generate it). If multiple certificates
+ have the same hash then the default zero number must be increased. This format is the same as used by other then
+ UNICORE popular middlewares as Globus and gLite. It is suggested when a common trust store with such middlewares 
+ is needed.
+ - _Directory trust store_ - the most flexible and convenient option, suggested for all remaining cases. It allows
+ to use a list of wildcard expressions, concrete paths of files or even URLs to remote files as a set of trusted CAs
+ and in the same way for the CRLs. With this trust store administrator can simply configure all files 
+ (or all with a specified extension) in a directory to be used as a trusted certificates.
+ 
+In all cases trust stores can be (and by default are) configured to be automatically refreshed. 
+ 
+  
 
 include::sec-ref-trustProperties.txt[]
 
@@ -24,9 +43,15 @@ Examples
 [NOTE]
 Various UNICORE modules use different property prefixes. Here we don't put any, but in practice you have
 to use the prefix (see the reference table above for the actual prefix). Also properties might need to be provided
-using different syntax, as XML. However in all cases the properties to use and values are the same. 
+using different syntax, as XML.
+
+Directory trust store, with a minimal set of options:
+
+ truststore.type=directory
+ truststore.directoryLocations=/trust/dir/*.pem
+ truststore.crlLocations=/trust/dir/*.crl
  
-Directory truststore, with complete set of options:
+Directory trust store, with a complete set of options:
 
  truststore.type=directory
  truststore.allowProxy=DENY
@@ -41,7 +66,7 @@ Directory truststore, with complete set of options:
  truststore.crlConnectionTimeout=200
  truststore.crlDiskCachePath=/tmp
 
-Openssl truststore:
+Openssl trust store:
 
  truststore.type=openssl
  truststore.opensslPath=/truststores/openssl
@@ -62,8 +87,13 @@ Configuring the credential
 --------------------------
 
 UNICORE uses private key and a corresponding certificate (called together as a _credential_) 
-to identify users and servers. Credentials might be provided in several formats. The following table list all possible 
-variants and corresponding parameters.
+to identify users and servers. Credentials might be provided in several formats:
+ - Credential can be obtained from a _keystore file_, encoded in JKS or PKCS12 format.  
+ - Credential can be loaded as a pair of PEM files (one with private key and another with certificate),
+ - or from a pair of DER files,
+ - or even from a single file, with PEM-encoded certificates and private key (in any order).  
+
+The following table list all parameters which allows for configuring the credential.
 
 include::sec-ref-credProperties.txt[]
 
@@ -73,7 +103,7 @@ Examples
 [NOTE]
 Various UNICORE modules use different property prefixes. Here we don't put any, but in practice you have
 to use the prefix (see the reference table above for the actual prefix). Also properties might need to be provided
-using different syntax, as XML. However in all cases the properties to use and values are the same.
+using different syntax, as XML.
 
 Credential as a pair of DER files:
 
@@ -82,7 +112,7 @@ Credential as a pair of DER files:
  credential.path=src/test/resources/credentials/cert-1.der
  credential.keyPath=src/test/resources/credentials/pk-1.der
 
-Credential as a JKS file (type can be autodetected in almost every case):
+Credential as a JKS file (credential type can be autodetected in almost every case):
 
  credential.path=src/test/resources/certs/server1.jks
  credential.password=xxxxxx

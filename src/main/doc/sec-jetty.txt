@@ -2,12 +2,26 @@
 Configuring advanced HTTP server settings
 -----------------------------------------
 
-TODO write me!
+UNICORE servers are using an embedded Jetty HTTP server. In most cases the default configuration
+should be perfectly fine. However, for some sites (e.g. experiencing an extremely high load) 
+HTTP server settings can be fine-tuned with the following parameters.
 
 include::sec-ref-jettyProperties.txt[]
 
-Examples
-~~~~~~~~
+Example
+~~~~~~~
 
-TODO write me!
+[NOTE]
+Various UNICORE modules use different property prefixes. Here we don't put any, but in practice you have
+to use the prefix (see the reference table above for the actual prefix). Also properties might need to be provided
+using different syntax, as XML.
+
+In this example we will turn on compression of all responses bigger then 50kB (assuming that the client supports
+decompression). Additionally we are limiting the number of concurrent clients that can be served to 
+more or less 50, while keeping 10 threads ready all the time to server new clients quicker.
+
+  jetty.gzip.enable=true
+  jetty.gzip.minGzipSize=51200
+  jetty.maxThreads=50
+  jetty.minThreads=10
 

@@ -2,12 +2,29 @@
 Configuring advanced HTTP client settings
 -----------------------------------------
 
-TODO write me!
+UNICORE client stack can be configured with several advanced options. In most cases
+you can skip this section as defaults are fine. 
+
+The following table lists all available options. A special note for the _http.*_ properties:
+those are passed to the Apache Commons HTTP Client library. Therefore it is possible to configure
+all relevant options of the client. The options are listed under this address:
+ http://hc.apache.org/httpclient-3.x/preference-api.html Also see the example below.
 
 include::sec-ref-clientProperties.txt[]
 
-Examples
-~~~~~~~~
+Example
+~~~~~~~
 
-TODO write me!
+[NOTE]
+Various UNICORE modules use different property prefixes. Here we don't put any, but in practice you have
+to use the prefix (see the reference table above for the actual prefix). Also properties might need to be provided
+using different syntax, as XML.
+
+Here we are setting an extremely short connection and socket timeouts for the clients
+calls, using the Apache HTTP client parameters. Additionally server hostname to certificate subject 
+name checking is set to cause connections failures, preventing man in the middle attacks. 
+
+  client.http.connection.timeout=2000
+  client.http.socket.timeout=2000
+  client.serverHostnameChecking=FAIL
 
