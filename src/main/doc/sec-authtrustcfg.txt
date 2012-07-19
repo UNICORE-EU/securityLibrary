@@ -38,8 +38,7 @@ In all cases trust stores can be (and by default are) configured to be automatic
 
 include::sec-ref-trustProperties.txt[]
 
-Examples
-~~~~~~~~
+*Examples*
 
 [NOTE]
 Various UNICORE modules use different property prefixes. Here we don't put any, but in practice you have

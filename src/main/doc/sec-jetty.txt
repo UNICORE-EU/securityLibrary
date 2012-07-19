@@ -8,8 +8,7 @@ HTTP server settings can be fine-tuned with the following parameters.
 
 include::sec-ref-jettyProperties.txt[]
 
-Example
-~~~~~~~
+*Example*
 
 [NOTE]
 Various UNICORE modules use different property prefixes. Here we don't put any, but in practice you have

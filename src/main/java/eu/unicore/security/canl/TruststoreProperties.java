@@ -120,7 +120,7 @@ public class TruststoreProperties extends PropertiesHelper
 				setDescription("The keystore path in case of truststore of keystore type."));
 
 		META.put(PROP_OPENSSL_NS_MODE, new PropertyMD(NamespaceCheckingMode.EUGRIDPMA_GLOBUS).setCategory("Openssl").
-				setDescription("In case of openssl truststore, controls which (and in which order) namespace checking rules should be applied. The '*_REQUIRE' settings will cause that all configured namespace definitions files must be present for each trusted CA certificate (otherwise checking will fail). The '*_AND_*' settings will cause to check both existing namespace files. Otherwise the first found is checked (n the order defined by the property)."));
+				setDescription("In case of openssl truststore, controls which (and in which order) namespace checking rules should be applied. The 'REQUIRE' settings will cause that all configured namespace definitions files must be present for each trusted CA certificate (otherwise checking will fail). The 'AND' settings will cause to check both existing namespace files. Otherwise the first found is checked (n the order defined by the property)."));
 		META.put(PROP_OPENSSL_DIR, new PropertyMD("/etc/grid-security/certificates").setPath().setCategory("Openssl").
 				setDescription("Directory to be used for opeenssl truststore."));
 
@@ -136,7 +136,7 @@ public class TruststoreProperties extends PropertiesHelper
 		META.put(PROP_REVOCATION_ORDER, new PropertyMD(RevocationCheckingOrder.OCSP_CRL).setCategory("Revocation").
 				setDescription("Controls overal revocation sources order"));
 		META.put(PROP_REVOCATION_USE_ALL, new PropertyMD("false").setCategory("Revocation").
-				setDescription("Controls whether all defined revocation sources should be always checked, even if one the first one already confirmed that a checked certificate is not revoked."));
+				setDescription("Controls whether all defined revocation sources should be always checked, even if the first one already confirmed that a checked certificate is not revoked."));
 		META.put(PROP_CRL_MODE, new PropertyMD(CrlCheckingMode.IF_VALID).setCategory("Revocation").
 				setDescription("General CRL handling mode. The IF_VALID setting turns on CRL checking only in case the CRL is present."));
 		META.put(PROP_CRL_UPDATE, new PropertyMD("600").setLong().setCategory("Revocation").
