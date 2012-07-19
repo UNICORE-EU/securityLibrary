@@ -59,17 +59,17 @@ public class CredentialProperties extends PropertiesHelper
 	static
 	{
 		META.put(PROP_LOCATION, new PropertyMD().setMandatory().
-				setDescription("credential location").setPath());
+				setDescription("Credential location. In case of 'jks', 'pkcs12' and 'pem' store it is the only location required. In case when credential is provided in two files, it is the certificate file path.").setPath());
 		META.put(PROP_PASSWORD, new PropertyMD().setSecret().
-				setDescription("password required to load the credential"));
+				setDescription("Password required to load the credential."));
 		META.put(PROP_KS_KEY_PASSWORD, new PropertyMD().setSecret().
-				setDescription("private key password in keystore (if different from the main credential password)"));
+				setDescription("Private key password, which might be needed only for 'jks' or 'pkcs12', if key is encrypted with different password then the main credential password."));
 		META.put(PROP_FORMAT, new PropertyMD().setEnum(CredentialFormat.jks).
-				setDescription("format of the credential"));
+				setDescription("Format of the credential. It is guessed when not given. Note that 'pem' might be either a PEM keystore with certificates and keys (in PEM format) or a pair of PEM files (one with certificate and second with private key)."));
 		META.put(PROP_KEY_LOCATION, new PropertyMD().
-				setDescription("location of the private key if stored separately from the main credential"));
+				setDescription("Location of the private key if stored separately from the main credential (applicable for 'pem' and 'der' types only),"));
 		META.put(PROP_KS_ALIAS, new PropertyMD().
-				setDescription("keystore alias of the key entry to be used (can be ignored if the keystore contains only one key entry)"));
+				setDescription("Keystore alias of the key entry to be used. Can be ignored if the keystore contains only one key entry. Only applicable for 'jks' and 'pkcs12'."));
 	}
 	
 

@@ -108,9 +108,9 @@ public class TruststoreProperties extends PropertiesHelper
 		META.put(PROP_TYPE, new PropertyMD().setEnum(TruststoreType.directory).
 				setMandatory().setDescription("The truststore type."));
 		META.put(PROP_PROXY_SUPPORT, new PropertyMD(ProxySupport.ALLOW).
-				setDescription("controls whether proxy certificates are supported"));
+				setDescription("Controls whether proxy certificates are supported."));
 		META.put(PROP_UPDATE, new PropertyMD("600").setLong().
-				setDescription("how often the truststore should be reloaded, in seconds."));
+				setDescription("How often the truststore should be reloaded, in seconds. Set to negative value to disable refreshing at runtime."));
 
 		META.put(PROP_KS_PASSWORD, new PropertyMD().setSecret().setCategory("Keystore").
 				setDescription("The password of the keystore type truststore."));
@@ -120,9 +120,9 @@ public class TruststoreProperties extends PropertiesHelper
 				setDescription("The keystore path in case of truststore of keystore type."));
 
 		META.put(PROP_OPENSSL_NS_MODE, new PropertyMD(NamespaceCheckingMode.EUGRIDPMA_GLOBUS).setCategory("Openssl").
-				setDescription("in case of openssl truststore, controls which (and in which order) namespace checking rules should be applied"));
+				setDescription("In case of openssl truststore, controls which (and in which order) namespace checking rules should be applied. The '*_REQUIRE' settings will cause that all configured namespace definitions files must be present for each trusted CA certificate (otherwise checking will fail). The '*_AND_*' settings will cause to check both existing namespace files. Otherwise the first found is checked (n the order defined by the property)."));
 		META.put(PROP_OPENSSL_DIR, new PropertyMD("/etc/grid-security/certificates").setPath().setCategory("Openssl").
-				setDescription("directory to be used for opeenssl truststore"));
+				setDescription("Directory to be used for opeenssl truststore."));
 
 		META.put(PROP_DIRECTORY_LOCATIONS, new PropertyMD().setList(false).setCategory("Directory").
 				setDescription("List of CA certificates locations. Can contain URLs, local files and wildcard expressions."));
@@ -140,7 +140,7 @@ public class TruststoreProperties extends PropertiesHelper
 		META.put(PROP_CRL_MODE, new PropertyMD(CrlCheckingMode.IF_VALID).setCategory("Revocation").
 				setDescription("General CRL handling mode. The IF_VALID setting turns on CRL checking only in case the CRL is present."));
 		META.put(PROP_CRL_UPDATE, new PropertyMD("600").setLong().setCategory("Revocation").
-				setDescription("How often CRLs should be updated, in seconds."));
+				setDescription("How often CRLs should be updated, in seconds. Set to negative value to disable refreshing at runtime."));
 		META.put(PROP_CRL_CONNECTION_TIMEOUT, new PropertyMD("15").setCategory("Revocation").
 				setDescription("Connection timeout for fetching the remote CRLs in seconds (not used for Openssl truststores)."));
 		META.put(PROP_CRL_CACHE_PATH, new PropertyMD().setPath().setCategory("Revocation").
