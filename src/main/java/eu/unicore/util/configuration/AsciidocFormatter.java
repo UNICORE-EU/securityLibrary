@@ -87,7 +87,7 @@ public class AsciidocFormatter implements HelpFormatter
 			else if (md.hasDefault())
 			{
 				if (md.getDefault() == null)
-					ret.append("_not set_");
+					ret.append("_not set_|");
 				else if (md.getDefault().equals(""))
 					ret.append("_empty string_|");
 				else
