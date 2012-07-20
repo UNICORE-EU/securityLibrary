@@ -48,7 +48,7 @@ using different syntax, as XML.
 Directory trust store, with a minimal set of options:
 
  truststore.type=directory
- truststore.directoryLocations=/trust/dir/*.pem
+ truststore.directoryLocations.1=/trust/dir/*.pem
  truststore.crlLocations=/trust/dir/*.crl
  
 Directory trust store, with a complete set of options:
@@ -56,11 +56,13 @@ Directory trust store, with a complete set of options:
  truststore.type=directory
  truststore.allowProxy=DENY
  truststore.updateInterval=1234
- truststore.directoryLocations=/trust/dir/*.pem http://caserver/ca.pem
+ truststore.directoryLocations.1=/trust/dir/*.pem
+ truststore.directoryLocations.2=http://caserver/ca.pem
  truststore.directoryEncoding=PEM
  truststore.directoryConnectionTimeout=100
  truststore.directoryDiskCachePath=/tmp
- truststore.crlLocations=/trust/dir/*.crl http://caserver/crl.pem
+ truststore.crlLocations.1=/trust/dir/*.crl
+ truststore.crlLocations.2=http://caserver/crl.pem
  truststore.crlUpdateInterval=400
  truststore.crlMode=REQUIRE
  truststore.crlConnectionTimeout=200
