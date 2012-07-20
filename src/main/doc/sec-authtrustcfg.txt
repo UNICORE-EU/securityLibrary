@@ -116,12 +116,12 @@ Credential as a pair of DER files:
 
  credential.format=der
  credential.password=the\!njs
- credential.path=src/test/resources/credentials/cert-1.der
- credential.keyPath=src/test/resources/credentials/pk-1.der
+ credential.path=/etc/credentials/cert-1.der
+ credential.keyPath=/etc/credentials/pk-1.der
 
 Credential as a JKS file (credential type can be autodetected in almost every case):
 
- credential.path=src/test/resources/certs/server1.jks
+ credential.path=/etc/credentials/server1.jks
  credential.password=xxxxxx
 
 
