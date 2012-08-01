@@ -28,9 +28,9 @@ import eu.emi.security.authn.x509.OCSPParametes;
 import eu.emi.security.authn.x509.OCSPResponder;
 import eu.emi.security.authn.x509.ProxySupport;
 import eu.emi.security.authn.x509.RevocationParameters;
+import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.RevocationParameters.RevocationCheckingOrder;
 import eu.emi.security.authn.x509.StoreUpdateListener;
-import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.impl.CRLParameters;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
@@ -214,7 +214,7 @@ public class TruststoreProperties extends PropertiesHelper
 	/**
 	 * @return a configured validator. 
 	 */
-	public X509CertChainValidator getValidator()
+	public X509CertChainValidatorExt getValidator()
 	{
 		if (type.equals(TruststoreType.keystore))
 		{

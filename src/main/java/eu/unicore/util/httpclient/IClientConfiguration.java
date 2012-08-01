@@ -10,18 +10,17 @@ package eu.unicore.util.httpclient;
 import java.util.Map;
 import java.util.Properties;
 
-import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
 import eu.unicore.util.httpclient.HttpUtils;
 
 /**
- * Extension of {@link IAuthnAndTrustConfiguration},
- * provides (mostly) security related settings, useful for the client side:
+ * Extension of {@link IPlainClientConfiguration},
+ * provides (mostly) security related settings, useful for the client side. This
+ * interface adds settings relevant for HTTP and WS clients, and therefore is the 
+ * the most commonly used interface for setting client side in UNICORE.
+ * It allows to configure:
  * <ul>
- *  <li> whether to initialize SSL or not
- *  <li> whether to do client-side SSL authentication
  *  <li> whether to perform HTTP authentication and settings for it
  *  <li> whether to disable digital body signing
- *  <li> whether to check server hostnames
  *  <li> list of outgoing and incoming handlers
  *  <li> classloader to be used in case of loading handler classes
  *  <li> settings to automatically initialize ETD for outgoing messages.
@@ -31,30 +30,12 @@ import eu.unicore.util.httpclient.HttpUtils;
  * 
  * @author golbi
  */
-public interface IClientConfiguration extends IAuthnAndTrustConfiguration
+public interface IClientConfiguration extends IPlainClientConfiguration
 {
 	/**
 	 * Makes a copy of this object.
 	 */
 	public IClientConfiguration clone();
-	
-	/**
-	 * Returns true if SSL mode is enabled.
-	 */
-	public boolean isSslEnabled();
-	
-	/**
-	 * Returns true if the client-side TLS authentication should be done.
-	 * If false then the local credential won't be used.
-	 * @return
-	 */
-	public boolean doSSLAuthn();
-
-	/**
-	 * whether to check if server hostname matches server's certificate
-	 * @return
-	 */
-	public ServerHostnameCheckingMode getServerHostnameCheckingMode();
 	
 	/**
 	 * Returns true if HTTP BASIC Auth should be used.

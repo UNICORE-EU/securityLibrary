@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import eu.emi.security.authn.x509.X509CertChainValidator;
+import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
 
@@ -50,7 +50,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	 * @param validator
 	 * @param credential
 	 */
-	public DefaultClientConfiguration(X509CertChainValidator validator, X509Credential credential)
+	public DefaultClientConfiguration(X509CertChainValidatorExt validator, X509Credential credential)
 	{
 		super(validator, credential);
 		this.sslAuthn = true;

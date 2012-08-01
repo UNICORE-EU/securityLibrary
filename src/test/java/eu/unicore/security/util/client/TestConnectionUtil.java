@@ -10,7 +10,7 @@ import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
 
-import eu.emi.security.authn.x509.X509CertChainValidator;
+import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
@@ -39,7 +39,7 @@ public class TestConnectionUtil extends TestCase
 			System.out.println("\nTest Get SSL Peer\n");
 			X509Credential cred = new KeystoreCredential("src/test/resources/client/httpclient.jks",
 					"the!client".toCharArray(), "the!client".toCharArray(), null, "JKS");
-			X509CertChainValidator validator = new KeystoreCertChainValidator("src/test/resources/client/httpclient.jks",
+			X509CertChainValidatorExt validator = new KeystoreCertChainValidator("src/test/resources/client/httpclient.jks",
 					"the!client".toCharArray(), "JKS", -1);
 			DefaultClientConfiguration secCfg = new DefaultClientConfiguration(validator, cred);
 			X509Certificate cert = ConnectionUtil.getPeerCertificate(secCfg,

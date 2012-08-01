@@ -120,6 +120,9 @@ public class PropertiesHelper
 		case LONG:
 			getLongValue(key);
 			break;
+		case FLOAT:
+			
+			break;
 		case BOOLEAN:
 			getBooleanValue(key);
 			break;
@@ -263,6 +266,21 @@ public class PropertiesHelper
 		}
 	}
 
+	protected Double getDoubleValueNoCheck(String name) throws ConfigurationException
+	{
+		String val = getValue(name);
+		if (val == null)
+			return null;
+		try
+		{
+			return Double.valueOf(val);
+		} catch (NumberFormatException e)
+		{
+			throw new ConfigurationException("Value " + val + " is not allowed for "
+					+ getKeyDescription(name) + ", must be a floating point (rational) number");
+		}
+	}
+
 	protected <T extends Number> T checkBounds(String name, T current) throws ConfigurationException
 	{
 		if (current == null)
@@ -270,17 +288,31 @@ public class PropertiesHelper
 		PropertyMD meta = metadata.get(name);
 		if (meta == null)
 			return current;
-		if (current.longValue() < meta.getMin())
+		if (current instanceof Float || current instanceof Double)
 		{
-			throw new ConfigurationException(getKeyDescription(name) + " parameter value "
+			if (current.doubleValue() < meta.getMinFloat())
+			{
+				throw new ConfigurationException(getKeyDescription(name) + " parameter value "
 					+ "is too small, minimum is " + meta.getMin());
-		}
-		if (current.longValue() > meta.getMax())
-		{
-			throw new ConfigurationException(getKeyDescription(name) + " parameter value "
+			}
+			if (current.doubleValue() > meta.getMaxFloat())
+			{
+				throw new ConfigurationException(getKeyDescription(name) + " parameter value "
 					+ "is too big, maximum is " + meta.getMax());
+			}
+		} else
+		{
+			if (current.longValue() < meta.getMin())
+			{
+				throw new ConfigurationException(getKeyDescription(name) + " parameter value "
+					+ "is too small, minimum is " + meta.getMin());
+			}
+			if (current.longValue() > meta.getMax())
+			{
+				throw new ConfigurationException(getKeyDescription(name) + " parameter value "
+					+ "is too big, maximum is " + meta.getMax());
+			}
 		}
-		
 		return current;
 	}
 	
@@ -296,6 +328,11 @@ public class PropertiesHelper
 		return checkBounds(name, retVal);
 	}
 
+	public Double getDoubleValue(String name) throws ConfigurationException
+	{
+		Double retVal = getDoubleValueNoCheck(name);
+		return checkBounds(name, retVal);
+	}
 
 	public Boolean getBooleanValue(String name) throws ConfigurationException
 	{
