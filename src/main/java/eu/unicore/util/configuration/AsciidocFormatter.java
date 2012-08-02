@@ -97,7 +97,10 @@ public class AsciidocFormatter implements HelpFormatter
 			String desc = md.getDescription();
 			if (desc == null)
 				desc = " ";
-			ret.append(desc + " \n");
+			ret.append(desc);
+			if (md.isUpdateable())
+				ret.append(" _(runtime updateable)_");
+			ret.append(" \n");
 		}
 		return ret.toString();
 	}

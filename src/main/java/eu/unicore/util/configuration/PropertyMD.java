@@ -6,6 +6,7 @@ package eu.unicore.util.configuration;
 
 import java.util.Arrays;
 
+
 /**
  * Provides an optional metadata for properties retrieved using {@link PropertiesHelper}.
  * Uses the fluent style and shortened syntax
@@ -21,6 +22,7 @@ public class PropertyMD
 	private boolean mandatory;
 	private boolean canHaveSubkeys = false;
 	private boolean numericalListKeys = false;
+	private boolean updateable = false;
 	private String description;
 	private String category;
 	private long min = Integer.MIN_VALUE;
@@ -112,6 +114,15 @@ public class PropertyMD
 	public boolean hasDefault() {
 		return hasDefault;
 	}
+	
+	public boolean isUpdateable() {
+		return updateable;
+	}
+	public PropertyMD setUpdateable(boolean updateable) {
+		this.updateable = updateable;
+		return this;
+	}
+	
 	public PropertyMD setBounds(long min, long max) {
 		if (type != Type.INT && type != Type.LONG)
 			throw new IllegalStateException("Integer bounds can be only set for int or long property");

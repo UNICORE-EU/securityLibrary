@@ -44,6 +44,7 @@ import eu.emi.security.authn.x509.impl.ValidatorParamsExt;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.configuration.PropertiesHelper;
+import eu.unicore.util.configuration.PropertyChangeListener;
 import eu.unicore.util.configuration.PropertyMD;
 
 
@@ -109,7 +110,7 @@ public class TruststoreProperties extends PropertiesHelper
 				setMandatory().setDescription("The truststore type."));
 		META.put(PROP_PROXY_SUPPORT, new PropertyMD(ProxySupport.ALLOW).
 				setDescription("Controls whether proxy certificates are supported."));
-		META.put(PROP_UPDATE, new PropertyMD("600").setLong().
+		META.put(PROP_UPDATE, new PropertyMD("600").setLong().setUpdateable(true).
 				setDescription("How often the truststore should be reloaded, in seconds. Set to negative value to disable refreshing at runtime."));
 
 		META.put(PROP_KS_PASSWORD, new PropertyMD().setSecret().setCategory("Keystore").
@@ -124,7 +125,7 @@ public class TruststoreProperties extends PropertiesHelper
 		META.put(PROP_OPENSSL_DIR, new PropertyMD("/etc/grid-security/certificates").setPath().setCategory("Openssl").
 				setDescription("Directory to be used for opeenssl truststore."));
 
-		META.put(PROP_DIRECTORY_LOCATIONS, new PropertyMD().setList(false).setCategory("Directory").
+		META.put(PROP_DIRECTORY_LOCATIONS, new PropertyMD().setList(false).setUpdateable(true).setCategory("Directory").
 				setDescription("List of CA certificates locations. Can contain URLs, local files and wildcard expressions."));
 		META.put(PROP_DIRECTORY_ENCODING, new PropertyMD(Encoding.PEM).setCategory("Directory").
 				setDescription("For directory truststore controls whether certificates are encoded in PEM or DER."));
@@ -139,14 +140,14 @@ public class TruststoreProperties extends PropertiesHelper
 				setDescription("Controls whether all defined revocation sources should be always checked, even if the first one already confirmed that a checked certificate is not revoked."));
 		META.put(PROP_CRL_MODE, new PropertyMD(CrlCheckingMode.IF_VALID).setCategory("Revocation").
 				setDescription("General CRL handling mode. The IF_VALID setting turns on CRL checking only in case the CRL is present."));
-		META.put(PROP_CRL_UPDATE, new PropertyMD("600").setLong().setCategory("Revocation").
+		META.put(PROP_CRL_UPDATE, new PropertyMD("600").setLong().setUpdateable(true).setCategory("Revocation").
 				setDescription("How often CRLs should be updated, in seconds. Set to negative value to disable refreshing at runtime."));
 		META.put(PROP_CRL_CONNECTION_TIMEOUT, new PropertyMD("15").setCategory("Revocation").
 				setDescription("Connection timeout for fetching the remote CRLs in seconds (not used for Openssl truststores)."));
 		META.put(PROP_CRL_CACHE_PATH, new PropertyMD().setPath().setCategory("Revocation").
 				setDescription("Directory where CRLs should be cached, after downloading them from " +
 						"remote source. Can be left undefined if no disk cache should be used. Note that directory should be secured, i.e. normal users should not be allowed to write to it. Not used for Openssl truststores."));
-		META.put(PROP_CRL_LOCATIONS, new PropertyMD().setList(false).setCategory("Revocation").
+		META.put(PROP_CRL_LOCATIONS, new PropertyMD().setList(false).setUpdateable(true).setCategory("Revocation").
 				setDescription("List of CRLs locations. Can contain URLs, local files and wildcard expressions. Not used for Openssl truststores."));
 		META.put(PROP_OCSP_MODE, new PropertyMD(OCSPCheckingMode.IF_AVAILABLE).setCategory("Revocation").
 				setDescription("General OCSP ckecking mode. REQUIRE should not be used unless it is guaranteed that for all certificates an OCSP responder is defined."));
@@ -209,6 +210,7 @@ public class TruststoreProperties extends PropertiesHelper
 		super(pfx, properties, META, log);
 		this.initialListeners = initialListeners;
 		createValidatorSafe();
+		addPropertyChangeListener(new PropertyChangeListenerImpl());
 	}
 	
 	/**
@@ -234,55 +236,67 @@ public class TruststoreProperties extends PropertiesHelper
 	 * Only few options can be modified at runtime.
 	 * @throws ConfigurationException 
 	 */
-	public void update() throws ConfigurationException
+	protected void update(String property) throws ConfigurationException
 	{
-		long newUpdateInterval = getLongValue(PROP_UPDATE);
-		if (newUpdateInterval != storeUpdateInterval)
+		if (property.equals(PROP_UPDATE))
 		{
-			if (opensslValidator != null)
-				opensslValidator.setUpdateInterval(newUpdateInterval*1000);
-			if (directoryValidator != null)
-				directoryValidator.setTruststoreUpdateInterval(newUpdateInterval*1000);
-			if (ksValidator != null)
-				ksValidator.setTruststoreUpdateInterval(newUpdateInterval*1000);
-			storeUpdateInterval = newUpdateInterval;
-			log.info("Updated " + prefix+PROP_UPDATE + " value to " + storeUpdateInterval);
+			long newUpdateInterval = getLongValue(PROP_UPDATE);
+			if (newUpdateInterval != storeUpdateInterval)
+			{
+				if (opensslValidator != null)
+					opensslValidator.setUpdateInterval(newUpdateInterval*1000);
+				if (directoryValidator != null)
+					directoryValidator.setTruststoreUpdateInterval(newUpdateInterval*1000);
+				if (ksValidator != null)
+					ksValidator.setTruststoreUpdateInterval(newUpdateInterval*1000);
+				storeUpdateInterval = newUpdateInterval;
+				log.info("Updated " + prefix+PROP_UPDATE + " value to " + storeUpdateInterval);
+			}
 		}
-
+		
 		if (opensslValidator != null)
 			return;
 		
-		long newCrlUpdateInterval = getLongValue(PROP_CRL_UPDATE);
-		if (newCrlUpdateInterval != crlUpdateInterval)
+		if (property.equals(PROP_CRL_UPDATE))
 		{
-			if (directoryValidator != null)
-				directoryValidator.setCRLUpdateInterval(newCrlUpdateInterval*1000);
-			if (ksValidator != null)
-				ksValidator.setCRLUpdateInterval(newCrlUpdateInterval*1000);
-			crlUpdateInterval = newCrlUpdateInterval;
-			log.info("Updated " + prefix+PROP_CRL_UPDATE + " value to " + crlUpdateInterval);
+			long newCrlUpdateInterval = getLongValue(PROP_CRL_UPDATE);
+			if (newCrlUpdateInterval != crlUpdateInterval)
+			{
+				if (directoryValidator != null)
+					directoryValidator.setCRLUpdateInterval(newCrlUpdateInterval*1000);
+				if (ksValidator != null)
+					ksValidator.setCRLUpdateInterval(newCrlUpdateInterval*1000);
+				crlUpdateInterval = newCrlUpdateInterval;
+				log.info("Updated " + prefix+PROP_CRL_UPDATE + " value to " + crlUpdateInterval);
+			}
 		}
 		
-		List<String> newCrlLocations = getListOfValues(PROP_CRL_LOCATIONS);
-		if (!newCrlLocations.equals(crlLocations))
+		if (property.startsWith(PROP_CRL_LOCATIONS))
 		{
-			if (directoryValidator != null)
-				directoryValidator.setCrls(newCrlLocations);
-			if (ksValidator != null)
-				ksValidator.setCrls(newCrlLocations);
-			crlLocations = newCrlLocations;
-			log.info("Updated " + prefix+PROP_CRL_LOCATIONS);
+			List<String> newCrlLocations = getListOfValues(PROP_CRL_LOCATIONS);
+			if (!newCrlLocations.equals(crlLocations))
+			{
+				if (directoryValidator != null)
+					directoryValidator.setCrls(newCrlLocations);
+				if (ksValidator != null)
+					ksValidator.setCrls(newCrlLocations);
+				crlLocations = newCrlLocations;
+				log.info("Updated " + prefix+PROP_CRL_LOCATIONS);
+			}
 		}
 		
 		if (ksValidator != null)
 			return;
 		
-		List<String> newDirectoryLocations = getListOfValues(PROP_DIRECTORY_LOCATIONS);
-		if (!newDirectoryLocations.equals(directoryLocations))
+		if (property.startsWith(PROP_DIRECTORY_LOCATIONS))
 		{
-			directoryValidator.setTruststorePaths(newDirectoryLocations);
-			directoryLocations = newDirectoryLocations;
-			log.info("Updated " + prefix+PROP_DIRECTORY_LOCATIONS);
+			List<String> newDirectoryLocations = getListOfValues(PROP_DIRECTORY_LOCATIONS);
+			if (!newDirectoryLocations.equals(directoryLocations))
+			{
+				directoryValidator.setTruststorePaths(newDirectoryLocations);
+				directoryLocations = newDirectoryLocations;
+				log.info("Updated " + prefix+PROP_DIRECTORY_LOCATIONS);
+			}
 		}
 	}
 
@@ -470,6 +484,29 @@ public class TruststoreProperties extends PropertiesHelper
 					"set in the property " + prefix + PROP_KS_TYPE + 
 					" and its autodetection failed. Try to set it and also " +
 					"review password and location - most probably those are wrong.");
+		}
+	}
+
+	/**
+	 * This class is used to update configuration of validators when properties are changed.
+	 * Properties reloading or setting must be triggered from outside this class.
+	 * @author K. Benedyczak
+	 */
+	private class PropertyChangeListenerImpl implements PropertyChangeListener 
+	{
+		private final String[] UPDATEABLE_PROPS = {PROP_UPDATE, PROP_CRL_UPDATE, 
+				PROP_DIRECTORY_LOCATIONS, PROP_CRL_LOCATIONS};
+		
+		@Override
+		public String[] getInterestingProperties()
+		{
+			return UPDATEABLE_PROPS;
+		}
+
+		@Override
+		public void propertyChanged(String propertyKey)
+		{
+			update(propertyKey);
 		}
 	}
 }

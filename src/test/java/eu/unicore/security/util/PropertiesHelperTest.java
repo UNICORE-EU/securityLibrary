@@ -24,6 +24,7 @@ import eu.unicore.util.configuration.DocumentationReferenceMeta;
 import eu.unicore.util.configuration.DocumentationReferencePrefix;
 import eu.unicore.util.configuration.FilePropertiesHelper;
 import eu.unicore.util.configuration.PropertiesHelper;
+import eu.unicore.util.configuration.PropertyChangeListener;
 import eu.unicore.util.configuration.PropertyMD;
 import junit.framework.TestCase;
 
@@ -53,6 +54,106 @@ public class PropertiesHelperTest extends TestCase
 		METADATA.put("p13.", new PropertyMD().setList(false).setDescription("List of values blah blah blah"));
 	}
 
+	private int global = 0;
+	private int focused = 0;
+	
+	public void testUpdates()
+	{
+		Properties p = new Properties();
+		p.setProperty("p09", "ola");
+		p.setProperty("p12", "viola");
+		PropertiesHelper helper = new PropertiesHelper("", p, METADATA, log);
+		PropertyChangeListener l1 = new PropertyChangeListener()
+		{
+			@Override
+			public void propertyChanged(String propertyKey)
+			{
+				global++;
+			}
+
+			@Override
+			public String[] getInterestingProperties()
+			{
+				return null;
+			}
+		};
+		PropertyChangeListener l2 = new PropertyChangeListener()
+		{
+			@Override
+			public void propertyChanged(String propertyKey)
+			{
+				if (propertyKey.startsWith("p12"))
+					focused++;
+				else
+					focused--;
+			}
+
+			@Override
+			public String[] getInterestingProperties()
+			{
+				return new String[] {"p12"};
+			}
+		};
+		
+		helper.addPropertyChangeListener(l1);
+		helper.addPropertyChangeListener(l2);
+		
+		helper.setProperties(p);
+		assertEquals(1, global);
+		assertEquals(0, focused);
+		
+		helper.setProperty("p09", "new");
+		assertEquals(2, global);
+		assertEquals(0, focused);
+		
+		helper.setProperty("p12", "viola");
+		assertEquals(3, global);
+		assertEquals(0, focused);
+
+		helper.setProperty("p12", null);
+		assertEquals(4, global);
+		assertEquals(1, focused);
+
+		helper.setProperty("p12", "viola");
+		assertEquals(5, global);
+		assertEquals(2, focused);
+		
+		helper.removePropertyChangeListener(l1);
+		helper.removePropertyChangeListener(l2);
+		
+		helper.setProperty("p12", "new");
+		assertEquals(5, global);
+		assertEquals(2, focused);
+		
+		helper.addPropertyChangeListener(l1);
+		helper.addPropertyChangeListener(l2);
+
+		helper.setProperty("p12.ddd", "new");
+		assertEquals(6, global);
+		assertEquals(3, focused);
+
+		helper.setProperty("p12.ddd", "new2");
+		assertEquals(7, global);
+		assertEquals(4, focused);
+		
+		p.setProperty("p09", "new");
+		p.setProperty("p12.ddd", "new2");
+		p.setProperty("p12", "new");
+		helper.setProperties(p);
+		assertEquals(8, global);
+		assertEquals(4, focused);
+
+		p.setProperty("p12.ddd", "new2");
+		p.setProperty("p12.qqq", "new2");
+		p.setProperty("p12.www", "new2");
+		helper.setProperties(p);
+		assertEquals(9, global);
+		assertEquals(5, focused);
+		
+	}
+
+	
+	
 	private static Properties load(String input)
 	{
 		Properties ret = new Properties();

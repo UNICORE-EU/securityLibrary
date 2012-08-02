@@ -29,6 +29,9 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 {
 	private static final Logger log = Log.getLogger(Log.SECURITY, AuthnAndTrustProperties.class);
 	
+	private TruststoreProperties truststoreProperties;
+	private CredentialProperties credentialProperties;
+	
 	public AuthnAndTrustProperties(String file) throws IOException, ConfigurationException
 	{
 		this(new File(file));
@@ -64,10 +67,9 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 	{
 		try
 		{
-			TruststoreProperties trustCfg = new TruststoreProperties(p, 
-					Collections.singleton(new LoggingStoreUpdateListener()),
+			truststoreProperties = new TruststoreProperties(p, Collections.singleton(new LoggingStoreUpdateListener()),
 					trustPrefix);
-			setValidator(trustCfg.getValidator());
+			setValidator(truststoreProperties.getValidator());
 		} catch (ConfigurationException e)
 		{
 			if (!trustOptional)
@@ -78,8 +80,8 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 		
 		try
 		{
-			CredentialProperties credProps = new CredentialProperties(p, credPrefix); 
-			setCredential(credProps.getCredential());
+			credentialProperties = new CredentialProperties(p, credPrefix); 
+			setCredential(credentialProperties.getCredential());
 		} catch (ConfigurationException e)
 		{
 			if (!credOptional)
@@ -87,5 +89,21 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 			else
 				log.info("Credential (optional) was not loaded as: " + e.getMessage());
 		} 
+	}
+
+	/**
+	 * @return the truststoreProperties
+	 */
+	public TruststoreProperties getTruststoreProperties()
+	{
+		return truststoreProperties;
+	}
+
+	/**
+	 * @return the credentialProperties
+	 */
+	public CredentialProperties getCredentialProperties()
+	{
+		return credentialProperties;
 	}
 }

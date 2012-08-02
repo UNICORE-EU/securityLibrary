@@ -60,6 +60,9 @@ public class ClientProperties extends DefaultClientConfiguration
 	
 	public static final String EXTRA_HTTP_LIB_PROPERTIES_PREFIX = "http.";
 	
+	private IAuthnAndTrustConfiguration authnAndTrustConfiguration;
+	private PropertiesHelper clientPropertiesHelper;
+	
 
 	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
 	static 
@@ -174,31 +177,32 @@ public class ClientProperties extends DefaultClientConfiguration
 	{
 		setValidator(authAndTrust.getValidator());
 		setCredential(authAndTrust.getCredential());
-		PropertiesHelper properties = new PropertiesHelper(clientPrefix, p, META, log);
-		setSslEnabled(properties.getBooleanValue(PROP_SSL_ENABLED));
+		this.authnAndTrustConfiguration = authAndTrust;
+		clientPropertiesHelper = new PropertiesHelper(clientPrefix, p, META, log);
+		setSslEnabled(clientPropertiesHelper.getBooleanValue(PROP_SSL_ENABLED));
 		if (isSslEnabled()) 
 		{
 			if (getValidator() == null || getCredential() == null)
 				throw new ConfigurationException("When SSL mode is enabled, both credential " +
 						"and trust settings must be provided");
-			setSslAuthn(properties.getBooleanValue(PROP_SSL_AUTHN_ENABLED));
+			setSslAuthn(clientPropertiesHelper.getBooleanValue(PROP_SSL_AUTHN_ENABLED));
 			getETDSettings().setIssuerCertificateChain(getCredential().getCertificateChain());
 		}
-		setDoSignMessage(properties.getBooleanValue(PROP_MESSAGE_SIGNING_ENABLED));
+		setDoSignMessage(clientPropertiesHelper.getBooleanValue(PROP_MESSAGE_SIGNING_ENABLED));
 		if (doSignMessage() && getCredential() == null)
 			throw new ConfigurationException("When message signing is enabled, the credential " +
 						"must be provided");
-		setHttpAuthn(properties.getBooleanValue(PROP_HTTP_AUTHN_ENABLED));
+		setHttpAuthn(clientPropertiesHelper.getBooleanValue(PROP_HTTP_AUTHN_ENABLED));
 		if (doHttpAuthn())
 		{
-			setHttpPassword(properties.getValue(PROP_HTTP_PASSWORD));
-			setHttpUser(properties.getValue(PROP_HTTP_USER));
+			setHttpPassword(clientPropertiesHelper.getValue(PROP_HTTP_PASSWORD));
+			setHttpUser(clientPropertiesHelper.getValue(PROP_HTTP_USER));
 		}
 		
-		setInHandlerClassNames(parseHandlers(properties, PROP_IN_HANDLERS));
-		setOutHandlerClassNames(parseHandlers(properties, PROP_OUT_HANDLERS));
+		setInHandlerClassNames(parseHandlers(clientPropertiesHelper, PROP_IN_HANDLERS));
+		setOutHandlerClassNames(parseHandlers(clientPropertiesHelper, PROP_OUT_HANDLERS));
 		
-		ServerHostnameCheckingMode hostnameMode = properties.getEnumValue(PROP_SERVER_HOSTNAME_CHECKING, 
+		ServerHostnameCheckingMode hostnameMode = clientPropertiesHelper.getEnumValue(PROP_SERVER_HOSTNAME_CHECKING, 
 				ServerHostnameCheckingMode.class);
 		setServerHostnameCheckingMode(hostnameMode);
 		
@@ -232,6 +236,22 @@ public class ClientProperties extends DefaultClientConfiguration
 		ClientProperties ret = new ClientProperties();
 		super.cloneTo(ret);
 		return ret;
+	}
+
+	/**
+	 * @return the authnAndTrustConfiguration
+	 */
+	public IAuthnAndTrustConfiguration getAuthnAndTrustConfiguration()
+	{
+		return authnAndTrustConfiguration;
+	}
+
+	/**
+	 * @return the clientPropertiesHelper
+	 */
+	public PropertiesHelper getClientPropertiesHelper()
+	{
+		return clientPropertiesHelper;
 	}
 }
 
