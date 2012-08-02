@@ -283,6 +283,8 @@ public class PropertyMD
 	protected boolean isFloat(String val) {
 		try
 		{
+			if (val == null)
+				return false;
 			Double.parseDouble(val);
 			return true;
 		} catch (NumberFormatException e)
