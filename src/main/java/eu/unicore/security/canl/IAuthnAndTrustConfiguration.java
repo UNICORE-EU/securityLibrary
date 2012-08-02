@@ -29,7 +29,7 @@
 
 package eu.unicore.security.canl;
 
-import eu.emi.security.authn.x509.X509CertChainValidator;
+import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.X509Credential;
 
 
@@ -45,7 +45,7 @@ public interface IAuthnAndTrustConfiguration
 	 * 
 	 * @return Object used to verify certificate chains
 	 */
-	public X509CertChainValidator getValidator();
+	public X509CertChainValidatorExt getValidator();
 	
 	/**
 	 * 

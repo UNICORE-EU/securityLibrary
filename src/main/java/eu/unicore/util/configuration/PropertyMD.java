@@ -6,6 +6,7 @@ package eu.unicore.util.configuration;
 
 import java.util.Arrays;
 
+
 /**
  * Provides an optional metadata for properties retrieved using {@link PropertiesHelper}.
  * Uses the fluent style and shortened syntax
@@ -13,7 +14,7 @@ import java.util.Arrays;
  */
 public class PropertyMD
 {
-	public enum Type {INT, LONG, BOOLEAN, STRING, PATH, ENUM, LIST}
+	public enum Type {INT, LONG, FLOAT, BOOLEAN, STRING, PATH, ENUM, LIST}
 	
 	private boolean secret;
 	private String defaultValue;
@@ -21,17 +22,20 @@ public class PropertyMD
 	private boolean mandatory;
 	private boolean canHaveSubkeys = false;
 	private boolean numericalListKeys = false;
+	private boolean updateable = false;
 	private String description;
 	private String category;
 	private long min = Integer.MIN_VALUE;
 	private long max = Integer.MAX_VALUE;
+	private double minFloat = Double.MIN_VALUE;
+	private double maxFloat = Double.MAX_VALUE;
 	private Type type = Type.STRING; 
 	private Enum<?> enumTypeInstance;
 
 	/**
 	 * Creates a non-secret property, with a default value 
 	 * (it can't become mandatory property as we have a default).
-	 * The property type will be guessed in that order: int, long, boolean. If the default 
+	 * The property type will be guessed in that order: int, long, float, boolean. If the default 
 	 * value can not be mapped to any of those types, the type will be String. The type can be later
 	 * freely changed, but default value must be of the type set. 
 	 * @param defaultValue
@@ -43,6 +47,8 @@ public class PropertyMD
 			this.type = Type.INT;
 		else if (isLong(defaultValue))
 			this.type = Type.LONG;
+		else if (isFloat(defaultValue))
+			this.type = Type.FLOAT;
 		else if (isBoolean(defaultValue))
 			this.type = Type.BOOLEAN;
 		else
@@ -108,25 +114,61 @@ public class PropertyMD
 	public boolean hasDefault() {
 		return hasDefault;
 	}
+	
+	public boolean isUpdateable() {
+		return updateable;
+	}
+	public PropertyMD setUpdateable(boolean updateable) {
+		this.updateable = updateable;
+		return this;
+	}
+	
 	public PropertyMD setBounds(long min, long max) {
+		if (type != Type.INT && type != Type.LONG)
+			throw new IllegalStateException("Integer bounds can be only set for int or long property");
 		this.min = min;
 		this.max = max;
+		return this;
+	}
+	public PropertyMD setBounds(double min, double max) {
+		if (type != Type.FLOAT)
+			throw new IllegalStateException("Floating point bounds can be only set for Floating point property");
+		this.minFloat = min;
+		this.maxFloat = max;
 		return this;
 	}
 	public PropertyMD setPositive() {
 		this.min = 1;
+		this.minFloat = 0.001;
 		return this;
 	}
 	public PropertyMD setNonNegative() {
 		this.min = 0;
+		this.minFloat = 0.0;
 		return this;
 	}
 	public PropertyMD setMin(long min) {
+		if (type != Type.INT && type != Type.LONG)
+			throw new IllegalStateException("Integer bounds can be only set for int or long property");
 		this.min = min;
 		return this;
 	}
 	public PropertyMD setMax(long max) {
+		if (type != Type.INT && type != Type.LONG)
+			throw new IllegalStateException("Integer bounds can be only set for int or long property");
 		this.max = max;
+		return this;
+	}
+	public PropertyMD setMin(double min) {
+		if (type != Type.FLOAT)
+			throw new IllegalStateException("Floating point bounds can be only set for Floating point property");
+		this.minFloat = min;
+		return this;
+	}
+	public PropertyMD setMax(double max) {
+		if (type != Type.FLOAT)
+			throw new IllegalStateException("Floating point bounds can be only set for Floating point property");
+		this.maxFloat = max;
 		return this;
 	}
 	public PropertyMD setLong() {
@@ -150,6 +192,10 @@ public class PropertyMD
 		this.type = Type.INT;
 		this.max = Integer.MAX_VALUE;
 		this.min = Integer.MIN_VALUE;
+		return this;
+	}
+	public PropertyMD setFloat() {
+		this.type = Type.FLOAT;
 		return this;
 	}
 	public PropertyMD setBoolean() {
@@ -188,6 +234,12 @@ public class PropertyMD
 	public long getMax() {
 		return max;
 	}
+	public double getMinFloat() {
+		return minFloat;
+	}
+	public double getMaxFloat() {
+		return maxFloat;
+	}
 	public Type getType() {
 		return type;
 	}
@@ -221,6 +273,17 @@ public class PropertyMD
 		try
 		{
 			Integer.parseInt(val);
+			return true;
+		} catch (NumberFormatException e)
+		{
+			return false;
+		}
+	}
+
+	protected boolean isFloat(String val) {
+		try
+		{
+			Double.parseDouble(val);
 			return true;
 		} catch (NumberFormatException e)
 		{
@@ -262,6 +325,21 @@ public class PropertyMD
 			return "filesystem path";
 		case LIST:
 			return "list of properties with a common prefix";
+		case FLOAT:
+			boolean hasMinF = false;
+			if (minFloat != Double.MIN_VALUE && minFloat != Double.MIN_VALUE)
+				hasMinF = true;
+			boolean hasMaxF = false;
+			if (maxFloat != Double.MAX_VALUE && maxFloat != Double.MAX_VALUE)
+				hasMaxF = true;
+			if (!hasMinF && !hasMaxF)
+				return "floating point number";
+			if (hasMinF && hasMaxF)
+				return "floating [" + minFloat + " -- " + maxFloat + "]";
+			if (hasMinF)
+				return "floating > " + minFloat;
+			if (hasMaxF)
+				return "floating < " + maxFloat;
 		default:
 			return "UNKNOWN";
 		}

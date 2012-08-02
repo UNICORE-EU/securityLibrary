@@ -15,11 +15,14 @@ import org.apache.log4j.Logger;
 
 
 /**
- * Wrapping class of the PropertiesHelper, adding file backing (with reloading support).
- * 
+ * Extension of the PropertiesHelper, adding file backing (with reloading support).
+ * If in your case the properties source is backed by a file only optionally, then consider using
+ * {@link WrappingFilePropertiesHelper}.
+ * The class implements Runnable, so it can be directly used by some scheduler to perform 
+ * checks for the updated configuration.  
  * @author K. Benedyczak
  */
-public class FilePropertiesHelper extends PropertiesHelper
+public class FilePropertiesHelper extends PropertiesHelper implements Runnable
 {
 	protected File file;
 	protected long lastAccess;
@@ -41,7 +44,7 @@ public class FilePropertiesHelper extends PropertiesHelper
 		lastAccess = file.lastModified();
 	}
 
-	public synchronized void reload() throws IOException, ConfigurationException
+	public void reload() throws IOException, ConfigurationException
 	{
 		setProperties(load(file));
 	}
@@ -53,10 +56,7 @@ public class FilePropertiesHelper extends PropertiesHelper
 
 	private boolean hasChanged()
 	{
-		long fileMod = file.lastModified();
-		boolean ret = (lastAccess==0 || lastAccess<fileMod);
-		lastAccess=fileMod;
-		return ret;
+		return hasFileChanged(lastAccess, file);
 	}
 	
 	public boolean reloadIfChanged() throws IOException, ConfigurationException
@@ -69,6 +69,31 @@ public class FilePropertiesHelper extends PropertiesHelper
 		return false;
 	}
 
+
+	@Override
+	public void run()
+	{
+		try
+		{
+			reloadIfChanged();
+		} catch (ConfigurationException e)
+		{
+			log.warn("The reloaded configuration is invalid: " + e.getMessage(), e);
+		} catch (IOException e)
+		{
+			log.warn("Can't re-read the configuration file " + file + 
+					": " + e.getMessage(), e);
+		}
+	}
+	
+	
+	public static boolean hasFileChanged(long lastAccess, File file)
+	{
+		long fileMod = file.lastModified();
+		boolean ret = (lastAccess==0 || lastAccess<fileMod);
+		lastAccess=fileMod;
+		return ret;
+	}
 	
 	public static Properties load(String file) throws IOException 
 	{

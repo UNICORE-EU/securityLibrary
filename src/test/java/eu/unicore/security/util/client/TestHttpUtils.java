@@ -18,7 +18,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 
-import eu.emi.security.authn.x509.X509CertChainValidator;
+import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
@@ -107,7 +107,7 @@ public class TestHttpUtils extends TestCase
 	{
 		X509Credential cred = new KeystoreCredential("src/test/resources/client/httpclient.jks",
 			"the!client".toCharArray(), "the!client".toCharArray(), null, "JKS");
-		X509CertChainValidator validator = new KeystoreCertChainValidator("src/test/resources/client/httpclient.jks",
+		X509CertChainValidatorExt validator = new KeystoreCertChainValidator("src/test/resources/client/httpclient.jks",
 			"the!client".toCharArray(), "JKS", -1);
 		IClientConfiguration secCfg = new DefaultClientConfiguration(validator, cred);
 		
@@ -123,7 +123,7 @@ public class TestHttpUtils extends TestCase
 	{
 		X509Credential cred = new KeystoreCredential("src/test/resources/client/combined.jks",
 			"the!client".toCharArray(), "the!client".toCharArray(), "mykey", "JKS");
-		X509CertChainValidator validator = new KeystoreCertChainValidator("src/test/resources/client/combined.jks",
+		X509CertChainValidatorExt validator = new KeystoreCertChainValidator("src/test/resources/client/combined.jks",
 			"the!client".toCharArray(), "JKS", -1);
 		IClientConfiguration secCfg = new DefaultClientConfiguration(validator, cred);
 		
@@ -158,7 +158,7 @@ public class TestHttpUtils extends TestCase
 	{
 		X509Credential cred = new KeystoreCredential("src/test/resources/client/httpclient.jks",
 				"the!client".toCharArray(), "the!client".toCharArray(), null, "JKS");
-		X509CertChainValidator validator = new KeystoreCertChainValidator("src/test/resources/client/httpclient.jks",
+		X509CertChainValidatorExt validator = new KeystoreCertChainValidator("src/test/resources/client/httpclient.jks",
 				"the!client".toCharArray(), "JKS", -1);
 		DefaultClientConfiguration secCfg = new DefaultClientConfiguration(validator, cred);
 		String url = server.getSecUrl()+"/servlet1";

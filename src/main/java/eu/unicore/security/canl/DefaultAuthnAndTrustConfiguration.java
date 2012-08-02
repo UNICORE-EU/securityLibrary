@@ -8,7 +8,7 @@
 
 package eu.unicore.security.canl;
 
-import eu.emi.security.authn.x509.X509CertChainValidator;
+import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.X509Credential;
 
 
@@ -20,7 +20,7 @@ import eu.emi.security.authn.x509.X509Credential;
  */
 public class DefaultAuthnAndTrustConfiguration implements IAuthnAndTrustConfiguration
 {
-	private X509CertChainValidator validator;
+	private X509CertChainValidatorExt validator;
 	private X509Credential credential;
 	
 	/**
@@ -35,7 +35,7 @@ public class DefaultAuthnAndTrustConfiguration implements IAuthnAndTrustConfigur
 	 * @param validator
 	 * @param credential
 	 */
-	public DefaultAuthnAndTrustConfiguration(X509CertChainValidator validator, X509Credential credential)
+	public DefaultAuthnAndTrustConfiguration(X509CertChainValidatorExt validator, X509Credential credential)
 	{
 		this.validator = validator;
 		this.credential = credential;
@@ -45,7 +45,7 @@ public class DefaultAuthnAndTrustConfiguration implements IAuthnAndTrustConfigur
 	 * @return the validator
 	 */
 	@Override
-	public X509CertChainValidator getValidator()
+	public X509CertChainValidatorExt getValidator()
 	{
 		return validator;
 	}
@@ -53,7 +53,7 @@ public class DefaultAuthnAndTrustConfiguration implements IAuthnAndTrustConfigur
 	/**
 	 * @param validator the validator to set
 	 */
-	public void setValidator(X509CertChainValidator validator)
+	public void setValidator(X509CertChainValidatorExt validator)
 	{
 		this.validator = validator;
 	}

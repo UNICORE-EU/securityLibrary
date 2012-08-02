@@ -72,13 +72,13 @@ public class TruststorePropertiesTest extends TestCase
 		p.setProperty(DEFAULT_PREFIX + PROP_CRL_MODE, "REQUIRE");
 		p.setProperty(DEFAULT_PREFIX + PROP_PROXY_SUPPORT, "DENY");
 
-		p.setProperty(DEFAULT_PREFIX + PROP_DIRECTORY_LOCATIONS, PFX+"dir/*.pem");
+		p.setProperty(DEFAULT_PREFIX + PROP_DIRECTORY_LOCATIONS + "1", PFX+"dir/*.pem");
 		p.setProperty(DEFAULT_PREFIX + PROP_DIRECTORY_CACHE_PATH, "/tmp");
 		p.setProperty(DEFAULT_PREFIX + PROP_DIRECTORY_CONNECTION_TIMEOUT, "100");
 		p.setProperty(DEFAULT_PREFIX + PROP_DIRECTORY_ENCODING, "PEM");
 		p.setProperty(DEFAULT_PREFIX + PROP_CRL_CACHE_PATH, "/tmp");
 		p.setProperty(DEFAULT_PREFIX + PROP_CRL_CONNECTION_TIMEOUT, "200");
-		p.setProperty(DEFAULT_PREFIX + PROP_CRL_LOCATIONS, PFX+"dir/*.crl");
+		p.setProperty(DEFAULT_PREFIX + PROP_CRL_LOCATIONS + "1", PFX+"dir/*.crl");
 		p.setProperty(DEFAULT_PREFIX + PROP_CRL_UPDATE, "400");
 		
 		p.setProperty(DEFAULT_PREFIX + PROP_OCSP_LOCAL_RESPONDERS + "1", "http://some.responder/foo src/test/resources/credentials/cert-1.pem");
@@ -100,18 +100,17 @@ public class TruststorePropertiesTest extends TestCase
 		assertEquals(2, v.getRevocationParameters().getOcspParameters().getLocalResponders().length);
 		
 		//test update
-		p.setProperty(DEFAULT_PREFIX + PROP_UPDATE, "12");
-		p.setProperty(DEFAULT_PREFIX + PROP_DIRECTORY_LOCATIONS, PFX+"dir/ss*.pem");
-		p.setProperty(DEFAULT_PREFIX + PROP_CRL_LOCATIONS, PFX+"dir/ss*.crl");
-		p.setProperty(DEFAULT_PREFIX + PROP_CRL_UPDATE, "40");
-		tp.update();
+		tp.setProperty(PROP_UPDATE, "12");
+		tp.setProperty(PROP_DIRECTORY_LOCATIONS + "1", PFX+"dir/ss*.pem");
+		tp.setProperty(PROP_CRL_LOCATIONS + "1", PFX+"dir/ss*.crl");
+		tp.setProperty(PROP_CRL_UPDATE, "40");
 		v = (DirectoryCertChainValidator) tp.getValidator();
 		
 		
 		assertEquals(12000, v.getTruststoreUpdateInterval());
 		assertEquals("40000", v.getRevocationParameters().getCrlParameters().getCrlUpdateInterval() + "");
-		assertEquals(PFX+"dir/ss*.crl", v.getRevocationParameters().getCrlParameters().getCrls().get(0));
 		assertEquals(PFX+"dir/ss*.pem", v.getTruststorePaths().get(0));
+		assertEquals(PFX+"dir/ss*.crl", v.getRevocationParameters().getCrlParameters().getCrls().get(0));
 		
 		
 		

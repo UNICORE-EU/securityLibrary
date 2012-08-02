@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,6 +35,13 @@ import eu.unicore.util.configuration.PropertyMD.Type;
  * and therefore acts as a namespace in the configuration file.
  * <p>
  * The class never logs errors: if exception is thrown then logging must be performed by the using class.
+ * <p>
+ * It is possible to register for property changes. The implementation is smart, i.e. it allows for detecting changes
+ * of particular properties or chnages in property groups if a listener is registered for a property which can 
+ * have subkeys.
+ * <p>
+ * Properties object internally stored in this class is copied, so external modifications on the constructor argument
+ * doesn't have any effect. Changes to wrapped properties must be done by appropriate set methods of this class. 
  * 
  * @author K. Benedyczak
  */
@@ -44,6 +52,9 @@ public class PropertiesHelper
 	protected Properties properties;
 	protected String prefix;
 	protected Map<String, PropertyMD> metadata;
+	protected List<PropertyChangeListener> genericListeners = new ArrayList<PropertyChangeListener>();
+	protected Map<String, List<PropertyChangeListener>> propertyFocusedListeners = 
+			new HashMap<String, List<PropertyChangeListener>>(); 
 	
 	/**
 	 * 
@@ -57,21 +68,157 @@ public class PropertiesHelper
 	public PropertiesHelper(String prefix, Properties properties, Map<String, PropertyMD> propertiesMD, 
 			Logger log) throws ConfigurationException
 	{
-		this.properties = properties;
+		this.properties = new Properties();
+		this.properties.putAll(properties);
 		this.prefix = prefix;
 		this.log = log;
 		this.metadata = propertiesMD;
 		if (this.metadata == null)
 			this.metadata = Collections.emptyMap();
-		checkConstraints(properties);
-		findUnknown();
+		setProperties(properties);
 	}
 
-	public synchronized void setProperties(Properties properties) throws IOException, ConfigurationException
+	public synchronized void setProperties(Properties properties) throws ConfigurationException
 	{
 		checkConstraints(properties);
-		this.properties = properties;
+		findUnknown();
+		Set<String> changed = filterChanged(propertyFocusedListeners.keySet(), this.properties, properties);
+		this.properties.clear();
+		this.properties.putAll(properties);
+		notifyGenericListeners();
+		for (String changedP: changed)
+			notifyFocusedListeners(changedP);
 	}
+
+	public synchronized void setProperty(String key, String value)
+	{
+		PropertyMD meta = metadata.get(key);
+		boolean change;
+		//value == null can not be set
+		if (value == null)
+		{
+			if (meta != null && meta.isMandatory())
+				throw new IllegalArgumentException("Can not remove a mandatory property");
+			change = properties.remove(prefix+key) != null;
+		} else
+		{
+			if (meta != null)
+				checkPropertyConstraints(meta, key);
+			change = !value.equals(properties.getProperty(prefix+key));
+			properties.setProperty(prefix+key, value);
+		}
+		warned.remove(key);
+		notifyGenericListeners();
+		if (change)
+			notifyFocusedListeners(key);
+	}
+
+	private boolean canHaveSubkeys(String key) 
+	{
+		PropertyMD meta = metadata.get(key);
+		if (meta != null && (meta.canHaveSubkeys() || meta.getType() == Type.LIST))
+			return true;
+		return false;
+	}
+	
+	protected Set<String> filterChanged(Set<String> toCheck, Properties orig, Properties updated)
+	{
+		Set<String> ret = new HashSet<String>();
+		for (String p: toCheck)
+		{
+			boolean group = canHaveSubkeys(p);
+			
+			if (!group)
+			{
+				String origVal = orig.getProperty(prefix+p);
+				String updatedVal = updated.getProperty(prefix+p);
+				if (origVal == null || updatedVal == null) 
+				{
+					if (origVal != updatedVal)
+						ret.add(p);
+				} else
+				{
+					if (!origVal.equals(updatedVal))
+						ret.add(p);
+				}
+			} else
+			{ //for properties with subkeys we check if any of the properties in the group changed
+				Map<String, String> origGroup = new PropertyGroupHelper(orig, p).getFilteredMap();
+				Map<String, String> updatedGroup = new PropertyGroupHelper(updated, p).getFilteredMap();
+				if (!origGroup.equals(updatedGroup))
+					ret.add(p);
+			}
+		}
+		return ret;
+	}
+	
+	protected void notifyFocusedListeners(String property)
+	{
+		synchronized(genericListeners)
+		{
+			//we have to handle differently the listeners which listen to updates of properties with subkeys
+			for (String key: propertyFocusedListeners.keySet())
+			{
+				if (key.equals(property))
+				{
+					notifyAllWithKey(key, property);
+				} else if (property.startsWith(key) && canHaveSubkeys(key))
+				{
+					notifyAllWithKey(key, property);
+				}
+			}
+		}		
+	}
+
+	protected void notifyAllWithKey(String key, String property)
+	{
+		List<PropertyChangeListener> listeners = propertyFocusedListeners.get(key);
+		for (PropertyChangeListener listener: listeners)
+			listener.propertyChanged(property);
+	}
+	
+	protected void notifyGenericListeners()
+	{
+		synchronized(genericListeners)
+		{
+			for (PropertyChangeListener listener: genericListeners)
+				listener.propertyChanged(null);
+		}		
+	}
+	
+	public void addPropertyChangeListener(PropertyChangeListener listener) 
+	{
+		synchronized(genericListeners)
+		{
+			if (listener.getInterestingProperties() == null)
+				genericListeners.add(listener);
+			else
+			{
+				String[] interestingProps = listener.getInterestingProperties();
+				for (String prop: interestingProps)
+				{
+					List<PropertyChangeListener> propListeners = propertyFocusedListeners.get(prop);
+					if (propListeners == null) 
+					{
+						propListeners = new ArrayList<PropertyChangeListener>();
+						propertyFocusedListeners.put(prop, propListeners);
+					}
+					propListeners.add(listener);
+				}
+			}
+		}
+	}
+	
+	public void removePropertyChangeListener(PropertyChangeListener listener)
+	{
+		synchronized(genericListeners)
+		{
+			genericListeners.remove(listener);
+			for (String key: propertyFocusedListeners.keySet())
+				propertyFocusedListeners.get(key).remove(listener);
+		}
+	}
+	
 	
 	protected void checkConstraints(Properties properties) throws ConfigurationException
 	{
@@ -119,6 +266,9 @@ public class PropertiesHelper
 			break;
 		case LONG:
 			getLongValue(key);
+			break;
+		case FLOAT:
+			
 			break;
 		case BOOLEAN:
 			getBooleanValue(key);
@@ -263,6 +413,21 @@ public class PropertiesHelper
 		}
 	}
 
+	protected Double getDoubleValueNoCheck(String name) throws ConfigurationException
+	{
+		String val = getValue(name);
+		if (val == null)
+			return null;
+		try
+		{
+			return Double.valueOf(val);
+		} catch (NumberFormatException e)
+		{
+			throw new ConfigurationException("Value " + val + " is not allowed for "
+					+ getKeyDescription(name) + ", must be a floating point (rational) number");
+		}
+	}
+
 	protected <T extends Number> T checkBounds(String name, T current) throws ConfigurationException
 	{
 		if (current == null)
@@ -270,17 +435,31 @@ public class PropertiesHelper
 		PropertyMD meta = metadata.get(name);
 		if (meta == null)
 			return current;
-		if (current.longValue() < meta.getMin())
+		if (current instanceof Float || current instanceof Double)
 		{
-			throw new ConfigurationException(getKeyDescription(name) + " parameter value "
+			if (current.doubleValue() < meta.getMinFloat())
+			{
+				throw new ConfigurationException(getKeyDescription(name) + " parameter value "
 					+ "is too small, minimum is " + meta.getMin());
-		}
-		if (current.longValue() > meta.getMax())
-		{
-			throw new ConfigurationException(getKeyDescription(name) + " parameter value "
+			}
+			if (current.doubleValue() > meta.getMaxFloat())
+			{
+				throw new ConfigurationException(getKeyDescription(name) + " parameter value "
 					+ "is too big, maximum is " + meta.getMax());
+			}
+		} else
+		{
+			if (current.longValue() < meta.getMin())
+			{
+				throw new ConfigurationException(getKeyDescription(name) + " parameter value "
+					+ "is too small, minimum is " + meta.getMin());
+			}
+			if (current.longValue() > meta.getMax())
+			{
+				throw new ConfigurationException(getKeyDescription(name) + " parameter value "
+					+ "is too big, maximum is " + meta.getMax());
+			}
 		}
-		
 		return current;
 	}
 	
@@ -296,6 +475,11 @@ public class PropertiesHelper
 		return checkBounds(name, retVal);
 	}
 
+	public Double getDoubleValue(String name) throws ConfigurationException
+	{
+		Double retVal = getDoubleValueNoCheck(name);
+		return checkBounds(name, retVal);
+	}
 
 	public Boolean getBooleanValue(String name) throws ConfigurationException
 	{
@@ -552,24 +736,6 @@ public class PropertiesHelper
 		return properties.containsKey(prefix+name);
 	}
 	
-	public synchronized void setProperty(String key, String value)
-	{
-		PropertyMD meta = metadata.get(key);
-		//value == null can not be set
-		if (value == null)
-		{
-			if (meta != null && meta.isMandatory())
-				throw new IllegalArgumentException("Can not remove a mandatory property");
-			properties.remove(prefix+key);
-		} else
-		{
-			if (meta != null)
-				checkPropertyConstraints(meta, key);
-			properties.setProperty(prefix+key, value);
-		}
-		warned.remove(key);
-	}
-	
 	/**
 	 * @param key a full key
 	 * @return value of a raw property, i.e. without any metadata checking, usage of prefix etc.
@@ -577,6 +743,15 @@ public class PropertiesHelper
 	public synchronized String getRawProperty(String key)
 	{
 		return properties.getProperty(key);
+	}
+	
+	/**
+	 * Only for use in the package
+	 * @return
+	 */
+	Logger getLoger()
+	{
+		return log;
 	}
 }
 
