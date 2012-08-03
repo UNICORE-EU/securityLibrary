@@ -284,7 +284,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	 * Changes to validator settings will be visible also in the validator of the cloned object.
 	 */
 	@Override
-	public IClientConfiguration clone()
+	public DefaultClientConfiguration clone()
 	{
 		DefaultClientConfiguration ret = new DefaultClientConfiguration();
 		cloneTo(ret);

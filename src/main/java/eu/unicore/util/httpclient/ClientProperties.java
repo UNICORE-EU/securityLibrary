@@ -235,6 +235,8 @@ public class ClientProperties extends DefaultClientConfiguration
 	{
 		ClientProperties ret = new ClientProperties();
 		super.cloneTo(ret);
+		ret.authnAndTrustConfiguration = this.authnAndTrustConfiguration.clone();
+		ret.clientPropertiesHelper= this.clientPropertiesHelper.clone();
 		return ret;
 	}
 

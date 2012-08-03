@@ -11,7 +11,6 @@ package eu.unicore.security;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
-import eu.unicore.util.httpclient.IClientConfiguration;
 
 /**
  * @author K. Benedyczak
@@ -50,7 +49,7 @@ public class MockSecurityConfig extends DefaultClientConfiguration
 	}
 
 	@Override
-	public IClientConfiguration clone()
+	public MockSecurityConfig clone()
 	{
 		try
 		{

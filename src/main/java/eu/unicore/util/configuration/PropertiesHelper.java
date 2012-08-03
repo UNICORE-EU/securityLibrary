@@ -45,7 +45,7 @@ import eu.unicore.util.configuration.PropertyMD.Type;
  * 
  * @author K. Benedyczak
  */
-public class PropertiesHelper
+public class PropertiesHelper implements Cloneable
 {
 	private Set<String> warned = Collections.synchronizedSet(new HashSet<String>());
 	protected Logger log;
@@ -752,6 +752,21 @@ public class PropertiesHelper
 	Logger getLoger()
 	{
 		return log;
+	}
+	
+	@Override
+	public PropertiesHelper clone()
+	{
+		PropertiesHelper ret = new PropertiesHelper(prefix, properties, metadata, log);
+		cloneTo(ret);
+		return ret;
+	}
+
+	protected void cloneTo(PropertiesHelper to)
+	{
+		to.warned.addAll(this.warned);
+		to.genericListeners.addAll(this.genericListeners);
+		to.propertyFocusedListeners.putAll(this.propertyFocusedListeners);
 	}
 }
 

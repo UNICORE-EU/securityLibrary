@@ -61,6 +61,18 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 	{
 		this(p, trustPrefix, credPrefix, false, false);
 	}
+
+	/**
+	 * only for cloning
+	 */
+	protected AuthnAndTrustProperties(TruststoreProperties trustProps, CredentialProperties credProps, 
+			DefaultAuthnAndTrustConfiguration configured)
+	{
+		this.credentialProperties = credProps;
+		this.truststoreProperties = trustProps;
+		setValidator(configured.getValidator());
+		setCredential(configured.getCredential());
+	}
 	
 	public AuthnAndTrustProperties(Properties p, String trustPrefix, String credPrefix, 
 			boolean trustOptional, boolean credOptional) throws ConfigurationException
@@ -105,5 +117,12 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 	public CredentialProperties getCredentialProperties()
 	{
 		return credentialProperties;
+	}
+	
+	public AuthnAndTrustProperties clone()
+	{
+		DefaultAuthnAndTrustConfiguration clonedRaw = super.clone();
+		return new AuthnAndTrustProperties(truststoreProperties.clone(), credentialProperties.clone(), clonedRaw);
+		
 	}
 }

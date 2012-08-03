@@ -291,4 +291,11 @@ public class CredentialProperties extends PropertiesHelper
 			return CredentialFormat.der;
 		return CredentialFormat.pem;
 	}
+	
+	public CredentialProperties clone()
+	{
+		CredentialProperties ret = new CredentialProperties(properties, mainPassword, keyPassword, prefix);
+		super.cloneTo(ret);
+		return ret;
+	}
 }

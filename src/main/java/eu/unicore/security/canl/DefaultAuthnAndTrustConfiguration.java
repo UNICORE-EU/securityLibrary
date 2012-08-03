@@ -18,7 +18,7 @@ import eu.emi.security.authn.x509.X509Credential;
  * 
  * @author golbi
  */
-public class DefaultAuthnAndTrustConfiguration implements IAuthnAndTrustConfiguration
+public class DefaultAuthnAndTrustConfiguration implements IAuthnAndTrustConfiguration, Cloneable
 {
 	private X509CertChainValidatorExt validator;
 	private X509Credential credential;
@@ -81,7 +81,7 @@ public class DefaultAuthnAndTrustConfiguration implements IAuthnAndTrustConfigur
 	 * Changes to validator settings will be visible also in the validator of the cloned object.
 	 */
 	@Override
-	public IAuthnAndTrustConfiguration clone()
+	public DefaultAuthnAndTrustConfiguration clone()
 	{
 		DefaultAuthnAndTrustConfiguration ret = new DefaultAuthnAndTrustConfiguration();
 		ret.setCredential(credential);

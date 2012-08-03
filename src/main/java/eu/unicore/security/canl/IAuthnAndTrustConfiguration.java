@@ -39,7 +39,7 @@ import eu.emi.security.authn.x509.X509Credential;
  * 
  * @author K. Benedyczak
  */
-public interface IAuthnAndTrustConfiguration
+public interface IAuthnAndTrustConfiguration extends Cloneable
 {
 	/**
 	 * 
@@ -52,4 +52,10 @@ public interface IAuthnAndTrustConfiguration
 	 * @return object used to provide local credentias
 	 */
 	public X509Credential getCredential();
+	
+	/**
+	 * 
+	 * @return cloned object
+	 */
+	public IAuthnAndTrustConfiguration clone();
 }

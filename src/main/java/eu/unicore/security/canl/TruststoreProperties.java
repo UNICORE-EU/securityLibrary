@@ -509,4 +509,11 @@ public class TruststoreProperties extends PropertiesHelper
 			update(propertyKey);
 		}
 	}
+	
+	public TruststoreProperties clone()
+	{
+		TruststoreProperties ret = new TruststoreProperties(properties, initialListeners, prefix);
+		super.cloneTo(ret);
+		return ret;
+	}
 }
