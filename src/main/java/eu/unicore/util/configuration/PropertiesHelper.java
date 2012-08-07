@@ -25,7 +25,7 @@ import eu.unicore.util.configuration.PropertyMD.Type;
 
 /**
  * Provides methods to parse properties and return them as String, ints, longs, Files, arbitrary Enums 
- * or Lists of strings or others. There is a number of additional features provided:
+ * or Lists of strings or others. There is a number of additional features provided.
  * <p> 
  * The object is configured with metadata about properties, so it is easier to call the 'get' methods later.
  * Metadata provides the following features: (1) ability to generate documentation with properties reference,
@@ -33,7 +33,8 @@ import eu.unicore.util.configuration.PropertyMD.Type;
  * Note that metadata is used when the object is created or when underlying properties are modified. During the 
  * retrieval you can trick the system and for instance try to get a value of "INT" property as a String or 
  * even File. However this is strongly not suggested - typically you should use the get***Value() method
- * corresponding to the property type.
+ * corresponding to the property type. If you do so you can be sure that no exception is raised. If you 
+ * try to change the type at runtime you have no such guarantee. 
  * <p>
  * The object maintains a private copy of properties passed as constructor argument. All modifications of the
  * source properties must be signaled using {@link #setProperty(String, String)} or 
