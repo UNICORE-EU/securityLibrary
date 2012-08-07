@@ -14,7 +14,7 @@ import java.util.Arrays;
  */
 public class PropertyMD
 {
-	public enum Type {INT, LONG, FLOAT, BOOLEAN, STRING, PATH, ENUM, LIST}
+	public enum Type {INT, LONG, FLOAT, BOOLEAN, STRING, PATH, ENUM, LIST, CLASS}
 	
 	private boolean secret;
 	private String defaultValue;
@@ -31,6 +31,7 @@ public class PropertyMD
 	private double maxFloat = Double.MAX_VALUE;
 	private Type type = Type.STRING; 
 	private Enum<?> enumTypeInstance;
+	private Class<?> baseClass;
 
 	/**
 	 * Creates a non-secret property, with a default value 
@@ -54,7 +55,22 @@ public class PropertyMD
 		else
 			this.type = Type.STRING;
 	}
-
+	
+	/**
+	 * Creates a property of class type with a desired class default value.
+	 * All values must be loadable classes which extend the baseClass 
+	 * @param defaultValue default value
+	 * @param baseClass base class for this property
+	 */
+	public PropertyMD(Class<?> defaultValue, Class<?> baseClass) {
+		this.defaultValue = defaultValue == null ? null : defaultValue.getName();
+		this.baseClass = baseClass;
+		if (defaultValue != null && !baseClass.isAssignableFrom(defaultValue))
+			throw new IllegalArgumentException(defaultValue + " must extend " + baseClass);
+		this.hasDefault = true;
+		this.type = Type.CLASS;
+	}
+	
 	/**
 	 * Creates a property of enum type with a desired enum default value.
 	 * @param defaultValue
@@ -86,17 +102,25 @@ public class PropertyMD
 		if (isMandatory())
 			throw new IllegalStateException("A property can not have a default " +
 					"value and be mandatory at the same time");
+		checkDefault(type, defaultValue);
+		this.defaultValue = defaultValue;
+		this.hasDefault = true;
+		return this;
+	}
+	
+	protected void checkDefault(Type type, String defaultValue) {
 		if (type == Type.BOOLEAN && !isBoolean(defaultValue))
 			throw new IllegalStateException("A property defualt type must be valid value of its type: boolean");
 		if (type == Type.INT && !isInt(defaultValue))
 			throw new IllegalStateException("A property defualt type must be valid value of its type: int");
 		if (type == Type.LONG && !isLong(defaultValue))
 			throw new IllegalStateException("A property defualt type must be valid value of its type: long");
-
-		this.defaultValue = defaultValue;
-		this.hasDefault = true;
-		return this;
+		if (type == Type.FLOAT && !isFloat(defaultValue))
+			throw new IllegalStateException("A property defualt type must be valid value of its type: float");
+		if (type == Type.CLASS && !isClass(defaultValue))
+			throw new IllegalStateException("A property defualt type must be valid value of its type: class");
 	}
+	
 	public boolean isMandatory() {
 		return mandatory;
 	}
@@ -138,11 +162,15 @@ public class PropertyMD
 		return this;
 	}
 	public PropertyMD setPositive() {
+		if (type != Type.FLOAT && type != Type.INT && type != Type.LONG)
+			throw new IllegalStateException("Floating point bounds can be only set for number properties");
 		this.min = 1;
 		this.minFloat = 0.001;
 		return this;
 	}
 	public PropertyMD setNonNegative() {
+		if (type != Type.FLOAT && type != Type.INT && type != Type.LONG)
+			throw new IllegalStateException("Floating point bounds can be only set for Floating point property");
 		this.min = 0;
 		this.minFloat = 0.0;
 		return this;
@@ -172,6 +200,7 @@ public class PropertyMD
 		return this;
 	}
 	public PropertyMD setLong() {
+		checkDefault(Type.LONG, defaultValue);
 		this.type = Type.LONG;
 		this.max = Long.MAX_VALUE;
 		this.min = Long.MIN_VALUE;
@@ -188,17 +217,28 @@ public class PropertyMD
 		this.type = Type.ENUM;
 		return this;
 	}
+	public PropertyMD setClass(Class<?> baseClass) {
+		this.type = Type.CLASS;
+		this.baseClass = baseClass;
+		checkDefault(Type.CLASS, defaultValue);
+		return this;
+	}
 	public PropertyMD setInt() {
+		checkDefault(Type.INT, defaultValue);
 		this.type = Type.INT;
 		this.max = Integer.MAX_VALUE;
 		this.min = Integer.MIN_VALUE;
 		return this;
 	}
 	public PropertyMD setFloat() {
+		checkDefault(Type.FLOAT, defaultValue);
 		this.type = Type.FLOAT;
+		this.minFloat = Double.MIN_VALUE;
+		this.maxFloat = Double.MAX_VALUE;
 		return this;
 	}
 	public PropertyMD setBoolean() {
+		checkDefault(Type.BOOLEAN, defaultValue);
 		this.type = Type.BOOLEAN;
 		return this;
 	}
@@ -246,6 +286,9 @@ public class PropertyMD
 	public Enum<?> getEnumTypeInstance() {
 		return enumTypeInstance;
 	}
+	public Class<?> getBaseClass() {
+		return baseClass;
+	}
 	
 	
 	protected boolean isBoolean(String val) {
@@ -288,6 +331,21 @@ public class PropertyMD
 			Double.parseDouble(val);
 			return true;
 		} catch (NumberFormatException e)
+		{
+			return false;
+		}
+	}
+
+	protected boolean isClass(String val) {
+		try
+		{
+			if (val == null)
+				return false;
+			Class<?> cls = Class.forName(val);
+			if (baseClass != null && !baseClass.isAssignableFrom(cls))
+				return false;
+			return true;
+		} catch (ClassNotFoundException e)
 		{
 			return false;
 		}
@@ -342,6 +400,8 @@ public class PropertyMD
 				return "floating > " + minFloat;
 			if (hasMaxF)
 				return "floating < " + maxFloat;
+		case CLASS:
+			return "Class extending " + baseClass.getName();
 		default:
 			return "UNKNOWN";
 		}

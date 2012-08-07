@@ -25,23 +25,32 @@ import eu.unicore.util.configuration.PropertyMD.Type;
 
 /**
  * Provides methods to parse properties and return them as String, ints, longs, Files, arbitrary Enums 
- * or Lists of strings. 
- * Logs values read from Properties source, additionally logs when default value is used (on DEBUG level) 
- * and in case when out of range values are found and defaults are present and used instead (WARN). 
- * The logging is performed only once per property. The object is configured with initial defaults and mandatory 
- * properties, so it is easier to call the 'get' methods later.
+ * or Lists of strings or others. There is a number of additional features provided:
+ * <p> 
+ * The object is configured with metadata about properties, so it is easier to call the 'get' methods later.
+ * Metadata provides the following features: (1) ability to generate documentation with properties reference,
+ * (2) provides default values for not set properties and (3) can define types and permitted values.
+ * Note that metadata is used when the object is created or when underlying properties are modified. During the 
+ * retrieval you can trick the system and for instance try to get a value of "INT" property as a String or 
+ * even File. However this is strongly not suggested - typically you should use the get***Value() method
+ * corresponding to the property type.
+ * <p>
+ * The object maintains a private copy of properties passed as constructor argument. All modifications of the
+ * source properties must be signaled using {@link #setProperty(String, String)} or 
+ * {@link #setProperties(Properties)} methods. 
+ * <p>
+ * The class logs values read from Properties source, additionally logs when default value is used (on DEBUG level). 
+ * The logging is performed only once per property. 
+ * The class never logs errors: if exception is thrown then logging must be performed by the using class.
  * <p> 
  * The class can use a custom prefix for properties - such prefix is added for all queried properties, 
- * and therefore acts as a namespace in the configuration file.
- * <p>
- * The class never logs errors: if exception is thrown then logging must be performed by the using class.
+ * and therefore acts as a namespace in the configuration file. The class also checks for unknown properties 
+ * (i.e. the ones which doesn't have a metadata attached) so it is important to stick to the convention:
+ * dot in property name should be used exclusively to separate (sub)namespace.    
  * <p>
  * It is possible to register for property changes. The implementation is smart, i.e. it allows for detecting changes
- * of particular properties or chnages in property groups if a listener is registered for a property which can 
+ * of particular properties or changes in property groups if a listener is registered for a property which can 
  * have subkeys.
- * <p>
- * Properties object internally stored in this class is copied, so external modifications on the constructor argument
- * doesn't have any effect. Changes to wrapped properties must be done by appropriate set methods of this class. 
  * 
  * @author K. Benedyczak
  */
@@ -103,7 +112,7 @@ public class PropertiesHelper implements Cloneable
 		} else
 		{
 			if (meta != null)
-				checkPropertyConstraints(meta, key);
+				checkPropertyConstraints(properties, meta, key);
 			change = !value.equals(properties.getProperty(prefix+key));
 			properties.setProperty(prefix+key, value);
 		}
@@ -229,7 +238,7 @@ public class PropertiesHelper implements Cloneable
 			PropertyMD meta = o.getValue();
 			try 
 			{
-				checkPropertyConstraints(meta, o.getKey());
+				checkPropertyConstraints(properties, meta, o.getKey());
 			} catch (ConfigurationException e)
 			{
 				builder.append(e.getMessage() + "\n");
@@ -241,7 +250,7 @@ public class PropertiesHelper implements Cloneable
 					+ warns);
 	}
 	
-	protected void checkPropertyConstraints(PropertyMD meta, String key) throws ConfigurationException {
+	protected void checkPropertyConstraints(Properties properties, PropertyMD meta, String key) throws ConfigurationException {
 		if (meta.isMandatory() && !isSet(key)) 
 			throw new ConfigurationException("The property " + getKeyDescription(key) + 
 					" is mandatory");
@@ -294,6 +303,8 @@ public class PropertiesHelper implements Cloneable
 				}
 			}
 			break;
+		case CLASS:
+			getClassValue(key, meta.getBaseClass());
 		}
 	}
 	
@@ -494,6 +505,27 @@ public class PropertiesHelper implements Cloneable
 				+ getKeyDescription(name) + ", must be one of yes|true|no|false");
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T> Class<? extends T> getClassValue(String name, Class<T> desiredBase) throws ConfigurationException
+	{
+		String val = getValue(name);
+		if (val == null)
+			return null;
+		try
+		{
+			Class<?> cls = Class.forName(val);
+			if (!desiredBase.isAssignableFrom(cls))
+				throw new ConfigurationException("Value " + val + " is not allowed for "
+						+ getKeyDescription(name) + ", must be class extending " + desiredBase);
+			return (Class<? extends T>) cls;
+		} catch (ClassNotFoundException e)
+		{
+			throw new ConfigurationException("Value " + val + " is not allowed for "
+					+ getKeyDescription(name) + ", must be a class name");
+		}
+		
+	}
+	
 	/**
 	 * Returns the value of name key as a provided enum class instance. Important: mapping of string
 	 * value to enum label is done in case insensitive way. Therefore if your enum constants differ
