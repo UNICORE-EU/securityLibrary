@@ -151,6 +151,12 @@ public class PropertiesHelperTest extends TestCase
 		assertEquals(9, global);
 		assertEquals(5, focused);
 		
+		try 
+		{
+			helper.setProperty("p03", "invalid");
+			fail("Managed to set wrong value for int property");
+		} catch (ConfigurationException expected) {/*ok*/}
+		
 	}
 
 	

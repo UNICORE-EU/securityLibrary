@@ -96,13 +96,14 @@ public class PropertiesHelper implements Cloneable
 		this.metadata = propertiesMD;
 		if (this.metadata == null)
 			this.metadata = Collections.emptyMap();
-		setProperties(properties);
+		checkConstraints();
+		findUnknown(properties);
 	}
 
 	public synchronized void setProperties(Properties properties) throws ConfigurationException
 	{
 		checkConstraints(properties);
-		findUnknown();
+		findUnknown(properties);
 		Set<String> changed = filterChanged(propertyFocusedListeners.keySet(), this.properties, properties);
 		this.properties.clear();
 		this.properties.putAll(properties);
@@ -241,8 +242,22 @@ public class PropertiesHelper implements Cloneable
 		}
 	}
 	
-	
+	/**
+	 * Checks if new properties are correct.
+	 * @param properties properties to be checked.
+	 * @throws ConfigurationException
+	 */
 	protected void checkConstraints(Properties properties) throws ConfigurationException
+	{
+		//tricky but short
+		new PropertiesHelper(prefix, properties, metadata, log);
+	}
+	
+	/**
+	 * Checks if the properties set to this object are correct.
+	 * @throws ConfigurationException
+	 */
+	protected void checkConstraints() throws ConfigurationException
 	{
 		StringBuilder builder = new StringBuilder();
 		
@@ -251,7 +266,7 @@ public class PropertiesHelper implements Cloneable
 			PropertyMD meta = o.getValue();
 			try 
 			{
-				checkPropertyConstraints(properties, meta, o.getKey());
+				checkPropertyConstraints(meta, o.getKey());
 			} catch (ConfigurationException e)
 			{
 				builder.append(e.getMessage() + "\n");
@@ -263,12 +278,12 @@ public class PropertiesHelper implements Cloneable
 					+ warns);
 	}
 	
-	protected void checkPropertyConstraints(Properties properties, PropertyMD meta, String key) throws ConfigurationException {
+	protected void checkPropertyConstraints(PropertyMD meta, String key) throws ConfigurationException {
 		if (meta.isMandatory() && !isSet(key)) 
 			throw new ConfigurationException("The property " + getKeyDescription(key) + 
 					" is mandatory");
 		
-		String value = properties.getProperty(prefix + key);
+		String value = getValue(key);
 		if (value == null && meta.getType() != Type.LIST)
 			return;
 		switch (meta.getType()) 
@@ -321,7 +336,7 @@ public class PropertiesHelper implements Cloneable
 		}
 	}
 	
-	protected void findUnknown()
+	protected void findUnknown(Properties properties)
 	{
 		Set<Object> keys = properties.keySet();
 		StringBuilder sb = new StringBuilder();
