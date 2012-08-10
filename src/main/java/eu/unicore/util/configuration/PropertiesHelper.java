@@ -66,7 +66,7 @@ import eu.unicore.util.jetty.JettyProperties;
  * 
  * @author K. Benedyczak
  */
-public class PropertiesHelper implements Cloneable
+public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 {
 	private Set<String> warned = Collections.synchronizedSet(new HashSet<String>());
 	protected Logger log;
