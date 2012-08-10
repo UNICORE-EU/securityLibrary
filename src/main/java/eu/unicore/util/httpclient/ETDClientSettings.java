@@ -46,7 +46,7 @@ public class ETDClientSettings implements Cloneable
 	 * <p>
 	 * Note that if you don't use this method but add trust delegations then the requested user 
 	 * will be implicitly set to the initial issuer (custodian) of the ETD chain.
-	 * This method it therefore useful when the client doesn't send ETD tokens but has anyway
+	 * This method is therefore useful when the client doesn't send ETD tokens but has anyway
 	 * rights to invoke operations on the requestedUser behalf (i.e. because of possession of 
 	 * a trusted agent role in the XUUDB/UVOS).
 	 * @param requested user's DN 

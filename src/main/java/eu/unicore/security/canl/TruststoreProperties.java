@@ -110,7 +110,7 @@ public class TruststoreProperties extends PropertiesHelper
 				setMandatory().setDescription("The truststore type."));
 		META.put(PROP_PROXY_SUPPORT, new PropertyMD(ProxySupport.ALLOW).
 				setDescription("Controls whether proxy certificates are supported."));
-		META.put(PROP_UPDATE, new PropertyMD("600").setLong().setUpdateable(true).
+		META.put(PROP_UPDATE, new PropertyMD("600").setLong().setUpdateable().
 				setDescription("How often the truststore should be reloaded, in seconds. Set to negative value to disable refreshing at runtime."));
 
 		META.put(PROP_KS_PASSWORD, new PropertyMD().setSecret().setCategory("Keystore").
@@ -125,7 +125,7 @@ public class TruststoreProperties extends PropertiesHelper
 		META.put(PROP_OPENSSL_DIR, new PropertyMD("/etc/grid-security/certificates").setPath().setCategory("Openssl").
 				setDescription("Directory to be used for opeenssl truststore."));
 
-		META.put(PROP_DIRECTORY_LOCATIONS, new PropertyMD().setList(false).setUpdateable(true).setCategory("Directory").
+		META.put(PROP_DIRECTORY_LOCATIONS, new PropertyMD().setList(false).setUpdateable().setCategory("Directory").
 				setDescription("List of CA certificates locations. Can contain URLs, local files and wildcard expressions."));
 		META.put(PROP_DIRECTORY_ENCODING, new PropertyMD(Encoding.PEM).setCategory("Directory").
 				setDescription("For directory truststore controls whether certificates are encoded in PEM or DER."));
@@ -140,14 +140,14 @@ public class TruststoreProperties extends PropertiesHelper
 				setDescription("Controls whether all defined revocation sources should be always checked, even if the first one already confirmed that a checked certificate is not revoked."));
 		META.put(PROP_CRL_MODE, new PropertyMD(CrlCheckingMode.IF_VALID).setCategory("Revocation").
 				setDescription("General CRL handling mode. The IF_VALID setting turns on CRL checking only in case the CRL is present."));
-		META.put(PROP_CRL_UPDATE, new PropertyMD("600").setLong().setUpdateable(true).setCategory("Revocation").
+		META.put(PROP_CRL_UPDATE, new PropertyMD("600").setLong().setUpdateable().setCategory("Revocation").
 				setDescription("How often CRLs should be updated, in seconds. Set to negative value to disable refreshing at runtime."));
 		META.put(PROP_CRL_CONNECTION_TIMEOUT, new PropertyMD("15").setCategory("Revocation").
 				setDescription("Connection timeout for fetching the remote CRLs in seconds (not used for Openssl truststores)."));
 		META.put(PROP_CRL_CACHE_PATH, new PropertyMD().setPath().setCategory("Revocation").
 				setDescription("Directory where CRLs should be cached, after downloading them from " +
 						"remote source. Can be left undefined if no disk cache should be used. Note that directory should be secured, i.e. normal users should not be allowed to write to it. Not used for Openssl truststores."));
-		META.put(PROP_CRL_LOCATIONS, new PropertyMD().setList(false).setUpdateable(true).setCategory("Revocation").
+		META.put(PROP_CRL_LOCATIONS, new PropertyMD().setList(false).setUpdateable().setCategory("Revocation").
 				setDescription("List of CRLs locations. Can contain URLs, local files and wildcard expressions. Not used for Openssl truststores."));
 		META.put(PROP_OCSP_MODE, new PropertyMD(OCSPCheckingMode.IF_AVAILABLE).setCategory("Revocation").
 				setDescription("General OCSP ckecking mode. REQUIRE should not be used unless it is guaranteed that for all certificates an OCSP responder is defined."));

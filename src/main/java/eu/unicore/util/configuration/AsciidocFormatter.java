@@ -69,7 +69,9 @@ public class AsciidocFormatter implements HelpFormatter
 		for (String key: keys)
 		{
 			PropertyMD md = metadata.get(key);
-
+			if (md.isHidden())
+				continue;
+			
 			ret.append("|" + pfx + key);
 			if (md.getType() == Type.LIST)
 				ret.append(md.numericalListKeys() ? "<NUMBER>" : "*");

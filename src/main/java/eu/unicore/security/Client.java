@@ -38,6 +38,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import eu.emi.security.authn.x509.impl.X500NameUtils;
+
 /**
  * Describes the entity that is performing an operation on the server side.
  * Wraps low level security material which was used to authenticate the client
@@ -137,7 +139,7 @@ public class Client implements Serializable {
 		StringBuilder cInfo = new StringBuilder();
 		
 		cInfo.append("Name: ");
-		cInfo.append(getDistinguishedName());
+		cInfo.append(X500NameUtils.getReadableForm(getDistinguishedName()));
 		cInfo.append("\nXlogin: ");
 		cInfo.append(getXlogin());
 		cInfo.append("\nRole: ");

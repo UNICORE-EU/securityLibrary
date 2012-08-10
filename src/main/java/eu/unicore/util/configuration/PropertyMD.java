@@ -17,6 +17,7 @@ public class PropertyMD
 	public enum Type {INT, LONG, FLOAT, BOOLEAN, STRING, PATH, ENUM, LIST, CLASS}
 	
 	private boolean secret;
+	private boolean hide;
 	private String defaultValue;
 	private boolean hasDefault;
 	private boolean mandatory;
@@ -95,6 +96,16 @@ public class PropertyMD
 		this.secret = true;
 		return this;
 	}
+	/**
+	 * @return if property should be ignored in documentation. Useful for subkeys.
+	 */
+	public boolean isHidden() {
+		return hide;
+	}
+	public PropertyMD setHidden() {
+		this.hide = true;
+		return this;
+	}
 	public String getDefault() {
 		return defaultValue;
 	}
@@ -109,6 +120,8 @@ public class PropertyMD
 	}
 	
 	protected void checkDefault(Type type, String defaultValue) {
+		if (defaultValue == null)
+			return;
 		if (type == Type.BOOLEAN && !isBoolean(defaultValue))
 			throw new IllegalStateException("A property defualt type must be valid value of its type: boolean");
 		if (type == Type.INT && !isInt(defaultValue))
@@ -142,8 +155,8 @@ public class PropertyMD
 	public boolean isUpdateable() {
 		return updateable;
 	}
-	public PropertyMD setUpdateable(boolean updateable) {
-		this.updateable = updateable;
+	public PropertyMD setUpdateable() {
+		this.updateable = true;
 		return this;
 	}
 	

@@ -22,6 +22,7 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 
 import eu.unicore.util.configuration.PropertyMD.Type;
+import eu.unicore.util.jetty.JettyProperties;
 
 /**
  * Provides methods to parse properties and return them as String, ints, longs, Files, arbitrary Enums 
@@ -52,6 +53,16 @@ import eu.unicore.util.configuration.PropertyMD.Type;
  * It is possible to register for property changes. The implementation is smart, i.e. it allows for detecting changes
  * of particular properties or changes in property groups if a listener is registered for a property which can 
  * have subkeys.
+ * <p>
+ * This class can be used in two ways: either as a helper class of a high-level configuration class,
+ * which provides a custom interface to obtaining configuration data (e.g. {@link ClientProperties})
+ * or can be extended if the interface of this class is enough (as in the case of {@link JettyProperties}. 
+ * The first solution is suggested when there are
+ * many complicated interconnections between properties or if high level objects should be returned for convenience.
+ * <p>
+ * If this class is extended, then the extending class should take care to properly check for its custom constraints,
+ * by overriding {@link #checkPropertyConstraints(Properties, PropertyMD, String)} method (not forgetting to call
+ * super). 
  * 
  * @author K. Benedyczak
  */
@@ -102,21 +113,22 @@ public class PropertiesHelper implements Cloneable
 
 	public synchronized void setProperty(String key, String value)
 	{
-		PropertyMD meta = metadata.get(key);
+		Properties tmp = new Properties();
+		tmp.putAll(properties);
+		
 		boolean change;
 		//value == null can not be set
 		if (value == null)
 		{
-			if (meta != null && meta.isMandatory())
-				throw new IllegalArgumentException("Can not remove a mandatory property");
-			change = properties.remove(prefix+key) != null;
+			change = tmp.remove(prefix+key) != null;
 		} else
 		{
-			if (meta != null)
-				checkPropertyConstraints(properties, meta, key);
 			change = !value.equals(properties.getProperty(prefix+key));
-			properties.setProperty(prefix+key, value);
+			tmp.setProperty(prefix+key, value);
 		}
+		checkConstraints(tmp);
+		
+		properties = tmp;
 		warned.remove(key);
 		notifyGenericListeners();
 		if (change)
@@ -319,9 +331,22 @@ public class PropertiesHelper implements Cloneable
 			if (key.startsWith(prefix))
 			{
 				String noPfxKey = key.substring(prefix.length());
-				if (noPfxKey.contains("."))
+				if (getMetadata(noPfxKey) != null)
 					continue;
-				if (getMetadata(noPfxKey) == null)
+				//let's also try if we have metadata for some subnamespaces, marked as list or with subkeys.
+				boolean done = false;
+				while (noPfxKey.contains(".")) {
+					noPfxKey = noPfxKey.substring(0, noPfxKey.lastIndexOf('.'));
+					PropertyMD md = getMetadata(noPfxKey); 
+					if (md != null) {
+						if (!md.canHaveSubkeys() && md.getType() != Type.LIST) {
+							sb.append(" ").append(key);
+						}
+						done = true;
+						break;
+					}
+				}
+				if (!done)
 					sb.append(" ").append(key);
 			}
 		}
@@ -357,9 +382,10 @@ public class PropertiesHelper implements Cloneable
 			return prefix + key;
 		
 		String description = meta.getDescription();
-		if (description != null && description.length() > 0)
-			return prefix + key + " (" + description + ")";
-		else
+		if (description != null && description.length() > 0) {
+			String shortDesc = description.length() < 40 ? description : description.substring(0, 37)+"...";
+			return prefix + key + " (" + shortDesc + ")";
+		} else
 			return prefix + key;
 	}
 	

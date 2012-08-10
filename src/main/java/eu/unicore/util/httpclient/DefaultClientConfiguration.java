@@ -55,6 +55,19 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 		super(validator, credential);
 		this.sslAuthn = true;
 		this.sslEnabled = true;
+		etdSettings.setIssuerCertificateChain(credential.getCertificateChain());
+	}
+
+	/**
+	 * This method also updates issuer in ETD settings, which basically always must be set.
+	 * @param credential the credential to set
+	 */
+	@Override
+	public void setCredential(X509Credential credential)
+	{
+		super.setCredential(credential);
+		if (getCredential() != null)
+			etdSettings.setIssuerCertificateChain(credential.getCertificateChain());
 	}
 
 	/**
