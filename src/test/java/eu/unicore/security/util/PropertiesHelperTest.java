@@ -52,6 +52,7 @@ public class PropertiesHelperTest extends TestCase
 		METADATA.put("p11.", new PropertyMD().setList(true).setDescription("List of values blah blah blah"));
 		METADATA.put("p12", new PropertyMD().setCanHaveSubkeys());
 		METADATA.put("p13.", new PropertyMD().setList(false).setDescription("List of values blah blah blah"));
+		METADATA.put("p14", new PropertyMD((String)null).setInt());
 	}
 
 	private int global = 0;
@@ -188,6 +189,19 @@ public class PropertiesHelperTest extends TestCase
 		{
 			PropertiesHelper helper = new PropertiesHelper(PREFIX, load(PROP), METADATA, log);
 			assertEquals(600, helper.getIntValue("p04").intValue());
+		} catch (ConfigurationException e)
+		{
+			fail(e.toString());
+		}
+	}
+	
+	public void testParsingNullDefault()
+	{
+		String PROP = "prefix.p09=mandatory\n";
+		try
+		{
+			PropertiesHelper helper = new PropertiesHelper(PREFIX, load(PROP), METADATA, log);
+			assertEquals(null, helper.getIntValue("p14"));
 		} catch (ConfigurationException e)
 		{
 			fail(e.toString());
