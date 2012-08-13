@@ -12,6 +12,7 @@ import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -24,6 +25,7 @@ import eu.emi.security.authn.x509.impl.DERCredential;
 import eu.emi.security.authn.x509.impl.FormatMode;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.emi.security.authn.x509.impl.PEMCredential;
+import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.configuration.PropertiesHelper;
@@ -41,6 +43,7 @@ public class CredentialProperties extends PropertiesHelper
 {
 	private static final Logger log = Log.getLogger(Log.SECURITY, CredentialProperties.class);
 
+	private static final long WEEK=7*24*60*60*1000;
 	public static final String DEFAULT_PREFIX = "credential.";
 
 	//common for all
@@ -166,14 +169,23 @@ public class CredentialProperties extends PropertiesHelper
 		try
 		{
 			cert.checkValidity();
+			try 
+			{
+				cert.checkValidity(new Date(System.currentTimeMillis()+WEEK));
+			} catch(CertificateExpiredException ce){
+				String date=cert.getNotAfter().toString(); 
+				log.warn("Credential certificate with DN " + 
+						X500NameUtils.getReadableForm(cert.getSubjectX500Principal())+ 
+						" will soon expire. The validity period ends " + date);
+			}
 		} catch (CertificateExpiredException e)
 		{
-			log.warn("Certificate loaded from " + credPath + " (" + 
+			throw new ConfigurationException("Certificate loaded from " + credPath + " (" + 
 					CertificateUtils.format(cert, FormatMode.COMPACT_ONE_LINE) + ") " +
 					" is EXPIRED: " + e.getMessage());
 		} catch (CertificateNotYetValidException e)
 		{
-			log.warn("Certificate loaded from " + credPath + " (" + 
+			throw new ConfigurationException("Certificate loaded from " + credPath + " (" + 
 					CertificateUtils.format(cert, FormatMode.COMPACT_ONE_LINE) + ") " +
 					" is NOT YED VALID: " + e.getMessage());
 		} 
