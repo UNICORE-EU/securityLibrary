@@ -178,8 +178,8 @@ public class TruststoreProperties extends PropertiesHelper
 	private String caDiskCache;
 	
 	private String ksPath;
-	private transient char[] ksPassword;
 	private String ksType;
+	private PasswordCallback passwordCallback;
 
 	/**
 	 * Simple constructor: logging is turned on and standard properties prefix is used.
@@ -192,11 +192,25 @@ public class TruststoreProperties extends PropertiesHelper
 			Collection<? extends StoreUpdateListener> initialListeners) 
 				throws ConfigurationException
 	{
-		this(properties, initialListeners, DEFAULT_PREFIX);
+		this(properties, initialListeners, null, DEFAULT_PREFIX);
 	}
 
 	/**
-	 * Allows for setting prefix
+	 * Simple constructor: logging is turned on and standard properties prefix is used.
+	 * @param properties properties object to read configuration from
+	 * @throws IOException 
+	 * @throws ConfigurationException whenever configuration is wrong and validator can not be instantiated.
+	 * @throws KeyStoreException 
+	 */
+	public TruststoreProperties(Properties properties, 
+			Collection<? extends StoreUpdateListener> initialListeners, PasswordCallback callback) 
+				throws ConfigurationException
+	{
+		this(properties, initialListeners, callback, DEFAULT_PREFIX);
+	}
+
+	/**
+	 * Allows for setting prefix and initialization listeners
 	 * @param properties properties object to read configuration from
 	 * @param pfx prefix to be used for properties. Should end with '.'!
 	 * @throws IOException 
@@ -207,8 +221,24 @@ public class TruststoreProperties extends PropertiesHelper
 			Collection<? extends StoreUpdateListener> initialListeners, String pfx) 
 				throws ConfigurationException
 	{
+		this(properties, initialListeners, null, pfx);
+	}
+	
+	/**
+	 * Allows for setting prefix, callback and initialization listeners
+	 * @param properties properties object to read configuration from
+	 * @param pfx prefix to be used for properties. Should end with '.'!
+	 * @throws IOException 
+	 * @throws ConfigurationException whenever configuration is wrong and validator can not be instantiated.
+	 * @throws KeyStoreException 
+	 */
+	public TruststoreProperties(Properties properties, 
+			Collection<? extends StoreUpdateListener> initialListeners, PasswordCallback callback, String pfx) 
+				throws ConfigurationException
+	{
 		super(pfx, properties, META, log);
 		this.initialListeners = initialListeners;
+		this.passwordCallback = callback;
 		createValidatorSafe();
 		addPropertyChangeListener(new PropertyChangeListenerImpl());
 	}
@@ -385,15 +415,23 @@ public class TruststoreProperties extends PropertiesHelper
 					prefix + PROP_KS_PATH + " must be an EXISTING, READABLE file: " + 
 					ksPath);
 
-		String pass = getValue(PROP_KS_PASSWORD);
-		if (pass == null)
+		boolean preferCallback = passwordCallback != null && passwordCallback.ignoreProperties();
+		char[] ksPassword = null;
+		if (!preferCallback)
+		{
+			String pass = getValue(PROP_KS_PASSWORD);
+			ksPassword = pass == null ? null : pass.toCharArray();
+		}
+		if (ksPassword == null && passwordCallback != null)
+		{
+			ksPassword = passwordCallback.getPassword("truststore", ksPath);
+		}
+		if (ksPassword == null)
 			throw new ConfigurationException("Keystore password must be set, property: " + 
 					prefix + PROP_KS_PASSWORD);
-		ksPassword = pass.toCharArray();
-		
 		ksType = getValue(PROP_KS_TYPE);
 		if (ksType == null)
-			autodetectKeystoreType();
+			autodetectKeystoreType(ksPassword);
 		
 		ValidatorParamsExt params = getValidatorParamsExt();
 		return new KeystoreCertChainValidator(ksPath, ksPassword, 
@@ -473,13 +511,14 @@ public class TruststoreProperties extends PropertiesHelper
 				cacheTtl, diskCachePath);
 	}
 	
-	private void autodetectKeystoreType() throws ConfigurationException
+	private void autodetectKeystoreType(char[] ksPassword) throws ConfigurationException
 	{
 		try
 		{
 			ksType = KeystoreCredential.autodetectType(ksPath, ksPassword);
 		} catch (Exception e)
 		{
+			e.printStackTrace();
 			throw new ConfigurationException("Truststore type is not " +
 					"set in the property " + prefix + PROP_KS_TYPE + 
 					" and its autodetection failed. Try to set it and also " +
@@ -512,8 +551,10 @@ public class TruststoreProperties extends PropertiesHelper
 	
 	public TruststoreProperties clone()
 	{
-		TruststoreProperties ret = new TruststoreProperties(properties, initialListeners, prefix);
+		TruststoreProperties ret = new TruststoreProperties(properties, initialListeners, null, prefix);
 		super.cloneTo(ret);
+		//be careful not via constructor, as we don't want clone to ask for password again.
+		ret.passwordCallback = this.passwordCallback;
 		return ret;
 	}
 }

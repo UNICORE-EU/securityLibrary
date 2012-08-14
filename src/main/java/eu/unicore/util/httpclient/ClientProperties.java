@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import eu.unicore.security.canl.AuthnAndTrustProperties;
 import eu.unicore.security.canl.CredentialProperties;
 import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
+import eu.unicore.security.canl.PasswordCallback;
 import eu.unicore.security.canl.TruststoreProperties;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
@@ -123,9 +124,15 @@ public class ClientProperties extends DefaultClientConfiguration
 	public ClientProperties(Properties p, String trustPrefix, String credPrefix, String clientPrefix) 
 			throws ConfigurationException
 	{
-		this(p, clientPrefix, getDefaultAuthnAndTrust(p, trustPrefix, credPrefix, clientPrefix));
+		this(p, clientPrefix, getDefaultAuthnAndTrust(p, null, trustPrefix, credPrefix, clientPrefix));
 	}
-
+	
+	public ClientProperties(Properties p, PasswordCallback callback, String trustPrefix, String credPrefix, String clientPrefix) 
+			throws ConfigurationException
+	{
+		this(p, clientPrefix, getDefaultAuthnAndTrust(p, callback, trustPrefix, credPrefix, clientPrefix));
+	}
+	
 	public ClientProperties(Properties p, IAuthnAndTrustConfiguration authAndTrust) 
 			throws ConfigurationException
 	{
@@ -133,15 +140,16 @@ public class ClientProperties extends DefaultClientConfiguration
 	}
 
 	/**
-	 * Load cred/validator settings. If some SSL settings are optional, then do not force the loading 
-	 * of the not strictly required artifacts. However a try to load what is configured is made always.
+	 * Load cred/validator settings, however assuming that both are optional. The checking if
+	 * the required things are configured are done in the main constructor when other client's 
+	 * options are evaluated.
 	 * @param p
 	 * @param trustPrefix
 	 * @param credPrefix
 	 * @param clientPrefix
 	 * @return
 	 */
-	private static IAuthnAndTrustConfiguration getDefaultAuthnAndTrust(Properties p, String trustPrefix, 
+	private static IAuthnAndTrustConfiguration getDefaultAuthnAndTrust(Properties p, PasswordCallback callback, String trustPrefix, 
 			String credPrefix, String clientPrefix)
 	{
 		boolean trustOptional = false, credOptional = false;
@@ -149,7 +157,9 @@ public class ClientProperties extends DefaultClientConfiguration
 		String sslP = p.getProperty(clientPrefix + PROP_SSL_ENABLED);
 		String sslAuthnP = p.getProperty(clientPrefix + PROP_SSL_AUTHN_ENABLED);
 		String signP = p.getProperty(clientPrefix + PROP_MESSAGE_SIGNING_ENABLED);
-		//FIXME this is bit not nice...
+		//theoretically we can simply set that trust and creds are optional, as anyway it will be strictly verified further.
+		//however we perform this trick here, to get detailed error messages - otherwise we would only get
+		// "no truststore" or "no keystore"
 		if (sslP != null && (sslP.equalsIgnoreCase("false") || sslP.equalsIgnoreCase("no")))
 			trustOptional = credOptional= true;
 		else if (sslAuthnP != null && (sslAuthnP.equalsIgnoreCase("false") || sslAuthnP.equalsIgnoreCase("no"))
@@ -182,10 +192,13 @@ public class ClientProperties extends DefaultClientConfiguration
 		setSslEnabled(clientPropertiesHelper.getBooleanValue(PROP_SSL_ENABLED));
 		if (isSslEnabled()) 
 		{
-			if (getValidator() == null || getCredential() == null)
-				throw new ConfigurationException("When SSL mode is enabled, both credential " +
-						"and trust settings must be provided");
+			if (getValidator() == null)
+				throw new ConfigurationException("When SSL mode is enabled " +
+						"trust settings must be provided");
 			setSslAuthn(clientPropertiesHelper.getBooleanValue(PROP_SSL_AUTHN_ENABLED));
+			if (doSSLAuthn() && getCredential() == null)
+				throw new ConfigurationException("When SSL authentication is enabled the credential " +
+							"must be provided");
 			getETDSettings().setIssuerCertificateChain(getCredential().getCertificateChain());
 		}
 		setDoSignMessage(clientPropertiesHelper.getBooleanValue(PROP_MESSAGE_SIGNING_ENABLED));

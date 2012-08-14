@@ -81,17 +81,16 @@ public class CredentialProperties extends PropertiesHelper
 	
 	private X509Credential credential;
 	
-	private transient char[] mainPassword;
-	private transient char[] keyPassword;
+	private PasswordCallback passwordCallback;
 	
 	/**
-	 * Simple constructor: logging is turned on and standard properties prefix is used.
+	 * Simple constructor: standard properties prefix is used, no password callback.
 	 * @param properties properties object to read configuration from
 	 * @throws ConfigurationException 
 	 */
 	public CredentialProperties(Properties properties) throws ConfigurationException
 	{
-		this(properties, null, null, DEFAULT_PREFIX);
+		this(properties, null, DEFAULT_PREFIX);
 	}
 
 	/**
@@ -103,42 +102,35 @@ public class CredentialProperties extends PropertiesHelper
 	public CredentialProperties(Properties properties, String pfx) 
 			throws ConfigurationException
 	{
-		this(properties, null, null, pfx);
+		this(properties, null, pfx);
 	}
 
+
 	/**
-	 * Allows for setting manually passwords (e.g. read from console
-	 * or GUI).
+	 * Allows for setting password callback (e.g. to read from console or GUI).
 	 * @param properties properties object to read configuration from
-	 * @param mainPassword manually set credential's password, overrides properties setting
-	 * @param keyPassword manually set credential's key password (used in JKS and PKCS12 only),
-	 * overrides property setting
+	 * @param callback callback used to load the password if it was not specified in the properties
 	 * @throws ConfigurationException 
 	 */
-	public CredentialProperties(Properties properties, char[] mainPassword, 
-			char[] keyPassword) 
+	public CredentialProperties(Properties properties, PasswordCallback callback) 
 			throws ConfigurationException
 	{
-		this(properties, mainPassword, keyPassword, DEFAULT_PREFIX);
+		this(properties, callback, DEFAULT_PREFIX);
 	}
 
 	/**
-	 * Allows for setting logging prefix and manually passwords (e.g. read from console
+	 * Allows for setting properties prefix and manually passwords (e.g. read from console
 	 * or GUI).
 	 * @param properties properties object to read configuration from
+	 * @param callback callback used to load the password if it was not specified in the properties
 	 * @param pfx prefix to be used for properties. Should end with '.'!
-	 * @param mainPassword manually set credential's password, overrides properties setting
-	 * @param keyPassword manually set credential's key password (used in JKS and PKCS12 only),
-	 * overrides property setting
 	 * @throws ConfigurationException 
 	 */
-	public CredentialProperties(Properties properties, char[] mainPassword, 
-			char[] keyPassword, String pfx) 
+	public CredentialProperties(Properties properties, PasswordCallback callback, String pfx) 
 			throws ConfigurationException
 	{
 		super(pfx, properties, META, log);
-		this.keyPassword = keyPassword;
-		this.mainPassword = mainPassword;
+		this.passwordCallback = callback;
 		createCredentialSafe();
 	}
 	
@@ -201,22 +193,27 @@ public class CredentialProperties extends PropertiesHelper
 					prefix + PROP_LOCATION + " must be an EXISTING, READABLE file: " + 
 					credPath);
 
-		char[] credPassword = mainPassword;
-		if (mainPassword == null)
+		boolean preferCallback = passwordCallback != null && passwordCallback.ignoreProperties();
+		char[] credPassword = null;
+		if (!preferCallback)
 		{
 			String pass = getValue(PROP_PASSWORD);
 			credPassword = pass == null ? null : pass.toCharArray();
-		} 
+		}
+		if (credPassword == null && passwordCallback != null)
+		{
+			credPassword = passwordCallback.getPassword("credential", credPath);
+		}
 		
 		String keyLocation = getFileValueAsString(PROP_KEY_LOCATION, false);
 		String ksAlias = getValue(PROP_KS_ALIAS);
-		char[] ksKeyPassword = keyPassword;
-		if (keyPassword == null)
+		char[] ksKeyPassword = null;
+		if (!preferCallback)
 		{
 			String pass = getValue(PROP_KS_KEY_PASSWORD);
 			ksKeyPassword = pass == null ? null : pass.toCharArray();
 		}
-		
+
 		type = getEnumValue(PROP_FORMAT, CredentialFormat.class);
 		if (type == null)
 		{
@@ -233,6 +230,11 @@ public class CredentialProperties extends PropertiesHelper
 				throw new ConfigurationException("For " + type + 
 					" credential, the " + prefix + PROP_PASSWORD + 
 					" property must be set and provide a keystore password");
+			if (ksKeyPassword == null && passwordCallback != null && passwordCallback.askForSeparateKeyPassword())
+			{
+				ksKeyPassword = passwordCallback.getPassword("credential's key", credPath);
+			}
+			
 			if (ksKeyPassword == null) 
 			{
 				log.debug("Using keystore password as key's password");
@@ -306,8 +308,10 @@ public class CredentialProperties extends PropertiesHelper
 	
 	public CredentialProperties clone()
 	{
-		CredentialProperties ret = new CredentialProperties(properties, mainPassword, keyPassword, prefix);
+		CredentialProperties ret = new CredentialProperties(properties, null, prefix);
 		super.cloneTo(ret);
+		//don't set it via constructor as then cloning would ask questions...
+		ret.passwordCallback = this.passwordCallback;
 		return ret;
 	}
 }
