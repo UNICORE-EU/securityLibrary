@@ -123,15 +123,15 @@ public class PropertyMD
 		if (defaultValue == null)
 			return;
 		if (type == Type.BOOLEAN && !isBoolean(defaultValue))
-			throw new IllegalStateException("A property defualt type must be valid value of its type: boolean");
+			throw new IllegalStateException("A property default type must be valid value of its type: boolean");
 		if (type == Type.INT && !isInt(defaultValue))
-			throw new IllegalStateException("A property defualt type must be valid value of its type: int");
+			throw new IllegalStateException("A property default type must be valid value of its type: int");
 		if (type == Type.LONG && !isLong(defaultValue))
-			throw new IllegalStateException("A property defualt type must be valid value of its type: long");
+			throw new IllegalStateException("A property default type must be valid value of its type: long");
 		if (type == Type.FLOAT && !isFloat(defaultValue))
-			throw new IllegalStateException("A property defualt type must be valid value of its type: float");
+			throw new IllegalStateException("A property default type must be valid value of its type: float");
 		if (type == Type.CLASS && !isClass(defaultValue))
-			throw new IllegalStateException("A property defualt type must be valid value of its type: class");
+			throw new IllegalStateException("A property default type must be valid value of its type: class");
 	}
 	
 	public boolean isMandatory() {
