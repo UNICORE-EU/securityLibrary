@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import eu.unicore.util.configuration.PropertyMD.DocumentationCategory;
 import eu.unicore.util.configuration.PropertyMD.Type;
 
 /**
@@ -30,17 +31,19 @@ public class AsciidocFormatter implements HelpFormatter
 			return "";
 		
 		Set<String> keys = metadata.keySet();
-		Map<String, Set<String>> keysInCats = new HashMap<String, Set<String>>();
+		Map<DocumentationCategory, Set<String>> keysInCats = new HashMap<DocumentationCategory, Set<String>>();
 		for (String key: keys)
 		{
-			String cat = metadata.get(key).getCategory();
+			PropertyMD meta = metadata.get(key);
+			DocumentationCategory cat = meta.getCategory();
 			Set<String> current = keysInCats.get(cat);
 			if (current == null)
 			{
 				current = new TreeSet<String>();
 				keysInCats.put(cat, current);
 			}
-			current.add(key);
+			
+			current.add(meta.getSortKey() != null ? meta.getSortKey() + "-_-_-"+key : key);
 		}
 		
 		
@@ -53,10 +56,10 @@ public class AsciidocFormatter implements HelpFormatter
 		if (noCat != null)
 			ret.append(formatCategory(noCat, pfx, metadata));
 		
-		Set<String> catsSet = new TreeSet<String>(keysInCats.keySet());
-		for (String cat: catsSet)
+		Set<DocumentationCategory> catsSet = new TreeSet<DocumentationCategory>(keysInCats.keySet());
+		for (DocumentationCategory cat: catsSet)
 		{
-			ret.append("4+^e| --- " + cat + " ---");
+			ret.append("4+^e| --- " + cat.getName() + " ---");
 			ret.append(formatCategory(keysInCats.get(cat), pfx, metadata));
 		}
 		ret.append("|=====================================================================\n");
@@ -68,6 +71,9 @@ public class AsciidocFormatter implements HelpFormatter
 		StringBuilder ret = new StringBuilder();
 		for (String key: keys)
 		{
+			if (key.contains("-_-_-"))
+				key = key.split("-_-_-")[1];
+			
 			PropertyMD md = metadata.get(key);
 			if (md.isHidden())
 				continue;

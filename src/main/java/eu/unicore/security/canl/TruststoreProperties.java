@@ -46,6 +46,7 @@ import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.configuration.PropertiesHelper;
 import eu.unicore.util.configuration.PropertyChangeListener;
 import eu.unicore.util.configuration.PropertyMD;
+import eu.unicore.util.configuration.PropertyMD.DocumentationCategory;
 
 
 
@@ -106,6 +107,11 @@ public class TruststoreProperties extends PropertiesHelper
 	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
 	static 
 	{
+		DocumentationCategory dirCat = new DocumentationCategory("Directory type settings", "1");
+		DocumentationCategory ksCat = new DocumentationCategory("Keystore type settings", "2");
+		DocumentationCategory opensslCat = new DocumentationCategory("Openssl type settings", "3");
+		DocumentationCategory revCat = new DocumentationCategory("Revocation settings", "4");
+		
 		META.put(PROP_TYPE, new PropertyMD().setEnum(TruststoreType.directory).
 				setMandatory().setDescription("The truststore type."));
 		META.put(PROP_PROXY_SUPPORT, new PropertyMD(ProxySupport.ALLOW).
@@ -113,51 +119,51 @@ public class TruststoreProperties extends PropertiesHelper
 		META.put(PROP_UPDATE, new PropertyMD("600").setLong().setUpdateable().
 				setDescription("How often the truststore should be reloaded, in seconds. Set to negative value to disable refreshing at runtime."));
 
-		META.put(PROP_KS_PASSWORD, new PropertyMD().setSecret().setCategory("Keystore").
+		META.put(PROP_KS_PASSWORD, new PropertyMD().setSecret().setCategory(ksCat).
 				setDescription("The password of the keystore type truststore."));
-		META.put(PROP_KS_TYPE, new PropertyMD().setCategory("Keystore").
+		META.put(PROP_KS_TYPE, new PropertyMD().setCategory(ksCat).
 				setDescription("The keystore type (jks, pkcs12) in case of truststore of keystore type."));
-		META.put(PROP_KS_PATH, new PropertyMD().setCategory("Keystore").
+		META.put(PROP_KS_PATH, new PropertyMD().setCategory(ksCat).
 				setDescription("The keystore path in case of truststore of keystore type."));
 
-		META.put(PROP_OPENSSL_NS_MODE, new PropertyMD(NamespaceCheckingMode.EUGRIDPMA_GLOBUS).setCategory("Openssl").
+		META.put(PROP_OPENSSL_NS_MODE, new PropertyMD(NamespaceCheckingMode.EUGRIDPMA_GLOBUS).setCategory(opensslCat).
 				setDescription("In case of openssl truststore, controls which (and in which order) namespace checking rules should be applied. The 'REQUIRE' settings will cause that all configured namespace definitions files must be present for each trusted CA certificate (otherwise checking will fail). The 'AND' settings will cause to check both existing namespace files. Otherwise the first found is checked (in the order defined by the property)."));
-		META.put(PROP_OPENSSL_DIR, new PropertyMD("/etc/grid-security/certificates").setPath().setCategory("Openssl").
+		META.put(PROP_OPENSSL_DIR, new PropertyMD("/etc/grid-security/certificates").setPath().setCategory(opensslCat).
 				setDescription("Directory to be used for opeenssl truststore."));
 
-		META.put(PROP_DIRECTORY_LOCATIONS, new PropertyMD().setList(false).setUpdateable().setCategory("Directory").
+		META.put(PROP_DIRECTORY_LOCATIONS, new PropertyMD().setList(false).setUpdateable().setCategory(dirCat).
 				setDescription("List of CA certificates locations. Can contain URLs, local files and wildcard expressions."));
-		META.put(PROP_DIRECTORY_ENCODING, new PropertyMD(Encoding.PEM).setCategory("Directory").
+		META.put(PROP_DIRECTORY_ENCODING, new PropertyMD(Encoding.PEM).setCategory(dirCat).
 				setDescription("For directory truststore controls whether certificates are encoded in PEM or DER."));
-		META.put(PROP_DIRECTORY_CONNECTION_TIMEOUT, new PropertyMD("15").setCategory("Directory").
+		META.put(PROP_DIRECTORY_CONNECTION_TIMEOUT, new PropertyMD("15").setCategory(dirCat).
 				setDescription("Connection timeout for fetching the remote CA certificates in seconds."));
-		META.put(PROP_DIRECTORY_CACHE_PATH, new PropertyMD().setPath().setCategory("Directory").
+		META.put(PROP_DIRECTORY_CACHE_PATH, new PropertyMD().setPath().setCategory(dirCat).
 				setDescription("Directory where CA certificates should be cached, after downloading them from a remote source. Can be left undefined if no disk cache should be used. Note that directory should be secured, i.e. normal users should not be allowed to write to it."));
 
-		META.put(PROP_REVOCATION_ORDER, new PropertyMD(RevocationCheckingOrder.OCSP_CRL).setCategory("Revocation").
+		META.put(PROP_REVOCATION_ORDER, new PropertyMD(RevocationCheckingOrder.OCSP_CRL).setCategory(revCat).
 				setDescription("Controls overal revocation sources order"));
-		META.put(PROP_REVOCATION_USE_ALL, new PropertyMD("false").setCategory("Revocation").
+		META.put(PROP_REVOCATION_USE_ALL, new PropertyMD("false").setCategory(revCat).
 				setDescription("Controls whether all defined revocation sources should be always checked, even if the first one already confirmed that a checked certificate is not revoked."));
-		META.put(PROP_CRL_MODE, new PropertyMD(CrlCheckingMode.IF_VALID).setCategory("Revocation").
+		META.put(PROP_CRL_MODE, new PropertyMD(CrlCheckingMode.IF_VALID).setCategory(revCat).
 				setDescription("General CRL handling mode. The IF_VALID setting turns on CRL checking only in case the CRL is present."));
-		META.put(PROP_CRL_UPDATE, new PropertyMD("600").setLong().setUpdateable().setCategory("Revocation").
+		META.put(PROP_CRL_UPDATE, new PropertyMD("600").setLong().setUpdateable().setCategory(revCat).
 				setDescription("How often CRLs should be updated, in seconds. Set to negative value to disable refreshing at runtime."));
-		META.put(PROP_CRL_CONNECTION_TIMEOUT, new PropertyMD("15").setCategory("Revocation").
+		META.put(PROP_CRL_CONNECTION_TIMEOUT, new PropertyMD("15").setCategory(revCat).
 				setDescription("Connection timeout for fetching the remote CRLs in seconds (not used for Openssl truststores)."));
-		META.put(PROP_CRL_CACHE_PATH, new PropertyMD().setPath().setCategory("Revocation").
+		META.put(PROP_CRL_CACHE_PATH, new PropertyMD().setPath().setCategory(revCat).
 				setDescription("Directory where CRLs should be cached, after downloading them from " +
 						"remote source. Can be left undefined if no disk cache should be used. Note that directory should be secured, i.e. normal users should not be allowed to write to it. Not used for Openssl truststores."));
-		META.put(PROP_CRL_LOCATIONS, new PropertyMD().setList(false).setUpdateable().setCategory("Revocation").
+		META.put(PROP_CRL_LOCATIONS, new PropertyMD().setList(false).setUpdateable().setCategory(revCat).
 				setDescription("List of CRLs locations. Can contain URLs, local files and wildcard expressions. Not used for Openssl truststores."));
-		META.put(PROP_OCSP_MODE, new PropertyMD(OCSPCheckingMode.IF_AVAILABLE).setCategory("Revocation").
+		META.put(PROP_OCSP_MODE, new PropertyMD(OCSPCheckingMode.IF_AVAILABLE).setCategory(revCat).
 				setDescription("General OCSP ckecking mode. REQUIRE should not be used unless it is guaranteed that for all certificates an OCSP responder is defined."));
-		META.put(PROP_OCSP_LOCAL_RESPONDERS, new PropertyMD().setList(true).setCategory("Revocation").
+		META.put(PROP_OCSP_LOCAL_RESPONDERS, new PropertyMD().setList(true).setCategory(revCat).
 				setDescription("Optional list of local OCSP responders"));
-		META.put(PROP_OCSP_TIMEOUT, new PropertyMD(""+OCSPParametes.DEFAULT_TIMEOUT).setCategory("Revocation").
+		META.put(PROP_OCSP_TIMEOUT, new PropertyMD(""+OCSPParametes.DEFAULT_TIMEOUT).setCategory(revCat).
 				setDescription("Timeout for OCSP connections in miliseconds."));
-		META.put(PROP_OCSP_CACHE_TTL, new PropertyMD(""+OCSPParametes.DEFAULT_CACHE).setCategory("Revocation").
+		META.put(PROP_OCSP_CACHE_TTL, new PropertyMD(""+OCSPParametes.DEFAULT_CACHE).setCategory(revCat).
 				setDescription("For how long the OCSP responses should be locally cached in seconds (this is a maximum value, responses won't be cached after expiration)"));
-		META.put(PROP_OCSP_DISK_CACHE, new PropertyMD().setPath().setCategory("Revocation").
+		META.put(PROP_OCSP_DISK_CACHE, new PropertyMD().setPath().setCategory(revCat).
 				setDescription("If this property is defined then OCSP responses will be cached on disk in the defined folder."));
 	}
 

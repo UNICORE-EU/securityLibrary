@@ -25,7 +25,8 @@ public class PropertyMD
 	private boolean numericalListKeys = false;
 	private boolean updateable = false;
 	private String description;
-	private String category;
+	private DocumentationCategory category;
+	private String sortKey = null;
 	private long min = Integer.MIN_VALUE;
 	private long max = Integer.MAX_VALUE;
 	private double minFloat = Double.MIN_VALUE;
@@ -423,15 +424,68 @@ public class PropertyMD
 	/**
 	 * @return the category
 	 */
-	public String getCategory() {
+	public DocumentationCategory getCategory() {
 		return category;
 	}
 
 	/**
 	 * @param optional property category
 	 */
-	public PropertyMD setCategory(String category) {
+	public PropertyMD setCategory(DocumentationCategory category) {
 		this.category = category;
 		return this;
+	}
+	
+	/**
+	 * @return the sortKey
+	 */
+	public String getSortKey()
+	{
+		return sortKey;
+	}
+
+	/**
+	 * @param sortKey the sortKey to set
+	 */
+	public PropertyMD setSortKey(String sortKey)
+	{
+		this.sortKey = sortKey;
+		return this;
+	}
+
+	/**
+	 * Defines documentation category, options are grouped in categories.
+	 * @author K. Benedyczak
+	 */
+	public static class DocumentationCategory implements Comparable<DocumentationCategory> {
+		private String name;
+		private String sortKey = null;
+		
+		public DocumentationCategory(String name) {
+			this.name = name;
+			if (name == null)
+				name = "";
+		}
+
+		public DocumentationCategory(String name, String sortKey)	{
+			this(name);
+			this.sortKey = sortKey;
+		}
+
+		public String getName()	{
+			return name;
+		}
+
+		public String getSortKey() {
+			return sortKey;
+		}
+
+		@Override
+		public int compareTo(DocumentationCategory o)
+		{
+			String myKey = sortKey == null ? name : sortKey;
+			String otherKey = o.getSortKey() == null ? o.getName() : o.getSortKey();
+			return myKey.compareTo(otherKey);
+		}
 	}
 }

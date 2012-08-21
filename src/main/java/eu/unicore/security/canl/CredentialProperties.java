@@ -61,17 +61,17 @@ public class CredentialProperties extends PropertiesHelper
 	private static final Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
 	static
 	{
-		META.put(PROP_LOCATION, new PropertyMD().setMandatory().
+		META.put(PROP_LOCATION, new PropertyMD().setMandatory().setSortKey("1").
 				setDescription("Credential location. In case of 'jks', 'pkcs12' and 'pem' store it is the only location required. In case when credential is provided in two files, it is the certificate file path.").setPath());
-		META.put(PROP_PASSWORD, new PropertyMD().setSecret().
-				setDescription("Password required to load the credential."));
-		META.put(PROP_KS_KEY_PASSWORD, new PropertyMD().setSecret().
-				setDescription("Private key password, which might be needed only for 'jks' or 'pkcs12', if key is encrypted with different password then the main credential password."));
-		META.put(PROP_FORMAT, new PropertyMD().setEnum(CredentialFormat.jks).
+		META.put(PROP_FORMAT, new PropertyMD().setEnum(CredentialFormat.jks).setSortKey("2").
 				setDescription("Format of the credential. It is guessed when not given. Note that 'pem' might be either a PEM keystore with certificates and keys (in PEM format) or a pair of PEM files (one with certificate and second with private key)."));
-		META.put(PROP_KEY_LOCATION, new PropertyMD().
+		META.put(PROP_PASSWORD, new PropertyMD().setSecret().setSortKey("3").
+				setDescription("Password required to load the credential."));
+		META.put(PROP_KEY_LOCATION, new PropertyMD().setSortKey("4").
 				setDescription("Location of the private key if stored separately from the main credential (applicable for 'pem' and 'der' types only),"));
-		META.put(PROP_KS_ALIAS, new PropertyMD().
+		META.put(PROP_KS_KEY_PASSWORD, new PropertyMD().setSecret().setSortKey("5").
+				setDescription("Private key password, which might be needed only for 'jks' or 'pkcs12', if key is encrypted with different password then the main credential password."));
+		META.put(PROP_KS_ALIAS, new PropertyMD().setSortKey("6").
 				setDescription("Keystore alias of the key entry to be used. Can be ignored if the keystore contains only one key entry. Only applicable for 'jks' and 'pkcs12'."));
 	}
 	
