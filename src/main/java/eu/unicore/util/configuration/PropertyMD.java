@@ -392,9 +392,9 @@ public class PropertyMD
 			if (hasMin && hasMax)
 				return "integer [" + min + " -- " + max + "]";
 			if (hasMin)
-				return "integer > " + min;
+				return "integer >= " + min;
 			if (hasMax)
-				return "integer < " + max;
+				return "integer <= " + max;
 		case PATH:
 			return "filesystem path";
 		case LIST:
