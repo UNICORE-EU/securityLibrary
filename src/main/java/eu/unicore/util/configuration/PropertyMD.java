@@ -7,12 +7,13 @@ package eu.unicore.util.configuration;
 import java.util.Arrays;
 
 
+
 /**
  * Provides an optional metadata for properties retrieved using {@link PropertiesHelper}.
  * Uses the fluent style and shortened syntax
  * @author K. Benedyczak
  */
-public class PropertyMD
+public class PropertyMD implements Cloneable
 {
 	public enum Type {INT, LONG, FLOAT, BOOLEAN, STRING, PATH, ENUM, LIST, CLASS}
 	
@@ -486,6 +487,16 @@ public class PropertyMD
 			String myKey = sortKey == null ? name : sortKey;
 			String otherKey = o.getSortKey() == null ? o.getName() : o.getSortKey();
 			return myKey.compareTo(otherKey);
+		}
+	}
+	
+	public PropertyMD clone() {
+		try
+		{
+			return (PropertyMD) super.clone();
+		} catch (CloneNotSupportedException e)
+		{
+			throw new RuntimeException("BUG: " + e);
 		}
 	}
 }
