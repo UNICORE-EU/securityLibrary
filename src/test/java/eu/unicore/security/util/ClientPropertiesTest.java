@@ -41,7 +41,7 @@ public class ClientPropertiesTest extends TestCase
 		assertEquals(false, cp.doSSLAuthn());
 		assertEquals(false, cp.isSslEnabled());
 		assertEquals(ServerHostnameCheckingMode.FAIL, cp.getServerHostnameCheckingMode());
-		assertEquals(1, cp.getExtraSettings().size());
+		assertEquals(3, cp.getExtraSettings().size());
 		assertEquals("foo", cp.getExtraSettings().get("http.dfsf"));
 	}
 
