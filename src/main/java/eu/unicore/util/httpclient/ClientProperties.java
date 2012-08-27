@@ -60,6 +60,7 @@ public class ClientProperties extends DefaultClientConfiguration
 	public static final String PROP_SERVER_HOSTNAME_CHECKING = "serverHostnameChecking";
 	
 	public static final String EXTRA_HTTP_LIB_PROPERTIES_PREFIX = "http.";
+	private static final int DEFAULT_HTTP_TIMEOUT = 20000;
 	
 	private IAuthnAndTrustConfiguration authnAndTrustConfiguration;
 	private PropertiesHelper clientPropertiesHelper;
@@ -87,7 +88,7 @@ public class ClientProperties extends DefaultClientConfiguration
 		META.put(PROP_SERVER_HOSTNAME_CHECKING, new PropertyMD(ServerHostnameCheckingMode.WARN).
 				setDescription("Controls whether server's hostname should be checked for matching its certificate subject. This verification prevents man-in-the-middle attacks. If enabled WARN will only print warning in log, FAIL will close the connection."));
 		META.put(EXTRA_HTTP_LIB_PROPERTIES_PREFIX, new PropertyMD().setCanHaveSubkeys().
-				setDescription("Additional settings to be used by the HTTP client."));
+				setDescription("Additional settings to be used by the HTTP client. The most useful are '.socket.timeout' and '.connection.timeout'. If those are not set,  default is used: " + DEFAULT_HTTP_TIMEOUT));
 	}
 
 	//all those constructors suck a bit- but there is no multi inheritance in Java, 
@@ -165,6 +166,7 @@ public class ClientProperties extends DefaultClientConfiguration
 		else if (sslAuthnP != null && (sslAuthnP.equalsIgnoreCase("false") || sslAuthnP.equalsIgnoreCase("no"))
 			&& signP != null && (signP.equalsIgnoreCase("false") || signP.equalsIgnoreCase("no")))
 			credOptional = true;
+		
 		return new AuthnAndTrustProperties(p, trustPrefix, credPrefix, trustOptional, credOptional);
 	}
 	
@@ -231,6 +233,11 @@ public class ClientProperties extends DefaultClientConfiguration
 						clientPrefix.length()), p.getProperty(key));
 		}
 		setExtraSettings(extraSettings);
+		
+		if (!extraSettings.containsKey(HttpUtils.SO_TIMEOUT))
+			extraSettings.setProperty(HttpUtils.SO_TIMEOUT, DEFAULT_HTTP_TIMEOUT+"");
+		if (!extraSettings.containsKey(HttpUtils.CONNECT_TIMEOUT))
+			extraSettings.setProperty(HttpUtils.CONNECT_TIMEOUT, DEFAULT_HTTP_TIMEOUT+"");
 	}
 	
 	private String[] parseHandlers(PropertiesHelper properties, String key)
