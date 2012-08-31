@@ -201,7 +201,8 @@ public class ClientProperties extends DefaultClientConfiguration
 			if (doSSLAuthn() && getCredential() == null)
 				throw new ConfigurationException("When SSL authentication is enabled the credential " +
 							"must be provided");
-			getETDSettings().setIssuerCertificateChain(getCredential().getCertificateChain());
+			if (getCredential() != null)
+				getETDSettings().setIssuerCertificateChain(getCredential().getCertificateChain());
 		}
 		setDoSignMessage(clientPropertiesHelper.getBooleanValue(PROP_MESSAGE_SIGNING_ENABLED));
 		if (doSignMessage() && getCredential() == null)

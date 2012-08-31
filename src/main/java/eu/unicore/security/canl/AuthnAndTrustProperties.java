@@ -159,7 +159,9 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 	public AuthnAndTrustProperties clone()
 	{
 		DefaultAuthnAndTrustConfiguration clonedRaw = super.clone();
-		return new AuthnAndTrustProperties(truststoreProperties.clone(), credentialProperties.clone(), clonedRaw);
+		CredentialProperties cp = credentialProperties == null ? null : credentialProperties.clone();
+		TruststoreProperties tp = truststoreProperties == null ? null : truststoreProperties.clone();
+		return new AuthnAndTrustProperties(tp, cp, clonedRaw);
 		
 	}
 }
