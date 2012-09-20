@@ -153,6 +153,7 @@ public class ETDImpl implements ETDApi
 			throw new IllegalArgumentException("Trust delegation chain cant be empty");
 		if (chain.get(0).getCustodianCertHash() == null)
 			throw new InconsistentTDChainException();
+		//FIXME - assumes that issuer of the first ETD == custodian. Not compatible with bootstrap ETD.
 		X509Certificate[] custodian = chain.get(0).getIssuerFromSignature();
 		if (custodian == null || custodian.length == 0)
 			throw new InconsistentTDChainException();
@@ -395,7 +396,7 @@ public class ETDImpl implements ETDApi
 		if (!custodianHash.equals(user[0].hashCode()))
 			return new ValidationResult(false, "Wrong user (certificate hashes " +
 					"are different)");
-		
+		//FIXME - assumes that issuer of the first ETD == custodian. Not compatible with bootstrap ETD.
 		X509Certificate []custodianCert = initial.getIssuerFromSignature();
 		if (custodianCert == null || custodianCert.length == 0)
 			return new ValidationResult(false, "No issuer certificate at position 1.");
