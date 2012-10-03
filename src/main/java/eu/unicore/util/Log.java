@@ -3,6 +3,8 @@ package eu.unicore.util;
 import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;
 
+import eu.unicore.util.configuration.PropertiesHelper;
+
 public class Log {
 	private static LoggerFactory spi;
 	static {
@@ -72,7 +74,13 @@ public class Log {
 	 * logger prefix for HTTP server logging
 	 */
 	public static final String HTTP_SERVER=UNICORE+".httpserver";
-
+	
+	/**
+	 * logger prefix for general logging of properties based configuration handling, used
+	 * by {@link PropertiesHelper} extensions.
+	 */
+	public static final String CONFIGURATION=UNICORE+".configuration";
+	
 	/**
 	 * returns a logger name, using the given prefix and the simple name
 	 * of the given class

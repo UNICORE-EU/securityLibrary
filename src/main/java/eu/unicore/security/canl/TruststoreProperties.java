@@ -61,7 +61,7 @@ import eu.unicore.util.configuration.PropertyMD.DocumentationCategory;
  */
 public class TruststoreProperties extends PropertiesHelper
 {
-	private static final Logger log = Log.getLogger(Log.SECURITY, TruststoreProperties.class);
+	private static final Logger log = Log.getLogger(Log.CONFIGURATION, TruststoreProperties.class);
 
 	public static final String DEFAULT_PREFIX = "truststore.";
 	

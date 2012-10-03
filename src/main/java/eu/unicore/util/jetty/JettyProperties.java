@@ -52,7 +52,7 @@ import eu.unicore.util.configuration.PropertyMD;
  */
 public class JettyProperties extends PropertiesHelper
 {
-	private static final Logger log = Log.getLogger(Log.HTTP_SERVER, JettyProperties.class);
+	private static final Logger log = Log.getLogger(Log.CONFIGURATION, JettyProperties.class);
 	
 	public static final String DEFAULT_PREFIX = "jetty.";
 	

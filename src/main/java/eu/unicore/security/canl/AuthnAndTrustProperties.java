@@ -27,7 +27,7 @@ import eu.unicore.util.configuration.FilePropertiesHelper;
  */
 public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 {
-	private static final Logger log = Log.getLogger(Log.SECURITY, AuthnAndTrustProperties.class);
+	private static final Logger log = Log.getLogger(Log.CONFIGURATION, AuthnAndTrustProperties.class);
 	
 	private TruststoreProperties truststoreProperties;
 	private CredentialProperties credentialProperties;

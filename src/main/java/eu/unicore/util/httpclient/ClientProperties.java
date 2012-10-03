@@ -46,7 +46,7 @@ import eu.unicore.util.configuration.PropertyMD;
  */
 public class ClientProperties extends DefaultClientConfiguration
 {
-	private static final Logger log = Log.getLogger(Log.SECURITY, ClientProperties.class);
+	private static final Logger log = Log.getLogger(Log.CONFIGURATION, ClientProperties.class);
 	public static final String DEFAULT_PREFIX = "client.";
 	
 	public static final String PROP_HTTP_AUTHN_ENABLED = "httpAuthnEnabled";
