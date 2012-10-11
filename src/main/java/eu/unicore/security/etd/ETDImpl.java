@@ -32,7 +32,8 @@ import eu.unicore.security.dsig.DSigException;
 public class ETDImpl implements ETDApi
 {
 	public static final int DEFAULT_VALIDITY_DAYS = 14;
-
+	// 5 mins to cover minor clock skews
+	public static final int ETD_VALIDITY_GRACE_TIME = 300000;
 
 	/**
 	 * Generates trust delegation in terms of DNs.
@@ -274,11 +275,12 @@ public class ETDImpl implements ETDApi
 		}
 		
 		Date notBefore = td.getNotBefore();
-		Date now = new Date();
-		if (notBefore != null && now.before(notBefore))
+		Date nowPlus = new Date(System.currentTimeMillis()+ETD_VALIDITY_GRACE_TIME);
+		if (notBefore != null && nowPlus.before(notBefore))
 			return new ValidationResult(false, "Delegation is not yet valid, will be from: " + notBefore); 
+		Date nowMinus = new Date(System.currentTimeMillis()-ETD_VALIDITY_GRACE_TIME);
 		Date notOnOrAfter = td.getNotOnOrAfter();
-		if (notOnOrAfter != null && (now.after(notOnOrAfter) || now.equals(notOnOrAfter)))
+		if (notOnOrAfter != null && nowMinus.after(notOnOrAfter))
 			return new ValidationResult(false, "Delegation is no more valid, expired at: " + notOnOrAfter);
 		
 		return new ValidationResult(true, "Validation OK");

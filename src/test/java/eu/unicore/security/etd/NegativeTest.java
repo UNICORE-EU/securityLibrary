@@ -146,7 +146,7 @@ public class NegativeTest extends ETDTestBase
 		try
 		{
 			Calendar c = Calendar.getInstance();
-			c.add(Calendar.MINUTE, -1);
+			c.add(Calendar.MINUTE, -6);
 			Date d = new Date();
 			
 			DelegationRestrictions restrictions = new DelegationRestrictions(d, c.getTime(), -1);
