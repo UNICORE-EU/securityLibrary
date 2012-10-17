@@ -308,10 +308,8 @@ public class CredentialProperties extends PropertiesHelper
 	
 	public CredentialProperties clone()
 	{
-		CredentialProperties ret = new CredentialProperties(properties, null, prefix);
+		CredentialProperties ret = new CredentialProperties(properties, passwordCallback, prefix);
 		super.cloneTo(ret);
-		//don't set it via constructor as then cloning would ask questions...
-		ret.passwordCallback = this.passwordCallback;
 		return ret;
 	}
 }

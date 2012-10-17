@@ -557,10 +557,8 @@ public class TruststoreProperties extends PropertiesHelper
 	
 	public TruststoreProperties clone()
 	{
-		TruststoreProperties ret = new TruststoreProperties(properties, initialListeners, null, prefix);
+		TruststoreProperties ret = new TruststoreProperties(properties, initialListeners, passwordCallback, prefix);
 		super.cloneTo(ret);
-		//be careful not via constructor, as we don't want clone to ask for password again.
-		ret.passwordCallback = this.passwordCallback;
 		return ret;
 	}
 }

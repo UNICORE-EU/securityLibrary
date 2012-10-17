@@ -7,6 +7,12 @@ package eu.unicore.security.canl;
 /**
  * Interface is used to obtain credential or truststore passwords at runtime,
  * typically by asking the user.
+ * <p>
+ * IMPORTANT: the implementation must handle password caching, i.e. the getPassword
+ * method may be called many times during the lifetime of this object, and typically the
+ * user should be asked only once (per protected Artifact Type and description combination).
+ * This is implemented in the {@link CachingPasswordCallback} and typically you should simply extend this class. 
+ * 
  * @author K. Benedyczak
  */
 public interface PasswordCallback
