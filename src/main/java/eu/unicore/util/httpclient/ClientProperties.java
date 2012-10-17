@@ -167,7 +167,7 @@ public class ClientProperties extends DefaultClientConfiguration
 			&& signP != null && (signP.equalsIgnoreCase("false") || signP.equalsIgnoreCase("no")))
 			credOptional = true;
 		
-		return new AuthnAndTrustProperties(p, trustPrefix, credPrefix, trustOptional, credOptional);
+		return new AuthnAndTrustProperties(p, trustPrefix, credPrefix, callback, trustOptional, credOptional);
 	}
 	
 	/**
