@@ -135,7 +135,7 @@ public class JettyProperties extends PropertiesHelper
 	
 	static{
 		defaults.put(MAX_THREADS, new PropertyMD("255").setPositive().
-				setDescription("Maximum number of threads to have in the thread pool processing for HTTP connections."));
+				setDescription("Maximum number of threads to have in the thread pool for processing HTTP connections."));
 		defaults.put(MIN_THREADS, new PropertyMD("1").setPositive().
 				setDescription("Minimum number of threads to have in the thread pool for processing HTTP connections."));
 		defaults.put(HIGH_LOAD_CONNECTIONS, new PropertyMD("200").setPositive().
