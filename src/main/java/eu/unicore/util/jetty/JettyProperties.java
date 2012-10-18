@@ -42,8 +42,8 @@ import eu.unicore.util.configuration.PropertiesHelper;
 import eu.unicore.util.configuration.PropertyMD;
 
 /**
- * Defines constants and defaults for Jetty settings, so simplifies properties handling
- * for Jetty server setup.
+ * Defines constants and defaults for HTTP server (i.e. Jetty) settings, so simplifies 
+ * properties handling for Jetty server setup.
  * <p>
  * Note that as Jetty configuration is simplistic (all settings can be derived directly
  * from the properties source) there is no need to define a specialized interface
@@ -135,21 +135,21 @@ public class JettyProperties extends PropertiesHelper
 	
 	static{
 		defaults.put(MAX_THREADS, new PropertyMD("255").setPositive().
-				setDescription("Maximum number of threads to have in the Jetty thread pool for connections serving."));
+				setDescription("Maximum number of threads to have in the thread pool processing for HTTP connections."));
 		defaults.put(MIN_THREADS, new PropertyMD("1").setPositive().
-				setDescription("Minimum number of threads to have in the Jetty thread pool for connections serving."));
+				setDescription("Minimum number of threads to have in the thread pool for processing HTTP connections."));
 		defaults.put(HIGH_LOAD_CONNECTIONS, new PropertyMD("200").setPositive().
-				setDescription("If the number of connections exceeds this amount, then connector is put into a special 'low on resources' state. Existing connections will be closed faster. Note that this value is honored only for NIO connectors. Legacy connectors go into low resources mode when no more threads are available."));
+				setDescription("If the number of connections exceeds this amount, then the connector is put into a special 'low on resources' state. Existing connections will be closed faster. Note that this value is honored only for NIO connectors. Legacy connectors go into low resources mode when no more threads are available."));
 		defaults.put(MAX_IDLE_TIME, new PropertyMD("200000").setPositive().
 				setDescription("Time (in ms.) before an idle connection will time out. It should be large enough not to expire connections with slow clients, values below 30s are getting quite risky."));
 		defaults.put(LOW_RESOURCE_MAX_IDLE_TIME, new PropertyMD("100").setPositive().
 				setDescription("In low resource conditions, time (in ms.) before an idle connection will time out."));
 		defaults.put(FAST_RANDOM, new PropertyMD("false").
-				setDescription("Use insecure, but fast pseudo random generator to generate session ids instead of slow and secure generator for SSL sockets. Useful for testing."));
+				setDescription("Use insecure, but fast pseudo random generator to generate session ids instead of secure generator for SSL sockets."));
 		defaults.put(SO_LINGER_TIME, new PropertyMD("-1").
 				setDescription("Socket linger time."));
 		defaults.put(WANT_CLIENT_AUTHN, new PropertyMD("true").
-				setDescription("Controls whether the SSL socket accepts client-side authentication."));
+				setDescription("Controls whether the SSL socket accepts (but does not require) client-side authentication."));
 		defaults.put(REQUIRE_CLIENT_AUTHN, new PropertyMD("true").
 				setDescription("Controls whether the SSL socket requires client-side authentication."));
 		defaults.put(DISABLED_CIPHER_SUITES, new PropertyMD("").
