@@ -54,7 +54,7 @@ public class JettyProperties extends PropertiesHelper
 {
 	private static final Logger log = Log.getLogger(Log.CONFIGURATION, JettyProperties.class);
 	
-	public static final String DEFAULT_PREFIX = "jetty.";
+	public static final String DEFAULT_PREFIX = "httpServer.";
 	
 	/**
 	 * use java.util.Random to generate session ids instead of SecureRandom (for SSL sockets)
