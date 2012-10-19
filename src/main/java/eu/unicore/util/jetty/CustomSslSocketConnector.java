@@ -66,7 +66,7 @@ public class CustomSslSocketConnector extends SslSocketConnector
 			X509Credential credential) throws KeyManagementException, NoSuchAlgorithmException, 
 			NoSuchProviderException
 	{
-		super(JettyConnectorUtils.createJettyContextFactory(validator, credential));
+		super(JettyConnectorUtils.createJettyContextFactory(validator, credential, log));
 	}
 
 	@Override

@@ -7,14 +7,10 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
-import java.security.cert.X509Certificate;
 
-import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
@@ -23,10 +19,8 @@ import org.apache.log4j.Logger;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
-import eu.emi.security.authn.x509.impl.CertificateUtils;
-import eu.emi.security.authn.x509.impl.FormatMode;
 import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
-import eu.unicore.security.canl.LoggingX509TrustManager;
+import eu.unicore.security.canl.SSLContextCreator;
 import eu.unicore.util.Log;
 
 
@@ -61,29 +55,11 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 
 	private synchronized SSLContext createSSLContext()
 	{
+		X509Credential credential = sec.doSSLAuthn() ? sec.getCredential() : null;
 		try
 		{
-			KeyManager km;
-			if (sec.doSSLAuthn())
-			{
-				km = sec.getCredential().getKeyManager();
-				if (log.isTraceEnabled())
-					debugKS(sec.getCredential());
-			} else
-			{
-				km = new NoAuthKeyManager();
-				log.trace("Not authenticating client");
-			}
-			
-			X509TrustManager tm = SocketFactoryCreator.getSSLTrustManager(sec.getValidator());
-			tm = new LoggingX509TrustManager(tm);
-			if (log.isTraceEnabled())
-				debugTS(sec.getValidator());
-			
-			SSLContext sslcontext = SSLContext.getInstance("TLS");
-			sslcontext.init(new KeyManager[] {km}, new TrustManager[] {tm}, null);
-			
-			return sslcontext;
+			return SSLContextCreator.createSSLContext(credential, sec.getValidator(), 
+					"TLS", "HTTP Client", log);
 		} catch (Exception e)
 		{
 			log.fatal(e.getMessage(), e);
@@ -91,24 +67,6 @@ public class AuthSSLProtocolSocketFactory implements SecureProtocolSocketFactory
 		}
 	}
 
-	private void debugTS(X509CertChainValidator validator)
-	{
-		X509Certificate trustedCerts[] = validator.getTrustedIssuers();
-		for (X509Certificate cert: trustedCerts)
-		{
-			log.trace("Currently(!) trusted certificate:\n" + 
-					CertificateUtils.format(cert, FormatMode.FULL));
-		}
-	}
-	
-	private void debugKS(X509Credential c)
-	{
-		X509Certificate[] certs = c.getCertificateChain();
-		X509Certificate[] certs509 = CertificateUtils.convertToX509Chain(certs);
-		log.trace("Client's certificate chain:" + 
-				CertificateUtils.format(certs509, FormatMode.FULL));
-	}	
-	
 	private SSLContext getSSLContext()
 	{
 		if (this.sslcontext == null)

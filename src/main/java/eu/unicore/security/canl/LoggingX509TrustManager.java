@@ -59,14 +59,16 @@ public class LoggingX509TrustManager implements X509TrustManager {
 	private static final Logger log = Log.getLogger(Log.SECURITY, LoggingX509TrustManager.class);
 
 	private X509TrustManager defaultTrustManager = null;
+	private String info;
 
 	/**
 	 * Constructor for AuthSSLX509TrustManager.
 	 */
-	public LoggingX509TrustManager(final X509TrustManager defaultTrustManager) {
+	public LoggingX509TrustManager(final X509TrustManager defaultTrustManager, String info) {
 		if (defaultTrustManager == null) {
 			throw new IllegalArgumentException("Trust manager may not be null");
 		}
+		this.info = info;
 		this.defaultTrustManager = defaultTrustManager;
 	}
 	
@@ -119,21 +121,21 @@ public class LoggingX509TrustManager implements X509TrustManager {
 	{
 		if (log.isDebugEnabled() && certificates != null) {
 			String info = CertificateUtils.format(certificates, FormatMode.FULL);
-			log.debug(type + info);
+			log.debug("[" + this.info + "] " + type + info);
 		}
 	}
 	
 	private void logFailedVerification(String type, CertificateException e) {
 		if (!log.isDebugEnabled())
 			return;
-		log.debug("Verification of the " + type + " certificate failed. " + 
+		log.debug("[" + info + "] Verification of the " + type + " certificate failed. " + 
 			e.getMessage());
 	}
 
 	private void logSuccessfulVerification(String type, X509Certificate[] certificates) {
 		if (!log.isDebugEnabled())
 			return;
-		log.debug("Verification of the " + type + 
+		log.debug("[" + info + "] Verification of the " + type + 
 			" certificate with subject DN " + 
 			X500NameUtils.getReadableForm(certificates[0].getSubjectX500Principal())
 			+ " was successful");

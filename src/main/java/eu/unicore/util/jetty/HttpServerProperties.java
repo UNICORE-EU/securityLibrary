@@ -50,9 +50,9 @@ import eu.unicore.util.configuration.PropertyMD;
  * and bean classes as other, more complicated configuration providers in this module do.  
  * @author K. Benedyczak
  */
-public class JettyProperties extends PropertiesHelper
+public class HttpServerProperties extends PropertiesHelper
 {
-	private static final Logger log = Log.getLogger(Log.CONFIGURATION, JettyProperties.class);
+	private static final Logger log = Log.getLogger(Log.CONFIGURATION, HttpServerProperties.class);
 	
 	public static final String DEFAULT_PREFIX = "httpServer.";
 	
@@ -162,22 +162,22 @@ public class JettyProperties extends PropertiesHelper
 				setDescription("Controls whether the NIO connector be used. NIO is best suited under high-load, when lots of connections exist that are idle for long periods."));
 	}
 
-	public JettyProperties() throws ConfigurationException 
+	public HttpServerProperties() throws ConfigurationException 
 	{
 		this(new Properties(), DEFAULT_PREFIX);
 	}
 	
-	public JettyProperties(Properties properties) throws ConfigurationException 
+	public HttpServerProperties(Properties properties) throws ConfigurationException 
 	{
 		this(properties, DEFAULT_PREFIX);
 	}
 	
-	public JettyProperties(Properties properties, String prefix) throws ConfigurationException 
+	public HttpServerProperties(Properties properties, String prefix) throws ConfigurationException 
 	{
 		super(prefix, properties, defaults, log);
 	}
 	
-	protected JettyProperties(Properties properties, String prefix, Map<String, PropertyMD> defaults) 
+	protected HttpServerProperties(Properties properties, String prefix, Map<String, PropertyMD> defaults) 
 			throws ConfigurationException 
 	{
 		super(prefix, properties, defaults, log);
@@ -187,12 +187,12 @@ public class JettyProperties extends PropertiesHelper
 	/**
 	 * @return Jetty settings useful for tests, with insecure random
 	 */
-	public static JettyProperties getSimpleTestSettings()
+	public static HttpServerProperties getSimpleTestSettings()
 	{
 		Properties p = new Properties();
-		JettyProperties ret = new JettyProperties(p);
-		ret.setProperty(JettyProperties.FAST_RANDOM, "true");
-		ret.setProperty(JettyProperties.SO_LINGER_TIME, "1");
+		HttpServerProperties ret = new HttpServerProperties(p);
+		ret.setProperty(HttpServerProperties.FAST_RANDOM, "true");
+		ret.setProperty(HttpServerProperties.SO_LINGER_TIME, "1");
 		return ret;
 	}
 }

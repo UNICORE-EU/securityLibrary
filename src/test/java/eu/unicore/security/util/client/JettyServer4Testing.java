@@ -46,7 +46,7 @@ import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
 import eu.unicore.security.canl.TruststoreProperties;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.jetty.JettyLogger;
-import eu.unicore.util.jetty.JettyProperties;
+import eu.unicore.util.jetty.HttpServerProperties;
 import eu.unicore.util.jetty.JettyServerBase;
 
 
@@ -63,7 +63,7 @@ public class JettyServer4Testing extends JettyServerBase {
 
 	
 	public JettyServer4Testing(URL[] listenUrls, IAuthnAndTrustConfiguration secProperties,
-			JettyProperties extraSettings) throws ConfigurationException
+			HttpServerProperties extraSettings) throws ConfigurationException
 	{
 		super(listenUrls, secProperties, extraSettings, JettyLogger.class);
 		initServer();
@@ -72,7 +72,7 @@ public class JettyServer4Testing extends JettyServerBase {
 	public static Properties getSecureProperties()
 	{
 		Properties p = new Properties();
-		p.setProperty("j." + JettyProperties.FAST_RANDOM, "true");
+		p.setProperty("j." + HttpServerProperties.FAST_RANDOM, "true");
 		
 		p.setProperty("k." + CredentialProperties.PROP_LOCATION, KEYSTORE);
 		p.setProperty("k." + CredentialProperties.PROP_FORMAT, "JKS");
@@ -92,14 +92,14 @@ public class JettyServer4Testing extends JettyServerBase {
 				new URL("https://" + host + ":" + (port+1))};
 	
 		AuthnAndTrustProperties secCfg = new AuthnAndTrustProperties(p, "t.", "k.");
-		JettyProperties extra = new JettyProperties(p, "j.");
+		HttpServerProperties extra = new HttpServerProperties(p, "j.");
 		return new JettyServer4Testing(urls, secCfg, extra);
 	}
 	
 	public static JettyServer4Testing getInstance(int soLinger) throws Exception {
 		int port = 62407;
 		Properties p = getSecureProperties();
-		p.setProperty("j." + JettyProperties.SO_LINGER_TIME, soLinger+"");
+		p.setProperty("j." + HttpServerProperties.SO_LINGER_TIME, soLinger+"");
 		return getInstance(p, port, soLinger);
 	}
 	
@@ -108,11 +108,11 @@ public class JettyServer4Testing extends JettyServerBase {
 		String host = "127.0.0.1";
 		URL[] urls = new URL[] {new URL("http://" + host + ":" + port)};
 		Properties p = new Properties();
-		p.setProperty("j." + JettyProperties.SO_LINGER_TIME, soLinger+"");
-		p.setProperty("j." + JettyProperties.FAST_RANDOM, "true");
+		p.setProperty("j." + HttpServerProperties.SO_LINGER_TIME, soLinger+"");
+		p.setProperty("j." + HttpServerProperties.FAST_RANDOM, "true");
 		
 		IAuthnAndTrustConfiguration secCfg = new DefaultAuthnAndTrustConfiguration();
-		JettyProperties extra = new JettyProperties(p, "j.");
+		HttpServerProperties extra = new HttpServerProperties(p, "j.");
 		return new JettyServer4Testing(urls, secCfg, extra);
 	}
 

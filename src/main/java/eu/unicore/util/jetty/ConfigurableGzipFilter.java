@@ -12,15 +12,15 @@ import eu.unicore.util.configuration.ConfigurationException;
 
 /**
  * Wrapper around Jetty's {@link GzipFilter} that allows to be configured
- * using {@link JettyProperties}
- * @see JettyProperties
+ * using {@link HttpServerProperties}
+ * @see HttpServerProperties
  * @author schuller
  */
 public class ConfigurableGzipFilter extends GzipFilter
 {	
-	private JettyProperties properties;
+	private HttpServerProperties properties;
 	
-	public ConfigurableGzipFilter(JettyProperties properties)
+	public ConfigurableGzipFilter(HttpServerProperties properties)
 	{
 		this.properties = properties;
 	}
@@ -45,7 +45,7 @@ public class ConfigurableGzipFilter extends GzipFilter
 			if(val==null)
 				try
 				{
-					val=properties.getValue(JettyProperties.GZIP_PREFIX + name);
+					val=properties.getValue(HttpServerProperties.GZIP_PREFIX + name);
 				} catch (ConfigurationException e)
 				{
 					throw new RuntimeException(

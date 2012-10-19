@@ -13,12 +13,8 @@ import java.security.cert.X509Certificate;
 
 import javax.net.ssl.HandshakeCompletedEvent;
 import javax.net.ssl.HandshakeCompletedListener;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSocket;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -26,9 +22,8 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
-import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
-import eu.unicore.security.canl.LoggingX509TrustManager;
+import eu.unicore.security.canl.SSLContextCreator;
 
 /**
  * low level utility methods useful for secured Jetty connectors
@@ -37,7 +32,7 @@ import eu.unicore.security.canl.LoggingX509TrustManager;
 public class JettyConnectorUtils
 {
 	public static SslContextFactory createJettyContextFactory(X509CertChainValidator validator,
-			X509Credential credential) throws NoSuchAlgorithmException, 
+			X509Credential credential, Logger log) throws NoSuchAlgorithmException, 
 			NoSuchProviderException, KeyManagementException
 	{
 		SslContextFactory ret = new SslContextFactory();
@@ -47,24 +42,9 @@ public class JettyConnectorUtils
 		if(vm!=null && vm.trim().startsWith("IBM")){
 			protocol = "SSL_TLS";//works for clients using both SSLv3 and TLS
 		}
-		ret.setSslContext(createSSLContext(validator, credential, protocol));
+		ret.setSslContext(SSLContextCreator.createSSLContext(credential, validator, protocol, 
+				"Jetty HTTP Server", log));
 		return ret;
-	}
-	
-	public static SSLContext createSSLContext(X509CertChainValidator validator,
-			X509Credential credential, String protocol) throws NoSuchAlgorithmException, 
-			NoSuchProviderException, KeyManagementException
-	{
-		KeyManager[] keyManagers = new KeyManager[] {credential.getKeyManager()};
-
-		X509TrustManager trustManager = SocketFactoryCreator.getSSLTrustManager(validator);
-		X509TrustManager decoratedTrustManager = new LoggingX509TrustManager(trustManager);
-		TrustManager[] trustManagers = new X509TrustManager[] {decoratedTrustManager};;
-
-		SSLContext context = SSLContext.getInstance(protocol);
-
-		context.init(keyManagers, trustManagers, null);
-		return context;
 	}
 	
 	public static void logConnection(final Socket socket, final Logger log) {

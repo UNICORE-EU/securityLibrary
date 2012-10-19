@@ -57,7 +57,7 @@ public class NIOSSLSocketConnector extends SslSelectChannelConnector {
 	public NIOSSLSocketConnector(X509CertChainValidator validator,
 			X509Credential credential) throws Exception
 	{
-		super(JettyConnectorUtils.createJettyContextFactory(validator, credential));
+		super(JettyConnectorUtils.createJettyContextFactory(validator, credential, log));
 	}
 	
 	@Override

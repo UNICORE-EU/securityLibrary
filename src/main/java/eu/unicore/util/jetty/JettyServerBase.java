@@ -77,7 +77,7 @@ public abstract class JettyServerBase {
 	protected final Class<? extends JettyLogger> jettyLogger;
 	protected final URL[] listenUrls;
 	protected final IAuthnAndTrustConfiguration securityConfiguration;
-	protected final JettyProperties extraSettings;
+	protected final HttpServerProperties extraSettings;
 	
 	private Server theServer;
 
@@ -92,7 +92,7 @@ public abstract class JettyServerBase {
 	 */
 	public JettyServerBase(URL listenUrl,
 			IAuthnAndTrustConfiguration secConfiguration,
-			JettyProperties extraSettings) throws ConfigurationException
+			HttpServerProperties extraSettings) throws ConfigurationException
 	{
 		this(new URL[] {listenUrl}, secConfiguration, extraSettings, JettyLogger.class);
 	}
@@ -110,7 +110,7 @@ public abstract class JettyServerBase {
 	 */
 	public JettyServerBase(URL[] listenUrls,
 			IAuthnAndTrustConfiguration secConfiguration,
-			JettyProperties extraSettings,
+			HttpServerProperties extraSettings,
 			Class<? extends JettyLogger> jettyLogger) throws ConfigurationException
 	{
 		this.securityConfiguration = secConfiguration;
@@ -148,7 +148,7 @@ public abstract class JettyServerBase {
 		theServer = new Server();
 		
 
-		configureSessionIdManager(extraSettings.getBooleanValue(JettyProperties.FAST_RANDOM));
+		configureSessionIdManager(extraSettings.getBooleanValue(HttpServerProperties.FAST_RANDOM));
 
 		Connector[] connectors = createConnectors();
 		for (Connector connector: connectors) {
@@ -208,7 +208,7 @@ public abstract class JettyServerBase {
 		{
 			throw new RuntimeException("Can not create Jetty NIO SSL connector, shouldn't happen.", e);
 		}
-		ssl.setLowResourcesConnections(extraSettings.getIntValue(JettyProperties.HIGH_LOAD_CONNECTIONS));
+		ssl.setLowResourcesConnections(extraSettings.getIntValue(HttpServerProperties.HIGH_LOAD_CONNECTIONS));
 		return ssl;
 	}
 	
@@ -237,7 +237,7 @@ public abstract class JettyServerBase {
 	 * @throws ConfigurationException
 	 */
 	protected AbstractConnector createSecureConnector(URL url) throws ConfigurationException {
-		boolean useNio = extraSettings.getBooleanValue(JettyProperties.USE_NIO);
+		boolean useNio = extraSettings.getBooleanValue(HttpServerProperties.USE_NIO);
 		SslConnector ssl;
 		if (useNio) {
 			logger.debug("Creating SSL NIO connector on: " + url);
@@ -248,9 +248,9 @@ public abstract class JettyServerBase {
 		}
 
 		SslContextFactory factory = ssl.getSslContextFactory();
-		factory.setNeedClientAuth(extraSettings.getBooleanValue(JettyProperties.REQUIRE_CLIENT_AUTHN));
-		factory.setWantClientAuth(extraSettings.getBooleanValue(JettyProperties.WANT_CLIENT_AUTHN));
-		String disabledCiphers = extraSettings.getValue(JettyProperties.DISABLED_CIPHER_SUITES);
+		factory.setNeedClientAuth(extraSettings.getBooleanValue(HttpServerProperties.REQUIRE_CLIENT_AUTHN));
+		factory.setWantClientAuth(extraSettings.getBooleanValue(HttpServerProperties.WANT_CLIENT_AUTHN));
+		String disabledCiphers = extraSettings.getValue(HttpServerProperties.DISABLED_CIPHER_SUITES);
 		if (disabledCiphers != null) {
 			disabledCiphers = disabledCiphers.trim();
 			if (disabledCiphers.length() > 1)
@@ -283,11 +283,11 @@ public abstract class JettyServerBase {
 	 * @return
 	 */
 	protected AbstractConnector createPlainConnector(URL url){
-		boolean useNio = extraSettings.getBooleanValue(JettyProperties.USE_NIO);
+		boolean useNio = extraSettings.getBooleanValue(HttpServerProperties.USE_NIO);
 		if (useNio) {
 			logger.debug("Creating plain NIO HTTP connector on: " + url);
 			SelectChannelConnector ret = getNioPlainConnectorInstance();
-			ret.setLowResourcesConnections(extraSettings.getIntValue(JettyProperties.HIGH_LOAD_CONNECTIONS));
+			ret.setLowResourcesConnections(extraSettings.getIntValue(HttpServerProperties.HIGH_LOAD_CONNECTIONS));
 			return ret;
 		} else {
 			logger.debug("Creating plain HTTP connector on: " + url);
@@ -303,20 +303,20 @@ public abstract class JettyServerBase {
 	protected void configureConnector(AbstractConnector connector, URL url) throws ConfigurationException {
 		connector.setHost(url.getHost());
 		connector.setPort(url.getPort() == -1 ? url.getDefaultPort() : url.getPort());
-		connector.setSoLingerTime(extraSettings.getIntValue(JettyProperties.SO_LINGER_TIME));
+		connector.setSoLingerTime(extraSettings.getIntValue(HttpServerProperties.SO_LINGER_TIME));
 		connector.setLowResourcesMaxIdleTime(extraSettings.getIntValue(
-			JettyProperties.LOW_RESOURCE_MAX_IDLE_TIME));
-		connector.setMaxIdleTime(extraSettings.getIntValue(JettyProperties.MAX_IDLE_TIME));
+			HttpServerProperties.LOW_RESOURCE_MAX_IDLE_TIME));
+		connector.setMaxIdleTime(extraSettings.getIntValue(HttpServerProperties.MAX_IDLE_TIME));
 	}
 
 	protected void configureServer() throws ConfigurationException {
 		QueuedThreadPool btPool=new QueuedThreadPool();
 		int connectorsNum = getUrls().length;
-		boolean useNio = extraSettings.getBooleanValue(JettyProperties.USE_NIO);
+		boolean useNio = extraSettings.getBooleanValue(HttpServerProperties.USE_NIO);
 		if (useNio)
 			connectorsNum *= 2;
-		btPool.setMaxThreads(extraSettings.getIntValue(JettyProperties.MAX_THREADS) + connectorsNum);
-		btPool.setMinThreads(extraSettings.getIntValue(JettyProperties.MIN_THREADS) + connectorsNum);
+		btPool.setMaxThreads(extraSettings.getIntValue(HttpServerProperties.MAX_THREADS) + connectorsNum);
+		btPool.setMinThreads(extraSettings.getIntValue(HttpServerProperties.MIN_THREADS) + connectorsNum);
 		theServer.setThreadPool(btPool);
 	}
 
@@ -327,7 +327,7 @@ public abstract class JettyServerBase {
 	 * @throws ConfigurationException
 	 */
 	protected void configureGzip() throws ConfigurationException {
-		boolean enableGzip = extraSettings.getBooleanValue(JettyProperties.ENABLE_GZIP);
+		boolean enableGzip = extraSettings.getBooleanValue(HttpServerProperties.ENABLE_GZIP);
 		if (enableGzip) {
 			FilterHolder gzipHolder = new FilterHolder(
 					new ConfigurableGzipFilter(extraSettings));
