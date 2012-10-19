@@ -27,11 +27,11 @@ public abstract class DBPropertiesHelper
 	@DocumentationReferencePrefix
 	public static final String PREFIX = "db.";
 
-	public final static String DIALECT = PREFIX+"dialect";
-	public final static String USER = PREFIX+"username";
-	public final static String PASSWORD = PREFIX+"password";
-	public final static String URL = PREFIX+"jdbcUrl";
-	public final static String DRIVER = PREFIX+"driver";
+	public final static String DIALECT = "dialect";
+	public final static String USER = "username";
+	public final static String PASSWORD = "password";
+	public final static String URL = "jdbcUrl";
+	public final static String DRIVER = "driver";
 	public final static DocumentationCategory dbCategory = new DocumentationCategory("Database");
 	
 	/**
@@ -46,25 +46,28 @@ public abstract class DBPropertiesHelper
 	 * @param defaultDriver default JDBC driver or null if no default should be set
 	 * @param defaultUrl default JDBC URL or null if no default should be set 
 	 * @param defaultDialect default value of an arbitrary enum specifying allowed variants of SQL dialects.
-	 * If is null then dialects property won't be included in returned metadata. 
+	 * If is null then dialects property won't be included in returned metadata.
+	 * @param prefix prefix which should be added to the properties. In case when those properties are merged 
+	 * with others this should be typically {@link DBPropertiesHelper#PREFIX}. When the metadata should form a 
+	 * separate DBProperties class, then should be empty string and the prefix should be set in the class. 
 	 * @return
 	 */
 	public static <T extends Enum<T>> Map<String, PropertyMD> getMetadata(Class<? extends Driver> defaultDriver, 
-			String defaultUrl, T defaultDialect)
+			String defaultUrl, T defaultDialect, String prefix)
 	{
 		Map<String, PropertyMD> ret = new HashMap<String, PropertyMD>();
 		if (defaultDialect != null)
-			ret.put(DIALECT, new PropertyMD(defaultDialect).setCategory(dbCategory).
+			ret.put(prefix+DIALECT, new PropertyMD(defaultDialect).setCategory(dbCategory).
 				setDescription("Database SQL dialect. Must match the selected driver, however " +
 						"sometimes more then one driver can be available for a dialect."));
-		ret.put(DRIVER, new PropertyMD(defaultDriver, Driver.class).setCategory(dbCategory).
+		ret.put(prefix+DRIVER, new PropertyMD(defaultDriver, Driver.class).setCategory(dbCategory).
 				setDescription("Database driver class name. This property is optional - if not set, " +
 						"then a default driver for the chosen database type is used."));
-		ret.put(URL, new PropertyMD(defaultUrl).setCategory(dbCategory).
+		ret.put(prefix+URL, new PropertyMD(defaultUrl).setCategory(dbCategory).
 				setDescription("Database JDBC URL."));
-		ret.put(USER, new PropertyMD("sa").setCategory(dbCategory).
+		ret.put(prefix+USER, new PropertyMD("sa").setCategory(dbCategory).
 				setDescription("Database username."));
-		ret.put(PASSWORD, new PropertyMD("").setCategory(dbCategory).
+		ret.put(prefix+PASSWORD, new PropertyMD("").setCategory(dbCategory).
 				setDescription("Database password."));
 		return ret;
 	}
