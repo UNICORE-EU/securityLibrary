@@ -183,7 +183,6 @@ public class SecurityTokens implements Serializable
 	public void setUser(X509Certificate[] user)
 	{
 		this.user = user;
-		//this way as we can have troubles related to proxies
 		X509Certificate userCert = getUserCertificate();
 		if (userCert != null)
 			this.userName = userCert.getSubjectX500Principal();
@@ -220,7 +219,6 @@ public class SecurityTokens implements Serializable
 	 * Returns a user's X509 certificate. Note that it <b>may not represent a 
 	 * valid user</b>, i.e. there might 
 	 * be no trust delegation chain from the returned user to the actual consignor.
-	 * In proxy mode the EEC certificate is returned.
 	 * @return null if user is not set as certificate, user certificate otherwise
 	 */
 	public X509Certificate getUserCertificate()
@@ -228,16 +226,7 @@ public class SecurityTokens implements Serializable
 		if (user == null)
 			return null;
 
-		if (supportProxy) 
-		{
-			X509Certificate userCert = ProxyUtils.getEndUserCertificate(user);
-			//this is bad... somehow we got as an user a chain which has only proxy certs
-			if (userCert == null)
-				return user[0]; 
-			else
-				return userCert;
-		} else
-			return user[0];
+		return user[0];
 	}
 
 	/**
@@ -370,6 +359,31 @@ public class SecurityTokens implements Serializable
 	}
 
 	/**
+	 * @return true only if the consignor's certificate is a proxy and proxy support is turned on.
+	 */
+	public boolean isConsignorUsingProxy()
+	{
+		if (consignor != null && supportProxy)
+		{
+			return ProxyUtils.isProxy(consignor);
+		}
+		return false;
+	}
+
+	/**
+	 * @return the identity of the real consignor's certificate. In case of proxies it can be different
+	 * from the value returned by the {@link #getConsignorName()}
+	 */
+	public X500Principal getConsignorRealName()
+	{
+		if (consignor != null)
+		{
+			return consignor[0].getSubjectX500Principal();
+		}
+		return null;
+	}
+	
+	/**
 	 * Returns true if the Consignor is anyhow allowed to work on
 	 * User's behalf, as set by the setConsignorTrusted method. 
 	 * @return
@@ -379,6 +393,11 @@ public class SecurityTokens implements Serializable
 		return consignorTrusted;
 	}
 
+	public boolean isSupportingProxy()
+	{
+		return supportProxy;
+	}
+	
 	/**
 	 * Sets the key value telling if the Consignor is allowed to work on 
 	 * the Users behalf. 
