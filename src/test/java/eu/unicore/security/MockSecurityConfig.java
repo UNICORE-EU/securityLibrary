@@ -53,10 +53,7 @@ public class MockSecurityConfig extends DefaultClientConfiguration
 	{
 		try
 		{
-			MockSecurityConfig ret = new MockSecurityConfig(doHttpAuthn(), 
-					doSSLAuthn(), correctSSLAuthN);
-			cloneTo(ret);
-			return ret;
+			return (MockSecurityConfig) super.clone();
 		} catch (Exception e)
 		{
 			throw new RuntimeException("Can't clone!");

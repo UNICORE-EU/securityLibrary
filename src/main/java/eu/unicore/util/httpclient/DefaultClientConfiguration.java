@@ -299,7 +299,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	@Override
 	public DefaultClientConfiguration clone()
 	{
-		DefaultClientConfiguration ret = new DefaultClientConfiguration();
+		DefaultClientConfiguration ret = (DefaultClientConfiguration) super.clone();
 		cloneTo(ret);
 		return ret;
 	}

@@ -83,7 +83,14 @@ public class DefaultAuthnAndTrustConfiguration implements IAuthnAndTrustConfigur
 	@Override
 	public DefaultAuthnAndTrustConfiguration clone()
 	{
-		DefaultAuthnAndTrustConfiguration ret = new DefaultAuthnAndTrustConfiguration();
+		DefaultAuthnAndTrustConfiguration ret = null;
+		try
+		{
+			ret = (DefaultAuthnAndTrustConfiguration) super.clone();
+		} catch (CloneNotSupportedException e)
+		{
+			// won't happen
+		}
 		ret.setCredential(credential);
 		ret.setValidator(validator);
 		return ret;

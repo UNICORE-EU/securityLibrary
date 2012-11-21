@@ -254,8 +254,7 @@ public class ClientProperties extends DefaultClientConfiguration
 	@Override
 	public ClientProperties clone()
 	{
-		ClientProperties ret = new ClientProperties();
-		super.cloneTo(ret);
+		ClientProperties ret = (ClientProperties) super.clone();
 		ret.authnAndTrustConfiguration = this.authnAndTrustConfiguration.clone();
 		ret.clientPropertiesHelper= this.clientPropertiesHelper.clone();
 		return ret;
