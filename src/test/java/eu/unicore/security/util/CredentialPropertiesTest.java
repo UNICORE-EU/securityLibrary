@@ -65,6 +65,16 @@ public class CredentialPropertiesTest extends TestCase
 		verify(p);
 	}
 
+	public void testDetect()
+	{
+		Properties p = new Properties();
+		//p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, CredentialFormat.pkcs12.toString());
+		p.setProperty(DEFAULT_PREFIX + PROP_LOCATION, PFX+"portal.p12");
+		p.setProperty(DEFAULT_PREFIX + PROP_PASSWORD, "the!portal");
+		p.setProperty(DEFAULT_PREFIX + PROP_KS_ALIAS, "portal");
+		verify(p);
+	}
+
 	private void verify(Properties p)
 	{
 		try

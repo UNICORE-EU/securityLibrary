@@ -274,7 +274,11 @@ public class CredentialProperties extends PropertiesHelper
 		
 		if (ksAlias != null || ksKeyPassword != null || keyLocation == null)
 		{
-			//ok - only JKS/PKCS12 possible
+			//possible: JKS, PKCS12 and PEM keystore
+			if (credPath.toLowerCase().endsWith("pem"))
+				return CredentialFormat.pem;
+			
+			//possible: JKS, PKCS12
 			try
 			{
 				String type = KeystoreCredential.autodetectType(credPath, credPassword);
@@ -286,14 +290,14 @@ public class CredentialProperties extends PropertiesHelper
 					throw new ConfigurationException("Unknown keystore type found: " + type);
 			} catch (KeyStoreException e)
 			{
-				new ConfigurationException(errorPfx + ". Tried to load JKS/PKCS12 keystore as " +
+				throw new ConfigurationException(errorPfx + ". Tried to load JKS/PKCS12 keystore as " +
 						"settings for those types are present, but it was not possible. " +
-						"Try to set the type explicitely and to review other credential settings.");
+						"Try to set the credential format explicitely and/or to review other credential settings.");
 			} catch (IOException e)
 			{
-				new ConfigurationException(errorPfx + ". Tried to load JKS/PKCS12 keystore as " +
+				throw new ConfigurationException(errorPfx + ". Tried to load JKS/PKCS12 keystore as " +
 						"settings for those types are present, but it was not possible. " +
-						"Try to set the type explicitely and to review other credential settings. " +
+						"Try to set the credential format explicitely and/or to review other credential settings. " +
 						"Cause: " + e.toString());
 			}
 				
