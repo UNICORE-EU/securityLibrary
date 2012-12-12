@@ -62,9 +62,7 @@ import eu.unicore.security.etd.TrustDelegation;
  * Note about proxy certificates:
  * This class can recognize proxy certificates (for both user and consignor).
  * By default this support is turned on. When proxy support is turned on 
- * the object will return an EEC (or EEC DN) for all calls to methods returning 
- * a final identity as DN. Still it is possible to get also the proxy certificate(s) when
- * using the methods returning full certificate chains. 
+ * the object will return an EEC for the call to {@link #getConsignorCertificate()} 
  * 
  * @author K. Benedyczak
  * @author Bernd Schuller
