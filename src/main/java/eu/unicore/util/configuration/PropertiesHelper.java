@@ -63,6 +63,8 @@ import eu.unicore.util.jetty.HttpServerProperties;
  * If this class is extended, then the extending class should take care to properly check for its custom constraints,
  * by overriding {@link #checkPropertyConstraints(Properties, PropertyMD, String)} method (not forgetting to call
  * super). 
+ * <p>
+ * This class is thread safe.
  * 
  * @author K. Benedyczak
  */

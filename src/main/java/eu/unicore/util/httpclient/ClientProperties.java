@@ -141,16 +141,16 @@ public class ClientProperties extends DefaultClientConfiguration
 	}
 
 	/**
-	 * Load cred/validator settings, however assuming that both are optional. The checking if
-	 * the required things are configured are done in the main constructor when other client's 
-	 * options are evaluated.
+	 * Creates {@link AuthnAndTrustProperties} instance, however checking if (some of) the settings are optional,
+	 * basing on the settings of the client properties. E.g. when SSL is turned off then truststore is not
+	 * required.
 	 * @param p
 	 * @param trustPrefix
 	 * @param credPrefix
 	 * @param clientPrefix
 	 * @return
 	 */
-	private static IAuthnAndTrustConfiguration getDefaultAuthnAndTrust(Properties p, PasswordCallback callback, String trustPrefix, 
+	public static AuthnAndTrustProperties getDefaultAuthnAndTrust(Properties p, PasswordCallback callback, String trustPrefix, 
 			String credPrefix, String clientPrefix)
 	{
 		boolean trustOptional = false, credOptional = false;
@@ -158,13 +158,19 @@ public class ClientProperties extends DefaultClientConfiguration
 		String sslP = p.getProperty(clientPrefix + PROP_SSL_ENABLED);
 		String sslAuthnP = p.getProperty(clientPrefix + PROP_SSL_AUTHN_ENABLED);
 		String signP = p.getProperty(clientPrefix + PROP_MESSAGE_SIGNING_ENABLED);
+		boolean sslOff = sslP != null && (sslP.equalsIgnoreCase("false") || sslP.equalsIgnoreCase("no"));
+		boolean sslAuthnOff = sslAuthnP != null && (sslAuthnP.equalsIgnoreCase("false") || sslAuthnP.equalsIgnoreCase("no"));
+		boolean signOff = signP != null && (signP.equalsIgnoreCase("false") || signP.equalsIgnoreCase("no")); 
+		
 		//theoretically we can simply set that trust and creds are optional, as anyway it will be strictly verified further.
 		//however we perform this trick here, to get detailed error messages - otherwise we would only get
 		// "no truststore" or "no keystore"
-		if (sslP != null && (sslP.equalsIgnoreCase("false") || sslP.equalsIgnoreCase("no")))
-			trustOptional = credOptional= true;
-		else if (sslAuthnP != null && (sslAuthnP.equalsIgnoreCase("false") || sslAuthnP.equalsIgnoreCase("no"))
-			&& signP != null && (signP.equalsIgnoreCase("false") || signP.equalsIgnoreCase("no")))
+		if (sslOff)
+		{
+			trustOptional = true;
+			if (signOff)
+				credOptional = true;
+		} else if (sslAuthnOff && signOff)
 			credOptional = true;
 		
 		return new AuthnAndTrustProperties(p, trustPrefix, credPrefix, callback, trustOptional, credOptional);
@@ -259,7 +265,20 @@ public class ClientProperties extends DefaultClientConfiguration
 		ret.clientPropertiesHelper= this.clientPropertiesHelper.clone();
 		return ret;
 	}
-
+	
+	/**
+	 * This version clones the object as normal clone(), but authnAndTrustConfiguration is
+	 * simply copied by reference so is shared with the cloned instance.
+	 * @return
+	 */
+	public ClientProperties shallowClone()
+	{
+		ClientProperties ret = (ClientProperties) super.clone();
+		ret.authnAndTrustConfiguration = this.authnAndTrustConfiguration;
+		ret.clientPropertiesHelper= this.clientPropertiesHelper.clone();
+		return ret;
+	}
+	
 	/**
 	 * @return the authnAndTrustConfiguration
 	 */
