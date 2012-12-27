@@ -281,7 +281,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	}
 	
 	protected void checkPropertyConstraints(PropertyMD meta, String key) throws ConfigurationException {
-		if (meta.isMandatory() && !isSet(key)) 
+		if (meta.isMandatory() && !isSet(key) && !(meta.getType() == Type.LIST || meta.canHaveSubkeys())) 
 			throw new ConfigurationException("The property " + getKeyDescription(key) + 
 					" is mandatory");
 		
@@ -316,9 +316,12 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 			getEnumValue(key, meta.getEnumTypeInstance().getDeclaringClass());
 			break;
 		case LIST:
+			Set<String> listKeys = getSortedStringKeys(prefix+key);
+			if (meta.isMandatory() && listKeys.size() == 0)
+				throw new ConfigurationException("The property " + getKeyDescription(key) + 
+						" is mandatory");
 			if (meta.numericalListKeys())
 			{
-				Set<String> listKeys = getSortedStringKeys(prefix+key);
 				int l = (prefix+key).length();
 				for (String k: listKeys)
 				{
