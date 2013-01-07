@@ -23,7 +23,7 @@ public class SimpleGenerateTest extends ETDTestBase
 					privKey1, receiverCert1, null);
 			System.out.println("-------------------------------------------\n" + 
 					"TD with RSA key, and cert boundled:");
-			System.out.println(td.getXML().xmlText(xmlOpts));
+			System.out.println(td.getXMLBeanDoc().xmlText(xmlOpts));
 		} catch (Exception e)
 		{
 			fail(e.getMessage());
@@ -39,7 +39,7 @@ public class SimpleGenerateTest extends ETDTestBase
 					privKey2, receiverCert2, null);
 			System.out.println("\n-------------------------------------------\n" + 
 				"TD with DSA key, and cert boundled:");
-			System.out.println(td.getXML().xmlText(xmlOpts));
+			System.out.println(td.getXMLBeanDoc().xmlText(xmlOpts));
 		} catch (Exception e)
 		{
 			fail(e.getMessage());
@@ -55,7 +55,7 @@ public class SimpleGenerateTest extends ETDTestBase
 					privKey1, receiverDN1, null);
 			System.out.println("\n-------------------------------------------\n" + 
 				"TD with RSA key, without cert boundled:");
-			System.out.println(td.getXML().xmlText(xmlOpts));
+			System.out.println(td.getXMLBeanDoc().xmlText(xmlOpts));
 		} catch (Exception e)
 		{
 			fail(e.getMessage());
@@ -71,7 +71,7 @@ public class SimpleGenerateTest extends ETDTestBase
 					privKey2, receiverDN2, null);
 			System.out.println("\n-------------------------------------------\n" + 
 				"TD with DSA key, without cert:");
-			System.out.println(td.getXML().xmlText(xmlOpts));
+			System.out.println(td.getXMLBeanDoc().xmlText(xmlOpts));
 		} catch (Exception e)
 		{
 			fail(e.getMessage());

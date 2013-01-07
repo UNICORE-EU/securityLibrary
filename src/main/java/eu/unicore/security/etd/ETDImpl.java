@@ -21,12 +21,15 @@ import org.apache.xmlbeans.XmlObject;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
+import eu.unicore.samly2.exceptions.SAMLValidationException;
+import eu.unicore.samly2.trust.SimpleTrustChecker;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.dsig.DSigException;
 
 /**
  * Implements logic to generate and validate trust delegation assertions.
  * FIXME! cert mode Java hash should be changed to a SHA2 hash! With backwards compatibility 
+ * TODO - use AssertionValidator to validate particulat assertions.
  * @author K. Benedyczak
  */
 public class ETDImpl implements ETDApi
@@ -264,14 +267,14 @@ public class ETDImpl implements ETDApi
 			return new ValidationResult(false, "Issuer certificate is " + issuerCertValidation.toString());
 		}
 		
+		SimpleTrustChecker signatureChecker = new SimpleTrustChecker(issuer[0], false);
 		try
 		{
-			if (!td.isCorrectlySigned(issuer[0].getPublicKey()))
-				return new ValidationResult(false, "Signature is incorrect");
-		} catch (DSigException e)
+			signatureChecker.checkTrust(td.getXMLBeanDoc());
+		} catch (SAMLValidationException e)
 		{
 			return new ValidationResult(false, "Signature is incorrect: " + 
-					e.getCause());
+					e.toString());
 		}
 		
 		Date notBefore = td.getNotBefore();

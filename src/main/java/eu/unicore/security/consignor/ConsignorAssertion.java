@@ -14,8 +14,9 @@ import java.security.cert.X509Certificate;
 import org.apache.xmlbeans.XmlException;
 
 import eu.unicore.samly2.assertion.Assertion;
+import eu.unicore.samly2.assertion.AssertionParser;
 import eu.unicore.samly2.elements.SAMLAttribute;
-import eu.unicore.samly2.exceptions.SAMLParseException;
+import eu.unicore.samly2.exceptions.SAMLValidationException;
 
 import xmlbeans.org.oasis.saml2.assertion.AssertionDocument;
 import xmlbeans.org.oasis.saml2.assertion.AttributeStatementType;
@@ -34,7 +35,6 @@ public class ConsignorAssertion extends Assertion
 	public static final String CONSIGNOR_ROLE = "CONSIGNOR";
 	public static final String ROLE_NAME_FORMAT = "urn:unicore:subject-role";
 
-	
 	public ConsignorAssertion()
 	{
 		super();
@@ -43,17 +43,16 @@ public class ConsignorAssertion extends Assertion
 	}
 	
 	public ConsignorAssertion(AssertionDocument doc) 
-		throws SAMLParseException, XmlException, IOException
+		throws SAMLValidationException, XmlException, IOException
 	{
-		super(doc);
 		//BUGFIX - it is ok to get Consignor assertion with no subject
 		//it means that Gateway processed the request but requester was not authenticated.
 		//if (getSubject() == null)
 		//	throw new SAMLParseException("No subject (consignor) in assertion.");
 		boolean found = false;
-		AttributeStatementType[] attrSs = getAttributes();
+		AttributeStatementType[] attrSs = doc.getAssertion().getAttributeStatementArray();
 		if (attrSs == null)
-			throw new SAMLParseException("No attribute statement in SAML assertion");
+			throw new SAMLValidationException("No attribute statement in SAML assertion");
 		for (int i=0; i<attrSs.length; i++)
 		{
 			AttributeType []attrs = attrSs[i].getAttributeArray();			
@@ -68,12 +67,16 @@ public class ConsignorAssertion extends Assertion
 				break;
 		}
 		if (!found)
-			throw new SAMLParseException("SAML assertion doesn't contain consignor role " +
-					"attirbute");
+			throw new SAMLValidationException("SAML assertion doesn't contain consignor role " +
+					"attribute");
+
+		this.assertionDoc = doc;
+		this.assertion = doc.getAssertion();
 	}
 	
 	public X509Certificate[] getConsignor()
 	{
-		return getSubjectFromConfirmation();
+		AssertionParser parser = new AssertionParser(getXMLBeanDoc());
+		return parser.getSubjectFromConfirmation();
 	}
 }

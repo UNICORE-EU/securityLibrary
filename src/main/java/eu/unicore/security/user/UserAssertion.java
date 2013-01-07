@@ -14,13 +14,16 @@ import java.security.cert.X509Certificate;
 
 import org.apache.xmlbeans.XmlException;
 
+import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.samly2.assertion.Assertion;
 import eu.unicore.samly2.elements.SAMLAttribute;
-import eu.unicore.samly2.exceptions.SAMLParseException;
+import eu.unicore.samly2.exceptions.SAMLValidationException;
 
 import xmlbeans.org.oasis.saml2.assertion.AssertionDocument;
+import xmlbeans.org.oasis.saml2.assertion.AssertionType;
 import xmlbeans.org.oasis.saml2.assertion.AttributeStatementType;
 import xmlbeans.org.oasis.saml2.assertion.AttributeType;
+import xmlbeans.org.oasis.saml2.assertion.SubjectType;
 
 
 /**
@@ -42,7 +45,6 @@ public class UserAssertion extends Assertion
 	 */
 	public UserAssertion(String consignorDN, String userDN)
 	{
-		super();
 		constructorCommon(consignorDN, userDN);
 	}
 
@@ -57,7 +59,6 @@ public class UserAssertion extends Assertion
 	public UserAssertion(String consignorDN, X509Certificate[] userCertChain) 
 		throws CertificateEncodingException
 	{
-		super();
 		String userDN = userCertChain[0].getSubjectX500Principal().getName();
 		constructorCommon(consignorDN, userDN);
 		setSenderVouchesX509Confirmation(userCertChain);
@@ -72,15 +73,20 @@ public class UserAssertion extends Assertion
 	}
 	
 	public UserAssertion(AssertionDocument doc) 
-		throws SAMLParseException, XmlException, IOException
+		throws SAMLValidationException, XmlException, IOException
 	{
 		super(doc);
-		if (getSubjectDN() == null)
-			throw new SAMLParseException("No subject (user) in assertion.");
+		AssertionType assertion = doc.getAssertion();
+		SubjectType subject = assertion.getSubject();
+		if (subject == null || subject.isNil() || subject.getNameID() == null || 
+				subject.getNameID().isNil() || subject.getNameID().getStringValue() == null)
+			throw new SAMLValidationException("No subject (user) in assertion.");
+		if (!SAMLConstants.NFORMAT_DN.equals(subject.getNameID().getFormat()))
+			throw new SAMLValidationException("Subject (user) in User assertion must be of DN format");
 		boolean found = false;
-		AttributeStatementType[] attrSs = getAttributes();
+		AttributeStatementType[] attrSs = assertion.getAttributeStatementArray();
 		if (attrSs == null)
-			throw new SAMLParseException("No attribute statement in SAML assertion");
+			throw new SAMLValidationException("No attribute statement in SAML assertion");
 		for (int i=0; i<attrSs.length; i++)
 		{
 			AttributeType []attrs = attrSs[i].getAttributeArray();			
@@ -95,7 +101,7 @@ public class UserAssertion extends Assertion
 				break;
 		}
 		if (!found)
-			throw new SAMLParseException("SAML assertion doesn't contain user " +
+			throw new SAMLValidationException("SAML assertion doesn't contain user " +
 					"role attirbute");
 	}
 	

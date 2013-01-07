@@ -14,14 +14,12 @@ import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.security.auth.x500.X500Principal;
-
 import xmlbeans.org.oasis.saml2.assertion.AuthnContextDocument;
 import xmlbeans.org.oasis.saml2.assertion.SubjectLocalityDocument;
 import xmlbeans.org.oasis.saml2.assertion.SubjectLocalityType;
 
-import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.samly2.SAMLConstants.AuthNClasses;
+import eu.unicore.samly2.exceptions.SAMLValidationException;
 import eu.unicore.security.Client;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.dsig.DSigException;
@@ -94,19 +92,11 @@ public class ConsignorImpl implements ConsignorAPI
 	public ValidationResult verifyConsignorToken(ConsignorAssertion assertion,
 			X509Certificate issuerCertificate)
 	{
-		String i1 = assertion.getIssuerDN();
-		X500Principal i2 = issuerCertificate.getSubjectX500Principal();
-		if (!X500NameUtils.equal(i2, i1))
-			return new ValidationResult(false, "Wrong issuer");
-		if (!assertion.checkTimeConditions())
-			return new ValidationResult(false, "Lifetime conditions are not met");
+		ConsignorValidator validator = new ConsignorValidator(issuerCertificate);
 		try
 		{
-			if (assertion.isSigned() &&
-					!assertion.isCorrectlySigned(
-					issuerCertificate.getPublicKey()))
-				return new ValidationResult(false, "Signature is invalid");
-		} catch (DSigException e)
+			validator.validate(assertion.getXMLBeanDoc());
+		} catch (SAMLValidationException e)
 		{
 			return new ValidationResult(false, e.getMessage());
 		}

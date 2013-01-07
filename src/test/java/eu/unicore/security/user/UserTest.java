@@ -23,13 +23,13 @@ public class UserTest extends TestBase
 			UserAssertion token = new UserAssertion(issuerDN1, issuerDN2);
 			System.out.println("-------------------------------------------\n" + 
 				"User token:");
-			System.out.println(token.getXML().xmlText(xmlOpts));
+			System.out.println(token.getXMLBeanDoc().xmlText(xmlOpts));
 			
-			AssertionDocument doc = token.getXML();
+			AssertionDocument doc = token.getXMLBeanDoc();
 			UserAssertion parsedToken = new UserAssertion(doc);
 			System.out.println("-------------------------------------------\n" + 
 				"Parsed user token:");
-			System.out.println(parsedToken.getXML().xmlText(xmlOpts));
+			System.out.println(parsedToken.getXMLBeanDoc().xmlText(xmlOpts));
 
 		} catch (Exception e)
 		{
@@ -46,14 +46,14 @@ public class UserTest extends TestBase
 			UserAssertion token = new UserAssertion(issuerDN1, issuerCert2);
 			System.out.println("-------------------------------------------\n" + 
 				"User token:");
-			System.out.println(token.getXML().xmlText(xmlOpts));
+			System.out.println(token.getXMLBeanDoc().xmlText(xmlOpts));
 			
-			AssertionDocument doc = token.getXML();
+			AssertionDocument doc = token.getXMLBeanDoc();
 			UserAssertion parsedToken = new UserAssertion(doc);
 			
 			System.out.println("-------------------------------------------\n" + 
 				"Parsed user token:");
-			System.out.println(parsedToken.getXML().xmlText(xmlOpts));
+			System.out.println(parsedToken.getXMLBeanDoc().xmlText(xmlOpts));
 			System.out.println("User's certificate parsed: " + 
 					parsedToken.getUserCertificate());
 

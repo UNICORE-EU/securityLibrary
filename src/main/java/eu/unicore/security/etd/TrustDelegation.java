@@ -17,11 +17,13 @@ import org.apache.xmlbeans.XmlException;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.samly2.assertion.Assertion;
 import eu.unicore.samly2.elements.SAMLAttribute;
-import eu.unicore.samly2.exceptions.SAMLParseException;
+import eu.unicore.samly2.exceptions.SAMLValidationException;
 
 import xmlbeans.org.oasis.saml2.assertion.AssertionDocument;
+import xmlbeans.org.oasis.saml2.assertion.AssertionType;
 import xmlbeans.org.oasis.saml2.assertion.AttributeStatementType;
 import xmlbeans.org.oasis.saml2.assertion.AttributeType;
+import xmlbeans.org.oasis.saml2.assertion.SubjectType;
 
 
 /**
@@ -30,7 +32,6 @@ import xmlbeans.org.oasis.saml2.assertion.AttributeType;
  */
 public class TrustDelegation extends Assertion
 {
-
 	private static final long serialVersionUID = 1L;
 
 	public static final String CUSTODIAN_NAME = "TrustDelegationOfUser";
@@ -42,7 +43,6 @@ public class TrustDelegation extends Assertion
 	
 	public TrustDelegation(String custodian)
 	{
-		super();
 		String dn = X500NameUtils.getPortableRFC2253Form(custodian);
 		custodianDN = dn;
 		hash = null;
@@ -54,8 +54,6 @@ public class TrustDelegation extends Assertion
 
 	public TrustDelegation(X509Certificate custodian)
 	{
-		super();
-		
 		String dn = custodian.getSubjectX500Principal().getName();
 		custodianDN = dn;
 		SAMLAttribute custodianA = new SAMLAttribute(CUSTODIAN_NAME, 
@@ -70,15 +68,18 @@ public class TrustDelegation extends Assertion
 		addAttribute(custodian2A);
 	}
 	
-	public TrustDelegation(AssertionDocument doc) throws SAMLParseException, XmlException, IOException
+	public TrustDelegation(AssertionDocument doc) throws SAMLValidationException, XmlException, IOException
 	{
 		super(doc);
-		if (getSubjectDN() == null)
-			throw new SAMLParseException("No subject (user) in assertion.");
-		AttributeStatementType[] attrSs = getAttributes();
+		AssertionType assertion = doc.getAssertion();
+		SubjectType subject = assertion.getSubject();
+		if (subject == null || subject.isNil() || subject.getNameID() == null || 
+				subject.getNameID().isNil() || subject.getNameID().getStringValue() == null)
+			throw new SAMLValidationException("No subject (user) in assertion.");
+		AttributeStatementType[] attrSs = assertion.getAttributeStatementArray();
 		custodianDN = null;
 		if (attrSs == null)
-			throw new SAMLParseException("No attribute statement in SAML assertion");
+			throw new SAMLValidationException("No attribute statement in SAML assertion");
 		for (int i=0; i<attrSs.length; i++)
 		{
 			AttributeType []attrs = attrSs[i].getAttributeArray();			
@@ -102,7 +103,7 @@ public class TrustDelegation extends Assertion
 						hash = Integer.parseInt(cur.getTextValue());
 					} catch (NumberFormatException e)
 					{
-						throw new SAMLParseException(
+						throw new SAMLValidationException(
 							"Custodian certificate hash " +
 							"value is not an integer");						
 					}
@@ -110,7 +111,7 @@ public class TrustDelegation extends Assertion
 			}
 		}
 		if (custodianDN == null)
-			throw new SAMLParseException("SAML assertion doesn't contain trust " +
+			throw new SAMLValidationException("SAML assertion doesn't contain trust " +
 					"delegation attribute");
 	}
 	

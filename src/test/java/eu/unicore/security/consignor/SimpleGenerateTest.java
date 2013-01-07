@@ -35,9 +35,9 @@ public class SimpleGenerateTest extends TestBase
 			
 			System.out.println("-------------------------------------------\n" + 
 					"Consignor token:");
-			System.out.println(token.getXML().xmlText(xmlOpts));
+			System.out.println(token.getXMLBeanDoc().xmlText(xmlOpts));
 			
-			AssertionDocument doc = token.getXML();
+			AssertionDocument doc = token.getXMLBeanDoc();
 			ConsignorAssertion parsedToken = new ConsignorAssertion(doc);
 			if (!parsedToken.isSigned())
 				fail("Assertion doesn't report itself as signed");
@@ -45,7 +45,7 @@ public class SimpleGenerateTest extends TestBase
 				impl.verifyConsignorToken(parsedToken, issuerCert2[0]);
 			if (!res.isValid())
 				fail(res.getInvalidResaon());
-			assertEquals("127.0.0.1", parsedToken.getAuthStatements()[0].getSubjectLocality().getAddress());
+			assertEquals("127.0.0.1", parsedToken.getXMLBean().getAuthnStatementArray(0).getSubjectLocality().getAddress());
 		} catch (Exception e)
 		{
 			e.printStackTrace();
@@ -66,9 +66,9 @@ public class SimpleGenerateTest extends TestBase
 			
 			System.out.println("-------------------------------------------\n" + 
 					"Consignor token:");
-			System.out.println(token.getXML().xmlText(xmlOpts));
+			System.out.println(token.getXMLBeanDoc().xmlText(xmlOpts));
 			
-			AssertionDocument doc = token.getXML();
+			AssertionDocument doc = token.getXMLBeanDoc();
 			ConsignorAssertion parsedToken = new ConsignorAssertion(doc);
 			if (parsedToken.isSigned())
 				fail("Assertion maliciously report itself as signed");
@@ -98,7 +98,7 @@ public class SimpleGenerateTest extends TestBase
 				impl.generateConsignorToken(issuerDN2, expiredCert,
 						AuthNClasses.TLS, "127.0.0.1");
 			
-			AssertionDocument doc = token.getXML();
+			AssertionDocument doc = token.getXMLBeanDoc();
 			ConsignorAssertion parsedToken = new ConsignorAssertion(doc);
 			ValidationResult res = 
 				impl.verifyConsignorToken(parsedToken, expiredCert[0]);

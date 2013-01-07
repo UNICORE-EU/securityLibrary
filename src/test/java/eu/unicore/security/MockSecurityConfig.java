@@ -27,14 +27,11 @@ public class MockSecurityConfig extends DefaultClientConfiguration
 	public static final String KS_ALIAS_GW = "gw";
 	public static final String KS_ALIAS_WRONG = "mykey_wrong";
 
-	private boolean correctSSLAuthN;
-	
 	public MockSecurityConfig(boolean doHTTPAuthN,
 			boolean doSSLAuthN, boolean correctSSLAuthN) throws Exception
 	{
 		setHttpAuthn(doHTTPAuthN);
 		setSslAuthn(doSSLAuthN);
-		this.correctSSLAuthN = correctSSLAuthN;
 		setHttpPassword(HTTP_PASSWD);
 		setHttpUser(HTTP_USER);
 		if (doSSLAuthN)

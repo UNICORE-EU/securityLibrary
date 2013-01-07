@@ -32,13 +32,13 @@ public class ParseTest extends ETDTestBase
 			TrustDelegation td = etdEngine.generateTD(issuerDN3, issuerCert3,
 					privKey4, receiverDN1, null);
 
-			TrustDelegation td2 = new TrustDelegation(td.getXML());
+			TrustDelegation td2 = new TrustDelegation(td.getXMLBeanDoc());
 			System.out.println("-------------------------------------------\n" + 
 				"TD with RSA key, DN:");
-				System.out.println(td.getXML().xmlText(xmlOpts));
+				System.out.println(td.getXMLBeanDoc().xmlText(xmlOpts));
 			System.out.println("-------------------------------------------\n" + 
 				"TD parsed with RSA key, DN:");
-			System.out.println(td2.getXML().xmlText(xmlOpts));
+			System.out.println(td2.getXMLBeanDoc().xmlText(xmlOpts));
 			
 			ValidationResult result = 
 				etdEngine.validateTD(td2, issuerDN3, issuerDN3, receiverDN1, new BinaryCertChainValidator(true));
@@ -58,13 +58,13 @@ public class ParseTest extends ETDTestBase
 			TrustDelegation td = etdEngine.generateTD(issuerCert1[0], issuerCert1,
 					privKey1, receiverCert1, null);
 
-			TrustDelegation td2 = new TrustDelegation(td.getXML());
+			TrustDelegation td2 = new TrustDelegation(td.getXMLBeanDoc());
 			System.out.println("-------------------------------------------\n" + 
 				"TD with RSA key, Cert:");
-				System.out.println(td.getXML().xmlText(xmlOpts));
+				System.out.println(td.getXMLBeanDoc().xmlText(xmlOpts));
 			System.out.println("-------------------------------------------\n" + 
 				"TD parsed with RSA key, Cert:");
-			System.out.println(td2.getXML().xmlText(xmlOpts));
+			System.out.println(td2.getXMLBeanDoc().xmlText(xmlOpts));
 			
 			ValidationResult result = 
 				etdEngine.validateTD(td2, issuerCert1[0], issuerCert1, 
@@ -92,18 +92,18 @@ public class ParseTest extends ETDTestBase
 			TrustDelegation td = etdEngine.generateTD(issuerDN1, issuerCert1,
 					privKey1, receiverDN1, rest);
 
-			TrustDelegation td2 = new TrustDelegation(td.getXML());
+			TrustDelegation td2 = new TrustDelegation(td.getXMLBeanDoc());
 
 			System.out.println("-------------------------------------------\n" + 
 				"TD parsed with custom restriction:");
-			System.out.println(td2.getXML().xmlText(xmlOpts));
+			System.out.println(td2.getXMLBeanDoc().xmlText(xmlOpts));
 			
 			ValidationResult result = 
 				etdEngine.validateTD(td2, issuerDN1, issuerDN1, receiverDN1, new BinaryCertChainValidator(true));
 			if (!result.isValid())
 				fail(result.getInvalidResaon());
 			
-			ConditionAbstractType []customC = td2.getCustomConditions();
+			ConditionAbstractType []customC = td2.getXMLBean().getConditions().getConditionArray();
 			if (customC == null || customC.length != 1)
 				fail("No custom conditions after parsing");
 		} catch (Exception e)
