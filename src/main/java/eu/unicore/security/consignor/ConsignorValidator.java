@@ -49,10 +49,4 @@ public class ConsignorValidator extends AssertionValidator
 			throw new SAMLValidationException("Issuer of assertion is not equal to the expected one: " + 
 					X500NameUtils.getReadableForm(assertion.getIssuer().getStringValue()));
 	}
-	
-	@Override
-	protected void checkStatements(AssertionType assertion) throws SAMLValidationException
-	{
-		//Consignor assertions are mixed
-	}
 }

@@ -8,17 +8,9 @@
 
 package eu.unicore.security.etd;
 
-import java.math.BigInteger;
-import java.util.Date;
-
-import org.apache.xmlbeans.XmlObject;
-
 import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.etd.TrustDelegation;
-import xmlbeans.org.oasis.saml2.assertion.ConditionAbstractType;
-import xmlbeans.org.oasis.saml2.assertion.ProxyRestrictionDocument;
-import xmlbeans.org.oasis.saml2.assertion.ProxyRestrictionType;
 
 /**
  * @author K. Benedyczak
@@ -73,42 +65,6 @@ public class ParseTest extends ETDTestBase
 				fail(result.getInvalidResaon());
 		} catch (Exception e)
 		{
-			fail(e.getMessage());
-		}
-		assertTrue(true);
-	}
-	
-	public void testCustomRestriction()
-	{
-		try
-		{
-			DelegationRestrictions rest = new DelegationRestrictions(new Date(), 1, 1);
-			
-			ProxyRestrictionDocument restDoc = ProxyRestrictionDocument.Factory.newInstance();
-			ProxyRestrictionType customRest = restDoc.addNewProxyRestriction();
-			customRest.setCount(BigInteger.TEN);
-			rest.setCustomConditions(new XmlObject[] {restDoc});
-			
-			TrustDelegation td = etdEngine.generateTD(issuerDN1, issuerCert1,
-					privKey1, receiverDN1, rest);
-
-			TrustDelegation td2 = new TrustDelegation(td.getXMLBeanDoc());
-
-			System.out.println("-------------------------------------------\n" + 
-				"TD parsed with custom restriction:");
-			System.out.println(td2.getXMLBeanDoc().xmlText(xmlOpts));
-			
-			ValidationResult result = 
-				etdEngine.validateTD(td2, issuerDN1, issuerDN1, receiverDN1, new BinaryCertChainValidator(true));
-			if (!result.isValid())
-				fail(result.getInvalidResaon());
-			
-			ConditionAbstractType []customC = td2.getXMLBean().getConditions().getConditionArray();
-			if (customC == null || customC.length != 1)
-				fail("No custom conditions after parsing");
-		} catch (Exception e)
-		{
-			e.printStackTrace();
 			fail(e.getMessage());
 		}
 		assertTrue(true);

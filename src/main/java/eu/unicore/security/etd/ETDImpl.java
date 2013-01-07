@@ -22,21 +22,18 @@ import org.apache.xmlbeans.XmlObject;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.samly2.exceptions.SAMLValidationException;
-import eu.unicore.samly2.trust.SimpleTrustChecker;
+import eu.unicore.samly2.validators.AssertionValidator;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.dsig.DSigException;
 
 /**
  * Implements logic to generate and validate trust delegation assertions.
  * FIXME! cert mode Java hash should be changed to a SHA2 hash! With backwards compatibility 
- * TODO - use AssertionValidator to validate particulat assertions.
  * @author K. Benedyczak
  */
 public class ETDImpl implements ETDApi
 {
 	public static final int DEFAULT_VALIDITY_DAYS = 14;
-	// 5 mins to cover minor clock skews
-	public static final int ETD_VALIDITY_GRACE_TIME = 300000;
 
 	/**
 	 * Generates trust delegation in terms of DNs.
@@ -260,31 +257,17 @@ public class ETDImpl implements ETDApi
 						" hashes are different)");				
 		}
 
-		
-		eu.emi.security.authn.x509.ValidationResult issuerCertValidation = validator.validate(issuer);
-		if (!issuerCertValidation.isValid())
-		{
-			return new ValidationResult(false, "Issuer certificate is " + issuerCertValidation.toString());
-		}
-		
-		SimpleTrustChecker signatureChecker = new SimpleTrustChecker(issuer[0], false);
+		AssertionValidator asValidator = new AssertionValidator(null, null, null,
+				AssertionValidator.DEFAULT_VALIDITY_GRACE_PERIOD, 
+				new ETDSamlTrustChecker(validator, issuer));
 		try
 		{
-			signatureChecker.checkTrust(td.getXMLBeanDoc());
+			asValidator.validate(td.getXMLBeanDoc());
 		} catch (SAMLValidationException e)
 		{
-			return new ValidationResult(false, "Signature is incorrect: " + 
-					e.toString());
+			return new ValidationResult(false, "Delegation assertion is invalid: " + 
+					e.getMessage());
 		}
-		
-		Date notBefore = td.getNotBefore();
-		Date nowPlus = new Date(System.currentTimeMillis()+ETD_VALIDITY_GRACE_TIME);
-		if (notBefore != null && nowPlus.before(notBefore))
-			return new ValidationResult(false, "Delegation is not yet valid, will be from: " + notBefore); 
-		Date nowMinus = new Date(System.currentTimeMillis()-ETD_VALIDITY_GRACE_TIME);
-		Date notOnOrAfter = td.getNotOnOrAfter();
-		if (notOnOrAfter != null && nowMinus.after(notOnOrAfter))
-			return new ValidationResult(false, "Delegation is no more valid, expired at: " + notOnOrAfter);
 		
 		return new ValidationResult(true, "Validation OK");
 	}

@@ -131,7 +131,7 @@ public class NegativeTest extends ETDTestBase
 			ValidationResult result = 
 				etdEngine.validateTD(td, issuerDN1, issuerDN1, receiverDN1, new BinaryCertChainValidator(true));
 			if (result.isValid() || 
-				!result.getInvalidResaon().startsWith("Signature is incorrect"))
+				!result.getInvalidResaon().contains("Signature is incorrect"))
 				fail("Validation of wrong key succeeded/error is wrong: " + 
 						result.getInvalidResaon());
 		} catch (Exception e)
@@ -156,7 +156,7 @@ public class NegativeTest extends ETDTestBase
 			ValidationResult result = 
 				etdEngine.validateTD(td, issuerDN1, issuerDN1, receiverDN1, new BinaryCertChainValidator(true));
 			if (result.isValid() || 
-				!result.getInvalidResaon().startsWith("Delegation is no more valid"))
+				!result.getInvalidResaon().contains("Assertion expired"))
 				fail("Validation of wrong end date succeeded/error is wrong: " + 
 						result.getInvalidResaon());
 		} catch (Exception e)
@@ -182,7 +182,7 @@ public class NegativeTest extends ETDTestBase
 			ValidationResult result = 
 				etdEngine.validateTD(td, issuerDN1, issuerDN1, receiverDN1, new BinaryCertChainValidator(true));
 			if (result.isValid() || 
-				!result.getInvalidResaon().startsWith("Delegation is not yet valid"))
+				!result.getInvalidResaon().contains("Assertion is not yet valid"))
 				fail("Validation of wrong start date succeeded/error is wrong: " + 
 						result.getInvalidResaon());
 		} catch (Exception e)
@@ -203,7 +203,7 @@ public class NegativeTest extends ETDTestBase
 				etdEngine.validateTD(td, expiredDN, expiredDN, receiverDN1,
 					new BinaryCertChainValidator(false));
 			if (result.isValid() || 
-				!result.getInvalidResaon().startsWith("Issuer certificate is FAILED"))
+				!result.getInvalidResaon().contains("was conducted by an untrusted entity"))
 				fail("Validation of ETD issued with expired issuer's certificate is wrong: " + 
 						result.getInvalidResaon());
 		} catch (Exception e)
