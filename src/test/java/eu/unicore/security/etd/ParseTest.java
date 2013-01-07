@@ -65,6 +65,7 @@ public class ParseTest extends ETDTestBase
 				fail(result.getInvalidResaon());
 		} catch (Exception e)
 		{
+			e.printStackTrace();
 			fail(e.getMessage());
 		}
 		assertTrue(true);

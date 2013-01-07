@@ -8,11 +8,15 @@
 
 package eu.unicore.security.etd;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
 import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlException;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.util.encoders.HexEncoder;
 
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.samly2.assertion.Assertion;
@@ -37,15 +41,18 @@ public class TrustDelegation extends Assertion
 	public static final String CUSTODIAN_NAME = "TrustDelegationOfUser";
 	public static final String CUSTODIAN_NAME_FORMAT_DN = "urn:unicore:trust-delegation:dn";
 	public static final String CUSTODIAN_NAME_FORMAT_FP = "urn:unicore:trust-delegation:hashcode";
+	public static final String CUSTODIAN_NAME_FORMAT_SHA2 = "urn:unicore:trust-delegation:sha2hashcode";
 
 	private String custodianDN;
-	private Integer hash;
+	private Integer legacyHash;
+	private String sha2Hash;
 	
 	public TrustDelegation(String custodian)
 	{
 		String dn = X500NameUtils.getPortableRFC2253Form(custodian);
 		custodianDN = dn;
-		hash = null;
+		legacyHash = null;
+		sha2Hash = null;
 		SAMLAttribute custodianA = new SAMLAttribute(CUSTODIAN_NAME, 
 			CUSTODIAN_NAME_FORMAT_DN);
 		custodianA.addStringAttributeValue(dn);
@@ -60,12 +67,19 @@ public class TrustDelegation extends Assertion
 			CUSTODIAN_NAME_FORMAT_DN);
 		custodianA.addStringAttributeValue(dn);
 		addAttribute(custodianA);
-		hash = custodian.hashCode();
 		
+		sha2Hash = generateSha2Hash(custodian);
 		SAMLAttribute custodian2A = new SAMLAttribute(CUSTODIAN_NAME, 
-			CUSTODIAN_NAME_FORMAT_FP);
-		custodian2A.addStringAttributeValue(hash + "");
+			CUSTODIAN_NAME_FORMAT_SHA2);
+		custodian2A.addStringAttributeValue(sha2Hash);
 		addAttribute(custodian2A);
+		
+		//legacy
+		legacyHash = custodian.hashCode();
+		SAMLAttribute custodian3A = new SAMLAttribute(CUSTODIAN_NAME, 
+			CUSTODIAN_NAME_FORMAT_FP);
+		custodian3A.addStringAttributeValue(legacyHash + "");
+		addAttribute(custodian3A);
 	}
 	
 	public TrustDelegation(AssertionDocument doc) throws SAMLValidationException, XmlException, IOException
@@ -93,26 +107,60 @@ public class TrustDelegation extends Assertion
 						.newCursor();
 					cur.toFirstContentToken();
 					custodianDN = cur.getTextValue();
+					cur.dispose();
 				} else if (attrs[j].getNameFormat().equals(CUSTODIAN_NAME_FORMAT_FP))
-				{
+				{ //backwards compatibility - we support U6.x cert hashes, which are hashes of java objects
 					XmlCursor cur = attrs[j].getAttributeValueArray(0)
 						.newCursor();
 					cur.toFirstContentToken();
 					try
 					{
-						hash = Integer.parseInt(cur.getTextValue());
+						legacyHash = Integer.parseInt(cur.getTextValue());
 					} catch (NumberFormatException e)
 					{
 						throw new SAMLValidationException(
 							"Custodian certificate hash " +
 							"value is not an integer");						
 					}
+					cur.dispose();
+				} else if (attrs[j].getNameFormat().equals(CUSTODIAN_NAME_FORMAT_SHA2))
+				{ //SHA2 hashes used from U7
+					XmlCursor cur = attrs[j].getAttributeValueArray(0).newCursor();
+					cur.toFirstContentToken();
+					sha2Hash = cur.getTextValue();
+					cur.dispose();
 				}
 			}
 		}
 		if (custodianDN == null)
 			throw new SAMLValidationException("SAML assertion doesn't contain trust " +
 					"delegation attribute");
+	}
+	
+	public static String generateSha2Hash(X509Certificate custodian)
+	{
+		SHA256Digest digest = new SHA256Digest();
+		byte[] binary;
+		try
+		{
+			binary = custodian.getEncoded();
+		} catch (CertificateEncodingException e1)
+		{
+			throw new RuntimeException("Shouldn't happen - can't get binary DER form of a certificate", e1);
+		}
+		digest.update(binary, 0, binary.length);
+		byte[] result = new byte[digest.getByteLength()];
+		digest.doFinal(result, 0);
+		HexEncoder encoder = new HexEncoder();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
+		try
+		{
+			encoder.encode(result, 0, result.length, baos);
+		} catch (IOException e)
+		{
+			throw new RuntimeException("Shouldn't happen", e);
+		}
+		return baos.toString();
 	}
 	
 	public String getCustodianDN()
@@ -122,7 +170,11 @@ public class TrustDelegation extends Assertion
 	
 	public Integer getCustodianCertHash()
 	{
-		return hash;
+		return legacyHash;
 	}
 	
+	public String getCustodianCertHashSha2()
+	{
+		return sha2Hash;
+	}
 }

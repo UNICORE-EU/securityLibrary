@@ -28,7 +28,6 @@ import eu.unicore.security.dsig.DSigException;
 
 /**
  * Implements logic to generate and validate trust delegation assertions.
- * FIXME! cert mode Java hash should be changed to a SHA2 hash! With backwards compatibility 
  * @author K. Benedyczak
  */
 public class ETDImpl implements ETDApi
@@ -195,7 +194,7 @@ public class ETDImpl implements ETDApi
 			return new ValidationResult(false, "Lack of issuer certificate " +
 				"(neither in KeyInfo element nor in available certificates list)");
 		
-		return validateTDBasic(validator, td, issuerCert, custodian, null);
+		return validateTDBasic(validator, td, issuerCert, custodian, null, null);
 	}
 
 	
@@ -235,12 +234,12 @@ public class ETDImpl implements ETDApi
 					"(TD receiver certificate: [" + subjectFromTD[0].toString() +
 					"] and should be: [" +receiver[0].toString() + "])");
 		return validateTDBasic(validator, td, issuer, custodian.getSubjectX500Principal().getName(),
-				custodian.hashCode());
+				custodian.hashCode(), TrustDelegation.generateSha2Hash(custodian));
 	}
 	
 	
 	private ValidationResult validateTDBasic(X509CertChainValidator validator, TrustDelegation td, 
-			X509Certificate[] issuer, String custodianDN, Integer custodianHash)
+			X509Certificate[] issuer, String custodianDN, Integer custodianHash, String custodianHashSha2)
 	{
 		String c1 = td.getCustodianDN();
 		if (!X500NameUtils.equal(c1, custodianDN))
@@ -255,6 +254,21 @@ public class ETDImpl implements ETDApi
 			if (!i.equals(custodianHash))
 				return new ValidationResult(false, "Wrong custodian (certificate" +
 						" hashes are different)");				
+		}
+
+		if (custodianHashSha2 != null)
+		{
+			String h = td.getCustodianCertHashSha2();
+			/* For now this code is disabled. When enabled, U6 based clients working with delegation
+			 * in certificate mode won't work with U7 servers. This rather shouldn't be a case, 
+			 * but for now allow for the legacy assertions.
+			if (h == null)
+				return new ValidationResult(false, "Custodian in assertion doesn't" +
+						"contain certificate SHA2 hash");
+			*/
+			if (h!= null && !h.equals(custodianHashSha2))
+				return new ValidationResult(false, "Wrong custodian (certificate" +
+						" SHA2 hashes are different)");				
 		}
 
 		AssertionValidator asValidator = new AssertionValidator(null, null, null,
