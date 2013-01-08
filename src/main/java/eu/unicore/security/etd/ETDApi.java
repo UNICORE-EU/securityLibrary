@@ -11,6 +11,7 @@ package eu.unicore.security.etd;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.List;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
@@ -137,11 +138,13 @@ public interface ETDApi
 	 * @param td
 	 * @param subject
 	 * @param user
-	 * @param validator certificate chain validator, used to check issuer cert chain.
+	 * @param validator certificate chain validator, used to check all issuers certificates.
+	 * @param trustedIssuers collection of certificates which are trusted as bootstrap delegation issuers (since U7)
 	 * @return validation result
 	 */
 	public ValidationResult isTrustDelegated(List<TrustDelegation> td, String subject, 
-			String user, X509CertChainValidator validator);
+			String user, X509CertChainValidator validator, 
+			Collection<X509Certificate> trustedIssuers);
 
 	/**
 	 * Tests if the specified trust delegation chain delegates the trust from user to
@@ -152,11 +155,13 @@ public interface ETDApi
 	 * @param td
 	 * @param subject
 	 * @param user
-	 * @param validator certificate chain validator, used to check issuer cert chain.
+	 * @param validator certificate chain validator, used to check all issuers certificates.
+	 * @param trustedIssuers collection of certificates which are trusted as bootstrap delegation issuers (since U7)
 	 * @return validation result
 	 */
 	public ValidationResult isTrustDelegated(List<TrustDelegation> td, X509Certificate[] subject, 
-			X509Certificate[] user, X509CertChainValidator validator);
+			X509Certificate[] user, X509CertChainValidator validator, 
+			Collection<X509Certificate> trustedIssuers);
 	
 	/**
 	 * Helper method to check if the subject is present in the chain. The chain is

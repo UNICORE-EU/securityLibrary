@@ -12,10 +12,9 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-
-import javax.security.auth.x500.X500Principal;
 
 import org.apache.xmlbeans.XmlObject;
 
@@ -45,6 +44,7 @@ public class ETDImpl implements ETDApi
 	 * @return The new trust delegation
 	 * @throws DSigException
 	 */
+	@Override
 	public TrustDelegation generateTD(String custodian, X509Certificate []issuer, 
 			PrivateKey pk, String subject, DelegationRestrictions restrictions) 
 		throws DSigException
@@ -67,11 +67,23 @@ public class ETDImpl implements ETDApi
 	 * @throws DSigException
 	 * @throws CertificateEncodingException 
 	 */
-	public TrustDelegation generateTD(X509Certificate custodian, X509Certificate[] issuer, 
-		PrivateKey pk, X509Certificate[] receiver, DelegationRestrictions restrictions) 
+	@Override
+	public TrustDelegation generateTD(X509Certificate custodian, X509Certificate[] issuer,
+			PrivateKey pk, X509Certificate[] receiver,
+			DelegationRestrictions restrictions) throws DSigException,
+			CertificateEncodingException
+	{
+		return generateTD(custodian.getSubjectX500Principal().getName(), 
+				TrustDelegation.generateSha2Hash(custodian), 
+				custodian.hashCode(), issuer, pk, receiver, restrictions);
+	}
+	
+	public TrustDelegation generateTD(String custodianDN, String sha2Hash, int legacyHash, 
+		X509Certificate[] issuer, PrivateKey pk, X509Certificate[] receiver, 
+		DelegationRestrictions restrictions) 
 		throws DSigException, CertificateEncodingException
 	{
-		TrustDelegation td = new TrustDelegation(custodian);
+		TrustDelegation td = new TrustDelegation(custodianDN, sha2Hash, legacyHash);
 		td.setX509Issuer(issuer[0].getSubjectX500Principal().getName());
 		td.setX509Subject(receiver[0].getSubjectX500Principal().getName());
 		td.setSenderVouchesX509Confirmation(receiver);
@@ -116,6 +128,7 @@ public class ETDImpl implements ETDApi
 	 * @throws InconsistentTDChainException
 	 * @throws IllegalArgumentException
 	 */
+	@Override
 	public List<TrustDelegation> issueChainedTD(List<TrustDelegation> chain,
 			X509Certificate []issuer, PrivateKey pk,
 			String subject, DelegationRestrictions restrictions) 
@@ -144,6 +157,7 @@ public class ETDImpl implements ETDApi
 	 * @throws InconsistentTDChainException
 	 * @throws CertificateEncodingException 
 	 */
+	@Override
 	public List<TrustDelegation> issueChainedTD(List<TrustDelegation> chain, 
 		X509Certificate[] issuer, PrivateKey pk, X509Certificate[] receiver, 
 		DelegationRestrictions restrictions) 
@@ -153,12 +167,10 @@ public class ETDImpl implements ETDApi
 			throw new IllegalArgumentException("Trust delegation chain cant be empty");
 		if (chain.get(0).getCustodianCertHash() == null)
 			throw new InconsistentTDChainException();
-		//FIXME - assumes that issuer of the first ETD == custodian. Not compatible with bootstrap ETD.
-		X509Certificate[] custodian = chain.get(0).getIssuerFromSignature();
-		if (custodian == null || custodian.length == 0)
-			throw new InconsistentTDChainException();
+		TrustDelegation initial = chain.get(0);
 		
-		chain.add(generateTD(custodian[0], issuer, pk, receiver, restrictions));
+		chain.add(generateTD(initial.getCustodianDN(), initial.getCustodianCertHashSha2(),
+				initial.getCustodianCertHash(), issuer, pk, receiver, restrictions));
 		return chain;
 	}
 	
@@ -177,6 +189,7 @@ public class ETDImpl implements ETDApi
  	 * received from the assertion
 	 * @return
 	 */
+	@Override
 	public ValidationResult validateTD(TrustDelegation td, String custodian, 
 			String issuer, String receiver, X509CertChainValidator validator)
 	{
@@ -210,6 +223,7 @@ public class ETDImpl implements ETDApi
 	 * @param validator certificate chain validator, used to check issuer cert chain.
 	 * @return
 	 */
+	@Override
 	public ValidationResult validateTD(TrustDelegation td, X509Certificate custodian, 
 			X509Certificate[] issuer, X509Certificate[] receiver, X509CertChainValidator validator)
 	{
@@ -298,11 +312,13 @@ public class ETDImpl implements ETDApi
 	 * @param td
 	 * @param subject
 	 * @param user
-	 * @param validator certificate chain validator, used to check issuer cert chain.
+	 * @param validator certificate chain validator, used to check all issuers certificates.
+	 * @param trustedIssuers collection of certificates which are trusted as bootstrap delegation issuers (since U7)
 	 * @return validation result
 	 */
+	@Override
 	public ValidationResult isTrustDelegated(List<TrustDelegation> td, String subject, 
-			String user, X509CertChainValidator validator)
+			String user, X509CertChainValidator validator, Collection<X509Certificate> trustedIssuers)
 	{
 		if (td == null || subject == null || user == null)
 			return new ValidationResult(false, "Some of arguments are null");
@@ -316,13 +332,15 @@ public class ETDImpl implements ETDApi
 		X509Certificate []custodianCert = initial.getIssuerFromSignature();
 		if (custodianCert == null || custodianCert.length == 0)
 			return new ValidationResult(false, "No issuer certificate at position 1.");
-		
-		if (!X500NameUtils.equal(custodianCert[0].getSubjectX500Principal(), custodian))
-			return new ValidationResult(false, "The issuer's certificate of the initial trust delegation" +
-					" is not consistent with the declared custodian (subject)");
-		if (!X500NameUtils.equal(custodian, initial.getIssuerDN()))
-			return new ValidationResult(false, "The signer's certificate of the initial trust delegation" +
-					" is not consistent with the declared assertion issuer");
+		if (!isAmongTrusted(custodianCert[0], trustedIssuers))
+		{
+			if (!X500NameUtils.equal(custodianCert[0].getSubjectX500Principal(), custodian))
+				return new ValidationResult(false, "The issuer's certificate of the initial trust delegation" +
+					" is not consistent with the declared custodian (subject) and it is not among trusted 3rd party issuers");
+			if (!X500NameUtils.equal(custodian, initial.getIssuerDN()))
+				return new ValidationResult(false, "The signer's certificate of the initial trust delegation" +
+					" is not consistent with the declared assertion issuer and it is not among trusted 3rd party issuers");
+		}
 
 		
 		int i=0;
@@ -366,6 +384,7 @@ public class ETDImpl implements ETDApi
 		return new ValidationResult(true, "Validation OK");
 	}
 	
+	
 	/**
 	 * Tests if the specified trust delegation chain delegates the trust from user to
 	 * subject. Please note that if the subject is the receiver of the assertion that is not
@@ -375,44 +394,28 @@ public class ETDImpl implements ETDApi
 	 * @param td
 	 * @param subject
 	 * @param user
-	 * @param validator certificate chain validator, used to check issuer cert chain.
+	 * @param validator certificate chain validator, used to check all issuers certificates.
+	 * @param trustedIssuers collection of certificates which are trusted as bootstrap delegation issuers (since U7)
 	 * @return validation result
 	 */
+	@Override
 	public ValidationResult isTrustDelegated(List<TrustDelegation> td, 
-			X509Certificate[] subject, X509Certificate[] user, X509CertChainValidator validator)
+			X509Certificate[] subject, X509Certificate[] user, X509CertChainValidator validator, 
+			Collection<X509Certificate> trustedIssuers)
 	{
 		if (td == null || subject == null || user == null || 
 				user.length == 0 || subject.length == 0)
 			return new ValidationResult(false, "Some of arguments are null/empty");
 		if (td.size() == 0)
 			return new ValidationResult(false, "Delegation chain is empty");
-		TrustDelegation initial = td.get(0);
-		String custodian = initial.getCustodianDN();
-		X500Principal u = user[0].getSubjectX500Principal();
-		if (!X500NameUtils.equal(u, custodian))
-			return new ValidationResult(false, "Wrong user");
-		Integer custodianHash = initial.getCustodianCertHash();
-		if (custodianHash == null)
-			return new ValidationResult(false, "Initial delegation doesn't have " +
-					"custodian certificate hash.");
-		if (!custodianHash.equals(user[0].hashCode()))
-			return new ValidationResult(false, "Wrong user (certificate hashes " +
-					"are different)");
-		//FIXME - assumes that issuer of the first ETD == custodian. Not compatible with bootstrap ETD.
-		X509Certificate []custodianCert = initial.getIssuerFromSignature();
-		if (custodianCert == null || custodianCert.length == 0)
-			return new ValidationResult(false, "No issuer certificate at position 1.");
-		
-		if (!X500NameUtils.equal(custodianCert[0].getSubjectX500Principal(), custodian))
-			return new ValidationResult(false, "The issuer's certificate of the initial trust delegation" +
-					" is not consistent with the declared custodian (subject)");
-		if (custodianCert[0].hashCode() != custodianHash)
-			return new ValidationResult(false, "The issuer's certificate of the initial trust delegation" +
-					" is not consistent with the declared custodian (hash)");
-		if (!X500NameUtils.equal(custodianCert[0].getIssuerX500Principal(), initial.getIssuerDN()))
-			return new ValidationResult(false, "The signer's certificate of the initial trust delegation" +
-					" is not consistent with the declared assertion issuer");
-		
+		X509Certificate []initIssuerCert = td.get(0).getIssuerFromSignature();
+		if (!isAmongTrusted(initIssuerCert[0], trustedIssuers))
+		{
+			if (!user[0].equals(initIssuerCert[0]))
+				return new ValidationResult(false, "The signer's certificate of the initial trust delegation" +
+						" is not consistent with the declared assertion issuer certificate and it is not among trusted 3rd party issuers");
+		}
+
 		int i=0;
 		int []maxProxies = new int[td.size()]; 
 		for (; i<td.size(); i++)
@@ -438,7 +441,7 @@ public class ETDImpl implements ETDApi
 			if (curIssuer == null || curIssuer.length == 0)
 				return new ValidationResult(false, 
 						"No issuer certificate at position " + i);
-			ValidationResult singleTD = validateTD(cur, custodianCert[0], 
+			ValidationResult singleTD = validateTD(cur, user[0], 
 				curIssuer, curSubject, validator);
 			if (!singleTD.isValid())
 				return new ValidationResult(false, 
@@ -484,6 +487,15 @@ public class ETDImpl implements ETDApi
 		}
 		return false;
 	}
+	
+	private boolean isAmongTrusted(X509Certificate toCheck, Collection<X509Certificate> trusted)
+	{
+		for (X509Certificate t: trusted)
+			if (t.equals(toCheck))
+				return true;
+		return false;
+	}
+
 }
 
 

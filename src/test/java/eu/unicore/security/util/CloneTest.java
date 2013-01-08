@@ -11,12 +11,12 @@ import java.util.Properties;
 import junit.framework.TestCase;
 
 import eu.unicore.security.canl.AuthnAndTrustProperties;
+import eu.unicore.security.canl.TrustedIssuersProperties;
 import eu.unicore.security.canl.CredentialProperties;
 import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
 import eu.unicore.security.canl.LoggingStoreUpdateListener;
 import eu.unicore.security.canl.TruststoreProperties;
 import eu.unicore.security.canl.CredentialProperties.CredentialFormat;
-import eu.unicore.security.canl.TruststoreProperties.TruststoreType;
 import eu.unicore.util.httpclient.ClientProperties;
 
 import static eu.unicore.security.canl.CredentialProperties.DEFAULT_PREFIX;
@@ -77,7 +77,8 @@ public class CloneTest extends TestCase
 		ClientProperties cp = new ClientProperties(p, new DefaultAuthnAndTrustConfiguration());
 		testByReflection(cp, cp.clone());
 
-		p.setProperty(TruststoreProperties.DEFAULT_PREFIX + PROP_TYPE, TruststoreType.keystore.toString());
+		p.setProperty(TruststoreProperties.DEFAULT_PREFIX + PROP_TYPE, 
+				TrustedIssuersProperties.TruststoreType.keystore.toString());
 		p.setProperty(TruststoreProperties.DEFAULT_PREFIX + PROP_KS_PATH, "src/test/resources/truststores/truststore1.jks");
 		p.setProperty(TruststoreProperties.DEFAULT_PREFIX + PROP_KS_PASSWORD, "the!njs");
 		TruststoreProperties cfg = new TruststoreProperties(p, 

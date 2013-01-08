@@ -61,25 +61,37 @@ public class TrustDelegation extends Assertion
 
 	public TrustDelegation(X509Certificate custodian)
 	{
-		String dn = custodian.getSubjectX500Principal().getName();
-		custodianDN = dn;
+		this(custodian.getSubjectX500Principal().getName(),
+				generateSha2Hash(custodian),
+				custodian.hashCode());
+	}
+
+	public TrustDelegation(String custodianDN, String sha2Hash, Integer legacyHash)
+	{
+		this.custodianDN = custodianDN;
 		SAMLAttribute custodianA = new SAMLAttribute(CUSTODIAN_NAME, 
 			CUSTODIAN_NAME_FORMAT_DN);
-		custodianA.addStringAttributeValue(dn);
+		custodianA.addStringAttributeValue(custodianDN);
 		addAttribute(custodianA);
 		
-		sha2Hash = generateSha2Hash(custodian);
-		SAMLAttribute custodian2A = new SAMLAttribute(CUSTODIAN_NAME, 
-			CUSTODIAN_NAME_FORMAT_SHA2);
-		custodian2A.addStringAttributeValue(sha2Hash);
-		addAttribute(custodian2A);
+		if (sha2Hash != null)
+		{
+			this.sha2Hash = sha2Hash;
+			SAMLAttribute custodian2A = new SAMLAttribute(CUSTODIAN_NAME, 
+					CUSTODIAN_NAME_FORMAT_SHA2);
+			custodian2A.addStringAttributeValue(sha2Hash);
+			addAttribute(custodian2A);
+		}
 		
 		//legacy
-		legacyHash = custodian.hashCode();
-		SAMLAttribute custodian3A = new SAMLAttribute(CUSTODIAN_NAME, 
-			CUSTODIAN_NAME_FORMAT_FP);
-		custodian3A.addStringAttributeValue(legacyHash + "");
-		addAttribute(custodian3A);
+		if (legacyHash != null)
+		{
+			this.legacyHash = legacyHash;
+			SAMLAttribute custodian3A = new SAMLAttribute(CUSTODIAN_NAME, 
+					CUSTODIAN_NAME_FORMAT_FP);
+			custodian3A.addStringAttributeValue(legacyHash + "");
+			addAttribute(custodian3A);
+		}
 	}
 	
 	public TrustDelegation(AssertionDocument doc) throws SAMLValidationException, XmlException, IOException

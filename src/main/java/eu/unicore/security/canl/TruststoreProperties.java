@@ -5,7 +5,6 @@
 package eu.unicore.security.canl;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -28,7 +27,6 @@ import eu.emi.security.authn.x509.OCSPParametes;
 import eu.emi.security.authn.x509.OCSPResponder;
 import eu.emi.security.authn.x509.ProxySupport;
 import eu.emi.security.authn.x509.RevocationParameters;
-import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.RevocationParameters.RevocationCheckingOrder;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.impl.CRLParameters;
@@ -36,15 +34,12 @@ import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.emi.security.authn.x509.impl.DirectoryCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
-import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.emi.security.authn.x509.impl.OpensslCertChainValidator;
 import eu.emi.security.authn.x509.impl.RevocationParametersExt;
 import eu.emi.security.authn.x509.impl.ValidatorParams;
 import eu.emi.security.authn.x509.impl.ValidatorParamsExt;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
-import eu.unicore.util.configuration.PropertiesHelper;
-import eu.unicore.util.configuration.PropertyChangeListener;
 import eu.unicore.util.configuration.PropertyMD;
 import eu.unicore.util.configuration.PropertyMD.DocumentationCategory;
 
@@ -56,20 +51,19 @@ import eu.unicore.util.configuration.PropertyMD.DocumentationCategory;
  * <p>
  * The class maintains a reference to the created validator and can try to update
  * its configuration upon request.
- *  
+ * <p>
+ * It is implemented as an extension of {@link TrustedIssuersProperties} and adds support for configuring Namespaces,
+ * proxy support and revocation settings.
+ * 
  * @author K. Benedyczak
  */
-public class TruststoreProperties extends PropertiesHelper
+public class TruststoreProperties extends TrustedIssuersProperties
 {
 	private static final Logger log = Log.getLogger(Log.CONFIGURATION, TruststoreProperties.class);
 
 	public static final String DEFAULT_PREFIX = "truststore.";
 	
-	public enum TruststoreType {keystore, openssl, directory};
 	//common for all
-	public static final String PROP_TYPE = "type";
-
-	public static final String PROP_UPDATE = "updateInterval";
 	public static final String PROP_PROXY_SUPPORT = "allowProxy";
 	public static final String PROP_CRL_MODE = "crlMode";
 	public static final String PROP_OCSP_MODE = "ocspMode";
@@ -86,59 +80,24 @@ public class TruststoreProperties extends PropertiesHelper
 	public static final String PROP_CRL_CONNECTION_TIMEOUT = "crlConnectionTimeout";
 	public static final String PROP_CRL_CACHE_PATH = "crlDiskCachePath";
 	
-	//the rest is store dependent
-	public static final String PROP_KS_PATH = "keystorePath";
-	public static final String PROP_KS_PASSWORD = "keystorePassword";
-	public static final String PROP_KS_TYPE = "keystoreFormat";
-
-	public static final String PROP_OPENSSL_DIR = "opensslPath";
 	public static final String PROP_OPENSSL_NS_MODE = "opensslNsMode";
 	
-	public static final String PROP_DIRECTORY_LOCATIONS = "directoryLocations.";
-	public static final String PROP_DIRECTORY_ENCODING = "directoryEncoding";
-	public static final String PROP_DIRECTORY_CONNECTION_TIMEOUT = "directoryConnectionTimeout";
-	public static final String PROP_DIRECTORY_CACHE_PATH = "directoryDiskCachePath";
+	private final static String[] UPDATEABLE_PROPS = {PROP_UPDATE, PROP_CRL_UPDATE, 
+			PROP_DIRECTORY_LOCATIONS, PROP_CRL_LOCATIONS};
 	
-	private Collection<? extends StoreUpdateListener> initialListeners;
-	private OpensslCertChainValidator opensslValidator = null;
-	private DirectoryCertChainValidator directoryValidator = null;
-	private KeystoreCertChainValidator ksValidator = null;
-		
 	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
 	static 
 	{
-		DocumentationCategory dirCat = new DocumentationCategory("Directory type settings", "1");
-		DocumentationCategory ksCat = new DocumentationCategory("Keystore type settings", "2");
 		DocumentationCategory opensslCat = new DocumentationCategory("Openssl type settings", "3");
 		DocumentationCategory revCat = new DocumentationCategory("Revocation settings", "4");
 		
-		META.put(PROP_TYPE, new PropertyMD().setEnum(TruststoreType.directory).
-				setMandatory().setDescription("The truststore type."));
+		META.putAll(TrustedIssuersProperties.META);
+		
 		META.put(PROP_PROXY_SUPPORT, new PropertyMD(ProxySupport.ALLOW).
 				setDescription("Controls whether proxy certificates are supported."));
-		META.put(PROP_UPDATE, new PropertyMD("600").setLong().setUpdateable().
-				setDescription("How often the truststore should be reloaded, in seconds. Set to negative value to disable refreshing at runtime."));
-
-		META.put(PROP_KS_PASSWORD, new PropertyMD().setSecret().setCategory(ksCat).
-				setDescription("The password of the keystore type truststore."));
-		META.put(PROP_KS_TYPE, new PropertyMD().setCategory(ksCat).
-				setDescription("The keystore type (jks, pkcs12) in case of truststore of keystore type."));
-		META.put(PROP_KS_PATH, new PropertyMD().setCategory(ksCat).
-				setDescription("The keystore path in case of truststore of keystore type."));
 
 		META.put(PROP_OPENSSL_NS_MODE, new PropertyMD(NamespaceCheckingMode.EUGRIDPMA_GLOBUS).setCategory(opensslCat).
 				setDescription("In case of openssl truststore, controls which (and in which order) namespace checking rules should be applied. The 'REQUIRE' settings will cause that all configured namespace definitions files must be present for each trusted CA certificate (otherwise checking will fail). The 'AND' settings will cause to check both existing namespace files. Otherwise the first found is checked (in the order defined by the property)."));
-		META.put(PROP_OPENSSL_DIR, new PropertyMD("/etc/grid-security/certificates").setPath().setCategory(opensslCat).
-				setDescription("Directory to be used for opeenssl truststore."));
-
-		META.put(PROP_DIRECTORY_LOCATIONS, new PropertyMD().setList(false).setUpdateable().setCategory(dirCat).
-				setDescription("List of CA certificates locations. Can contain URLs, local files and wildcard expressions."));
-		META.put(PROP_DIRECTORY_ENCODING, new PropertyMD(Encoding.PEM).setCategory(dirCat).
-				setDescription("For directory truststore controls whether certificates are encoded in PEM or DER."));
-		META.put(PROP_DIRECTORY_CONNECTION_TIMEOUT, new PropertyMD("15").setCategory(dirCat).
-				setDescription("Connection timeout for fetching the remote CA certificates in seconds."));
-		META.put(PROP_DIRECTORY_CACHE_PATH, new PropertyMD().setPath().setCategory(dirCat).
-				setDescription("Directory where CA certificates should be cached, after downloading them from a remote source. Can be left undefined if no disk cache should be used. Note that directory should be secured, i.e. normal users should not be allowed to write to it."));
 
 		META.put(PROP_REVOCATION_ORDER, new PropertyMD(RevocationCheckingOrder.OCSP_CRL).setCategory(revCat).
 				setDescription("Controls overal revocation sources order"));
@@ -167,26 +126,14 @@ public class TruststoreProperties extends PropertiesHelper
 				setDescription("If this property is defined then OCSP responses will be cached on disk in the defined folder."));
 	}
 
-	private TruststoreType type;
-	
 	private ProxySupport proxySupport;
 	private CrlCheckingMode crlMode;
-	private long storeUpdateInterval;
 	private NamespaceCheckingMode nsMode;
-	private String opensslDir;
 	private long crlUpdateInterval;
 	private int crlConnectionTimeout;
 	private String crlDiskCache;
 	private List<String> crlLocations;
-	private Encoding directoryEncoding;
-	private List<String> directoryLocations;
-	private int caConnectionTimeout;
-	private String caDiskCache;
 	
-	private String ksPath;
-	private String ksType;
-	private PasswordCallback passwordCallback;
-
 	/**
 	 * Simple constructor: logging is turned on and standard properties prefix is used.
 	 * @param properties properties object to read configuration from
@@ -242,31 +189,9 @@ public class TruststoreProperties extends PropertiesHelper
 			Collection<? extends StoreUpdateListener> initialListeners, PasswordCallback callback, String pfx) 
 				throws ConfigurationException
 	{
-		super(pfx, properties, META, log);
-		this.initialListeners = initialListeners;
-		this.passwordCallback = callback;
-		createValidatorSafe();
-		addPropertyChangeListener(new PropertyChangeListenerImpl());
+		super(META, log, properties, initialListeners, callback, pfx);
 	}
 	
-	/**
-	 * @return a configured validator. 
-	 */
-	public X509CertChainValidatorExt getValidator()
-	{
-		if (type.equals(TruststoreType.keystore))
-		{
-			return ksValidator;
-		} else if (type.equals(TruststoreType.openssl))
-		{
-			return opensslValidator;
-		} else if (type.equals(TruststoreType.directory))
-		{
-			return directoryValidator;
-		}
-		throw new RuntimeException("BUG: not all truststore types are handled in the code");
-	}
-
 	/**
 	 * Checks properties and tries to update the underlying validator whenever possible.
 	 * Only few options can be modified at runtime.
@@ -274,21 +199,7 @@ public class TruststoreProperties extends PropertiesHelper
 	 */
 	protected void update(String property) throws ConfigurationException
 	{
-		if (property.equals(PROP_UPDATE))
-		{
-			long newUpdateInterval = getLongValue(PROP_UPDATE);
-			if (newUpdateInterval != storeUpdateInterval)
-			{
-				if (opensslValidator != null)
-					opensslValidator.setUpdateInterval(newUpdateInterval*1000);
-				if (directoryValidator != null)
-					directoryValidator.setTruststoreUpdateInterval(newUpdateInterval*1000);
-				if (ksValidator != null)
-					ksValidator.setTruststoreUpdateInterval(newUpdateInterval*1000);
-				storeUpdateInterval = newUpdateInterval;
-				log.info("Updated " + prefix+PROP_UPDATE + " value to " + storeUpdateInterval);
-			}
-		}
+		super.update(property);
 		
 		if (opensslValidator != null)
 			return;
@@ -320,78 +231,29 @@ public class TruststoreProperties extends PropertiesHelper
 				log.info("Updated " + prefix+PROP_CRL_LOCATIONS);
 			}
 		}
-		
-		if (ksValidator != null)
-			return;
-		
-		if (property.startsWith(PROP_DIRECTORY_LOCATIONS))
-		{
-			List<String> newDirectoryLocations = getListOfValues(PROP_DIRECTORY_LOCATIONS);
-			if (!newDirectoryLocations.equals(directoryLocations))
-			{
-				directoryValidator.setTruststorePaths(newDirectoryLocations);
-				directoryLocations = newDirectoryLocations;
-				log.info("Updated " + prefix+PROP_DIRECTORY_LOCATIONS);
-			}
-		}
 	}
 
-	private void createValidatorSafe() throws ConfigurationException
+	protected String[] getUpdateableProperties()
 	{
-		try
-		{
-			createValidator();
-		} catch (KeyStoreException e)
-		{
-			throw new ConfigurationException("There was a problem setting up the " +
-					"truststore of type " + type + ": " + e.getMessage(), 
-					e);
-		} catch (IOException e)
-		{
-			throw new ConfigurationException("There was a problem setting up the " +
-					"truststore of type " + type + ": " + e.getMessage(), 
-					e);
-		}
+		return UPDATEABLE_PROPS;
 	}
-	
-	private void createValidator() throws ConfigurationException,
+
+	protected void createValidator() throws ConfigurationException,
 			KeyStoreException, IOException
 	{
-		type = getEnumValue(PROP_TYPE, TruststoreType.class);
-		storeUpdateInterval = getLongValue(PROP_UPDATE);
-		
 		crlMode = getEnumValue(PROP_CRL_MODE, CrlCheckingMode.class);
 		proxySupport = getEnumValue(PROP_PROXY_SUPPORT, ProxySupport.class);
-		
-		if (type.equals(TruststoreType.keystore))
-		{
-			ksValidator = getKeystoreValidator();
-		} else if (type.equals(TruststoreType.openssl))
-		{
-			opensslValidator = getOpensslValidator();
-		} else if (type.equals(TruststoreType.directory))
-		{
-			directoryValidator = getDirectoryValidator();
-		}
+		super.createValidator();
 	}
 
-	
-	
-	private DirectoryCertChainValidator getDirectoryValidator() 
+	protected DirectoryCertChainValidator getDirectoryValidator() 
 			throws ConfigurationException, KeyStoreException, IOException
 	{
 		setCrlSettings();
-		directoryLocations = getListOfValues(PROP_DIRECTORY_LOCATIONS);
-		directoryEncoding = getEnumValue(PROP_DIRECTORY_ENCODING, Encoding.class);
-		caConnectionTimeout = getIntValue(PROP_DIRECTORY_CONNECTION_TIMEOUT);
-		caDiskCache = getFileValueAsString(PROP_DIRECTORY_CACHE_PATH, true);
-		
-		ValidatorParamsExt params = getValidatorParamsExt();
-		return new DirectoryCertChainValidator(directoryLocations, directoryEncoding, 
-			storeUpdateInterval*1000, caConnectionTimeout*1000, caDiskCache, params);
+		return super.getDirectoryValidator();
 	}
-
-	private OpensslCertChainValidator getOpensslValidator() throws ConfigurationException
+	
+	protected OpensslCertChainValidator getOpensslValidator() throws ConfigurationException
 	{
 		nsMode = getEnumValue(PROP_OPENSSL_NS_MODE, NamespaceCheckingMode.class);
 		opensslDir = getFileValueAsString(PROP_OPENSSL_DIR, true);
@@ -406,45 +268,15 @@ public class TruststoreProperties extends PropertiesHelper
 			params);
 	}
 
-	private KeystoreCertChainValidator getKeystoreValidator() 
+
+	protected KeystoreCertChainValidator getKeystoreValidator() 
 			throws ConfigurationException, KeyStoreException, IOException
 	{
 		setCrlSettings();
-		ksPath = getValue(PROP_KS_PATH);
-		if (ksPath == null)
-			throw new ConfigurationException("Keystore path must be set, property: " + 
-					prefix + PROP_KS_PATH);
-
-		File ks = new File(ksPath);
-		if (!ks.exists() || !ks.canRead() || !ks.isFile())
-			throw new ConfigurationException("Keystore specified in the property " + 
-					prefix + PROP_KS_PATH + " must be an EXISTING, READABLE file: " + 
-					ksPath);
-
-		boolean preferCallback = passwordCallback != null && passwordCallback.ignoreProperties();
-		char[] ksPassword = null;
-		if (!preferCallback)
-		{
-			String pass = getValue(PROP_KS_PASSWORD);
-			ksPassword = pass == null ? null : pass.toCharArray();
-		}
-		if (ksPassword == null && passwordCallback != null)
-		{
-			ksPassword = passwordCallback.getPassword("truststore", ksPath);
-		}
-		if (ksPassword == null)
-			throw new ConfigurationException("Keystore password must be set, property: " + 
-					prefix + PROP_KS_PASSWORD);
-		ksType = getValue(PROP_KS_TYPE);
-		if (ksType == null)
-			autodetectKeystoreType(ksPassword);
-		
-		ValidatorParamsExt params = getValidatorParamsExt();
-		return new KeystoreCertChainValidator(ksPath, ksPassword, 
-			ksType, storeUpdateInterval*1000, params);
-	}	
+		return super.getKeystoreValidator();
+	}
 	
-	private void setCrlSettings() throws ConfigurationException
+	protected void setCrlSettings() throws ConfigurationException
 	{
 		crlUpdateInterval = getLongValue(PROP_CRL_UPDATE);
 		crlConnectionTimeout = getIntValue(PROP_CRL_CONNECTION_TIMEOUT);
@@ -452,7 +284,7 @@ public class TruststoreProperties extends PropertiesHelper
 		crlLocations = getListOfValues(PROP_CRL_LOCATIONS);
 	}
 	
-	private ValidatorParamsExt getValidatorParamsExt()
+	protected ValidatorParamsExt getValidatorParamsExt()
 	{
 		CRLParameters crlParameters = new CRLParameters(crlLocations, crlUpdateInterval*1000, 
 			crlConnectionTimeout, crlDiskCache);
@@ -463,7 +295,7 @@ public class TruststoreProperties extends PropertiesHelper
 		return new ValidatorParamsExt(revParams, proxySupport, initialListeners);
 	}
 	
-	private OCSPParametes getOCSPParameters()
+	protected OCSPParametes getOCSPParameters()
 	{
 		OCSPCheckingMode checkingMode = getEnumValue(PROP_OCSP_MODE, OCSPCheckingMode.class);
 		int connectTimeout = getIntValue(PROP_OCSP_TIMEOUT);
@@ -515,44 +347,6 @@ public class TruststoreProperties extends PropertiesHelper
 		
 		return new OCSPParametes(checkingMode, localResponders, connectTimeout, true, false, 
 				cacheTtl, diskCachePath);
-	}
-	
-	private void autodetectKeystoreType(char[] ksPassword) throws ConfigurationException
-	{
-		try
-		{
-			ksType = KeystoreCredential.autodetectType(ksPath, ksPassword);
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-			throw new ConfigurationException("Truststore type is not " +
-					"set in the property " + prefix + PROP_KS_TYPE + 
-					" and its autodetection failed. Try to set it and also " +
-					"review password and location - most probably those are wrong.");
-		}
-	}
-
-	/**
-	 * This class is used to update configuration of validators when properties are changed.
-	 * Properties reloading or setting must be triggered from outside this class.
-	 * @author K. Benedyczak
-	 */
-	private class PropertyChangeListenerImpl implements PropertyChangeListener 
-	{
-		private final String[] UPDATEABLE_PROPS = {PROP_UPDATE, PROP_CRL_UPDATE, 
-				PROP_DIRECTORY_LOCATIONS, PROP_CRL_LOCATIONS};
-		
-		@Override
-		public String[] getInterestingProperties()
-		{
-			return UPDATEABLE_PROPS;
-		}
-
-		@Override
-		public void propertyChanged(String propertyKey)
-		{
-			update(propertyKey);
-		}
 	}
 	
 	public TruststoreProperties clone()
