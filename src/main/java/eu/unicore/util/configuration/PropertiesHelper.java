@@ -168,8 +168,8 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 				}
 			} else
 			{ //for properties with subkeys we check if any of the properties in the group changed
-				Map<String, String> origGroup = new PropertyGroupHelper(orig, p).getFilteredMap();
-				Map<String, String> updatedGroup = new PropertyGroupHelper(updated, p).getFilteredMap();
+				Map<String, String> origGroup = new PropertyGroupHelper(orig, prefix+p).getFilteredMap();
+				Map<String, String> updatedGroup = new PropertyGroupHelper(updated, prefix+p).getFilteredMap();
 				if (!origGroup.equals(updatedGroup))
 					ret.add(p);
 			}
