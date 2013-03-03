@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +79,8 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	protected List<PropertyChangeListener> genericListeners = new ArrayList<PropertyChangeListener>();
 	protected Map<String, List<PropertyChangeListener>> propertyFocusedListeners = 
 			new HashMap<String, List<PropertyChangeListener>>(); 
+	protected Set<String> structuredPrefixes = new HashSet<String>();
+	
 	
 	/**
 	 * 
@@ -140,8 +143,9 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 
 	private boolean canHaveSubkeys(String key) 
 	{
-		PropertyMD meta = metadata.get(key);
-		if (meta != null && (meta.canHaveSubkeys() || meta.getType() == Type.LIST))
+		PropertyMD meta = getMetadata(key);
+		if (meta != null && (meta.canHaveSubkeys() || meta.getType() == Type.LIST) || 
+				meta.getType() == Type.STRUCTURED_LIST)
 			return true;
 		return false;
 	}
@@ -281,12 +285,17 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	}
 	
 	protected void checkPropertyConstraints(PropertyMD meta, String key) throws ConfigurationException {
-		if (meta.isMandatory() && !isSet(key) && !(meta.getType() == Type.LIST || meta.canHaveSubkeys())) 
+		//we check structured members only when called specially in recursive way
+		if (meta.isStructuredListEntry() && !key.startsWith(meta.getStructuredListEntryId()))
+			return;
+		
+		if (meta.isMandatory() && !isSet(key) && !(meta.getType() == Type.LIST || 
+				meta.getType() == Type.STRUCTURED_LIST || meta.canHaveSubkeys())) 
 			throw new ConfigurationException("The property " + getKeyDescription(key) + 
 					" is mandatory");
 		
 		String value = getValue(key);
-		if (value == null && meta.getType() != Type.LIST)
+		if (value == null && meta.getType() != Type.LIST && meta.getType() != Type.STRUCTURED_LIST)
 			return;
 		switch (meta.getType()) 
 		{
@@ -338,8 +347,74 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 			break;
 		case CLASS:
 			getClassValue(key, meta.getBaseClass());
+		case STRING:
+			break;
+		case STRUCTURED_LIST:
+			checkStructuredListConstraints(meta, key);
+			break;
 		}
 	}
+
+	private void checkStructuredListConstraints(PropertyMD meta, String key) 
+	{
+		structuredPrefixes.add(key);
+		if (meta.numericalListKeys())
+		{
+			Set<String> listKeys2 = getSortedStringKeys(prefix+key);
+			int l = (prefix+key).length();
+			for (String k: listKeys2)
+			{
+				k = k.substring(l);
+				k = k.substring(0, k.indexOf('.'));
+				try
+				{
+					Integer.parseInt(k);
+				} catch (NumberFormatException e)
+				{
+					throw new ConfigurationException("For the " + prefix + key + 
+						" list property only the numerical subkeys are allowed, and " + k + " doesn't end with a numerical value.");
+				}
+			}
+		}
+		
+		Set<String> mandatoryElements = new HashSet<String>();
+		for (Map.Entry<String, PropertyMD> o : metadata.entrySet())
+		{
+			PropertyMD m = o.getValue();
+			if (m.isStructuredListEntry() && key.equals(m.getStructuredListEntryId()) && m.isMandatory())
+				mandatoryElements.add(o.getKey());
+		}
+		
+		Set<String> elements = getStructuredListKeys(key);
+		if (meta.isMandatory() && elements.size() == 0)
+			throw new ConfigurationException("The list " + getKeyDescription(key) + 
+					" must have elements");
+		for (String element: elements)
+		{
+			Set<String> presentMandatory = new HashSet<String>();
+			PropertyGroupHelper helper = new PropertyGroupHelper(properties, prefix+element);
+			Iterator<String> keys = helper.keys();
+			while(keys.hasNext())
+			{
+				String entryKey = keys.next();
+				entryKey = entryKey.substring(prefix.length());
+				PropertyMD eMeta = getMetadata(entryKey);
+				if (eMeta != null)
+				{
+					checkPropertyConstraints(eMeta, entryKey);
+					if (eMeta.isMandatory())
+						presentMandatory.add(entryKey.substring(element.length()));
+				}
+			}
+			if (!mandatoryElements.equals(presentMandatory))
+			{
+				mandatoryElements.removeAll(presentMandatory);
+				throw new ConfigurationException("The following properties must be defined for the list entry with key " 
+						+ element + ": " + mandatoryElements);
+			}
+		}
+	}
+	
 	
 	protected void findUnknown(Properties properties)
 	{
@@ -380,6 +455,17 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		if (metadata.containsKey(key))
 			return metadata.get(key);
 		
+		for (String structuredPrefix: structuredPrefixes)
+		{
+			if (key.startsWith(structuredPrefix))
+			{
+				String realKey = key.substring(structuredPrefix.length());
+				int dot = realKey.indexOf('.');
+				realKey = realKey.substring(dot+1);
+				return metadata.get(realKey);
+			}
+		}
+		
 		Set<Entry<String, PropertyMD>> entries = metadata.entrySet();
 		for (Entry<String, PropertyMD> entry: entries)
 		{
@@ -397,7 +483,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	 */
 	public String getKeyDescription(String key) 
 	{
-		PropertyMD meta = metadata.get(key);
+		PropertyMD meta = getMetadata(key);
 		if (meta == null)
 			return prefix + key;
 		
@@ -420,7 +506,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		
 		if (val == null) 
 		{
-			PropertyMD meta = metadata.get(name);
+			PropertyMD meta = getMetadata(name);
 			boolean hasDefault = meta != null ? meta.hasDefault() : false;
 			if (hasDefault)
 			{
@@ -490,7 +576,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	{
 		if (current == null)
 			return current;
-		PropertyMD meta = metadata.get(name);
+		PropertyMD meta = getMetadata(name);
 		if (meta == null)
 			return current;
 		if (current instanceof Float || current instanceof Double)
@@ -738,7 +824,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		String base = prefix + prefix2;
 		PropertyMD meta = metadata.get(prefix2);
 		boolean numericalKeys = meta == null ? false : meta.numericalListKeys();
-		Set<String> keys = numericalKeys ? getSortedNumKeys(base) : getSortedStringKeys(base);
+		Set<String> keys = numericalKeys ? getSortedNumKeys(base, false) : getSortedStringKeys(base);
 		
 		List<String> ret = new ArrayList<String>();
 		for (Object keyO: keys)
@@ -752,7 +838,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		return ret;
 	}
 	
-	private synchronized Set<String> getSortedNumKeys(String base)
+	private synchronized Set<String> getSortedNumKeys(String base, boolean allowListSubKeys)
 	{
 		SortedSet<Integer> keys = new TreeSet<Integer>();
 		Set<Object> allKeys = properties.keySet();
@@ -762,6 +848,9 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 			if (key.startsWith(base))
 			{
 				String post = key.substring(base.length());
+				int dot = post.indexOf('.');
+				if (dot != -1 && allowListSubKeys)
+					post = post.substring(0, dot);
 				try
 				{
 					int i = Integer.parseInt(post);
@@ -795,10 +884,32 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		return keys;
 	}
 	
+	/**
+	 * @param listKey
+	 * @return list of keys defined for the structured list. The returned keys can be iterated and
+	 * glued with an actual interesting parameter which is a member of this structured list.
+	 */
+	public synchronized Set<String> getStructuredListKeys(String listKey)
+	{
+		PropertyMD listMeta = metadata.get(listKey);
+		if (listMeta == null || listMeta.getType() != PropertyMD.Type.STRUCTURED_LIST)
+			throw new IllegalArgumentException("The " + listKey + " is not a structured list property");
+		Set<String> keys = listMeta.numericalListKeys() ? getSortedNumKeys(prefix+listKey, true) : 
+			getSortedStringKeys(prefix+listKey);
+		Set<String> ret = new LinkedHashSet<String>();
+		int prefixLen = prefix.length();
+		for (String key: keys)
+		{
+			key = key.substring(prefixLen);
+			ret.add(key+'.');
+		}
+		return ret;
+	}
+	
 	protected void logValue(String name, String val) 
 	{
 		warned.add(name);
-		PropertyMD meta = metadata.get(name);
+		PropertyMD meta = getMetadata(name);
 		boolean hideValue = false;
 		if (meta != null && meta.isSecret())
 			hideValue = true;

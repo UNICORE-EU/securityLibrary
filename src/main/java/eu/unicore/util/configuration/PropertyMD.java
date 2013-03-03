@@ -15,7 +15,7 @@ import java.util.Arrays;
  */
 public class PropertyMD implements Cloneable
 {
-	public enum Type {INT, LONG, FLOAT, BOOLEAN, STRING, PATH, ENUM, LIST, CLASS}
+	public enum Type {INT, LONG, FLOAT, BOOLEAN, STRING, PATH, ENUM, LIST, CLASS, STRUCTURED_LIST}
 	
 	private boolean secret;
 	private boolean hide;
@@ -25,6 +25,7 @@ public class PropertyMD implements Cloneable
 	private boolean canHaveSubkeys = false;
 	private boolean numericalListKeys = false;
 	private boolean updateable = false;
+	private String structuredListId;
 	private String description;
 	private DocumentationCategory category;
 	private String sortKey = null;
@@ -84,7 +85,7 @@ public class PropertyMD implements Cloneable
 		this.defaultValue = defaultValue.name();
 		this.type = Type.ENUM;
 	}
-	
+
 	/**
 	 * public, non mandatory property without a default value of String type.
 	 */
@@ -108,6 +109,7 @@ public class PropertyMD implements Cloneable
 		this.hide = true;
 		return this;
 	}
+	
 	public String getDefault() {
 		return defaultValue;
 	}
@@ -269,6 +271,24 @@ public class PropertyMD implements Cloneable
 	public boolean numericalListKeys() {
 		return numericalListKeys;
 	}
+
+	public PropertyMD setStructuredList(boolean numericalKeys) {
+		this.type = Type.STRUCTURED_LIST;
+		this.numericalListKeys = numericalKeys;
+		return this;
+	}
+
+	public PropertyMD setStructuredListEntry(String listId) {
+		this.structuredListId = listId;
+		return this;
+	}
+	
+	public String getStructuredListEntryId() {
+		return structuredListId;
+	}
+	public boolean isStructuredListEntry() {
+		return structuredListId != null;
+	}
 	
 	
 	public boolean canHaveSubkeys() {
@@ -417,6 +437,8 @@ public class PropertyMD implements Cloneable
 				return "floating < " + maxFloat;
 		case CLASS:
 			return "Class extending " + baseClass.getName();
+		case STRUCTURED_LIST:
+			return "Structured list";
 		default:
 			return "UNKNOWN";
 		}

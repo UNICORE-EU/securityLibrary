@@ -9,9 +9,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -53,8 +55,106 @@ public class PropertiesHelperTest extends TestCase
 		METADATA.put("p12", new PropertyMD().setCanHaveSubkeys());
 		METADATA.put("p13.", new PropertyMD().setList(false).setDescription("List of values blah blah blah"));
 		METADATA.put("p14", new PropertyMD((String)null).setInt());
+		METADATA.put("p15.", new PropertyMD().setStructuredList(true).setMandatory());
+		METADATA.put("sl1", new PropertyMD().setStructuredListEntry("p15.").setMandatory());
+		METADATA.put("sl2", new PropertyMD("33").setStructuredListEntry("p15.").setBounds(0, 40));
 	}
 
+	
+	
+	/**
+	 * Tests structured list:
+	 *  - whether missing mandatory is detected
+	 *  - whether numerical keys are enforced
+	 *  - whether bounds and type is verified for list entry
+	 *  - whether unknown entries are reported
+	 *  - whether retrieval of all list keys works
+	 *  - whether it is possible to get entries
+	 */
+	public void testStructuredList()
+	{
+		Properties p = new Properties();
+		p.setProperty(PREFIX+"p09", "a");
+		PropertiesHelper helper;
+		
+		try
+		{
+			new PropertiesHelper(PREFIX, p, METADATA, log);
+			fail("mandatory doesn't work for structured list");
+		} catch (ConfigurationException e) {
+			assertTrue(e.toString(), e.getMessage().contains("must have elements"));
+		}
+		
+		p.setProperty(PREFIX+"p15.xxx.sl1", "asda");
+		try
+		{
+			new PropertiesHelper(PREFIX, p, METADATA, log);
+			fail("numerical keys are not enforced for structured list");
+		} catch (ConfigurationException e) {
+			assertTrue(e.toString(), e.getMessage().contains("numerical"));
+		}
+		
+		p.remove(PREFIX+"p15.xxx.sl1");
+		p.setProperty(PREFIX+"p15.44.sl1", "asda");
+		p.setProperty(PREFIX+"p15.44.sl2", "asda");
+		try
+		{
+			new PropertiesHelper(PREFIX, p, METADATA, log);
+			fail("int type not verified");
+		} catch (ConfigurationException e) {
+			assertTrue(e.toString(), e.getMessage().contains("integer"));
+		}
+		
+		p.setProperty(PREFIX+"p15.44.sl1", "asda");
+		p.setProperty(PREFIX+"p15.44.sl2", "41");
+		try
+		{
+			new PropertiesHelper(PREFIX, p, METADATA, log);
+			fail("int bounds not verified");
+		} catch (ConfigurationException e) {
+			assertTrue(e.toString(), e.getMessage().contains("too big"));
+		}
+		
+		p.remove(PREFIX+"p15.44.sl1");
+		p.setProperty(PREFIX+"p15.44.sl2", "40");
+		try
+		{
+			new PropertiesHelper(PREFIX, p, METADATA, log);
+			fail("mandatory structured list property not enforced");
+		} catch (ConfigurationException e) {
+			assertTrue(e.toString(), e.getMessage().contains("must be defined"));
+		}
+		
+		p.setProperty(PREFIX+"p15.44.sl1", "asda");
+		p.setProperty(PREFIX+"p15.44.sl2", "40");
+		p.setProperty(PREFIX+"p15.44.unknown", "40");
+		try
+		{
+			new PropertiesHelper(PREFIX, p, METADATA, log);
+			fail("unknown entry accepted");
+		} catch (ConfigurationException e) {
+			assertTrue(e.toString(), e.getMessage().contains("unknown"));
+		}
+		
+		p.remove(PREFIX+"p15.44.unknown");
+		p.setProperty(PREFIX+"p15.1.sl1", "a");
+		p.setProperty(PREFIX+"p15.1.sl2", "4");
+		
+		
+		helper = new PropertiesHelper(PREFIX, p, METADATA, log);
+		Set<String> listkeys = helper.getStructuredListKeys("p15.");
+		assertEquals(2, listkeys.size());
+		Iterator<String> it = listkeys.iterator();
+		
+		String k = it.next();
+		assertEquals("a", helper.getValue(k + "sl1"));
+		assertEquals(4, (int)helper.getIntValue(k + "sl2"));
+		k = it.next();
+		assertEquals("asda", helper.getValue(k + "sl1"));
+		assertEquals(40, (int)helper.getIntValue(k + "sl2"));
+		
+	}
+	
 	private int global = 0;
 	private int focused = 0;
 	
@@ -347,6 +447,7 @@ public class PropertiesHelperTest extends TestCase
 		fw.close();
 		assertEquals(true, helper.reloadIfChanged());
 	}
+
 	
 	public void testAsciidocReference()
 	{

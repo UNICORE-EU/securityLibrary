@@ -77,9 +77,16 @@ public class AsciidocFormatter implements HelpFormatter
 			PropertyMD md = metadata.get(key);
 			if (md.isHidden())
 				continue;
-			
-			ret.append("|" + pfx + key);
-			if (md.getType() == Type.LIST)
+
+			if (!md.isStructuredListEntry())
+				ret.append("|" + pfx + key);
+			else
+			{
+				PropertyMD listMeta = metadata.get(md.getStructuredListEntryId());
+				String listKey = listMeta.numericalListKeys() ? "<NUMBER>." : "*.";
+				ret.append("|" + pfx + md.getStructuredListEntryId() + listKey + key);
+			}
+			if (md.getType() == Type.LIST || md.getType() == Type.STRUCTURED_LIST)
 				ret.append(md.numericalListKeys() ? "<NUMBER>" : "*");
 			if (md.canHaveSubkeys())
 				ret.append("[.*]");
