@@ -163,6 +163,7 @@ public class PropertiesHelperTest extends TestCase
 		Properties p = new Properties();
 		p.setProperty("p09", "ola");
 		p.setProperty("p12", "viola");
+		p.setProperty("p15.44.sl1", "asda");
 		PropertiesHelper helper = new PropertiesHelper("", p, METADATA, log);
 		PropertyChangeListener l1 = new PropertyChangeListener()
 		{
@@ -290,7 +291,8 @@ public class PropertiesHelperTest extends TestCase
 
 	public void testParsingDefault()
 	{
-		String PROP = "prefix.p09=mandatory\nprefix.p01 = ALLOW";
+		String PROP = "prefix.p09=mandatory\nprefix.p01 = ALLOW\nprefix.p15.44.sl1=asda";
+
 		try
 		{
 			PropertiesHelper helper = new PropertiesHelper(PREFIX, load(PROP), METADATA, log);
@@ -303,7 +305,7 @@ public class PropertiesHelperTest extends TestCase
 	
 	public void testParsingNullDefault()
 	{
-		String PROP = "prefix.p09=mandatory\n";
+		String PROP = "prefix.p09=mandatory\nprefix.p15.44.sl1=asda";
 		try
 		{
 			PropertiesHelper helper = new PropertiesHelper(PREFIX, load(PROP), METADATA, log);
@@ -316,7 +318,7 @@ public class PropertiesHelperTest extends TestCase
 	
 	public void testParsingUnknown()
 	{
-		String PROP = "prefix.p09=mandatory\nprefix.foo = bar";
+		String PROP = "prefix.p09=mandatory\nprefix.foo = bar\nprefix.p15.44.sl1=asda";
 		try
 		{
 			new PropertiesHelper(PREFIX, load(PROP), METADATA, log);
@@ -349,13 +351,13 @@ public class PropertiesHelperTest extends TestCase
 			assertTrue(e.getMessage().contains("p07"));
 		}
 		
-		PROP = "prefix.p09=mandatory\nprefix.p07 = 100";
+		PROP = "prefix.p09=mandatory\nprefix.p07 = 100\nprefix.p15.44.sl1=asda";
 		new PropertiesHelper(PREFIX, load(PROP), METADATA, log);
 	}
 
 	public void testParsingEnums()
 	{
-		String PROP = "prefix.p09=mandatory\nprefix.p01 = DENY";
+		String PROP = "prefix.p09=mandatory\nprefix.p01 = DENY\nprefix.p15.44.sl1=asda";
 		try
 		{
 			PropertiesHelper helper = new PropertiesHelper(PREFIX, load(PROP), METADATA, log);
@@ -368,7 +370,7 @@ public class PropertiesHelperTest extends TestCase
 
 	public void testParsingPaths()
 	{
-		String PROP = "prefix.p09=mandatory\nprefix.p10 = src/test/resources";
+		String PROP = "prefix.p09=mandatory\nprefix.p10 = src/test/resources\nprefix.p15.44.sl1=asda";
 		try
 		{
 			PropertiesHelper helper = new PropertiesHelper(PREFIX, load(PROP), METADATA, log);
@@ -391,7 +393,7 @@ public class PropertiesHelperTest extends TestCase
 
 	public void testParsingLists()
 	{
-		String PROP = "prefix.p09=mandatory\nprefix.p11.22 = ola\nprefix.p11.100 = ala\nprefix.p13.22 = ola\nprefix.p13.100 = ala";
+		String PROP = "prefix.p09=mandatory\nprefix.p11.22 = ola\nprefix.p11.100 = ala\nprefix.p13.22 = ola\nprefix.p13.100 = ala\nprefix.p15.44.sl1=asda";
 		try
 		{
 			PropertiesHelper helper = new PropertiesHelper(PREFIX, load(PROP), METADATA, log);
@@ -422,7 +424,7 @@ public class PropertiesHelperTest extends TestCase
 
 	public void testParsingSubkeys()
 	{
-		String PROP = "prefix.p09=mandatory\nprefix.p12 = def\nprefix.p12.sub = ala";
+		String PROP = "prefix.p09=mandatory\nprefix.p12 = def\nprefix.p12.sub = ala\nprefix.p15.44.sl1=asda";
 		try
 		{
 			PropertiesHelper helper = new PropertiesHelper(PREFIX, load(PROP), METADATA, log);
