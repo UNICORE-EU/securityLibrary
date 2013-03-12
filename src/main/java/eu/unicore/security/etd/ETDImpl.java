@@ -21,6 +21,7 @@ import org.apache.xmlbeans.XmlObject;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
+import eu.unicore.samly2.elements.SAMLAttribute;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.dsig.DSigException;
 
@@ -79,6 +80,20 @@ public class ETDImpl implements ETDApi
 		return addRestrictionsAndSign(td, issuer, pk, restrictions);
 	}
 	
+	public TrustDelegation generateTD(X509Certificate custodian, X509Certificate[] issuer, 
+		PrivateKey pk, X509Certificate[] receiver, DelegationRestrictions restrictions,
+		List<SAMLAttribute> attributes) 
+		throws DSigException, CertificateEncodingException
+	{
+		TrustDelegation td = new TrustDelegation(custodian);
+		td.setX509Issuer(issuer[0].getSubjectX500Principal().getName());
+		td.setX509Subject(receiver[0].getSubjectX500Principal().getName());
+		td.setSenderVouchesX509Confirmation(receiver);
+		for (SAMLAttribute sam : attributes) {
+			td.addAttribute(sam);
+		}
+		return addRestrictionsAndSign(td, issuer, pk, restrictions);
+	}
 	
 	private TrustDelegation addRestrictionsAndSign(TrustDelegation td, 
 			X509Certificate []issuer, PrivateKey pk,
