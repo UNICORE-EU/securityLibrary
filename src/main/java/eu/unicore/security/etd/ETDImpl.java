@@ -11,6 +11,7 @@ package eu.unicore.security.etd;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -20,6 +21,7 @@ import org.apache.xmlbeans.XmlObject;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
+import eu.unicore.samly2.elements.SAMLAttribute;
 import eu.unicore.samly2.exceptions.SAMLValidationException;
 import eu.unicore.samly2.validators.AssertionValidator;
 import eu.unicore.security.ValidationResult;
@@ -75,21 +77,39 @@ public class ETDImpl implements ETDApi
 	{
 		return generateTD(custodian.getSubjectX500Principal().getName(), 
 				TrustDelegation.generateSha2Hash(custodian), 
-				custodian.hashCode(), issuer, pk, receiver, restrictions);
+				custodian.hashCode(), issuer, pk, receiver, restrictions,
+				new ArrayList<SAMLAttribute>());
 	}
 	
-	public TrustDelegation generateTD(String custodianDN, String sha2Hash, int legacyHash, 
+
+	@Override
+	public TrustDelegation generateTD(X509Certificate custodian, X509Certificate[] issuer,
+			PrivateKey pk, X509Certificate[] receiver,
+			DelegationRestrictions restrictions, List<SAMLAttribute> attributes)
+			throws DSigException, CertificateEncodingException
+	{
+		return generateTD(custodian.getSubjectX500Principal().getName(), 
+				TrustDelegation.generateSha2Hash(custodian), 
+				custodian.hashCode(), issuer, pk, receiver, restrictions,
+				attributes);
+	}
+
+	
+	private TrustDelegation generateTD(String custodianDN, String sha2Hash, int legacyHash, 
 		X509Certificate[] issuer, PrivateKey pk, X509Certificate[] receiver, 
-		DelegationRestrictions restrictions) 
+		DelegationRestrictions restrictions, List<SAMLAttribute> attributes) 
 		throws DSigException, CertificateEncodingException
 	{
 		TrustDelegation td = new TrustDelegation(custodianDN, sha2Hash, legacyHash);
 		td.setX509Issuer(issuer[0].getSubjectX500Principal().getName());
 		td.setX509Subject(receiver[0].getSubjectX500Principal().getName());
 		td.setSenderVouchesX509Confirmation(receiver);
+		for (SAMLAttribute sam : attributes) 
+		{
+			td.addAttribute(sam);
+		}
 		return addRestrictionsAndSign(td, issuer, pk, restrictions);
-	}
-	
+	}	
 	
 	private TrustDelegation addRestrictionsAndSign(TrustDelegation td, 
 			X509Certificate []issuer, PrivateKey pk,
@@ -170,7 +190,8 @@ public class ETDImpl implements ETDApi
 		TrustDelegation initial = chain.get(0);
 		
 		chain.add(generateTD(initial.getCustodianDN(), initial.getCustodianCertHashSha2(),
-				initial.getCustodianCertHash(), issuer, pk, receiver, restrictions));
+				initial.getCustodianCertHash(), issuer, pk, receiver, restrictions,
+				new ArrayList<SAMLAttribute>()));
 		return chain;
 	}
 	
@@ -495,7 +516,6 @@ public class ETDImpl implements ETDApi
 				return true;
 		return false;
 	}
-
 }
 
 

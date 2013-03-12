@@ -8,10 +8,13 @@
 
 package eu.unicore.security.etd;
 
+import java.util.Collections;
+
 import javax.security.auth.x500.X500Principal;
 
 import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
+import eu.unicore.samly2.elements.SAMLAttribute;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.etd.TrustDelegation;
 
@@ -20,6 +23,35 @@ import eu.unicore.security.etd.TrustDelegation;
  */
 public class GenerateAndVerifyTest extends ETDTestBase
 {
+	public void testWithCustomAttributes()
+	{
+		try
+		{
+			SAMLAttribute samlA = new SAMLAttribute("foo", "bar");
+			samlA.addStringAttributeValue("bar");
+			
+			TrustDelegation td = etdEngine.generateTD(issuerCert1[0], issuerCert1,
+					privKey1, issuerCert3, null, Collections.singletonList(samlA));
+			
+			String dnsubFromTD = new X500Principal(td.getSubjectDN()).getName();
+			String dnsubOrig = issuerCert3[0].getSubjectX500Principal().getName();
+			
+			assertTrue(X500NameUtils.equal(dnsubFromTD, dnsubOrig));
+			
+			ValidationResult result = 
+				etdEngine.validateTD(td, issuerCert1[0], issuerCert1, 
+						issuerCert3, new BinaryCertChainValidator(true));
+			if (!result.isValid())
+				fail(result.getInvalidResaon());
+			assertEquals(4, td.getXMLBean().getAttributeStatementArray()[0].getAttributeArray().length);
+		} catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+		assertTrue(true);
+	}
+
+	
 	public void testRSACert3()
 	{
 		try
