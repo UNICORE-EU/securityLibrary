@@ -14,6 +14,7 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
+import eu.unicore.samly2.elements.SAMLAttribute;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.dsig.DSigException;
 
@@ -95,6 +96,24 @@ public interface ETDApi
 			PrivateKey pk, X509Certificate[] receiver, 
 			DelegationRestrictions restrictions) 
 		throws DSigException, CertificateEncodingException;
+	
+	/**
+	 * a new method that supports a list of SAML attributes to include in the soap.
+	 * @param custodian
+	 * @param issuer
+	 * @param pk
+	 * @param receiver
+	 * @param restrictions
+	 * @param attributes
+	 * @return
+	 * @throws DSigException
+	 * @throws CertificateEncodingException
+	 */
+	public TrustDelegation generateTD(X509Certificate custodian, X509Certificate[] issuer, 
+		PrivateKey pk, X509Certificate[] receiver, DelegationRestrictions restrictions,
+		List<SAMLAttribute> attributes) 
+		throws DSigException, CertificateEncodingException;	
+
 	
 	/**
 	 * Validate single trust delegation assertion. Checks if receiver has trust of custodian 
