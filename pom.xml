@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>eu.eu-emi.security</groupId>
 			<artifactId>canl</artifactId>
-			<version>1.1.0</version>
+			<version>1.2.0</version>
 		</dependency>
 
 		<!-- XMLBeans and samly2 are required only if you use classes from the 
