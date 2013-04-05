@@ -257,26 +257,28 @@ public class ClientProperties extends DefaultClientConfiguration
 		return new String[0];
 	}
 	
-	@Override
-	public ClientProperties clone()
-	{
-		ClientProperties ret = (ClientProperties) super.clone();
-		ret.authnAndTrustConfiguration = this.authnAndTrustConfiguration.clone();
-		ret.clientPropertiesHelper= this.clientPropertiesHelper.clone();
-		return ret;
-	}
-	
 	/**
 	 * This version clones the object as normal clone(), but authnAndTrustConfiguration is
 	 * simply copied by reference so is shared with the cloned instance.
 	 * @return
+	 * @Deprecated use clone()
 	 */
-	public ClientProperties shallowClone()
+	@Override
+	public ClientProperties clone()
 	{
 		ClientProperties ret = (ClientProperties) super.clone();
 		ret.authnAndTrustConfiguration = this.authnAndTrustConfiguration;
 		ret.clientPropertiesHelper= this.clientPropertiesHelper.clone();
 		return ret;
+	}
+	
+	/**
+	 * @Deprecated use clone(), works in the same way.
+	 */
+	@Deprecated
+	public ClientProperties shallowClone()
+	{
+		return clone();
 	}
 	
 	/**
