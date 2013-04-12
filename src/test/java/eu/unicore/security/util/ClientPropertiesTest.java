@@ -29,7 +29,6 @@ public class ClientPropertiesTest extends TestCase
 		p.setProperty(DEFAULT_PREFIX+PROP_SERVER_HOSTNAME_CHECKING, "FAIL");
 		p.setProperty(DEFAULT_PREFIX+PROP_SSL_AUTHN_ENABLED, "false");
 		p.setProperty(DEFAULT_PREFIX+PROP_SSL_ENABLED, "false");
-		p.setProperty(DEFAULT_PREFIX+EXTRA_HTTP_LIB_PROPERTIES_PREFIX+"dfsf", "foo");
 		
 		ClientProperties cp = new ClientProperties(p, new DefaultAuthnAndTrustConfiguration());
 		assertEquals(true, cp.doHttpAuthn());
@@ -41,8 +40,6 @@ public class ClientPropertiesTest extends TestCase
 		assertEquals(false, cp.doSSLAuthn());
 		assertEquals(false, cp.isSslEnabled());
 		assertEquals(ServerHostnameCheckingMode.FAIL, cp.getServerHostnameCheckingMode());
-		assertEquals(3, cp.getExtraSettings().size());
-		assertEquals("foo", cp.getExtraSettings().get("http.dfsf"));
 	}
 
 }

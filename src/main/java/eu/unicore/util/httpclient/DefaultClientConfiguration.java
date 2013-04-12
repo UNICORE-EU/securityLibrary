@@ -34,9 +34,9 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	private boolean sslEnabled;
 	private boolean doSignMessage;
 	private ETDClientSettings etdSettings = new ETDClientSettings();
-	private Properties extraSettings = new Properties();
 	private Map<String, Object> extraSecurityTokens = new HashMap<String, Object>();
 	private ServerHostnameCheckingMode serverHostnameCheckingMode = ServerHostnameCheckingMode.NONE;
+	private HttpClientProperties httpClientProperties = new HttpClientProperties(new Properties());
 	
 	/**
 	 * Only default settings, i.e. no security.
@@ -241,20 +241,22 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	}
 
 	/**
-	 * @return the extraSettings
+	 * @deprecated returns null 
 	 */
 	@Override
+	@Deprecated
 	public Properties getExtraSettings()
 	{
-		return extraSettings;
+		return null;
 	}
 
 	/**
 	 * @param extraSettings the extraSettings to set
+	 * @deprecated Not used anymore, no op
 	 */
+	@Deprecated
 	public void setExtraSettings(Properties extraSettings)
 	{
-		this.extraSettings = extraSettings;
 	}
 
 	/**
@@ -318,9 +320,6 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 		Map<String, Object> extra = new HashMap<String, Object>();
 		extra.putAll(extraSecurityTokens);
 		ret.setExtraSecurityTokens(extra);
-		Properties p = new Properties();
-		p.putAll(extraSettings);
-		ret.setExtraSettings(p);
 		ret.setHttpAuthn(httpAuthn);
 		ret.setHttpPassword(httpPassword);
 		ret.setHttpUser(httpUser);
@@ -332,5 +331,16 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 		ret.setValidator(getValidator());
 		ret.setServerHostnameCheckingMode(serverHostnameCheckingMode);
 		return ret;
+	}
+
+	@Override
+	public HttpClientProperties getHttpClientProperties()
+	{
+		return httpClientProperties;
+	}
+	
+	public void setHttpclientProperties(HttpClientProperties httpClientProperties)
+	{
+		this.httpClientProperties = httpClientProperties;
 	}
 }

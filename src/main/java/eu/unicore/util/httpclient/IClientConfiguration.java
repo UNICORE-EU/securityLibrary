@@ -10,8 +10,6 @@ package eu.unicore.util.httpclient;
 import java.util.Map;
 import java.util.Properties;
 
-import eu.unicore.util.httpclient.HttpUtils;
-
 /**
  * Extension of {@link IPlainClientConfiguration},
  * provides (mostly) security related settings, useful for the client side. This
@@ -83,13 +81,19 @@ public interface IClientConfiguration extends IPlainClientConfiguration
 	public ETDClientSettings getETDSettings();
 	
 	/**
-	 * Returns additional settings which are used to set up the client call
-	 * (e.g., HTTP client proxy settings or additional security handler settings)
+	 * Returns additional settings which are used to set up the client call,
+	 * e.g. additional security handler settings.
 	 * 
 	 * @return see above
-	 * @see HttpUtils
+	 * @deprecated - don't use, will be removed. repalaced bny the {@link #getHttpClientProperties()}
 	 */
+	@Deprecated
 	public Properties getExtraSettings();
+	
+	/**
+	 * @return settings for the HTTP client.
+	 */
+	public HttpClientProperties getHttpClientProperties();
 	
 	/**
 	 * For outgoing calls, get extra security information. This map is used whenever 

@@ -6,22 +6,28 @@ package eu.unicore.security.util.client;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Properties;
 
 import javax.net.ssl.SSLPeerUnverifiedException;
 
-import junit.framework.TestCase;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.util.EntityUtils;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
+import junit.framework.TestCase;
 
 import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
+import eu.unicore.util.httpclient.HttpClientProperties;
 import eu.unicore.util.httpclient.HttpUtils;
 import eu.unicore.util.jetty.HttpServerProperties;
 
@@ -41,15 +47,15 @@ public class TestJettyServer extends TestCase
 			X509CertChainValidatorExt validator = new KeystoreCertChainValidator("src/test/resources/client/httpclient.jks",
 					"the!client".toCharArray(), "JKS", -1);
 			DefaultClientConfiguration secCfg = new DefaultClientConfiguration(validator, cred);
-			secCfg.getExtraSettings().setProperty(HttpUtils.CONNECT_TIMEOUT, "2000");
-			secCfg.getExtraSettings().setProperty(HttpUtils.SO_TIMEOUT, "2000");
+			secCfg.getHttpClientProperties().setProperty(HttpClientProperties.CONNECT_TIMEOUT, "2000");
+			secCfg.getHttpClientProperties().setProperty(HttpClientProperties.SO_TIMEOUT, "2000");
 			secCfg.setSslAuthn(useClientCred);
 			
 			String url = server.getSecUrl()+"/servlet1";
 			HttpClient client = HttpUtils.createClient(url, secCfg);
-			GetMethod get = new GetMethod(url);
-			client.executeMethod(get);
-			String resp = get.getResponseBodyAsString();
+			HttpGet get = new HttpGet(url);
+			HttpResponse response = client.execute(get);
+			String resp = EntityUtils.toString(response.getEntity());
 			if (shouldBeOk)
 				assertTrue("Got: " + resp, SimpleServlet.OK_GET.equals(resp));
 			else
@@ -162,7 +168,7 @@ public class TestJettyServer extends TestCase
 	
 	private void runThreadingCheck(JettyServer4Testing server, long minTime, long maxTime) throws Exception
 	{
-		HttpClient client = HttpUtils.createClient(new Properties());
+		HttpClient client = HttpUtils.createClient(new HttpClientProperties(new Properties()));
 
 		MethodRunner r1 = new MethodRunner(client, server.getUrl()+"/servlet1");
 		MethodRunner r2 = new MethodRunner(client, server.getUrl()+"/servlet1");
@@ -198,12 +204,21 @@ public class TestJettyServer extends TestCase
 		
 		public void run()
 		{
-			PostMethod post = new PostMethod(url);
-			post.addParameter("timeout", "2000");
+			URI uri;
+			try
+			{
+				uri = new URIBuilder(url).addParameter("timeout", "2000").build();
+			} catch (URISyntaxException e1)
+			{
+				e1.printStackTrace();
+				fail(e1.toString());
+				return;
+			}
+			HttpPost post = new HttpPost(uri);
 			HttpUtils.setConnectionTimeout(client, 20000, 20000);
 			try
 			{
-				client.executeMethod(post);
+				client.execute(post);
 			} catch(Exception e)
 			{
 				e.printStackTrace();

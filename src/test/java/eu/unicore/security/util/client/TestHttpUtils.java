@@ -9,20 +9,27 @@ package eu.unicore.security.util.client;
 
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.URI;
 import java.util.Properties;
 
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.RedirectException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.util.EntityUtils;
 
 import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
+import eu.unicore.util.httpclient.HttpClientProperties;
 import eu.unicore.util.httpclient.HttpUtils;
 import eu.unicore.util.httpclient.IClientConfiguration;
 import eu.unicore.util.httpclient.ServerHostnameCheckingMode;
@@ -48,23 +55,24 @@ public class TestHttpUtils extends TestCase
 	
 	public void testPlainHttp() throws Exception
 	{
-		HttpClient client = HttpUtils.createClient(new Properties());
-		GetMethod get = new GetMethod(server.getUrl()+"/servlet1");
-		client.executeMethod(get);
-		String resp = get.getResponseBodyAsString();
+		HttpClient client = HttpUtils.createClient(new DefaultClientConfiguration().getHttpClientProperties());
+		HttpGet get = new HttpGet(server.getUrl()+"/servlet1");
+		HttpResponse response = client.execute(get);
+		String resp = EntityUtils.toString(response.getEntity());
 		assertTrue("Got: " + resp, SimpleServlet.OK_GET.equals(resp));
 	}
 	
 	public void testTimeouts() throws Exception
 	{
-		HttpClient client = HttpUtils.createClient(new Properties());
-		PostMethod post = new PostMethod(server.getUrl()+"/servlet1");
-		post.addParameter("timeout", "5000");
+		HttpClient client = HttpUtils.createClient(new DefaultClientConfiguration().getHttpClientProperties());
+		URI uri = new URIBuilder(server.getUrl()+"/servlet1").
+				addParameter("timeout", "5000").build();
+		HttpPost post = new HttpPost(uri);
 		HttpUtils.setConnectionTimeout(client, 300, 300);
 		long start = System.currentTimeMillis();
 		try
 		{
-			client.executeMethod(post);
+			client.execute(post);
 		} catch(SocketTimeoutException e)
 		{
 			long end = System.currentTimeMillis();
@@ -78,29 +86,56 @@ public class TestHttpUtils extends TestCase
 		fail("Execution was not timed out, took " + (end-start));
 	}
 
-	public void testRedirects() throws Exception
+	public void testRedirectSingle() throws Exception
 	{
-		
-		PostMethod post = new PostMethod(server.getUrl()+"/servlet2");
-		post.addParameter("redirect-to", server.getUrl()+"/servlet1");
-		Properties p = new Properties();
-		p.setProperty(HttpUtils.HTTP_MAX_REDIRECTS, "1");
+		URI uri = new URIBuilder(server.getUrl()+"/servlet2").
+				addParameter("redirect-to", server.getUrl()+"/servlet1").build();
+		HttpPost post = new HttpPost(uri);
+		HttpClientProperties p = new HttpClientProperties(new Properties());
+		p.setProperty(HttpClientProperties.HTTP_MAX_REDIRECTS, "1");
 		HttpClient client = HttpUtils.createClient(p);
-		client.executeMethod(post);
-		String resp = post.getResponseBodyAsString();
+		HttpResponse response = client.execute(post);
+		String resp = EntityUtils.toString(response.getEntity());
 		assertTrue("Got: " + resp, SimpleServlet.OK_POST.equals(resp));
+	}
+
+	public void testRedirectsTooMany() throws Exception
+	{
+		HttpClientProperties p = new HttpClientProperties(new Properties());
+		p.setProperty(HttpClientProperties.HTTP_MAX_REDIRECTS, "5");
+		p.setProperty(HttpClientProperties.ALLOW_CIRCULAR_REDIRECTS, "true");
+		HttpClient client = HttpUtils.createClient(p);
+		URI uri = new URIBuilder(server.getUrl()+"/servlet2")
+				.addParameter("redirect-to", server.getUrl()+"/servlet1")
+				.addParameter("redirect-to-first", server.getUrl()+"/servlet2")
+				.addParameter("num", "6").build();
+		HttpPost post = new HttpPost(uri);
 		
-		p.setProperty(HttpUtils.HTTP_MAX_REDIRECTS, "5");
-		client = HttpUtils.createClient(p);
-		post = new PostMethod(server.getUrl()+"/servlet2");
-		post.addParameter("redirect-to", server.getUrl()+"/servlet1");
-		post.addParameter("redirect-to-first", server.getUrl()+"/servlet2");
-		post.addParameter("num", "6");
-		client.executeMethod(post);
+		try
+		{
+			client.execute(post);
+			fail("Got proper response when redirects limit should be hit");
+		} catch(ClientProtocolException e)
+		{
+			assertTrue("Got wrong exception cause: " + e, e.getCause() instanceof RedirectException);
+		}
+	}
+
+	public void testRedirectsMany() throws Exception
+	{
+		HttpClientProperties p = new HttpClientProperties(new Properties());
+		p.setProperty(HttpClientProperties.HTTP_MAX_REDIRECTS, "5");
+		p.setProperty(HttpClientProperties.ALLOW_CIRCULAR_REDIRECTS, "true");
+		HttpClient client = HttpUtils.createClient(p);
+		URI uri = new URIBuilder(server.getUrl()+"/servlet2")
+				.addParameter("redirect-to", server.getUrl()+"/servlet1")
+				.addParameter("redirect-to-first", server.getUrl()+"/servlet2")
+				.addParameter("num", "4").build();
+		HttpPost post = new HttpPost(uri);
 		
-		System.out.println(post.getStatusCode() + " " + post.getStatusLine());
-		resp = post.getResponseBodyAsString();
-		assertTrue("Got: " + post.getStatusCode(), post.getStatusCode() == 302);
+		HttpResponse response = client.execute(post);
+		String resp = EntityUtils.toString(response.getEntity());
+		assertTrue("Got: " + resp, SimpleServlet.OK_POST.equals(resp));
 	}
 	
 	public void testHttps() throws Exception
@@ -113,9 +148,9 @@ public class TestHttpUtils extends TestCase
 		
 		String url = server.getSecUrl()+"/servlet1";
 		HttpClient client = HttpUtils.createClient(url, secCfg);
-		GetMethod get = new GetMethod(url);
-		client.executeMethod(get);
-		String resp = get.getResponseBodyAsString();
+		HttpGet get = new HttpGet(url);
+		HttpResponse response = client.execute(get);
+		String resp = EntityUtils.toString(response.getEntity());
 		assertTrue("Got: " + resp, SimpleServlet.OK_GET.equals(resp));
 	}
 
@@ -131,10 +166,10 @@ public class TestHttpUtils extends TestCase
 		
 		HttpClient client = HttpUtils.createClient(url, secCfg);
 
-		GetMethod get = new GetMethod(url);
+		HttpGet get = new HttpGet(url);
 		try
 		{
-			client.executeMethod(get);
+			client.execute(get);
 			fail("Managed to conenct with untrusted certificate!!!!!");
 		} catch (SSLPeerUnverifiedException e)
 		{
@@ -191,8 +226,8 @@ public class TestHttpUtils extends TestCase
 	{
 		secCfg.setServerHostnameCheckingMode(mode);
 		HttpClient client = HttpUtils.createClient(url, secCfg);
-		GetMethod get = new GetMethod(url);
-		client.executeMethod(get);
-		get.getResponseBodyAsString();
+		HttpGet get = new HttpGet(url);
+		HttpResponse response = client.execute(get);
+		EntityUtils.toString(response.getEntity());
 	}
 }

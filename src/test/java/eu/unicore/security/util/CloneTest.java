@@ -26,7 +26,6 @@ import static eu.unicore.security.canl.CredentialProperties.PROP_PASSWORD;
 import static eu.unicore.security.canl.TruststoreProperties.PROP_KS_PASSWORD;
 import static eu.unicore.security.canl.TruststoreProperties.PROP_KS_PATH;
 import static eu.unicore.security.canl.TruststoreProperties.PROP_TYPE;
-import static eu.unicore.util.httpclient.ClientProperties.EXTRA_HTTP_LIB_PROPERTIES_PREFIX;
 import static eu.unicore.util.httpclient.ClientProperties.PROP_HTTP_AUTHN_ENABLED;
 import static eu.unicore.util.httpclient.ClientProperties.PROP_HTTP_PASSWORD;
 import static eu.unicore.util.httpclient.ClientProperties.PROP_HTTP_USER;
@@ -72,7 +71,6 @@ public class CloneTest extends TestCase
 		p.setProperty(ClientProperties.DEFAULT_PREFIX+PROP_SERVER_HOSTNAME_CHECKING, "FAIL");
 		p.setProperty(ClientProperties.DEFAULT_PREFIX+PROP_SSL_AUTHN_ENABLED, "false");
 		p.setProperty(ClientProperties.DEFAULT_PREFIX+PROP_SSL_ENABLED, "false");
-		p.setProperty(ClientProperties.DEFAULT_PREFIX+EXTRA_HTTP_LIB_PROPERTIES_PREFIX+"dfsf", "foo");
 		
 		ClientProperties cp = new ClientProperties(p, new DefaultAuthnAndTrustConfiguration());
 		testByReflection(cp, cp.clone());

@@ -59,9 +59,6 @@ public class ClientProperties extends DefaultClientConfiguration
 	public static final String PROP_OUT_HANDLERS = "outHandlers";
 	public static final String PROP_SERVER_HOSTNAME_CHECKING = "serverHostnameChecking";
 	
-	public static final String EXTRA_HTTP_LIB_PROPERTIES_PREFIX = "http.";
-	private static final int DEFAULT_HTTP_TIMEOUT = 20000;
-	
 	private IAuthnAndTrustConfiguration authnAndTrustConfiguration;
 	private PropertiesHelper clientPropertiesHelper;
 	
@@ -87,8 +84,9 @@ public class ClientProperties extends DefaultClientConfiguration
 				setDescription("Controls whether the SSL/TLS connection mode is enabled."));
 		META.put(PROP_SERVER_HOSTNAME_CHECKING, new PropertyMD(ServerHostnameCheckingMode.WARN).
 				setDescription("Controls whether server's hostname should be checked for matching its certificate subject. This verification prevents man-in-the-middle attacks. If enabled WARN will only print warning in log, FAIL will close the connection."));
-		META.put(EXTRA_HTTP_LIB_PROPERTIES_PREFIX, new PropertyMD().setCanHaveSubkeys().
-				setDescription("Additional settings to be used by the HTTP client. The most useful are '.socket.timeout' and '.connection.timeout'. If those are not set,  default is used: " + DEFAULT_HTTP_TIMEOUT));
+		
+		for (Map.Entry<String, PropertyMD> entry: HttpClientProperties.META.entrySet())
+			META.put(HttpClientProperties.PREFIX+entry.getKey(), entry.getValue());
 	}
 
 	//all those constructors suck a bit- but there is no multi inheritance in Java, 
@@ -228,23 +226,9 @@ public class ClientProperties extends DefaultClientConfiguration
 				ServerHostnameCheckingMode.class);
 		setServerHostnameCheckingMode(hostnameMode);
 		
-		//This is bit tricky: clientPrefix+EXTRA_... is the prefix for extra properties,
-		//but EXTRA_... must be left in the keys. 
-		String extraPrefix = clientPrefix + EXTRA_HTTP_LIB_PROPERTIES_PREFIX;
-		Properties extraSettings = new Properties();
-		for (Object k: p.keySet())
-		{
-			String key = (String)k;
-			if (key.startsWith(extraPrefix))
-				extraSettings.setProperty(key.substring(
-						clientPrefix.length()), p.getProperty(key));
-		}
-		setExtraSettings(extraSettings);
-		
-		if (!extraSettings.containsKey(HttpUtils.SO_TIMEOUT))
-			extraSettings.setProperty(HttpUtils.SO_TIMEOUT, DEFAULT_HTTP_TIMEOUT+"");
-		if (!extraSettings.containsKey(HttpUtils.CONNECT_TIMEOUT))
-			extraSettings.setProperty(HttpUtils.CONNECT_TIMEOUT, DEFAULT_HTTP_TIMEOUT+"");
+		HttpClientProperties httpProperties = new HttpClientProperties(
+				clientPrefix+HttpClientProperties.PREFIX, p);
+		setHttpclientProperties(httpProperties);
 	}
 	
 	private String[] parseHandlers(PropertiesHelper properties, String key)

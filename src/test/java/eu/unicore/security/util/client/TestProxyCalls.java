@@ -5,12 +5,13 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Properties;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+
 import junit.framework.TestCase;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
-
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
+import eu.unicore.util.httpclient.HttpClientProperties;
 import eu.unicore.util.httpclient.HttpUtils;
 
 /**
@@ -61,16 +62,16 @@ public class TestProxyCalls extends TestCase{
 	}
 
 	public void testProxyCall()throws Exception{
-		Properties props = new Properties();
-		props.setProperty(HttpUtils.HTTP_PROXY_HOST, "localhost");
-		props.setProperty(HttpUtils.HTTP_PROXY_PORT, String.valueOf(port));
+		HttpClientProperties props = new HttpClientProperties(new Properties());
+		props.setProperty(HttpClientProperties.HTTP_PROXY_HOST, "localhost");
+		props.setProperty(HttpClientProperties.HTTP_PROXY_PORT, String.valueOf(port));
 		String uri="http://www.verisign.com/";
 		DefaultClientConfiguration config = new DefaultClientConfiguration();
-		config.setExtraSettings(props);
+		config.setHttpclientProperties(props);
 		HttpClient client=HttpUtils.createClient(uri, config);
-		GetMethod httpget = new GetMethod("http://www.verisign.com/");
+		HttpGet httpget = new HttpGet("http://www.verisign.com/");
 		try { 
-			client.executeMethod(httpget);
+			client.execute(httpget);
 			assertTrue(gotCall);
 		} finally {
 			httpget.releaseConnection();
