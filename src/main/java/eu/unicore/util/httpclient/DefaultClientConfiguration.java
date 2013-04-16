@@ -28,6 +28,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	private String httpPassword;
 	private boolean sslAuthn;
 	private boolean httpAuthn;
+	private boolean messageLogging;
 	private String[] inHandlerClassNames;
 	private String[] outHandlerClassNames;
 	private ClassLoader classLoader;
@@ -291,6 +292,21 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	public void setServerHostnameCheckingMode(ServerHostnameCheckingMode serverHostnameCheckingMode)
 	{
 		this.serverHostnameCheckingMode = serverHostnameCheckingMode;
+	}
+
+	public void setMessageLogging(boolean what)
+	{
+		this.messageLogging=what;
+	}
+	
+	public boolean isMessageLogging()
+	{
+		return messageLogging;
+	}
+	
+	public void setHttpClientProperties(HttpClientProperties httpClientProperties)
+	{
+		this.httpClientProperties = httpClientProperties;
 	}
 
 	/**

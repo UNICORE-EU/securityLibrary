@@ -22,7 +22,7 @@ import eu.unicore.security.dsig.DSigException;
 /**
  * ETD external interface.
  * <p>
- * There are two flavours of trust delegations that can be used (but exectly one kind 
+ * There are two flavours of trust delegations that can be used (but exactly one kind 
  * can be used in a chain). In the first kind identity is specified by DNs only. In this
  * case Issuer certificate (or chain) is included in every assertion but receiver and
  * custodian are specified by DNs only. In the second case subject's certificate
@@ -82,7 +82,7 @@ public interface ETDApi
 
 	
 	/**
-	 * Generates trust delegationin terms of certificates.
+	 * Generates trust delegation in terms of certificates.
 	 * @param custodian DN of initial trust delegation issuer (if not in trust delegation chain 
 	 * it is equal to issuer)
 	 * @param issuer Actual issuer certificate of this trust delegation

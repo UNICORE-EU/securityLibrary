@@ -101,4 +101,11 @@ public interface IClientConfiguration extends IPlainClientConfiguration
 	 * were configured by this class.
 	 */
 	public Map<String,Object> getExtraSecurityTokens();
+	
+	/**
+	 * returns true if messages should be logged
+	 * @return
+	 */
+	public boolean isMessageLogging();
+	
 }

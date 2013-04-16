@@ -31,6 +31,8 @@ public class HttpClientProperties extends PropertiesHelper
 	
 	/** If true then connection will be closed immediately after serving the request */
 	public static final String CONNECTION_CLOSE = "connection-close";
+	/** If true then connection will be closed immediately after serving the request */
+	public static final String ALLOW_CHUNKING= "allow-chunking";
 	/** Maximum number of redirects to take. Set to a non positive value to disable automatic redirects. */
 	public static final String HTTP_MAX_REDIRECTS = "maxRedirects";
 	/** Space delimited list of hosts for which HTTP proxy shouldn't be used */
@@ -39,6 +41,8 @@ public class HttpClientProperties extends PropertiesHelper
 	public static final String HTTP_PROXY_HOST = "proxyHost";
 	/** HTTP proxy port */
 	public static final String HTTP_PROXY_PORT = "proxyPort";
+	/** HTTP proxy type: SOCKS or HTTP */
+	public static final String HTTP_PROXY_TYPE = "proxyType";
 	/** HTTP proxy user name */
 	public static final String HTTP_PROXY_USER = "proxy.user";
 	/** HTTP proxy password */
@@ -61,6 +65,8 @@ public class HttpClientProperties extends PropertiesHelper
 		META.put(CONNECTION_CLOSE, new PropertyMD("false").setCategory(httpCat).
 				setDescription("If set to true then the client will send connection close header, " +
 						"so the server will close the socket."));
+		META.put(ALLOW_CHUNKING, new PropertyMD("true").setCategory(httpCat).
+				setDescription("If set to false, then the client will not use HTTP 1.1 data chunking."));
 		META.put(HTTP_MAX_REDIRECTS, new PropertyMD("3").setCategory(httpCat).
 				setDescription("Maximum number of allowed HTTP redirects."));
 		META.put(MAX_HOST_CONNECTIONS, new PropertyMD("6").setCategory(httpCat).
@@ -80,13 +86,14 @@ public class HttpClientProperties extends PropertiesHelper
 				setDescription("Space (single) separated list of hosts, for which the HTTP proxy should not be used."));
 		META.put(HTTP_PROXY_HOST, new PropertyMD().setCategory(proxyCat).
 				setDescription("If set then the HTTP proxy will be used, with this hostname."));
-		META.put(HTTP_PROXY_PORT, new PropertyMD().setCategory(proxyCat).
+		META.put(HTTP_PROXY_PORT, new PropertyMD().setCategory(proxyCat).setInt().
 				setDescription("HTTP proxy port. If not defined then system property is consulted, and as a final fallback 80 is used."));
+		META.put(HTTP_PROXY_TYPE, new PropertyMD("HTTP").setCategory(proxyCat).
+				setDescription("HTTP proxy type: HTTP or SOCKS."));
 		META.put(HTTP_PROXY_USER, new PropertyMD().setCategory(proxyCat).
 				setDescription("Relevant only when using HTTP proxy: defines username for authentication to the proxy."));
 		META.put(HTTP_PROXY_PASS, new PropertyMD().setCategory(proxyCat).
 				setDescription("Relevant only when using HTTP proxy: defines password for authentication to the proxy."));
-
 	}
 	
 	public HttpClientProperties(String prefix, Properties properties) throws ConfigurationException

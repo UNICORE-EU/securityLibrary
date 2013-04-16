@@ -58,6 +58,7 @@ public class ClientProperties extends DefaultClientConfiguration
 	public static final String PROP_IN_HANDLERS = "inHandlers";
 	public static final String PROP_OUT_HANDLERS = "outHandlers";
 	public static final String PROP_SERVER_HOSTNAME_CHECKING = "serverHostnameChecking";
+	public static final String PROP_MESSAGE_LOGGING = "messageLogging";
 	
 	private IAuthnAndTrustConfiguration authnAndTrustConfiguration;
 	private PropertiesHelper clientPropertiesHelper;
@@ -84,6 +85,8 @@ public class ClientProperties extends DefaultClientConfiguration
 				setDescription("Controls whether the SSL/TLS connection mode is enabled."));
 		META.put(PROP_SERVER_HOSTNAME_CHECKING, new PropertyMD(ServerHostnameCheckingMode.WARN).
 				setDescription("Controls whether server's hostname should be checked for matching its certificate subject. This verification prevents man-in-the-middle attacks. If enabled WARN will only print warning in log, FAIL will close the connection."));
+		META.put(PROP_MESSAGE_LOGGING, new PropertyMD("false").
+				setDescription("Controls whether messages should be logged (at INFO level)."));
 		
 		for (Map.Entry<String, PropertyMD> entry: HttpClientProperties.META.entrySet())
 			META.put(HttpClientProperties.PREFIX+entry.getKey(), entry.getValue());
