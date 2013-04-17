@@ -158,7 +158,7 @@ public class HttpServerProperties extends PropertiesHelper
 				setDescription("Specifies the minimal size of message that should be compressed."));
 		defaults.put(ENABLE_GZIP, new PropertyMD("false").
 				setDescription("Controls whether to enable compression of HTTP responses."));
-		defaults.put(USE_NIO, new PropertyMD("false").
+		defaults.put(USE_NIO, new PropertyMD("true").
 				setDescription("Controls whether the NIO connector be used. NIO is best suited under high-load, when lots of connections exist that are idle for long periods."));
 	}
 
