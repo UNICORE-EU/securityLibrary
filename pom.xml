@@ -14,8 +14,8 @@
 	</parent>
 	
 	<scm>
-		<connection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/securityLibrary/trunk</connection>
-		<developerConnection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/securityLibrary/trunk</developerConnection>
+		<connection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/securityLibrary/branches/securityLibrary-3.x</connection>
+		<developerConnection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/securityLibrary/branches/securityLibrary-3.x</developerConnection>
 	</scm>
 
 	<developers>
