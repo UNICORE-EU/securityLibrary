@@ -104,5 +104,21 @@ public class HttpClientProperties extends PropertiesHelper
 	public HttpClientProperties(Properties properties) throws ConfigurationException
 	{
 		super(PREFIX, properties, META, log);
-	}	
+	}
+	
+	public void setConnectionTimeout(int millis){
+		setProperty(CONNECT_TIMEOUT, Integer.toString(millis));
+	}
+	
+	public int getConnectionTimeout(){
+		return getIntValue(CONNECT_TIMEOUT);
+	}
+	
+	public void setSocketTimeout(int millis){
+		setProperty(SO_TIMEOUT, Integer.toString(millis));
+	}
+	
+	public int setSocketTimeout(){
+		return getIntValue(SO_TIMEOUT);
+	}
 }

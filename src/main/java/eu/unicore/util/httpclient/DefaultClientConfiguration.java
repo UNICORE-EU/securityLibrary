@@ -303,11 +303,6 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	{
 		return messageLogging;
 	}
-	
-	public void setHttpClientProperties(HttpClientProperties httpClientProperties)
-	{
-		this.httpClientProperties = httpClientProperties;
-	}
 
 	/**
 	 * Note - credential and validator objects are not cloned - are copied by reference.
@@ -355,7 +350,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 		return httpClientProperties;
 	}
 	
-	public void setHttpclientProperties(HttpClientProperties httpClientProperties)
+	public void setHttpClientProperties(HttpClientProperties httpClientProperties)
 	{
 		this.httpClientProperties = httpClientProperties;
 	}

@@ -231,7 +231,7 @@ public class ClientProperties extends DefaultClientConfiguration
 		
 		HttpClientProperties httpProperties = new HttpClientProperties(
 				clientPrefix+HttpClientProperties.PREFIX, p);
-		setHttpclientProperties(httpProperties);
+		setHttpClientProperties(httpProperties);
 	}
 	
 	private String[] parseHandlers(PropertiesHelper properties, String key)
