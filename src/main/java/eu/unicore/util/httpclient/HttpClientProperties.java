@@ -121,4 +121,13 @@ public class HttpClientProperties extends PropertiesHelper
 	public int setSocketTimeout(){
 		return getIntValue(SO_TIMEOUT);
 	}
+	
+	@Override
+	public HttpClientProperties clone()
+	{
+		HttpClientProperties ret = new HttpClientProperties(prefix,properties);
+		super.cloneTo(ret);
+		return ret;
+	}
+	
 }
