@@ -10,6 +10,8 @@ package eu.unicore.util.httpclient;
 import java.util.Map;
 import java.util.Properties;
 
+import eu.unicore.util.configuration.PropertiesHelper;
+
 /**
  * Extension of {@link IPlainClientConfiguration},
  * provides (mostly) security related settings, useful for the client side. This
@@ -108,4 +110,17 @@ public interface IClientConfiguration extends IPlainClientConfiguration
 	 */
 	public boolean isMessageLogging();
 	
+	/**
+	 * add a configuration handler
+	 * @param settings - the properties helper class to add
+	 */
+	public void addConfigurationHandler(PropertiesHelper settings);
+	
+	/**
+	 * gets the configuration handler, if it exists
+	 * @param key - the class of the configuration handler
+	 * @return
+	 */
+	public <T extends PropertiesHelper> T getConfigurationHandler(Class<T>key);
+
 }

@@ -14,6 +14,7 @@ import java.util.Properties;
 import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
+import eu.unicore.util.configuration.PropertiesHelper;
 
 
 /**
@@ -38,7 +39,9 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	private Map<String, Object> extraSecurityTokens = new HashMap<String, Object>();
 	private ServerHostnameCheckingMode serverHostnameCheckingMode = ServerHostnameCheckingMode.NONE;
 	private HttpClientProperties httpClientProperties = new HttpClientProperties(new Properties());
-	
+	private final Map<Class<? extends PropertiesHelper>,PropertiesHelper>extraConfigurationHandlers 
+	= new HashMap<Class<? extends PropertiesHelper>, PropertiesHelper>();
+
 	/**
 	 * Only default settings, i.e. no security.
 	 */
@@ -298,7 +301,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	{
 		this.messageLogging=what;
 	}
-	
+
 	public boolean isMessageLogging()
 	{
 		return messageLogging;
@@ -350,9 +353,26 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	{
 		return httpClientProperties;
 	}
-	
+
 	public void setHttpClientProperties(HttpClientProperties httpClientProperties)
 	{
 		this.httpClientProperties = httpClientProperties;
+	}
+
+	/**
+	 * add a custom configuration source
+	 */
+	public void addConfigurationHandler(PropertiesHelper settings){
+		extraConfigurationHandlers.put(settings.getClass(), settings);
+	}
+
+	/**
+	 * returns the requested configuration handler 
+	 * @param key - the configuration handler class used as key
+	 * @return the configuration handler
+	 */
+	public <T extends PropertiesHelper> T getConfigurationHandler(Class<T>key){
+		Object o=extraConfigurationHandlers.get(key);
+		return  key.cast(o);
 	}
 }
