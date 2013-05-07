@@ -521,6 +521,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 			}
 		} else
 		{
+			val=val.trim();
 			if (doLog) 
 				logValue(name, val);
 		}
