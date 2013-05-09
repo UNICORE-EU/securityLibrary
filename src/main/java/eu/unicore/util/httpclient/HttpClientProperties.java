@@ -118,7 +118,7 @@ public class HttpClientProperties extends PropertiesHelper
 		setProperty(SO_TIMEOUT, Integer.toString(millis));
 	}
 	
-	public int setSocketTimeout(){
+	public int getSocketTimeout(){
 		return getIntValue(SO_TIMEOUT);
 	}
 	
