@@ -97,7 +97,7 @@ public class TruststoreProperties extends TrustedIssuersProperties
 				setDescription("Controls whether proxy certificates are supported."));
 
 		META.put(PROP_OPENSSL_NS_MODE, new PropertyMD(NamespaceCheckingMode.EUGRIDPMA_GLOBUS).setCategory(opensslCat).
-				setDescription("In case of openssl truststore, controls which (and in which order) namespace checking rules should be applied. The 'REQUIRE' settings will cause that all configured namespace definitions files must be present for each trusted CA certificate (otherwise checking will fail). The 'AND' settings will cause to check both existing namespace files. Otherwise the first found is checked (in the order defined by the property)."));
+				setDescription("In case of openssl truststore, controls which (and in which order) namespace checking rules should be applied. The 'REQUIRE' settings will cause that all configured namespace definitions files must be present for each trusted CA certificate (otherwise checking will fail). The 'AND' settings will cause to check both existing namespace files. Otherwise the first found is checked (in the order defined by the property)."));		
 
 		META.put(PROP_REVOCATION_ORDER, new PropertyMD(RevocationCheckingOrder.OCSP_CRL).setCategory(revCat).
 				setDescription("Controls overal revocation sources order"));
@@ -257,6 +257,8 @@ public class TruststoreProperties extends TrustedIssuersProperties
 	{
 		nsMode = getEnumValue(PROP_OPENSSL_NS_MODE, NamespaceCheckingMode.class);
 		opensslDir = getFileValueAsString(PROP_OPENSSL_DIR, true);
+		opensslNewStoreFormat = getBooleanValue(PROP_OPENSSL_NEW_STORE_FORMAT);
+		
 		RevocationCheckingOrder order = getEnumValue(PROP_REVOCATION_ORDER, RevocationCheckingOrder.class);
 		boolean useAll = getBooleanValue(PROP_REVOCATION_USE_ALL);
 
@@ -264,8 +266,8 @@ public class TruststoreProperties extends TrustedIssuersProperties
 				useAll, order);
 		ValidatorParams params = new ValidatorParams(revocationSettings, 
 			proxySupport, initialListeners);
-		return new OpensslCertChainValidator(opensslDir, nsMode, storeUpdateInterval*1000, 
-			params);
+		return new OpensslCertChainValidator(opensslDir, opensslNewStoreFormat, nsMode, 
+				storeUpdateInterval*1000, params);
 	}
 
 

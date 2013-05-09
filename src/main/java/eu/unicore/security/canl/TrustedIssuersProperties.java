@@ -75,6 +75,7 @@ public class TrustedIssuersProperties extends PropertiesHelper
 	public static final String PROP_KS_TYPE = "keystoreFormat";
 
 	public static final String PROP_OPENSSL_DIR = "opensslPath";
+	public static final String PROP_OPENSSL_NEW_STORE_FORMAT = "opensslNewStoreFormat";
 	
 	public static final String PROP_DIRECTORY_LOCATIONS = "directoryLocations.";
 	public static final String PROP_DIRECTORY_ENCODING = "directoryEncoding";
@@ -109,6 +110,8 @@ public class TrustedIssuersProperties extends PropertiesHelper
 
 		META.put(PROP_OPENSSL_DIR, new PropertyMD("/etc/grid-security/certificates").setPath().setCategory(opensslCat).
 				setDescription("Directory to be used for opeenssl truststore."));
+		META.put(PROP_OPENSSL_NEW_STORE_FORMAT, new PropertyMD("false").setCategory(opensslCat).
+				setDescription("In case of openssl truststore, specifies whether the trust store is in openssl 1.0.0+ format (true) or older openssl 0.x format (false)"));
 
 		META.put(PROP_DIRECTORY_LOCATIONS, new PropertyMD().setList(false).setUpdateable().setCategory(dirCat).
 				setDescription("List of CA certificates locations. Can contain URLs, local files and wildcard expressions."));
@@ -124,6 +127,7 @@ public class TrustedIssuersProperties extends PropertiesHelper
 	
 	protected long storeUpdateInterval;
 	protected String opensslDir;
+	protected boolean opensslNewStoreFormat;
 	protected Encoding directoryEncoding;
 	protected List<String> directoryLocations;
 	protected int caConnectionTimeout;
@@ -330,13 +334,14 @@ public class TrustedIssuersProperties extends PropertiesHelper
 	protected OpensslCertChainValidator getOpensslValidator() throws ConfigurationException
 	{
 		opensslDir = getFileValueAsString(PROP_OPENSSL_DIR, true);
-
+		opensslNewStoreFormat = getBooleanValue(PROP_OPENSSL_NEW_STORE_FORMAT);
+		
 		RevocationParameters revocationSettings = new RevocationParameters(CrlCheckingMode.IGNORE, 
 				getOCSPParameters());
 		ValidatorParams params = new ValidatorParams(revocationSettings, 
 			ProxySupport.DENY, initialListeners);
-		return new OpensslCertChainValidator(opensslDir, NamespaceCheckingMode.IGNORE, storeUpdateInterval*1000, 
-			params);
+		return new OpensslCertChainValidator(opensslDir, opensslNewStoreFormat, 
+				NamespaceCheckingMode.IGNORE, storeUpdateInterval*1000,	params);
 	}
 
 	protected KeystoreCertChainValidator getKeystoreValidator() 
