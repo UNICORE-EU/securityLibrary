@@ -372,7 +372,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 				} catch (NumberFormatException e)
 				{
 					throw new ConfigurationException("For the " + prefix + key + 
-						" list property only the numerical subkeys are allowed, and " + k + " doesn't end with a numerical value.");
+						" structurd list property only the numerical subkeys are allowed, and " + k + " isn't a numerical subkey.");
 				}
 			}
 		}
@@ -401,9 +401,14 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 				PropertyMD eMeta = getMetadata(entryKey);
 				if (eMeta != null)
 				{
+					String realKey = getMetadataKey(entryKey);
+					if ((eMeta.canHaveSubkeys() || eMeta.getType() == Type.LIST) && entryKey.endsWith(realKey))
+						throw new ConfigurationException("The entry with key " + prefix+entryKey + " is illegal, should have a subkey");
+					if (eMeta.canHaveSubkeys() || eMeta.getType() == Type.LIST)
+						entryKey = entryKey.substring(0, entryKey.indexOf(realKey))+realKey;
 					checkPropertyConstraints(eMeta, entryKey);
 					if (eMeta.isMandatory())
-						presentMandatory.add(entryKey.substring(element.length()));
+						presentMandatory.add(realKey);
 				}
 			}
 			if (!mandatoryElements.equals(presentMandatory))
@@ -450,30 +455,49 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 					". Remove them or use correct property names if there are mistakes.");
 	}
 	
-	protected PropertyMD getMetadata(String key)
+	/**
+	 * For regular entries returns the argument. For entries where propertyKey is something from a list 
+	 * or entry with subkeys, the real entry key is returned. Similarily for the structured list - the structured
+	 * list entry is returned. 
+	 * 
+	 * @param propertyKey
+	 * @return
+	 */
+	protected String getMetadataKey(String propertyKey)
 	{
-		if (metadata.containsKey(key))
-			return metadata.get(key);
+		if (metadata.containsKey(propertyKey))
+			return propertyKey;
 		
+		String realKey = propertyKey;
 		for (String structuredPrefix: structuredPrefixes)
 		{
-			if (key.startsWith(structuredPrefix))
+			if (propertyKey.startsWith(structuredPrefix))
 			{
-				String realKey = key.substring(structuredPrefix.length());
+				realKey = propertyKey.substring(structuredPrefix.length());
 				int dot = realKey.indexOf('.');
 				realKey = realKey.substring(dot+1);
-				return metadata.get(realKey);
+				PropertyMD md = metadata.get(realKey);
+				if (md != null)
+					return realKey;
+				break; //maybe this is a list or something with subkeys, in the structured list
 			}
 		}
 		
 		Set<Entry<String, PropertyMD>> entries = metadata.entrySet();
 		for (Entry<String, PropertyMD> entry: entries)
 		{
-			if (key.startsWith(entry.getKey()) && 
+			if (realKey.startsWith(entry.getKey()) && 
 					(entry.getValue().getType() == Type.LIST || entry.getValue().canHaveSubkeys()))
-				return entry.getValue();
+				return entry.getKey();
 		}
 		return null;
+		
+	}
+	
+	protected PropertyMD getMetadata(String key)
+	{
+		String realKey = getMetadataKey(key);
+		return realKey == null ? null: metadata.get(realKey);
 	}
 
 	/**

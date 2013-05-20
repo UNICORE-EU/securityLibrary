@@ -58,6 +58,7 @@ public class PropertiesHelperTest extends TestCase
 		METADATA.put("p15.", new PropertyMD().setStructuredList(true).setMandatory());
 		METADATA.put("sl1", new PropertyMD().setStructuredListEntry("p15.").setMandatory());
 		METADATA.put("sl2", new PropertyMD("33").setStructuredListEntry("p15.").setBounds(0, 40));
+		METADATA.put("sl3.", new PropertyMD().setStructuredListEntry("p15.").setList(true));
 	}
 
 	
@@ -70,13 +71,14 @@ public class PropertiesHelperTest extends TestCase
 	 *  - whether unknown entries are reported
 	 *  - whether retrieval of all list keys works
 	 *  - whether it is possible to get entries
+	 *  - whether list as structured list entry works
 	 */
 	public void testStructuredList()
 	{
 		Properties p = new Properties();
 		p.setProperty(PREFIX+"p09", "a");
 		PropertiesHelper helper;
-		
+
 		try
 		{
 			new PropertiesHelper(PREFIX, p, METADATA, log);
@@ -124,10 +126,11 @@ public class PropertiesHelperTest extends TestCase
 		} catch (ConfigurationException e) {
 			assertTrue(e.toString(), e.getMessage().contains("must be defined"));
 		}
-		
+
 		p.setProperty(PREFIX+"p15.44.sl1", "asda");
 		p.setProperty(PREFIX+"p15.44.sl2", "40");
 		p.setProperty(PREFIX+"p15.44.unknown", "40");
+		p.setProperty(PREFIX+"p15.44.sl3.1", "40");
 		try
 		{
 			new PropertiesHelper(PREFIX, p, METADATA, log);
@@ -152,7 +155,18 @@ public class PropertiesHelperTest extends TestCase
 		k = it.next();
 		assertEquals("asda", helper.getValue(k + "sl1"));
 		assertEquals(40, (int)helper.getIntValue(k + "sl2"));
-		
+
+		p.setProperty(PREFIX+"p15.1.sl1", "a");
+		p.setProperty(PREFIX+"p15.1.sl2", "4");
+		p.setProperty(PREFIX+"p15.1.sl3.1", "l1");
+		p.setProperty(PREFIX+"p15.1.sl3.2", "l2");
+		p.setProperty(PREFIX+"p15.1.sl3.3", "l3");
+		helper = new PropertiesHelper(PREFIX, p, METADATA, log);
+		List<String> vals = helper.getListOfValues("p15.1.sl3.");
+		assertEquals(3, vals.size());
+		assertEquals("l1", vals.get(0));
+		assertEquals("l2", vals.get(1));
+		assertEquals("l3", vals.get(2));
 	}
 	
 	private int global = 0;
