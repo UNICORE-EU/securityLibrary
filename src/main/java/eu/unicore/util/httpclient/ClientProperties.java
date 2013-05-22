@@ -232,6 +232,8 @@ public class ClientProperties extends DefaultClientConfiguration
 		HttpClientProperties httpProperties = new HttpClientProperties(
 				clientPrefix+HttpClientProperties.PREFIX, p);
 		setHttpClientProperties(httpProperties);
+		
+		setMessageLogging(clientPropertiesHelper.getBooleanValue(PROP_MESSAGE_LOGGING));
 	}
 	
 	private String[] parseHandlers(PropertiesHelper properties, String key)
