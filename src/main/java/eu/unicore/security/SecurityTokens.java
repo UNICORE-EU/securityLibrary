@@ -296,9 +296,9 @@ public class SecurityTokens implements Serializable
         		{
         			sb.append("User certificate is a proxy certificate");
         			if (supportProxy)
-        				sb.append(")" + lineSep);
+        				sb.append(lineSep);
         			else
-        				sb.append(" but proxy handling is NOT enabled)" + lineSep);
+        				sb.append(" but proxy handling is NOT enabled" + lineSep);
         		}
         	}
         	if (consignor != null)
@@ -309,11 +309,13 @@ public class SecurityTokens implements Serializable
         		{
         			sb.append("Consignor's certificate is a proxy certificate");
         			if (supportProxy)
-        				sb.append(")" + lineSep);
+        				sb.append(lineSep);
         			else
-        				sb.append(" but proxy handling is NOT enabled)" + lineSep);
+        				sb.append(" but proxy handling is NOT enabled" + lineSep);
         		}
         	}
+        	sb.append("Delegation to consignor status: " + isConsignorTrusted() + 
+        			", core delegation status: " + isTrustDelegationValidated() + lineSep);
         	if (signatureStatus != null)
         	{
         		sb.append(lineSep+"Message signature status: ").append(signatureStatus.toString());
