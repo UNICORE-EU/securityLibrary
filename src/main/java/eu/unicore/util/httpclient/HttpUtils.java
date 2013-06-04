@@ -72,8 +72,7 @@ public class HttpUtils {
 
 	//prevent instantiation 
 	private HttpUtils(){}
-	public static final String USER_AGENT =  
-		"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; XFire Client +http://xfire.codehaus.org)";
+	public static final String USER_AGENT = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)";
 
 	/**
 	 * Convenience method for getting a {@link HttpClient} configured 
