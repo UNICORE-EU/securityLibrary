@@ -62,6 +62,41 @@ public class PropertiesHelperTest extends TestCase
 	}
 
 	
+	public void testListKeys()
+	{
+		Map<String, PropertyMD> meta = new HashMap<String, PropertyMD>();
+		meta.put("l1.", new PropertyMD().setStructuredList(true));
+		meta.put("a", new PropertyMD().setStructuredListEntry("l1."));
+		meta.put("l2.", new PropertyMD().setStructuredList(false));
+		meta.put("b", new PropertyMD().setStructuredListEntry("l2."));
+
+		Properties p = new Properties();
+		p.setProperty(PREFIX+"l1.1.a", "1");
+		p.setProperty(PREFIX+"l1.55.a", "1");
+		p.setProperty(PREFIX+"l1.3.a", "1");
+		p.setProperty(PREFIX+"l1.2.a", "1");
+		PropertiesHelper h = new PropertiesHelper(PREFIX, p, meta, log);
+		Set<String> keys = h.getStructuredListKeys("l1.");
+		Iterator<String> it = keys.iterator();
+		assertEquals("l1.1.", it.next());
+		assertEquals("l1.2.", it.next());
+		assertEquals("l1.3.", it.next());
+		assertEquals("l1.55.", it.next());
+		
+		p = new Properties();
+		p.setProperty(PREFIX+"l2.asd.a", "1");
+		p.setProperty(PREFIX+"l2.sss.a", "1");
+		p.setProperty(PREFIX+"l2.dd.a", "1");
+		p.setProperty(PREFIX+"l2.zz.a", "1");
+		h = new PropertiesHelper(PREFIX, p, meta, log);
+		keys = h.getStructuredListKeys("l2.");
+		it = keys.iterator();
+		assertEquals("l2.asd.", it.next());
+		assertEquals("l2.dd.", it.next());
+		assertEquals("l2.sss.", it.next());
+		assertEquals("l2.zz.", it.next());
+	}
+	
 	
 	/**
 	 * Tests structured list:

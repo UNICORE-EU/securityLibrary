@@ -325,7 +325,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 			getEnumValue(key, meta.getEnumTypeInstance().getDeclaringClass());
 			break;
 		case LIST:
-			Set<String> listKeys = getSortedStringKeys(prefix+key);
+			Set<String> listKeys = getSortedStringKeys(prefix+key, false);
 			if (meta.isMandatory() && listKeys.size() == 0)
 				throw new ConfigurationException("The property " + getKeyDescription(key) + 
 						" is mandatory");
@@ -360,12 +360,11 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		structuredPrefixes.add(key);
 		if (meta.numericalListKeys())
 		{
-			Set<String> listKeys2 = getSortedStringKeys(prefix+key);
+			Set<String> listKeys2 = getSortedStringKeys(prefix+key, true);
 			int l = (prefix+key).length();
 			for (String k: listKeys2)
 			{
 				k = k.substring(l);
-				k = k.substring(0, k.indexOf('.'));
 				try
 				{
 					Integer.parseInt(k);
@@ -849,7 +848,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		String base = prefix + prefix2;
 		PropertyMD meta = metadata.get(prefix2);
 		boolean numericalKeys = meta == null ? false : meta.numericalListKeys();
-		Set<String> keys = numericalKeys ? getSortedNumKeys(base, false) : getSortedStringKeys(base);
+		Set<String> keys = numericalKeys ? getSortedNumKeys(base, false) : getSortedStringKeys(base, false);
 		
 		List<String> ret = new ArrayList<String>();
 		for (Object keyO: keys)
@@ -896,7 +895,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		return ret;
 	}
 
-	private synchronized Set<String> getSortedStringKeys(String base)
+	private synchronized Set<String> getSortedStringKeys(String base, boolean allowListSubKeys)
 	{
 		SortedSet<String> keys = new TreeSet<String>();
 		Set<Object> allKeys = properties.keySet();
@@ -904,7 +903,21 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		{
 			String key = (String) keyO;
 			if (key.startsWith(base))
-				keys.add(key);
+			{
+				String post = key.substring(base.length());
+				int dot = post.indexOf('.');
+				if (dot != -1 && allowListSubKeys)
+					post = post.substring(0, dot);
+				else if (dot != -1 && !allowListSubKeys)
+				{
+					log.warn("Property list key '" + key + 
+							"' should not posses a dot: '" +
+							post + "'. Ignoring.");
+					continue;
+				}
+					
+				keys.add(base+post);
+			}
 		}
 		return keys;
 	}
@@ -920,7 +933,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		if (listMeta == null || listMeta.getType() != PropertyMD.Type.STRUCTURED_LIST)
 			throw new IllegalArgumentException("The " + listKey + " is not a structured list property");
 		Set<String> keys = listMeta.numericalListKeys() ? getSortedNumKeys(prefix+listKey, true) : 
-			getSortedStringKeys(prefix+listKey);
+			getSortedStringKeys(prefix+listKey, true);
 		Set<String> ret = new LinkedHashSet<String>();
 		int prefixLen = prefix.length();
 		for (String key: keys)
