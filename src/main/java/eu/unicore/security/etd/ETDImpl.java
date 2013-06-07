@@ -19,8 +19,11 @@ import java.util.List;
 
 import org.apache.xmlbeans.XmlObject;
 
+import xmlbeans.org.oasis.saml2.assertion.NameIDType;
+
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
+import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.samly2.elements.SAMLAttribute;
 import eu.unicore.samly2.exceptions.SAMLValidationException;
 import eu.unicore.samly2.validators.AssertionValidator;
@@ -57,6 +60,18 @@ public class ETDImpl implements ETDApi
 		return addRestrictionsAndSign(td, issuer, pk, restrictions);
 	}
 
+
+	@Override
+	public TrustDelegation generateBootstrapTD(String custodianDN, X509Certificate[] issuer,
+			String issuerName, String issuerFormat, PrivateKey pk, String receiverDN,
+			DelegationRestrictions restrictions) throws DSigException
+	{
+		TrustDelegation td = new TrustDelegation(custodianDN);
+		td.setIssuer(issuerName, issuerFormat);
+		td.setX509Subject(receiverDN);
+		return addRestrictionsAndSign(td, issuer, pk, restrictions);
+	}
+	
 	/**
 	 * Generates trust delegation in terms of certificates.
 	 * @param custodian DN of initial trust delegation issuer (if not in trust delegation chain 
@@ -197,7 +212,6 @@ public class ETDImpl implements ETDApi
 	
 
 	
-	
 	/**
 	 * Validate single trust delegation assertion. Checks if receiver has trust of custodian 
 	 * delegated by issuer. This validation is done in terms of DNs.
@@ -214,10 +228,38 @@ public class ETDImpl implements ETDApi
 	public ValidationResult validateTD(TrustDelegation td, String custodian, 
 			String issuer, String receiver, X509CertChainValidator validator)
 	{
-		String i1 = td.getIssuerDN();
-		if (!X500NameUtils.equal(i1, issuer))
-			return new ValidationResult(false, "Wrong issuer (is " + i1 + 
-					" and should be " + issuer + ")");
+		NameIDType issuerN = NameIDType.Factory.newInstance();
+		issuerN.setFormat(SAMLConstants.NFORMAT_DN);
+		issuerN.setStringValue(issuer);
+		return validateTD(td, custodian, issuerN, receiver, validator);
+	}	
+
+	public ValidationResult validateTD(TrustDelegation td, String custodian, 
+			NameIDType issuer, String receiver, X509CertChainValidator validator)
+	{
+		NameIDType realIssuer = td.getXMLBean().getIssuer();
+		String realIssuerNFormat = realIssuer.getFormat();
+		if (realIssuerNFormat == null)
+			realIssuerNFormat = SAMLConstants.NFORMAT_ENTITY;
+		String requestedIssuerFormat = issuer.getFormat();
+		if (requestedIssuerFormat == null)
+			requestedIssuerFormat = SAMLConstants.NFORMAT_ENTITY;
+		if (!requestedIssuerFormat.equals(realIssuerNFormat))
+			return new ValidationResult(false, "Wrong issuer format (is " + realIssuerNFormat + 
+					" and should be " + requestedIssuerFormat + ")");
+		String i1 = realIssuer.getStringValue();
+		if (realIssuerNFormat.equals(SAMLConstants.NFORMAT_DN))
+		{
+			if (!X500NameUtils.equal(i1, issuer.getStringValue()))
+				return new ValidationResult(false, "Wrong issuer (is " + i1 + 
+					" and should be " + issuer.getStringValue() + ")");
+		} else
+		{
+			if (!i1.equals(issuer.getStringValue()))
+				return new ValidationResult(false, "Wrong issuer (is " + i1 + 
+						" and should be " + issuer.getStringValue() + ")");
+		}
+
 		String r1 = td.getSubjectDN();
 		if (!X500NameUtils.equal(r1, receiver))
 			return new ValidationResult(false, "Wrong receiver (is " + r1 + 
@@ -382,7 +424,7 @@ public class ETDImpl implements ETDApi
 				receiver = td.get(i+1).getIssuerDN();
 			
 			ValidationResult singleTD = validateTD(cur, custodian, 
-				cur.getIssuerDN(), receiver, validator);
+				cur.getXMLBean().getIssuer(), receiver, validator);
 			if (!singleTD.isValid())
 				return new ValidationResult(false, 
 						"Chain has invalid entry at position "

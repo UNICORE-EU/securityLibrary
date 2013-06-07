@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Vector;
 
 import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
+import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.etd.DelegationRestrictions;
 import eu.unicore.security.etd.TrustDelegation;
@@ -249,6 +250,39 @@ public class TDChainTest extends ETDTestBase
 				fail("Chain with wrong custodian passed validation: " + result2);
 		} catch (Exception e)
 		{
+			fail(e.getMessage());
+		}
+		assertTrue(true);
+	}
+
+	public void testBootstrapCustodianEntity()
+	{
+		try
+		{
+			DelegationRestrictions restrictions = new DelegationRestrictions(
+					new Date(), 1, 3);
+			Vector<TrustDelegation> td = new Vector<TrustDelegation>();
+			td.add(etdEngine.generateBootstrapTD("CN=fake", issuerCert1, "someIDP", SAMLConstants.NFORMAT_ENTITY,
+					privKey1, issuerDN2, restrictions));
+			List<TrustDelegation> chain = etdEngine.issueChainedTD(td, 
+					issuerCert2, privKey2, receiverDN1, restrictions);
+			chain = etdEngine.issueChainedTD(chain, 
+					receiverCert1, privKey3, receiverDN2, restrictions);
+			
+			ValidationResult result = etdEngine.isTrustDelegated(chain, receiverDN2, "CN=fake", 
+						new BinaryCertChainValidator(true),
+						Collections.singleton(issuerCert1[0]));
+			if (!result.isValid())
+				fail("Chain with bootstrap issuer didn't pass validation: " + result);
+
+			ValidationResult result2 = etdEngine.isTrustDelegated(chain, receiverDN2, issuerDN2, 
+					new BinaryCertChainValidator(true),
+					Collections.singleton(issuerCert1[0]));
+			if (result2.isValid() || !result2.getInvalidResaon().contains("Wrong user"))
+				fail("Chain with wrong custodian passed validation: " + result2);
+		} catch (Exception e)
+		{
+			e.printStackTrace();
 			fail(e.getMessage());
 		}
 		assertTrue(true);

@@ -80,6 +80,26 @@ public interface ETDApi
 			PrivateKey pk, String receiverDN, DelegationRestrictions restrictions) 
 		throws DSigException;
 
+	/**
+	 * Generates a bootstrap trust delegation in terms of DNs. Bootstrap delegation
+	 * is intended to be a first in chain, and additionally its issuer != custodian. Such issuer must be 
+	 * explicitly trusted by validating entities. Initial issuer need not to be of X500 format, typically
+	 * it will be of entity format.
+	 * @param custodianDN DN of initial trust delegation issuer (if not in trust delegation 
+	 * chain then it is equal to issuer's DN)
+	 * @param issuer Actual issuer certificate of this trust delegation
+	 * @param issuerName Issuer's identity
+	 * @param issuerName Issuer's identity format
+	 * @param pk Private key of the issuer
+	 * @param receiverDN DN of the receiver of this trust delegation
+	 * @param restrictions Set of restrictions (can be null)
+	 * @return The new trust delegation
+	 * @throws DSigException
+	 */
+	public TrustDelegation generateBootstrapTD(String custodianDN, X509Certificate[] issuer, String issuerName,
+			String issuerFormat, PrivateKey pk, String receiverDN, DelegationRestrictions restrictions) 
+		throws DSigException;
+	
 	
 	/**
 	 * Generates trust delegation in terms of certificates.
