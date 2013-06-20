@@ -33,7 +33,7 @@ public class GenerateAndVerifyTest extends ETDTestBase
 			TrustDelegation td = etdEngine.generateTD(issuerCert1[0], issuerCert1,
 					privKey1, issuerCert3, null, Collections.singletonList(samlA));
 			
-			String dnsubFromTD = new X500Principal(td.getSubjectDN()).getName();
+			String dnsubFromTD = new X500Principal(td.getSubjectName()).getName();
 			String dnsubOrig = issuerCert3[0].getSubjectX500Principal().getName();
 			
 			assertTrue(X500NameUtils.equal(dnsubFromTD, dnsubOrig));
@@ -59,7 +59,7 @@ public class GenerateAndVerifyTest extends ETDTestBase
 			TrustDelegation td = etdEngine.generateTD(issuerCert1[0], issuerCert1,
 					privKey1, issuerCert3, null);
 			
-			String dnsubFromTD = new X500Principal(td.getSubjectDN()).getName();
+			String dnsubFromTD = new X500Principal(td.getSubjectName()).getName();
 			String dnsubOrig = issuerCert3[0].getSubjectX500Principal().getName();
 			
 			assertTrue(X500NameUtils.equal(dnsubFromTD, dnsubOrig));

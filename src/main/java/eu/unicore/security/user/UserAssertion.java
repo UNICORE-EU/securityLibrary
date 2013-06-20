@@ -107,7 +107,7 @@ public class UserAssertion extends Assertion
 	
 	public String getUserDN()
 	{
-		return getSubjectDN();
+		return getSubjectName();
 	}
 
 	public X509Certificate[] getUserCertificate()

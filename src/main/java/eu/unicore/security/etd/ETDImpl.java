@@ -260,7 +260,7 @@ public class ETDImpl implements ETDApi
 						" and should be " + issuer.getStringValue() + ")");
 		}
 
-		String r1 = td.getSubjectDN();
+		String r1 = td.getSubjectName();
 		if (!X500NameUtils.equal(r1, receiver))
 			return new ValidationResult(false, "Wrong receiver (is " + r1 + 
 					" and should be " + receiver + ")");
@@ -400,7 +400,7 @@ public class ETDImpl implements ETDApi
 			if (!X500NameUtils.equal(custodianCert[0].getSubjectX500Principal(), custodian))
 				return new ValidationResult(false, "The issuer's certificate of the initial trust delegation" +
 					" is not consistent with the declared custodian (subject) and it is not among trusted 3rd party issuers");
-			if (!X500NameUtils.equal(custodian, initial.getIssuerDN()))
+			if (!X500NameUtils.equal(custodian, initial.getIssuerName()))
 				return new ValidationResult(false, "The signer's certificate of the initial trust delegation" +
 					" is not consistent with the declared assertion issuer and it is not among trusted 3rd party issuers");
 		}
@@ -412,16 +412,16 @@ public class ETDImpl implements ETDApi
 		{
 			TrustDelegation cur = td.get(i);
 			if (i + 1 < td.size())
-				if (!X500NameUtils.equal(cur.getSubjectDN(), td.get(i+1).getIssuerDN()))
+				if (!X500NameUtils.equal(cur.getSubjectName(), td.get(i+1).getIssuerName()))
 					return new ValidationResult(
 						false, "Chain is inconsistent at position " + i + 
 							", subject and issuer do not match. Subject is: " + 
-							cur.getSubjectDN() + 
+							cur.getSubjectName() + 
 							" while the issuer of the next delegation in chain is: " + 
-							td.get(i+1).getIssuerDN());
+							td.get(i+1).getIssuerName());
 			String receiver = subject;
 			if (i + 1 < td.size())
-				receiver = td.get(i+1).getIssuerDN();
+				receiver = td.get(i+1).getIssuerName();
 			
 			ValidationResult singleTD = validateTD(cur, custodian, 
 				cur.getXMLBean().getIssuer(), receiver, validator);
@@ -432,7 +432,7 @@ public class ETDImpl implements ETDApi
 			
 			maxProxies[i] = cur.getProxyRestriction();
 			
-			if (X500NameUtils.equal(subject, cur.getSubjectDN()))
+			if (X500NameUtils.equal(subject, cur.getSubjectName()))
 				break;
 		}
 		if (i == td.size())
@@ -545,7 +545,7 @@ public class ETDImpl implements ETDApi
 	{
 		for (TrustDelegation td: tdChain)
 		{
-			if (X500NameUtils.equal(td.getSubjectDN(), subject))
+			if (X500NameUtils.equal(td.getSubjectName(), subject))
 				return true;
 		}
 		return false;
