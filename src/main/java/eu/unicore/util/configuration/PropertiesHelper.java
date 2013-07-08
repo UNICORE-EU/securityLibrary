@@ -253,7 +253,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	 * @param properties properties to be checked.
 	 * @throws ConfigurationException
 	 */
-	protected final void checkConstraints(Properties properties) throws ConfigurationException
+	protected void checkConstraints(Properties properties) throws ConfigurationException
 	{
 		//tricky but short
 		new PropertiesHelper(prefix, properties, metadata, log);
