@@ -59,6 +59,7 @@ public class ClientProperties extends DefaultClientConfiguration
 	public static final String PROP_OUT_HANDLERS = "outHandlers";
 	public static final String PROP_SERVER_HOSTNAME_CHECKING = "serverHostnameChecking";
 	public static final String PROP_MESSAGE_LOGGING = "messageLogging";
+	public static final String PROP_SECURITY_SESSIONS = "securitySessions";
 	
 	private IAuthnAndTrustConfiguration authnAndTrustConfiguration;
 	private PropertiesHelper clientPropertiesHelper;
@@ -87,6 +88,8 @@ public class ClientProperties extends DefaultClientConfiguration
 				setDescription("Controls whether server's hostname should be checked for matching its certificate subject. This verification prevents man-in-the-middle attacks. If enabled WARN will only print warning in log, FAIL will close the connection."));
 		META.put(PROP_MESSAGE_LOGGING, new PropertyMD("false").
 				setDescription("Controls whether messages should be logged (at INFO level)."));
+		META.put(PROP_SECURITY_SESSIONS, new PropertyMD("true").
+				setDescription("Controls whether security sessions should be enabled."));
 		
 		for (Map.Entry<String, PropertyMD> entry: HttpClientProperties.META.entrySet())
 			META.put(HttpClientProperties.PREFIX+entry.getKey(), entry.getValue());
@@ -234,6 +237,7 @@ public class ClientProperties extends DefaultClientConfiguration
 		setHttpClientProperties(httpProperties);
 		
 		setMessageLogging(clientPropertiesHelper.getBooleanValue(PROP_MESSAGE_LOGGING));
+		setUseSecuritySessions(clientPropertiesHelper.getBooleanValue(PROP_SECURITY_SESSIONS));
 	}
 	
 	private String[] parseHandlers(PropertiesHelper properties, String key)

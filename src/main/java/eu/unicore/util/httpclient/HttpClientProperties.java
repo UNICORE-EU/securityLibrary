@@ -75,7 +75,7 @@ public class HttpClientProperties extends PropertiesHelper
 		META.put(MAX_TOTAL_CONNECTIONS, new PropertyMD("20").setCategory(httpCat).
 				setDescription("How many connections in total can be made. " +
 						"Note: this is a limit for a single client object instance."));
-		META.put(SO_TIMEOUT, new PropertyMD("20000").setCategory(httpCat).
+		META.put(SO_TIMEOUT, new PropertyMD("0").setCategory(httpCat).
 				setDescription("Socket timeout (ms)"));
 		META.put(CONNECT_TIMEOUT, new PropertyMD("20000").setCategory(httpCat).
 				setDescription("Timeout for the connection establishing (ms)"));

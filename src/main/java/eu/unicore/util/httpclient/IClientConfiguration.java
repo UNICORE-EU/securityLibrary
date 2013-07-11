@@ -111,6 +111,12 @@ public interface IClientConfiguration extends IPlainClientConfiguration
 	public boolean isMessageLogging();
 	
 	/**
+	 * returns true if client should attempt to establish a security session
+	 * with the server
+	 */
+	public boolean useSecuritySessions();
+
+	/**
 	 * add a configuration handler
 	 * @param settings - the properties helper class to add
 	 */

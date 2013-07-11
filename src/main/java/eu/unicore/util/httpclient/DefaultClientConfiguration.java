@@ -30,6 +30,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	private boolean sslAuthn;
 	private boolean httpAuthn;
 	private boolean messageLogging;
+	private boolean useSecuritySessions;
 	private String[] inHandlerClassNames;
 	private String[] outHandlerClassNames;
 	private ClassLoader classLoader;
@@ -210,6 +211,20 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 		this.sslEnabled = sslEnabled;
 	}
 
+	@Override
+	public boolean useSecuritySessions()
+	{
+		return useSecuritySessions;
+	}
+
+	/**
+	 * @param useSecuritySessions - whether to enable sessions
+	 */
+	public void setUseSecuritySessions(boolean useSecuritySessions)
+	{
+		this.useSecuritySessions = useSecuritySessions;
+	}
+	
 	/**
 	 * @return the doSignMessages
 	 */
