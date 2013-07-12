@@ -30,7 +30,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	private boolean sslAuthn;
 	private boolean httpAuthn;
 	private boolean messageLogging;
-	private boolean useSecuritySessions;
+	private boolean useSecuritySessions = true;
 	private String[] inHandlerClassNames;
 	private String[] outHandlerClassNames;
 	private ClassLoader classLoader;
@@ -361,6 +361,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 		ret.setServerHostnameCheckingMode(serverHostnameCheckingMode);
 		ret.setHttpClientProperties(httpClientProperties.clone());
 		ret.setMessageLogging(messageLogging);
+		ret.setUseSecuritySessions(useSecuritySessions);
 		ret.extraConfigurationHandlers.putAll(extraConfigurationHandlers);
 		return ret;
 	}
