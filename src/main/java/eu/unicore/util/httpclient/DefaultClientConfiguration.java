@@ -43,6 +43,8 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	private final Map<Class<? extends PropertiesHelper>,PropertiesHelper> extraConfigurationHandlers 
 			= new HashMap<Class<? extends PropertiesHelper>, PropertiesHelper>();
 
+	private SessionIDProviderFactory sessionIDProviderFactory;
+	
 	/**
 	 * Only default settings, i.e. no security.
 	 */
@@ -225,6 +227,15 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 		this.useSecuritySessions = useSecuritySessions;
 	}
 	
+	@Override
+	public SessionIDProviderFactory getSessionIDProviderFactory() {
+		return sessionIDProviderFactory;
+	}
+
+	public void setSessionIDProviderFactory(SessionIDProviderFactory sessionIDProviderFactory) {
+		this.sessionIDProviderFactory = sessionIDProviderFactory;
+	}
+
 	/**
 	 * @return the doSignMessages
 	 */

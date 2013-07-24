@@ -117,6 +117,11 @@ public interface IClientConfiguration extends IPlainClientConfiguration
 	public boolean useSecuritySessions();
 
 	/**
+	 * @return used to obtain a SessionIDProvider
+	 */
+	public SessionIDProviderFactory getSessionIDProviderFactory();
+	
+	/**
 	 * add a configuration handler
 	 * @param settings - the properties helper class to add
 	 */
