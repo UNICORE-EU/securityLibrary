@@ -373,6 +373,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 		ret.setHttpClientProperties(httpClientProperties.clone());
 		ret.setMessageLogging(messageLogging);
 		ret.setUseSecuritySessions(useSecuritySessions);
+		ret.setSessionIDProviderFactory(sessionIDProviderFactory);
 		ret.extraConfigurationHandlers.putAll(extraConfigurationHandlers);
 		return ret;
 	}
