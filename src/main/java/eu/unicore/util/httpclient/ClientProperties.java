@@ -60,6 +60,8 @@ public class ClientProperties extends DefaultClientConfiguration
 	public static final String PROP_SERVER_HOSTNAME_CHECKING = "serverHostnameChecking";
 	public static final String PROP_MESSAGE_LOGGING = "messageLogging";
 	public static final String PROP_SECURITY_SESSIONS = "securitySessions";
+	public static final String PROP_MAX_RETRIES = "maxWsCallRetries";
+	public static final String PROP_RETRY_DELAY = "wsCallRetryDelay";
 	
 	private IAuthnAndTrustConfiguration authnAndTrustConfiguration;
 	private PropertiesHelper clientPropertiesHelper;
@@ -90,6 +92,12 @@ public class ClientProperties extends DefaultClientConfiguration
 				setDescription("Controls whether messages should be logged (at INFO level)."));
 		META.put(PROP_SECURITY_SESSIONS, new PropertyMD("true").
 				setDescription("Controls whether security sessions should be enabled."));
+		META.put(PROP_MAX_RETRIES, new PropertyMD("3").
+				setDescription("Controls how many times the client should try to call a failing web service. " +
+						"Note that only the transient failure reasons cause the retry. " +
+						"Note that value of 0 enables unlimited number of retries, while value of 1 means that only one call is tried."));
+		META.put(PROP_RETRY_DELAY, new PropertyMD("10000").
+				setDescription("Amount of milliseconds to wait before retry of a failed web service call."));
 		
 		for (Map.Entry<String, PropertyMD> entry: HttpClientProperties.META.entrySet())
 			META.put(HttpClientProperties.PREFIX+entry.getKey(), entry.getValue());
@@ -238,6 +246,8 @@ public class ClientProperties extends DefaultClientConfiguration
 		
 		setMessageLogging(clientPropertiesHelper.getBooleanValue(PROP_MESSAGE_LOGGING));
 		setUseSecuritySessions(clientPropertiesHelper.getBooleanValue(PROP_SECURITY_SESSIONS));
+		setMaxWSRetries(clientPropertiesHelper.getIntValue(PROP_MAX_RETRIES));
+		setRetryDelay(clientPropertiesHelper.getLongValue(PROP_RETRY_DELAY));
 	}
 	
 	private String[] parseHandlers(PropertiesHelper properties, String key)

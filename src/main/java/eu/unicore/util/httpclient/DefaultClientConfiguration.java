@@ -36,6 +36,8 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	private ClassLoader classLoader;
 	private boolean sslEnabled;
 	private boolean doSignMessage;
+	private int maxWSRetries=1;
+	private long retryDelay=0;
 	private ETDClientSettings etdSettings = new ETDClientSettings();
 	private Map<String, Object> extraSecurityTokens = new HashMap<String, Object>();
 	private ServerHostnameCheckingMode serverHostnameCheckingMode = ServerHostnameCheckingMode.NONE;
@@ -346,6 +348,56 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 		return ret;
 	}
 
+	@Override
+	public HttpClientProperties getHttpClientProperties()
+	{
+		return httpClientProperties;
+	}
+
+	public void setHttpClientProperties(HttpClientProperties httpClientProperties)
+	{
+		this.httpClientProperties = httpClientProperties;
+	}
+
+	/**
+	 * add a custom configuration source
+	 */
+	public void addConfigurationHandler(PropertiesHelper settings){
+		extraConfigurationHandlers.put(settings.getClass(), settings);
+	}
+
+	/**
+	 * returns the requested configuration handler 
+	 * @param key - the configuration handler class used as key
+	 * @return the configuration handler
+	 */
+	public <T extends PropertiesHelper> T getConfigurationHandler(Class<T>key){
+		Object o=extraConfigurationHandlers.get(key);
+		return  key.cast(o);
+	}
+
+	@Override
+	public int getMaxWSRetries()
+	{
+		return maxWSRetries;
+	}
+
+	public void setMaxWSRetries(int max)
+	{
+		this.maxWSRetries = max;
+	}
+	
+	@Override
+	public long getRetryDelay()
+	{
+		return retryDelay;
+	}
+	
+	public void setRetryDelay(long delay)
+	{
+		this.retryDelay = delay;
+	}
+	
 	/**
 	 * for implementing clone in subclasses
 	 * @param ret
@@ -375,34 +427,8 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 		ret.setUseSecuritySessions(useSecuritySessions);
 		ret.setSessionIDProviderFactory(sessionIDProviderFactory);
 		ret.extraConfigurationHandlers.putAll(extraConfigurationHandlers);
+		ret.setRetryDelay(retryDelay);
+		ret.setMaxWSRetries(maxWSRetries);
 		return ret;
-	}
-
-	@Override
-	public HttpClientProperties getHttpClientProperties()
-	{
-		return httpClientProperties;
-	}
-
-	public void setHttpClientProperties(HttpClientProperties httpClientProperties)
-	{
-		this.httpClientProperties = httpClientProperties;
-	}
-
-	/**
-	 * add a custom configuration source
-	 */
-	public void addConfigurationHandler(PropertiesHelper settings){
-		extraConfigurationHandlers.put(settings.getClass(), settings);
-	}
-
-	/**
-	 * returns the requested configuration handler 
-	 * @param key - the configuration handler class used as key
-	 * @return the configuration handler
-	 */
-	public <T extends PropertiesHelper> T getConfigurationHandler(Class<T>key){
-		Object o=extraConfigurationHandlers.get(key);
-		return  key.cast(o);
 	}
 }

@@ -115,6 +115,16 @@ public interface IClientConfiguration extends IPlainClientConfiguration
 	 * with the server
 	 */
 	public boolean useSecuritySessions();
+	
+	/**
+	 * @return number of retries of failed web service calls. Only selected faults are subject to retry.  
+	 */
+	public int getMaxWSRetries();
+	
+	/**
+	 * @return amount of milliseconds to wait between retry of a failed WS call.
+	 */
+	public long getRetryDelay();
 
 	/**
 	 * @return used to obtain a SessionIDProvider
