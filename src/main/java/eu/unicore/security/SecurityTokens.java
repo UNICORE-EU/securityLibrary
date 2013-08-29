@@ -45,8 +45,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.security.auth.x500.X500Principal;
-
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.emi.security.authn.x509.proxy.ProxyUtils;
 import eu.unicore.security.etd.TrustDelegation;
@@ -103,7 +101,8 @@ public class SecurityTokens implements Serializable
 	private X509Certificate[] consignor;
 	private SignatureStatus signatureStatus = SignatureStatus.UNCHECKED;
 	private Map<String, Object> context;
-	private X500Principal userName;
+	private String userName;
+	private String consignorName;
 	private String clientIP;
 	
 	/**
@@ -143,6 +142,18 @@ public class SecurityTokens implements Serializable
 	public void setConsignor(X509Certificate[] consignor)
 	{
 		this.consignor = consignor; 
+		this.consignorName = consignor[0].getSubjectX500Principal().getName();
+	}
+
+	/**
+	 * Sets a consignor as a DN. It should be a VALIDATED identity.
+	 * This method clears any consignor certificate previously set.
+	 * @param consignor
+	 */
+	public void setConsignorName(String consignorName)
+	{
+		this.consignorName = consignorName; 
+		this.consignor = null;
 	}
 
 	/**
@@ -171,7 +182,6 @@ public class SecurityTokens implements Serializable
 		return null;
 	}
 	
-
 	/**
 	 * Sets user identity in terms of certificates. It is an identity of a user on 
 	 * whose behalf consignor wishes to execute the request. 
@@ -183,7 +193,7 @@ public class SecurityTokens implements Serializable
 		this.user = user;
 		X509Certificate userCert = getUserCertificate();
 		if (userCert != null)
-			this.userName = userCert.getSubjectX500Principal();
+			this.userName = userCert.getSubjectX500Principal().getName();
 	}
 
 	/**
@@ -207,7 +217,7 @@ public class SecurityTokens implements Serializable
 	 *  
 	 * @param userName
 	 */
-	public void setUserName(X500Principal userName)
+	public void setUserName(String userName)
 	{
 		this.userName = userName;
 		user = null;
@@ -236,7 +246,7 @@ public class SecurityTokens implements Serializable
 	 * 
 	 * @return
 	 */
-	public X500Principal getUserName()
+	public String getUserName()
 	{
 		if (userName != null)
 			return userName;
@@ -247,12 +257,12 @@ public class SecurityTokens implements Serializable
 	 * Returns a consignor's DN. In proxy mode the consignor's EEC DN is returned.
 	 * @return
 	 */
-	public X500Principal getConsignorName()
+	public String getConsignorName()
 	{
 		if (consignor != null)
-			return getConsignorCertificate().getSubjectX500Principal();
+			return getConsignorCertificate().getSubjectX500Principal().getName();
 		else
-			return null;
+			return consignorName;
 	}
 
 	/**
@@ -274,7 +284,7 @@ public class SecurityTokens implements Serializable
 	 * from the user to the consignor) or the <i>consignor</i> (in other cases).
 	 * This method will return null when the consignor is unknown.
 	 */
-	public X500Principal getEffectiveUserName()
+	public String getEffectiveUserName()
 	{
 		if (userName != null && consignorTrusted)
 			return getUserName();
@@ -301,11 +311,12 @@ public class SecurityTokens implements Serializable
         				sb.append(" but proxy handling is NOT enabled" + lineSep);
         		}
         	}
-        	if (consignor != null)
+        	if (consignorName != null)
         	{
-        		X500Principal consignor = getConsignorName(); 
+        		String consignor = getConsignorName(); 
         		sb.append("Consignor DN: ").append(X500NameUtils.getReadableForm(consignor));
-        		if (ProxyUtils.isProxy(this.consignor))
+        		sb.append(lineSep);
+        		if (this.consignor != null && ProxyUtils.isProxy(this.consignor))
         		{
         			sb.append("Consignor's certificate is a proxy certificate");
         			if (supportProxy)
@@ -315,7 +326,7 @@ public class SecurityTokens implements Serializable
         		}
         	}
         	sb.append("Delegation to consignor status: " + isConsignorTrusted() + 
-        			", core delegation status: " + isTrustDelegationValidated() + lineSep);
+        			", core delegation status: " + isTrustDelegationValidated());
         	if (signatureStatus != null)
         	{
         		sb.append(lineSep+"Message signature status: ").append(signatureStatus.toString());
@@ -374,13 +385,13 @@ public class SecurityTokens implements Serializable
 	 * @return the identity of the real consignor's certificate. In case of proxies it can be different
 	 * from the value returned by the {@link #getConsignorName()}
 	 */
-	public X500Principal getConsignorRealName()
+	public String getConsignorRealName()
 	{
 		if (consignor != null)
 		{
-			return consignor[0].getSubjectX500Principal();
+			return consignor[0].getSubjectX500Principal().getName();
 		}
-		return null;
+		return consignorName;
 	}
 	
 	/**
@@ -460,7 +471,7 @@ public class SecurityTokens implements Serializable
 
 	/**
 	 * Two sets of tokes are considered equal if their effective user names, 
-	 * consignor certs, delegation statuses and signature status are equal.
+	 * consignor names, delegation statuses and signature status are equal.
 	 * Also proxy mode and client's IP must be the same.
 	 */
 	public boolean equals(Object otherO)
@@ -478,12 +489,13 @@ public class SecurityTokens implements Serializable
 		if (other.isTrustDelegationValidated() != isTrustDelegationValidated())
 			return false;
 		
-		if (other.getConsignorCertificate() == null)
+		if (other.getConsignorName() == null)
 		{
-			if (getConsignorCertificate() != null)
+			if (getConsignorName() != null)
 				return false;
-		} else if (!other.getConsignorCertificate().equals(getConsignorCertificate()))
+		} else if (!other.getConsignorName().equals(getConsignorName()))
 			return false;
+		
 		
 		if (other.getEffectiveUserName() == null)
 		{
@@ -506,11 +518,15 @@ public class SecurityTokens implements Serializable
 	}
 
 	public int hashCode(){
+		String cons = getConsignorName();
+		int consignorHash = cons == null ? 0 : cons.hashCode(); 
+		String user = getEffectiveUserName();
+		int userHash = user == null ? 0 : user.hashCode();
 		return getMessageSignatureStatus().hashCode()
 				^ (isConsignorTrusted()?0x1:0x0)
 				^ (isTrustDelegationValidated()?0x2:0x0)
-				^ getConsignorCertificate().hashCode()
-				^ getEffectiveUserName().hashCode();
+				^ consignorHash
+				^ userHash;
 	}
 }
 

@@ -6,7 +6,7 @@
  * Author: K. Benedyczak <golbi@mat.umk.pl>
  */
 package eu.unicore.security;
-import java.security.cert.X509Certificate;
+
 
 /**
  * This simple interface is used to check whether the caller 
@@ -20,9 +20,9 @@ public interface SelfCallChecker
 {
 	/**
 	 * Checks if the client is the same as the server which serves the request.
-	 * @param client client's certificate
-	 * @return true if the above contition is true and trust delegations
-	 * should be accepted witout further checking in this request case.
+	 * @param client client's DN
+	 * @return true if the above condition is true and the call should be accepted without further 
+	 * delegation checking. 
 	 */
-	public boolean isSelfCall(X509Certificate client);
+	public boolean isSelfCall(String client);
 }
