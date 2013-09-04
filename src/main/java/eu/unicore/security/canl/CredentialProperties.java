@@ -142,7 +142,7 @@ public class CredentialProperties extends PropertiesHelper
 		return credential;
 	}
 
-	private void createCredentialSafe() throws ConfigurationException
+	protected void createCredentialSafe() throws ConfigurationException
 	{
 		try
 		{
@@ -183,7 +183,7 @@ public class CredentialProperties extends PropertiesHelper
 		} 
 	}
 	
-	private void createCredential() throws ConfigurationException, 
+	protected void createCredential() throws ConfigurationException, 
 		KeyStoreException, IOException, CertificateException
 	{
 		credPath = getFileValueAsString(PROP_LOCATION, false);
@@ -261,7 +261,7 @@ public class CredentialProperties extends PropertiesHelper
 					Arrays.toString(CredentialFormat.values()));
 	}
 	
-	private CredentialFormat autodetectType(String credPath, char[] credPassword,
+	protected CredentialFormat autodetectType(String credPath, char[] credPassword,
 			String keyLocation, String ksAlias, char[] ksKeyPassword)
 	{
 		String errorPfx = "Credential type was not set with the property " 
