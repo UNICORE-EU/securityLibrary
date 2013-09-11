@@ -163,7 +163,10 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 		try{
 			MessageDigest md=MessageDigest.getInstance("MD5");
 			// credential subject
-			md.update(safeToBytes(settings.getCredential().getSubjectName()));
+			if (settings.getCredential() != null)
+				md.update(safeToBytes(settings.getCredential().getSubjectName()));
+			else
+				md.update(safeToBytes(null));
 			
 			ETDClientSettings etd = settings.getETDSettings();
 			//requested user
