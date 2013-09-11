@@ -45,7 +45,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	private final Map<Class<? extends PropertiesHelper>,PropertiesHelper> extraConfigurationHandlers 
 			= new HashMap<Class<? extends PropertiesHelper>, PropertiesHelper>();
 
-	private SessionIDProviderFactory sessionIDProviderFactory;
+	private SessionIDProvider sessionIDProvider = new SessionIDProviderImpl();
 	
 	/**
 	 * Only default settings, i.e. no security.
@@ -230,12 +230,12 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	}
 	
 	@Override
-	public SessionIDProviderFactory getSessionIDProviderFactory() {
-		return sessionIDProviderFactory;
+	public SessionIDProvider getSessionIDProvider() {
+		return sessionIDProvider;
 	}
 
-	public void setSessionIDProviderFactory(SessionIDProviderFactory sessionIDProviderFactory) {
-		this.sessionIDProviderFactory = sessionIDProviderFactory;
+	public void setSessionIDProvider(SessionIDProvider sessionIDProvider) {
+		this.sessionIDProvider = sessionIDProvider;
 	}
 
 	/**
@@ -425,7 +425,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 		ret.setHttpClientProperties(httpClientProperties.clone());
 		ret.setMessageLogging(messageLogging);
 		ret.setUseSecuritySessions(useSecuritySessions);
-		ret.setSessionIDProviderFactory(sessionIDProviderFactory);
+		ret.setSessionIDProvider(sessionIDProvider);
 		ret.extraConfigurationHandlers.putAll(extraConfigurationHandlers);
 		ret.setRetryDelay(retryDelay);
 		ret.setMaxWSRetries(maxWSRetries);

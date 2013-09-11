@@ -129,7 +129,7 @@ public interface IClientConfiguration extends IPlainClientConfiguration
 	/**
 	 * @return used to obtain a SessionIDProvider
 	 */
-	public SessionIDProviderFactory getSessionIDProviderFactory();
+	public SessionIDProvider getSessionIDProvider();
 	
 	/**
 	 * add a configuration handler
