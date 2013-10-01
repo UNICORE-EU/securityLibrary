@@ -98,7 +98,9 @@ public class JettyLogger extends AbstractLogger implements Logger
 
 	public void debug(String msg, Object... args)
 	{
-		log.debug(format(msg, args));
+		if(log.isDebugEnabled()){
+			log.debug(format(msg, args));
+		}
 	}
 
 	public void debug(Throwable thrown)
