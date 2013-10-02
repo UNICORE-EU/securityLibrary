@@ -40,10 +40,15 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 	/*
 	 * extract the service independent part of a service URI
 	 */
-	private String extractServerID(String uri){
+	public static String extractServerID(String uri){
 		try{
 			//TODO better way?
-			return uri.split("services")[0];
+			String parts[] = uri.split("services");
+			if (parts.length > 1)
+			{
+				return parts[0] + "services";
+			}
+			return uri;
 		}catch(Exception ex){
 			return uri;
 		}
