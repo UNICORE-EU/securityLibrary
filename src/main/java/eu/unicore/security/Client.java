@@ -119,7 +119,7 @@ public class Client implements Serializable {
 	
 	//additional attributes may contain things relevant on the target system 
 	//such as license keys, ... In most cases subjectAttributes are what you need.
-	private final Map<String,Serializable> extraAttributes;
+	private final Map<String,String> extraAttributes;
 	
 	/**
 	 * Constructs an anonymous Client. Setters must be used to fully configure
@@ -127,7 +127,7 @@ public class Client implements Serializable {
 	 */
 	public Client() {
 		setAnonymousClient();
-		extraAttributes = new HashMap<String,Serializable>();
+		extraAttributes = new HashMap<String,String>();
 		setSubjectAttributes(new SubjectAttributesHolder());
 		xlogin = new Xlogin();
 		role = new Role();
@@ -242,7 +242,7 @@ public class Client implements Serializable {
 	}
 
 	
-	public Map<String, Serializable> getExtraAttributes() {
+	public Map<String, String> getExtraAttributes() {
 		return extraAttributes;
 	}
 	
