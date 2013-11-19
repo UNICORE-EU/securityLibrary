@@ -71,7 +71,6 @@ public class ConsignorAssertion extends Assertion
 					"attribute");
 
 		this.assertionDoc = doc;
-		this.assertion = doc.getAssertion();
 	}
 	
 	public X509Certificate[] getConsignor()

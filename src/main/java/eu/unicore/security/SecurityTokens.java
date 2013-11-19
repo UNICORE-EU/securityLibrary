@@ -65,7 +65,7 @@ import eu.unicore.security.etd.TrustDelegation;
  * @author K. Benedyczak
  * @author Bernd Schuller
  */
-public class SecurityTokens implements Serializable
+public class SecurityTokens implements Serializable, Cloneable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -97,10 +97,10 @@ public class SecurityTokens implements Serializable
 	 */
 	public static final String SCOPE_REQUEST = "request";
 
-	private X509Certificate[] user;
-	private X509Certificate[] consignor;
-	private SignatureStatus signatureStatus = SignatureStatus.UNCHECKED;
-	private Map<String, Object> context;
+	private transient X509Certificate[] user;
+	private transient X509Certificate[] consignor;
+	private transient SignatureStatus signatureStatus = SignatureStatus.UNCHECKED;
+	private transient Map<String, Object> context;
 	private String userName;
 	private String consignorName;
 	private String clientIP;
@@ -135,6 +135,10 @@ public class SecurityTokens implements Serializable
 		this.supportProxy = supportProxy;
 	}
 
+	public SecurityTokens clone()throws CloneNotSupportedException{
+		SecurityTokens clone=(SecurityTokens)super.clone();
+		return clone;
+	}
 	/**
 	 * Sets a consignor. It should be a VALIDATED identity.
 	 * @param consignor
