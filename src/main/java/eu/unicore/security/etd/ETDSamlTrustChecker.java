@@ -31,6 +31,7 @@ public class ETDSamlTrustChecker extends DsigSamlTrustCheckerBase
 	
 	public ETDSamlTrustChecker(X509CertChainValidator validator, X509Certificate[] expectedIssuer)
 	{
+		super(false);
 		this.validator = validator;
 		this.expectedIssuer = expectedIssuer;
 	}
