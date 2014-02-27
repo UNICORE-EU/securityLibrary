@@ -59,11 +59,12 @@ public class FilePropertiesHelper extends PropertiesHelper implements Runnable
 		return hasFileChanged(lastAccess, file);
 	}
 	
-	public boolean reloadIfChanged() throws IOException, ConfigurationException
+	public synchronized boolean reloadIfChanged() throws IOException, ConfigurationException
 	{
 		if (hasChanged())
 		{
 			reload();
+			lastAccess = file.lastModified();
 			return true;
 		}
 		return false;
@@ -86,13 +87,10 @@ public class FilePropertiesHelper extends PropertiesHelper implements Runnable
 		}
 	}
 	
-	
 	public static boolean hasFileChanged(long lastAccess, File file)
 	{
 		long fileMod = file.lastModified();
-		boolean ret = (lastAccess==0 || lastAccess<fileMod);
-		lastAccess=fileMod;
-		return ret;
+		return (lastAccess==0 || lastAccess<fileMod);
 	}
 	
 	public static Properties load(String file) throws IOException 
