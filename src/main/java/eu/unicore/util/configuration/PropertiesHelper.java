@@ -141,7 +141,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 			notifyFocusedListeners(key);
 	}
 
-	private boolean canHaveSubkeys(String key) 
+	protected boolean canHaveSubkeys(String key) 
 	{
 		PropertyMD meta = getMetadata(key);
 		if (meta != null && (meta.canHaveSubkeys() || meta.getType() == Type.LIST) || 
@@ -355,7 +355,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		}
 	}
 
-	private void checkStructuredListConstraints(PropertyMD meta, String key) 
+	protected void checkStructuredListConstraints(PropertyMD meta, String key) 
 	{
 		structuredPrefixes.add(key);
 		if (meta.numericalListKeys())
@@ -862,7 +862,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		return ret;
 	}
 	
-	private synchronized Set<String> getSortedNumKeys(String base, boolean allowListSubKeys)
+	protected synchronized Set<String> getSortedNumKeys(String base, boolean allowListSubKeys)
 	{
 		SortedSet<Integer> keys = new TreeSet<Integer>();
 		Set<Object> allKeys = properties.keySet();
@@ -895,7 +895,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		return ret;
 	}
 
-	private synchronized Set<String> getSortedStringKeys(String base, boolean allowListSubKeys)
+	protected synchronized Set<String> getSortedStringKeys(String base, boolean allowListSubKeys)
 	{
 		SortedSet<String> keys = new TreeSet<String>();
 		Set<Object> allKeys = properties.keySet();
