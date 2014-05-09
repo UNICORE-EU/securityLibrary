@@ -371,7 +371,8 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 				} catch (NumberFormatException e)
 				{
 					throw new ConfigurationException("For the " + prefix + key + 
-						" structurd list property only the numerical subkeys are allowed, and " + k + " isn't a numerical subkey.");
+						" structurd list property only the numerical subkeys are allowed, and " 
+							+ k + " isn't a numerical subkey.");
 				}
 			}
 		}
@@ -435,6 +436,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 				//let's also try if we have metadata for some subnamespaces, marked as list or with subkeys.
 				boolean done = false;
 				while (noPfxKey.contains(".")) {
+					//case 1: ordinary entry with subkeys allowed or list type
 					noPfxKey = noPfxKey.substring(0, noPfxKey.lastIndexOf('.'));
 					PropertyMD md = getMetadata(noPfxKey); 
 					if (md != null) {
@@ -443,6 +445,16 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 						}
 						done = true;
 						break;
+					} else
+					{
+						//case 2: we can also have a structured list marked as subkeys allowed
+						PropertyMD md2 = getMetadata(noPfxKey+".");
+						if (md2 != null && md2.getType() == Type.STRUCTURED_LIST && 
+								md2.canHaveSubkeys())
+						{
+							done = true;
+							break;
+						}
 					}
 				}
 				if (!done)
@@ -456,7 +468,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	
 	/**
 	 * For regular entries returns the argument. For entries where propertyKey is something from a list 
-	 * or entry with subkeys, the real entry key is returned. Similarily for the structured list - the structured
+	 * or entry with subkeys, the real entry key is returned. Similarly for the structured list - the structured
 	 * list entry is returned. 
 	 * 
 	 * @param propertyKey
