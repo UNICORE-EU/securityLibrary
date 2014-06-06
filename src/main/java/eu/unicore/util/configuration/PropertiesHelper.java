@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -402,9 +403,11 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 				if (eMeta != null)
 				{
 					String realKey = getMetadataKey(entryKey);
-					if ((eMeta.canHaveSubkeys() || eMeta.getType() == Type.LIST) && entryKey.endsWith(realKey))
-						throw new ConfigurationException("The entry with key " + prefix+entryKey + " is illegal, should have a subkey");
-					if (eMeta.canHaveSubkeys() || eMeta.getType() == Type.LIST)
+					if (eMeta.getType() == Type.LIST && entryKey.endsWith(realKey))
+						throw new ConfigurationException("The entry with key " + 
+								prefix+entryKey + " is illegal, should have a subkey");
+					if ((eMeta.canHaveSubkeys() && !entryKey.endsWith(realKey)) 
+							|| eMeta.getType() == Type.LIST)
 						entryKey = entryKey.substring(0, entryKey.indexOf(realKey))+realKey;
 					checkPropertyConstraints(eMeta, entryKey);
 					if (eMeta.isMandatory())
@@ -837,7 +840,39 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 			return getEnumValue(perServiceKey, type);
 		return getEnumValue(key, type);
 	}
-
+	
+	/**
+	 * Returns a string value which can be localized. It is assumed that the given key can have subkeys.
+	 * A 'key.language_country' alue is returned if present. If not then the 'key.language'. If it is also
+	 * absent then the {@link #getValue(String)} is used.
+	 * @param key
+	 * @param locale
+	 * @return
+	 */
+	public String getLocalizedValue(String key, Locale locale)
+	{
+		boolean hasCountry = !locale.getCountry().equals("");
+		boolean hasLang = !locale.getLanguage().equals("");
+		String keyPfx = key + ".";
+		
+		if (hasCountry && hasLang)
+		{
+			String fullLocale = locale.getLanguage() + "_" + locale.getCountry();
+			if (isSet(keyPfx + fullLocale))
+				return getValue(keyPfx + fullLocale);
+		}
+		
+		if (hasLang)
+		{
+			String fullLocale = locale.getLanguage();
+			if (isSet(keyPfx + fullLocale))
+				return getValue(keyPfx + fullLocale);
+		}
+		
+		return getValue(key);
+	}
+	
+	
 	/**
 	 * Returns a sorted list of values. Each value corresponds to a property
 	 * with a key with a specified prefix and arbitrary ending. Usually this prefix should end with '.'

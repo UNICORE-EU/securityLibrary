@@ -59,8 +59,34 @@ public class PropertiesHelperTest extends TestCase
 		METADATA.put("sl1", new PropertyMD().setStructuredListEntry("p15.").setMandatory());
 		METADATA.put("sl2", new PropertyMD("33").setStructuredListEntry("p15.").setBounds(0, 40));
 		METADATA.put("sl3.", new PropertyMD().setStructuredListEntry("p15.").setList(true));
+		METADATA.put("sl4", new PropertyMD().setStructuredListEntry("p15.").setCanHaveSubkeys());
 	}
 
+	
+	public void testStructuredListEntryWithSubkeys()
+	{
+		Properties p = new Properties();
+		p.setProperty(PREFIX+"p09", "mandatory");
+		p.setProperty(PREFIX+"p15.1.sl1", "mandatory");
+		p.setProperty(PREFIX+"p15.1.sl4", "a");
+		p.setProperty(PREFIX+"p15.1.sl4.subkey1", "b");
+		p.setProperty(PREFIX+"p15.1.sl4.subkey2", "c");
+		PropertiesHelper helper;
+
+		try
+		{
+			helper = new PropertiesHelper(PREFIX, p, METADATA, log);
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
+			fail("Can't set subkey on structured list entry");
+
+			return;
+		}
+		
+		assertEquals("a", helper.getValue("p15.1.sl4"));
+		assertEquals("b", helper.getValue("p15.1.sl4.subkey1"));
+		assertEquals("c", helper.getValue("p15.1.sl4.subkey2"));
+	}
 	
 	public void testListKeys()
 	{
