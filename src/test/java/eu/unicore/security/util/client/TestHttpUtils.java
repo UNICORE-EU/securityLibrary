@@ -68,7 +68,7 @@ public class TestHttpUtils extends TestCase
 		URI uri = new URIBuilder(server.getUrl()+"/servlet1").
 				addParameter("timeout", "5000").build();
 		HttpPost post = new HttpPost(uri);
-		HttpUtils.setConnectionTimeout(client, 300, 300);
+		HttpUtils.setConnectionTimeout(post, 300, 300);
 		long start = System.currentTimeMillis();
 		try
 		{

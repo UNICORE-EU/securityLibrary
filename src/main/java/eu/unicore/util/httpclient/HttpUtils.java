@@ -17,21 +17,22 @@ import org.apache.http.auth.Credentials;
 import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.auth.NTLMSchemeFactory;
 import org.apache.http.impl.client.BasicAuthCache;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.http.params.HttpParams;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
 import org.apache.log4j.Logger;
 
@@ -83,74 +84,82 @@ public class HttpUtils {
 	 */
 	public static synchronized HttpClient createClient(String uri, IClientConfiguration security)
 	{
-		DefaultHttpClient client = createClient(security.getHttpClientProperties());
-		if (security.isSslEnabled())
-			configureSSL(client, security);
-		configureProxy(client, uri, security.getHttpClientProperties());
-		return client;
+		@SuppressWarnings("resource")
+		PoolingHttpClientConnectionManager connMan = security.isSslEnabled() ? 
+				getSSLConnectionManager(security) : new PoolingHttpClientConnectionManager();
+				
+		HttpClientBuilder clientBuilder = createClientBuilder(security.getHttpClientProperties(), connMan);
+		configureProxy(clientBuilder, uri, security.getHttpClientProperties());
+		return clientBuilder.build();
 	}
-
 
 	/**
 	 * Create a HTTP client.
 	 * The returned client has neither SSL nor HTTP proxy support configured.
-	 * @deprecated use {@link #createClient(HttpClientProperties)} instead, as it doesn't 
-	 * use any assumptions about the properties prefix, and can reuse the same parsed properties object.
 	 */
-	@Deprecated
-	public static synchronized DefaultHttpClient createClient(Properties properties)
+	public static synchronized HttpClient createClient(HttpClientProperties properties)
 	{
-		HttpClientProperties parsed = new HttpClientProperties(properties);
-		return createClient(parsed);
+		return createClientBuilder(properties, new PoolingHttpClientConnectionManager()).build();
 	}
 	
 	/**
 	 * Create a HTTP client.
-	 * The returned client has neither SSL nor HTTP proxy support configured.
+	 * The returned client has no HTTP proxy support configured.
 	 */
-	public static synchronized DefaultHttpClient createClient(HttpClientProperties properties)
+	private static synchronized HttpClientBuilder createClientBuilder(HttpClientProperties properties,
+			PoolingHttpClientConnectionManager connMan)
 	{
 		boolean connClose = properties.getBooleanValue(HttpClientProperties.CONNECTION_CLOSE);
 		boolean allowCircularRedirects = properties.getBooleanValue(
 				HttpClientProperties.ALLOW_CIRCULAR_REDIRECTS);
 		int maxRedirects = properties.getIntValue(HttpClientProperties.HTTP_MAX_REDIRECTS);
+		boolean allowRedirects = maxRedirects > 0;
 
-		PoolingClientConnectionManager manager = new PoolingClientConnectionManager();
 		int maxConnPerHost = properties.getIntValue(HttpClientProperties.MAX_HOST_CONNECTIONS);
-		manager.setDefaultMaxPerRoute(maxConnPerHost);
+		connMan.setDefaultMaxPerRoute(maxConnPerHost);
 		int maxTotalConn  = properties.getIntValue(HttpClientProperties.MAX_TOTAL_CONNECTIONS);
-		manager.setMaxTotal(maxTotalConn);
+		connMan.setMaxTotal(maxTotalConn);
 
-		DefaultHttpClient client = new DefaultHttpClient(manager);
-		client.setRedirectStrategy(new VeryLaxRedirectStrategy());
+		HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+		clientBuilder.setConnectionManager(connMan);
+		clientBuilder.setRedirectStrategy(new VeryLaxRedirectStrategy());
 
-		HttpParams params = client.getParams();
-		params.setParameter(CoreProtocolPNames.USER_AGENT, USER_AGENT);
-		params.setBooleanParameter(ClientPNames.MAX_REDIRECTS, true);
-		params.setIntParameter(ClientPNames.MAX_REDIRECTS, maxRedirects);
-		params.setBooleanParameter(ClientPNames.ALLOW_CIRCULAR_REDIRECTS, allowCircularRedirects);
-		if (connClose)
-			client.addRequestInterceptor(CONN_CLOSE_INTERCEPTOR);
-
+		RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
 		int socketTimeout = properties.getIntValue(HttpClientProperties.SO_TIMEOUT);
 		int connectTimeout = properties.getIntValue(HttpClientProperties.CONNECT_TIMEOUT);
-		setConnectionTimeout(client, socketTimeout, connectTimeout);
 		
-		return client;
+		setConnectionTimeout(requestConfigBuilder, socketTimeout, connectTimeout);
+		RequestConfig requestConfig = requestConfigBuilder.
+				setCircularRedirectsAllowed(allowCircularRedirects).
+				setMaxRedirects(maxRedirects).
+				setRedirectsEnabled(allowRedirects).
+				build();
+		clientBuilder.setDefaultRequestConfig(requestConfig);
+
+		clientBuilder.setUserAgent(USER_AGENT);
+		if (connClose)
+			clientBuilder.addInterceptorFirst(CONN_CLOSE_INTERCEPTOR);
+		return clientBuilder;
 	}
 
-	public static void configureSSL(DefaultHttpClient client, IClientConfiguration security)
+	public static PoolingHttpClientConnectionManager getSSLConnectionManager(IClientConfiguration security)
 	{
-		SchemeRegistry schemeRegistry = client.getConnectionManager().getSchemeRegistry();
 		SSLContext sslContext = createSSLContext(security);
 		CanlHostnameVerifier hostnameVerifier = new CanlHostnameVerifier(
 				security.getServerHostnameCheckingMode());
-		SSLSocketFactory schemeSocketFactory = new SSLSocketFactory(sslContext, hostnameVerifier);
-		Scheme sslScheme = new Scheme("https", 443, schemeSocketFactory);
-		schemeRegistry.register(sslScheme);
+		int connectTimeout = security.getHttpClientProperties().
+				getIntValue(HttpClientProperties.CONNECT_TIMEOUT);
+		SSLConnectionSocketFactory sslsf = new CustomSSLConnectionSocketFactory(sslContext, hostnameVerifier,
+				connectTimeout);
+		PlainConnectionSocketFactory plainsf = new PlainConnectionSocketFactory();
+		
+		Registry<ConnectionSocketFactory> r = RegistryBuilder.<ConnectionSocketFactory>create()
+		        .register("http", plainsf)
+		        .register("https", sslsf)
+		        .build();
+
+		return new PoolingHttpClientConnectionManager(r);
 	}
-	
-	
 	
 	/**
 	 * configure the HTTP proxy settings on the given client
@@ -158,7 +167,7 @@ public class HttpUtils {
 	 * @param client - the HttpClient instance
 	 * @param uri - the URI to connect to
 	 */
-	public static void configureProxy(DefaultHttpClient client, String uri, HttpClientProperties properties){
+	public static void configureProxy(HttpClientBuilder clientBuilder, String uri, HttpClientProperties properties){
 		if (isNonProxyHost(uri, properties)) 
 			return;
 
@@ -181,17 +190,20 @@ public class HttpUtils {
 			if (port == null)
 				port = 80;
 			HttpHost proxy = new HttpHost(proxyHost, port);
-			client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+			clientBuilder.setProxy(proxy);
 			
 			String proxyUser = properties.getValue(HttpClientProperties.HTTP_PROXY_USER);
 			String proxyPass = properties.getValue(HttpClientProperties.HTTP_PROXY_PASS);
 			if (proxyUser != null && proxyPass != null)
 			{
 				Credentials credentials = getCredentials(proxyUser, proxyPass);
-				client.getCredentialsProvider().setCredentials(new AuthScope(proxyHost, port), 
-						credentials);
 				boolean ntlm = credentials instanceof NTCredentials;
-				client.addRequestInterceptor(new ProxyPreemptiveAuthnInterceptor(proxy, ntlm));
+
+				CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+				credentialsProvider.setCredentials(new AuthScope(proxyHost, port), 
+						credentials);
+				clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+				clientBuilder.addInterceptorLast(new ProxyPreemptiveAuthnInterceptor(proxy, ntlm));
 			}
 		}
 
@@ -226,16 +238,26 @@ public class HttpUtils {
 		return new UsernamePasswordCredentials(username, password);
 	}
 
+	private static void setConnectionTimeout(RequestConfig.Builder reqConfigBuilder, 
+			int socketTimeout, int connectTimeout) {
+		reqConfigBuilder.setSocketTimeout(socketTimeout);
+		reqConfigBuilder.setConnectTimeout(connectTimeout);
+		reqConfigBuilder.setConnectionRequestTimeout(connectTimeout);
+	}
+
 	/**
 	 * Helper method: sets the connection timeout for the HTTP client and the socket timeout.
-	 * @param client - the HTTPClient
+	 * @param request http request to be configured
 	 * @param socketTimeout socket timeout in milliseconds
 	 * @param connectTimeout connection timeout in milliseconds
 	 */
-	public static void setConnectionTimeout(HttpClient client, int socketTimeout, int connectTimeout){
-		client.getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT, socketTimeout);
-		client.getParams().setLongParameter(ClientPNames.CONN_MANAGER_TIMEOUT, connectTimeout);
-		client.getParams().setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, connectTimeout);
+	public static void setConnectionTimeout(HttpRequestBase request, 
+			int socketTimeout, int connectTimeout) {
+		RequestConfig current = request.getConfig();
+		RequestConfig.Builder reqConfigBuilder = current != null ? 
+				RequestConfig.copy(current) : RequestConfig.custom();
+		setConnectionTimeout(reqConfigBuilder, socketTimeout, connectTimeout);
+		request.setConfig(reqConfigBuilder.build());
 	}
 	
 	/**
@@ -273,11 +295,11 @@ public class HttpUtils {
 		public void process(HttpRequest request, HttpContext context) throws HttpException,
 				IOException
 		{
-			AuthCache authCache = (AuthCache) context.getAttribute(ClientContext.AUTH_CACHE);
+			AuthCache authCache = (AuthCache) context.getAttribute(HttpClientContext.AUTH_CACHE);
 			if (authCache == null)
 			{
 				authCache = new BasicAuthCache();
-				context.setAttribute(ClientContext.AUTH_CACHE, authCache);				
+				context.setAttribute(HttpClientContext.AUTH_CACHE, authCache);				
 			}
 			
 			if (authCache.get(host) == null)

@@ -11,7 +11,6 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 
 import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
@@ -20,8 +19,7 @@ import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
  * Wiring of CANL hostname verification into Apache HTTP client.
  * 
  * Note: this implementation is fairly incomplete. The API is awkward as it forces the 
- * shape of implementation which is no go for us. So the only implemented method is the one used by 
- * {@link SSLSocketFactory}.
+ * shape of implementation which is no go for us.
  * @author K. Benedyczak
  */
 public class CanlHostnameVerifier implements X509HostnameVerifier

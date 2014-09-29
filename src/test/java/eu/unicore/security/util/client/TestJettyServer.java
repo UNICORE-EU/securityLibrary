@@ -13,14 +13,14 @@ import java.util.Properties;
 
 import javax.net.ssl.SSLPeerUnverifiedException;
 
+import junit.framework.TestCase;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.util.EntityUtils;
-
-import junit.framework.TestCase;
 
 import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.X509Credential;
@@ -38,7 +38,8 @@ import eu.unicore.util.jetty.HttpServerProperties;
  */
 public class TestJettyServer extends TestCase
 {
-	private void makeRequest(JettyServer4Testing server, boolean shouldBeOk, Class<? extends Exception> expected, boolean useClientCred) throws Exception
+	private void makeRequest(JettyServer4Testing server, boolean shouldBeOk, 
+			Class<? extends Exception> expected, boolean useClientCred) throws Exception
 	{
 		try
 		{
@@ -138,6 +139,7 @@ public class TestJettyServer extends TestCase
 		}
 	}
 	
+	
 	public void testDisabledCiphers() throws Exception
 	{
 		Properties p1 = JettyServer4Testing.getSecureProperties();
@@ -215,7 +217,7 @@ public class TestJettyServer extends TestCase
 				return;
 			}
 			HttpPost post = new HttpPost(uri);
-			HttpUtils.setConnectionTimeout(client, 20000, 20000);
+			HttpUtils.setConnectionTimeout(post, 20000, 20000);
 			try
 			{
 				client.execute(post);
@@ -273,7 +275,7 @@ public class TestJettyServer extends TestCase
 		server.start();
 		makeRequest(server, false, SSLPeerUnverifiedException.class, false);
 	}
-	
+
 	private static final String allCiphers = "SSL_DH_DSS_WITH_3DES_EDE_CBC_SHA " +
 	"SSL_DH_DSS_WITH_DES_CBC_SHA " +
 	"SSL_DH_DSS_EXPORT_WITH_DES40_CBC_SHA " +
