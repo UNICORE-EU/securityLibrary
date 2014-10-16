@@ -44,6 +44,7 @@ public class JettyConnectorUtils
 		}
 		ret.setSslContext(SSLContextCreator.createSSLContext(credential, validator, protocol, 
 				"Jetty HTTP Server", log));
+		ret.addExcludeProtocols("SSL","SSLv2","SSLv3");
 		return ret;
 	}
 	
