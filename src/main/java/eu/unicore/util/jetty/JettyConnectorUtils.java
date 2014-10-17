@@ -36,14 +36,10 @@ public class JettyConnectorUtils
 			NoSuchProviderException, KeyManagementException
 	{
 		SslContextFactory ret = new SslContextFactory();
-		//fix for IBM JDK where default protocol "TLS" does not work
-		String vm=System.getProperty("java.vm.vendor");
 		String protocol = "TLS"; 
-		if(vm!=null && vm.trim().startsWith("IBM")){
-			protocol = "SSL_TLS";//works for clients using both SSLv3 and TLS
-		}
 		ret.setSslContext(SSLContextCreator.createSSLContext(credential, validator, protocol, 
 				"Jetty HTTP Server", log));
+		ret.setExcludeProtocols("SSL","SSLv2","SSLv3");
 		return ret;
 	}
 	
