@@ -4,7 +4,7 @@
 	<groupId>eu.unicore.security</groupId>
 	<artifactId>securityLibrary</artifactId>
 	<packaging>jar</packaging>
-	<version>3.1.0</version>
+	<version>3.1.0-p1</version>
 	<name>securityLibrary</name>
 
 	<parent>
@@ -14,8 +14,8 @@
 	</parent>
 	
 	<scm>
-		<connection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/securityLibrary/tags/securityLibrary-3.1.0</connection>
-		<developerConnection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/securityLibrary/tags/securityLibrary-3.1.0</developerConnection>
+		<connection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/securityLibrary/tags/securityLibrary-3.1.0-p1</connection>
+		<developerConnection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/securityLibrary/tags/securityLibrary-3.1.0-p1</developerConnection>
 	</scm>
 
 	<developers>
