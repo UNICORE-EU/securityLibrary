@@ -163,6 +163,8 @@ public abstract class JettyServerBase {
 		rootHandler = createRootHandler();
 		theServer.setHandler(configureHttpHeaders(rootHandler));
 		configureGzip();
+		theServer.setSendServerVersion(false);
+		theServer.addBean(new JettyErrorHandler());
 	}
 
 
