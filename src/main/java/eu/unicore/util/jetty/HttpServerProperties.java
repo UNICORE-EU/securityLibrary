@@ -54,6 +54,23 @@ public class HttpServerProperties extends PropertiesHelper
 {
 	private static final Logger log = Log.getLogger(Log.CONFIGURATION, HttpServerProperties.class);
 	
+
+	public enum XFrameOptions {
+		deny("DENY"), sameOrigin("SAMEORIGIN"), allowFrom("ALLOW-FROM"), allow("");
+		
+		private String httpValue;
+		
+		XFrameOptions(String httpValue)
+		{
+			this.httpValue = httpValue;
+		}
+		
+		public String toHttp()
+		{
+			return httpValue;
+		}
+	};
+	
 	public static final String DEFAULT_PREFIX = "httpServer.";
 	
 	/**
@@ -130,6 +147,10 @@ public class HttpServerProperties extends PropertiesHelper
 	 */
 	public static final String ENABLE_GZIP = GZIP_PREFIX + "enable";
 	
+	public static final String ENABLE_HSTS = "enableHsts";
+	public static final String FRAME_OPTIONS = "xFrameOptions";
+	public static final String ALLOWED_TO_EMBED = "xFrameAllowed";
+	
 	@DocumentationReferenceMeta
 	protected final static Map<String, PropertyMD> defaults=new HashMap<String, PropertyMD>();
 	
@@ -160,6 +181,24 @@ public class HttpServerProperties extends PropertiesHelper
 				setDescription("Controls whether to enable compression of HTTP responses."));
 		defaults.put(USE_NIO, new PropertyMD("true").
 				setDescription("Controls whether the NIO connector be used. NIO is best suited under high-load, when lots of connections exist that are idle for long periods."));
+		
+		defaults.put(ENABLE_HSTS, new PropertyMD("false").
+				setDescription("Control whether HTTP strict transport security is enabled. "
+						+ "It is a good and strongly suggested security mechanism for all production sites. "
+						+ "At the same time it can not be used with self-signed or not "
+						+ "issued by a generally trusted CA server certificates, "
+						+ "as with HSTS a user can't opt in to enter such site."));
+		defaults.put(FRAME_OPTIONS, new PropertyMD(XFrameOptions.deny).
+				setDescription("Defines whether a clickjacking prevention should be turned on, by insertion"
+						+ "of the X-Frame-Options HTTP header. The 'allow' value disables the feature."
+						+ " See the RFC 7034 for details. Note that for the 'allowFrom' "
+						+ "you should define also the " + ALLOWED_TO_EMBED + 
+						" option and it is not fully supported by all the browsers."));
+		defaults.put(ALLOWED_TO_EMBED, new PropertyMD("http://localhost").
+				setDescription("URI origin that is allowed to embed web interface inside a (i)frame."
+						+ " Meaningful only if the " + FRAME_OPTIONS + " is set to 'allowFrom'."
+						+ " The value should be in the form: 'http[s]://host[:port]'"));
+
 	}
 
 	public HttpServerProperties() throws ConfigurationException 

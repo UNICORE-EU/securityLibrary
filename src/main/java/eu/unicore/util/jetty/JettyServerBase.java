@@ -40,6 +40,8 @@ import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.rewrite.handler.HeaderPatternRule;
+import org.eclipse.jetty.rewrite.handler.RewriteHandler;
 import org.eclipse.jetty.server.AbstractConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
@@ -61,6 +63,7 @@ import eu.unicore.security.canl.AuthnAndTrustProperties;
 import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
+import eu.unicore.util.jetty.HttpServerProperties.XFrameOptions;
 
 /**
  * Wraps a Jetty server and allows to configure it using {@link AuthnAndTrustProperties}<br/>
@@ -78,7 +81,8 @@ public abstract class JettyServerBase {
 	protected final URL[] listenUrls;
 	protected final IAuthnAndTrustConfiguration securityConfiguration;
 	protected final HttpServerProperties extraSettings;
-	
+
+	private Handler rootHandler;
 	private Server theServer;
 
 	/**
@@ -156,10 +160,49 @@ public abstract class JettyServerBase {
 		}
 		
 		configureServer();
-		theServer.setHandler(createRootHandler());
+		rootHandler = createRootHandler();
+		theServer.setHandler(configureHttpHeaders(rootHandler));
 		configureGzip();
 	}
 
+
+	protected Handler configureHttpHeaders(Handler toWrap)
+	{
+		RewriteHandler rewriter = new RewriteHandler();
+		rewriter.setRewriteRequestURI(false);
+		rewriter.setRewritePathInfo(false);
+		rewriter.setHandler(toWrap);
+
+		if (extraSettings.getBooleanValue(HttpServerProperties.ENABLE_HSTS))
+		{
+			HeaderPatternRule hstsRule = new HeaderPatternRule();
+			hstsRule.setName("Strict-Transport-Security");
+			hstsRule.setValue("max-age=31536000; includeSubDomains");
+			hstsRule.setPattern("*");
+			rewriter.addRule(hstsRule);
+		}
+		
+		XFrameOptions frameOpts = extraSettings.getEnumValue(
+				HttpServerProperties.FRAME_OPTIONS, XFrameOptions.class);
+		if (frameOpts != XFrameOptions.allow)
+		{
+			HeaderPatternRule frameOriginRule = new HeaderPatternRule();
+			frameOriginRule.setName("X-Frame-Options");
+			
+			StringBuilder sb = new StringBuilder(frameOpts.toHttp());
+			if (frameOpts == XFrameOptions.allowFrom)
+			{
+				String allowedOrigin = extraSettings.getValue(
+						HttpServerProperties.ALLOWED_TO_EMBED);
+				sb.append(" ").append(allowedOrigin);
+			}
+			frameOriginRule.setValue(sb.toString());
+			frameOriginRule.setPattern("*");
+			rewriter.addRule(frameOriginRule);
+		}
+		return rewriter;
+	}
+	
 	protected void configureSessionIdManager(boolean useFastRandom) {
 		if (useFastRandom){
 			logger.info("Using fast (but less secure) session ID generator");
@@ -379,13 +422,23 @@ public abstract class JettyServerBase {
 	
 	/**
 	 * 
-	 * @return the root handler of this Jetty server. 
+	 * @return the root handler of this Jetty server as returned by {@link #createRootHandler()} 
 	 */
 	public Handler getRootHandler() 
 	{
+		return rootHandler;
+	}
+	
+	/**
+	 * 
+	 * @return the root handler of this Jetty server - usually it is a wrapper of the 
+	 * handler returned by the {@link #getRootHandler()}
+	 */
+	public Handler getRootHandlerLowLevel() 
+	{
 		return theServer.getHandler();
 	}
-
+	
 	/**
 	 * @return server the Jetty server
 	 */

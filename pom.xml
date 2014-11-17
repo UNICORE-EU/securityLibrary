@@ -91,7 +91,13 @@
 			<version>${jetty.version}</version>
 			<optional>true</optional>
 		</dependency>
-
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-rewrite</artifactId>
+			<version>${jetty.version}</version>
+			<optional>true</optional>
+		</dependency>
+		
 		<!-- commons-httpclient is required only if you use classes from the 
 		         eu.unicore.util.httpclient 
 		     package.
