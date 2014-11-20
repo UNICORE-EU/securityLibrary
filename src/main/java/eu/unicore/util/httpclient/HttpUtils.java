@@ -311,13 +311,18 @@ public class HttpUtils {
 		}
 	}
 	
+
+	static String[] protocols = {"TLSv1","TLSv1.1","TLSv1.2"};
+	
 	private static SSLContext createSSLContext(IPlainClientConfiguration sec)
 	{
 		X509Credential credential = sec.doSSLAuthn() ? sec.getCredential() : null;
 		try
 		{
-			return SSLContextCreator.createSSLContext(credential, sec.getValidator(), 
+			SSLContext sslContext = SSLContextCreator.createSSLContext(credential, sec.getValidator(), 
 					"TLS", "HTTP Client", logger);
+			sslContext.getSupportedSSLParameters().setProtocols(protocols);
+			return sslContext;
 		} catch (Exception e)
 		{
 			logger.fatal(e.getMessage(), e);
