@@ -510,6 +510,41 @@ public class PropertyMD implements Cloneable
 			String otherKey = o.getSortKey() == null ? o.getName() : o.getSortKey();
 			return myKey.compareTo(otherKey);
 		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((name == null) ? 0 : name.hashCode());
+			result = prime * result + ((sortKey == null) ? 0 : sortKey.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			DocumentationCategory other = (DocumentationCategory) obj;
+			if (name == null)
+			{
+				if (other.name != null)
+					return false;
+			} else if (!name.equals(other.name))
+				return false;
+			if (sortKey == null)
+			{
+				if (other.sortKey != null)
+					return false;
+			} else if (!sortKey.equals(other.sortKey))
+				return false;
+			return true;
+		}
 	}
 	
 	public PropertyMD clone() {
