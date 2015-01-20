@@ -4,10 +4,11 @@
  */
 package eu.unicore.util.configuration;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Properties;
 
@@ -100,17 +101,18 @@ public class FilePropertiesHelper extends PropertiesHelper implements Runnable
 	
 	public static Properties load(File file) throws IOException 
 	{
-		BufferedInputStream is = new BufferedInputStream(new FileInputStream(file));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				new FileInputStream(file), "UTF-8"));
 		Properties properties = new Properties();
 		try
 		{
-			properties.load(is);
+			properties.load(reader);
 		} catch (Exception e)
 		{
 			throw new Error("Can not load properties file " + file + ": " + e.getMessage(), e);
 		} finally 
 		{ 
-			is.close();
+			reader.close();
 		}
 		return properties;
 	}
