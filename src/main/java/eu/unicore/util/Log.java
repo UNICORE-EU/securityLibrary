@@ -1,5 +1,9 @@
 package eu.unicore.util;
 
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;
 
@@ -119,24 +123,52 @@ public class Log {
 		logException(message,cause,Logger.getLogger(WSRFLITE));
 	}
 	
+	static final Map<Integer,Long>errorLogTimes = new ConcurrentHashMap<Integer, Long>(); 
+	
 	/**
 	 * log an error message to the specified logger.
 	 * A human-friendly message is constructed and logged at "ERROR" level.
 	 * The stack trace is logged at "DEBUG" level.
 	 * 
+	 * To avoid repeated, massive logging of the same error, a hash over the message is computed and stored
+	 * together with a timestamp. If the "same" message occurs within a minute of the last, it will not 
+	 * get logged.
+	 * 
 	 * @param message - the error message
 	 * @param cause - the cause of the error
 	 * @param logger - the logger to use
 	 */
-	public static void logException(String message, Throwable cause, Logger logger){
-		logger.error(message);
-		if(cause!=null){
-			logger.error("The root error was: "+getDetailMessage(cause));
-			if(logger.isDebugEnabled())logger.debug("Stack trace",cause);
-			else{
-				logger.error("To see the full error stack trace, set log4j.logger."+logger.getName()+"=DEBUG");
+	public static boolean logException(String message, Throwable cause, Logger logger){
+		boolean logged = false;
+		Integer hash = (message!=null? message.hashCode():0)+
+				31*(cause!=null && cause.getMessage()!=null? cause.getMessage().hashCode():0)+
+				31*31*logger.getName().hashCode();
+		Long ts = errorLogTimes.get(hash);
+		if(errorLogTimes.size()>=500){
+			Iterator<Map.Entry<Integer, Long>>iter = errorLogTimes.entrySet().iterator();
+			while(iter.hasNext()){
+				Map.Entry<Integer, Long> e = iter.next();
+				if(System.currentTimeMillis()-60000 > e.getValue()){
+					iter.remove();
+				}
 			}
 		}
+		
+		if(ts == null || System.currentTimeMillis()-60000>ts){
+			logger.error(message);
+			logged = true;
+			if(errorLogTimes.size()<500){
+				errorLogTimes.put(hash, System.currentTimeMillis());
+			}
+			if(cause!=null){
+				logger.error("The root error was: "+getDetailMessage(cause));
+				if(logger.isDebugEnabled())logger.debug("Stack trace",cause);
+				else{
+					logger.error("To see the full error stack trace, set log4j.logger."+logger.getName()+"=DEBUG");
+				}
+			}
+		}
+		return logged;
 	}
 	
 	/**
