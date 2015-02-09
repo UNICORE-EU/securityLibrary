@@ -26,12 +26,12 @@ public class Log {
 						" using default");
 				spi = new DefaultLogFactory();
 			}
-			
+
 		} else
 			spi = new DefaultLogFactory();
 	}
-	
-			
+
+
 	protected Log(){}
 
 	/**
@@ -53,12 +53,12 @@ public class Log {
 	 * logger prefix for persistence related code
 	 */
 	public static final String PERSISTENCE=UNICORE+".wsrflite.persistence";
-	
+
 	/**
 	 * logger prefix for services
 	 */
 	public static final String SERVICES=UNICORE+".services";
-	
+
 	/**
 	 * logger prefix for security
 	 */
@@ -68,7 +68,7 @@ public class Log {
 	 * logger prefix for client stack
 	 */
 	public static final String CLIENT=UNICORE+".client";
-	
+
 	/**
 	 * logger prefix for connection logging
 	 */
@@ -78,13 +78,13 @@ public class Log {
 	 * logger prefix for HTTP server logging
 	 */
 	public static final String HTTP_SERVER=UNICORE+".httpserver";
-	
+
 	/**
 	 * logger prefix for general logging of properties based configuration handling, used
 	 * by {@link PropertiesHelper} extensions.
 	 */
 	public static final String CONFIGURATION=UNICORE+".configuration";
-	
+
 	/**
 	 * returns a logger name, using the given prefix and the simple name
 	 * of the given class
@@ -96,7 +96,7 @@ public class Log {
 	public static String getLoggerName(String prefix, Class<?>clazz){
 		return spi.getLoggerName(prefix, clazz);
 	}
-	
+
 	/**
 	 * returns a logger, using the given prefix and the simple name
 	 * of the given class
@@ -108,8 +108,8 @@ public class Log {
 	public static Logger getLogger(String prefix, Class<?>clazz){
 		return spi.getLogger(prefix, clazz);
 	}
-	
-	
+
+
 	/** 
 	 * log an error message to the default logger ("unicore.wsrflite")
 	 * A human-friendly message is constructed and logged at "INFO" level.
@@ -122,9 +122,12 @@ public class Log {
 	public static void logException(String message, Throwable cause){
 		logException(message,cause,Logger.getLogger(WSRFLITE));
 	}
-	
-	static final Map<Integer,Long>errorLogTimes = new ConcurrentHashMap<Integer, Long>(); 
-	
+
+	// keep track of when message was last logged
+	static final Map<Integer,Long>errorLogTimes = new ConcurrentHashMap<Integer, Long>();
+	// keep track of how often a message was NOT logged
+	static final Map<Integer,Long>errorCounters = new ConcurrentHashMap<Integer, Long>(); 
+
 	/**
 	 * log an error message to the specified logger.
 	 * A human-friendly message is constructed and logged at "ERROR" level.
@@ -143,18 +146,26 @@ public class Log {
 		Integer hash = (message!=null? message.hashCode():0)+
 				31*(cause!=null && cause.getMessage()!=null? cause.getMessage().hashCode():0)+
 				31*31*logger.getName().hashCode();
+
+		// when was this message last logged?
 		Long ts = errorLogTimes.get(hash);
+		// get number of suppressed log entries
+		Long dropped = errorCounters.get(hash);
+		if(dropped==null)dropped = 0l;
+
 		if(errorLogTimes.size()>=500){
 			Iterator<Map.Entry<Integer, Long>>iter = errorLogTimes.entrySet().iterator();
 			while(iter.hasNext()){
 				Map.Entry<Integer, Long> e = iter.next();
 				if(System.currentTimeMillis()-60000 > e.getValue()){
 					iter.remove();
+					errorCounters.remove(e.getKey());
 				}
 			}
 		}
-		
+
 		if(ts == null || System.currentTimeMillis()-60000>ts){
+			if(dropped>0)message = "(repeated "+dropped+" times) "+message;
 			logger.error(message);
 			logged = true;
 			if(errorLogTimes.size()<500){
@@ -168,9 +179,14 @@ public class Log {
 				}
 			}
 		}
+		else{
+			if(errorCounters.size()<500){
+				errorCounters.put(hash, Long.valueOf(dropped+1));
+			}
+		}
 		return logged;
 	}
-	
+
 	/**
 	 * construct a (hopefully) useful error message from the root cause of an 
 	 * exception
@@ -189,12 +205,12 @@ public class Log {
 			cause=cause.getCause();
 		}
 		while(cause!=null);
-		
+
 		if(message!=null)sb.append(type).append(": ").append(message);
 		else sb.append(type).append(" (no further message available)");
 		return sb.toString();
 	}
-	
+
 	/**
 	 * construct a user-friendly error message 
 	 * 
@@ -205,7 +221,7 @@ public class Log {
 	public static String createFaultMessage(String message, Throwable cause){
 		return message+": "+getDetailMessage(cause);
 	}
-	
+
 	public static void cleanLogContext(){
 		MDC.remove("clientName");
 	}

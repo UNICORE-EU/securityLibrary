@@ -21,6 +21,10 @@ public class TestLog extends TestCase{
 		}
 		// should have single entry in TS map
 		assertEquals(1, Log.errorLogTimes.size());
+		// and message drop count should be set
+		assertEquals(1, Log.errorCounters.size());
+		assertEquals((Long)100L, Log.errorCounters.values().iterator().next());
+		
 		// expire it...
 		Integer key = Log.errorLogTimes.keySet().iterator().next();
 		Log.errorLogTimes.put(key, System.currentTimeMillis()-61000);
