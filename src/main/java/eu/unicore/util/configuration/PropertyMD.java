@@ -22,6 +22,7 @@ public class PropertyMD implements Cloneable
 	private String defaultValue;
 	private boolean hasDefault;
 	private boolean mandatory;
+	private boolean deprecated;
 	private boolean canHaveSubkeys = false;
 	private boolean numericalListKeys = false;
 	private boolean updateable = false;
@@ -324,8 +325,17 @@ public class PropertyMD implements Cloneable
 	public Class<?> getBaseClass() {
 		return baseClass;
 	}
-	
-	
+	public boolean isDeprecated()
+	{
+		return deprecated;
+	}
+	public PropertyMD setDeprecated()
+	{
+		this.deprecated = true;
+		setHidden();
+		return this;
+	}
+
 	protected boolean isBoolean(String val) {
 		if (val == null)
 			return false;

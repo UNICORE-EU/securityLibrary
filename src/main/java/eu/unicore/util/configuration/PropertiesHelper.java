@@ -104,12 +104,14 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 			this.metadata = Collections.emptyMap();
 		checkConstraints();
 		findUnknown(properties);
+		checkDeprecated();
 	}
 
 	public synchronized void setProperties(Properties properties) throws ConfigurationException
 	{
 		checkConstraints(properties);
 		findUnknown(properties);
+		checkDeprecated();
 		Set<String> changed = filterChanged(propertyFocusedListeners.keySet(), this.properties, properties);
 		this.properties.clear();
 		this.properties.putAll(properties);
@@ -258,6 +260,21 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	{
 		//tricky but short
 		new PropertiesHelper(prefix, properties, metadata, log);
+	}
+
+	/**
+	 * Logs all deprecated settings 
+	 */
+	protected void checkDeprecated()
+	{
+		for (Map.Entry<String, PropertyMD> o : metadata.entrySet())
+		{
+			PropertyMD meta = o.getValue();
+			if (meta.isDeprecated() && isSet(o.getKey()))
+				log.warn("The setting " + getKeyDescription(o.getKey()) + 
+						" is deprecated and will be ignored. "
+						+ "Please remove it from configuration.");
+		}
 	}
 	
 	/**
