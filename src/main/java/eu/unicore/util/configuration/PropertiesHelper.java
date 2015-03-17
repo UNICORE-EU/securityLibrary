@@ -107,6 +107,23 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		checkDeprecated();
 	}
 
+	/**
+	 * Cloning constructor. Fast: no initialization checks are performed. Metadata is copied by reference(!).
+	 * Listeners are not copied.
+	 * @param source
+	 * @throws ConfigurationException
+	 */
+	protected PropertiesHelper(PropertiesHelper source) throws ConfigurationException
+	{
+		this.properties = new Properties();
+		this.properties.putAll(source.properties);
+		this.prefix = source.prefix;
+		this.log = source.log;
+		this.metadata = source.metadata;
+		this.warned.addAll(source.warned);
+		this.structuredPrefixes.addAll(source.structuredPrefixes);
+	}
+	
 	public synchronized void setProperties(Properties properties) throws ConfigurationException
 	{
 		checkConstraints(properties);
@@ -1049,14 +1066,13 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	@Override
 	public PropertiesHelper clone()
 	{
-		PropertiesHelper ret = new PropertiesHelper(prefix, properties, metadata, log);
+		PropertiesHelper ret = new PropertiesHelper(this);
 		cloneTo(ret);
 		return ret;
 	}
 
 	protected void cloneTo(PropertiesHelper to)
 	{
-		to.warned.addAll(this.warned);
 		to.genericListeners.addAll(this.genericListeners);
 		to.propertyFocusedListeners.putAll(this.propertyFocusedListeners);
 	}
