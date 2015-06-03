@@ -11,7 +11,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Properties;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSocketFactory;
 
 import junit.framework.TestCase;
 
@@ -83,7 +85,6 @@ public class TestJettyServer extends TestCase
 		return server;
 	}
 
-	
 	public void testSSLBio() throws Exception
 	{
 		Properties p1 = JettyServer4Testing.getSecureProperties();
@@ -139,11 +140,17 @@ public class TestJettyServer extends TestCase
 		}
 	}
 	
-	
 	public void testDisabledCiphers() throws Exception
 	{
+		SSLContext context = SSLContext.getDefault();
+		SSLSocketFactory sf = context.getSocketFactory();
+		String[] cipherSuites = sf.getSupportedCipherSuites();
+		StringBuilder allCiphers = new StringBuilder(cipherSuites[0]);
+		for (int i=1; i<cipherSuites.length; i++)
+			allCiphers.append(" ").append(cipherSuites[i]);
+		
 		Properties p1 = JettyServer4Testing.getSecureProperties();
-		p1.setProperty("j." + HttpServerProperties.DISABLED_CIPHER_SUITES, allCiphers);
+		p1.setProperty("j." + HttpServerProperties.DISABLED_CIPHER_SUITES, allCiphers.toString());
 		p1.setProperty("j." + HttpServerProperties.USE_NIO, "false");
 		JettyServer4Testing server = prepareServer(p1);
 		makeRequest(server, false, SSLPeerUnverifiedException.class, true);
@@ -152,7 +159,7 @@ public class TestJettyServer extends TestCase
 		server = prepareServer(p1);
 		makeRequest(server, false, SSLPeerUnverifiedException.class, true);
 	}
-	
+
 	public void testThreads() throws Exception
 	{
 		Properties p1 = JettyServer4Testing.getSecureProperties();
@@ -167,7 +174,7 @@ public class TestJettyServer extends TestCase
 		
 		runThreadingCheck(server, 2000, 3500);
 	}
-	
+
 	private void runThreadingCheck(JettyServer4Testing server, long minTime, long maxTime) throws Exception
 	{
 		HttpClient client = HttpUtils.createClient(new HttpClientProperties(new Properties()));
@@ -229,7 +236,6 @@ public class TestJettyServer extends TestCase
 		}
 	}
 	
-	
 	public void testClientAuthn() throws Exception
 	{
 		Properties p1 = JettyServer4Testing.getSecureProperties();
@@ -275,89 +281,4 @@ public class TestJettyServer extends TestCase
 		server.start();
 		makeRequest(server, false, SSLPeerUnverifiedException.class, false);
 	}
-
-	private static final String allCiphers = "SSL_DH_DSS_WITH_3DES_EDE_CBC_SHA " +
-	"SSL_DH_DSS_WITH_DES_CBC_SHA " +
-	"SSL_DH_DSS_EXPORT_WITH_DES40_CBC_SHA " +
-	"SSL_DH_RSA_WITH_DES_CBC_SHA " +
-	"SSL_DH_RSA_WITH_3DES_EDE_CBC_SHA " +
-	"SSL_DH_RSA_EXPORT_WITH_DES40_CBC_SHA " +
-	"TLS_DHE_DSS_WITH_AES_128_CBC_SHA " +
-	"TLS_DHE_DSS_WITH_AES_256_CBC_SHA " +
-	"SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA " +
-	"SSL_DHE_DSS_WITH_DES_CBC_SHA " +
-	"SSL_DHE_DSS_WITH_RC4_128_SHA " +
-	"SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA " +
-	"TLS_DHE_RSA_WITH_AES_128_CBC_SHA " +
-	"TLS_DHE_RSA_WITH_AES_256_CBC_SHA " +
-	"SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA " +
-	"SSL_DHE_RSA_WITH_DES_CBC_SHA " +
-	"SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA " +
-	"SSL_DHE_DSS_EXPORT1024_WITH_DES_CBC_SHA " +
-	"SSL_DHE_DSS_EXPORT1024_WITH_RC4_56_SHA " +
-	"TLS_DH_anon_WITH_AES_128_CBC_SHA " +
-	"TLS_DH_anon_WITH_AES_256_CBC_SHA " +
-	"SSL_DH_anon_WITH_3DES_EDE_CBC_SHA " +
-	"SSL_DH_anon_WITH_DES_CBC_SHA " +
-	"SSL_DH_anon_WITH_RC4_128_MD5 " +
-	"SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA " +
-	"SSL_DH_anon_EXPORT_WITH_RC4_40_MD5 " +
-	"SSL_FORTEZZA_DMS_WITH_NULL_SHA " +
-	"SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA " +
-	"TLS_RSA_WITH_AES_128_CBC_SHA " +
-	"TLS_RSA_WITH_AES_256_CBC_SHA " +
-	"SSL_RSA_WITH_3DES_EDE_CBC_SHA " +
-	"SSL_RSA_WITH_DES_CBC_SHA " +
-	"SSL_RSA_WITH_IDEA_CBC_SHA " +
-	"SSL_RSA_WITH_RC4_128_MD5 " +
-	"SSL_RSA_WITH_RC4_128_SHA " +
-	"SSL_RSA_WITH_NULL_MD5 " +
-	"SSL_RSA_WITH_NULL_SHA " +
-	"SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5 " +
-	"SSL_RSA_EXPORT_WITH_RC4_40_MD5 " +
-	"SSL_RSA_EXPORT_WITH_DES40_CBC_SHA " +
-	"SSL_RSA_EXPORT1024_WITH_RC4_56_SHA " +
-	"SSL_RSA_EXPORT1024_WITH_DES_CBC_SHA " +
-	"SSL_RSA_FIPS_WITH_DES_CBC_SHA " +
-	"SSL_RSA_FIPS_WITH_3DES_EDE_CBC_SHA " +
-	"TLS_KRB5_WITH_3DES_EDE_CBC_MD5 " +
-	"TLS_KRB5_WITH_3DES_EDE_CBC_SHA " +
-	"TLS_KRB5_WITH_DES_CBC_MD5 " +
-	"TLS_KRB5_WITH_DES_CBC_SHA " +
-	"TLS_KRB5_WITH_IDEA_CBC_SHA " +
-	"TLS_KRB5_WITH_IDEA_CBC_MD5 " +
-	"TLS_KRB5_WITH_RC4_128_MD5 " +
-	"TLS_KRB5_WITH_RC4_128_SHA " +
-	"TLS_KRB5_EXPORT_WITH_DES_CBC_40_MD5 " +
-	"TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA " +
-	"TLS_KRB5_EXPORT_WITH_RC2_CBC_40_SHA " +
-	"TLS_KRB5_EXPORT_WITH_RC2_CBC_40_MD5 " +
-	"TLS_KRB5_EXPORT_WITH_RC4_40_MD5 " +
-	"TLS_KRB5_EXPORT_WITH_RC4_40_SHA " +
-	"TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA " +
-	"TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA " +
-	"TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA " +
-	"TLS_ECDH_ECDSA_WITH_RC4_128_SHA " +
-	"TLS_ECDH_ECDSA_WITH_NULL_SHA " +
-	"TLS_ECDH_RSA_WITH_AES_128_CBC_SHA " +
-	"TLS_ECDH_RSA_WITH_AES_256_CBC_SHA " +
-	"TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA " +
-	"TLS_ECDH_RSA_WITH_RC4_128_SHA " +
-	"TLS_ECDH_RSA_WITH_NULL_SHA " +
-	"TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA " +
-	"TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA " +
-	"TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA " +
-	"TLS_ECDHE_ECDSA_WITH_RC4_128_SHA " +
-	"TLS_ECDHE_ECDSA_WITH_NULL_SHA " +
-	"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA " +
-	"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA " +
-	"TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA " +
-	"TLS_ECDHE_RSA_WITH_RC4_128_SHA " +
-	"TLS_ECDHE_RSA_WITH_NULL_SHA " +
-	"TLS_ECDH_anon_WITH_AES_128_CBC_SHA " +
-	"TLS_ECDH_anon_WITH_AES_256_CBC_SHA " +
-	"TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA " +
-	"TLS_ECDH_anon_WITH_RC4_128_SHA " +
-	"TLS_ECDH_anon_WITH_NULL_SHA " +
-	"TLS_EMPTY_RENEGOTIATION_INFO_SCSV ";
 }
