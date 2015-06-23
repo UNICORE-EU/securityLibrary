@@ -18,5 +18,6 @@ public enum OperationType {
 	 * The operation can modify the resource and we can assume that operations of this type 
 	 * require the full access to the resource.
 	 */
-	modify
+	modify,
+	
 }
