@@ -42,6 +42,7 @@ import javax.servlet.DispatcherType;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.rewrite.handler.HeaderPatternRule;
 import org.eclipse.jetty.rewrite.handler.RewriteHandler;
+import org.eclipse.jetty.rewrite.handler.Rule;
 import org.eclipse.jetty.server.AbstractConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
@@ -175,6 +176,9 @@ public abstract class JettyServerBase {
 		rewriter.setRewritePathInfo(false);
 		rewriter.setHandler(toWrap);
 
+		//workaround for Jetty bug: RewriteHandler without any rule won't work
+		rewriter.setRules(new Rule[0]);
+		
 		if (extraSettings.getBooleanValue(HttpServerProperties.ENABLE_HSTS))
 		{
 			HeaderPatternRule hstsRule = new HeaderPatternRule();
