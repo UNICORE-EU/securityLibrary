@@ -174,7 +174,8 @@ public class HttpServerProperties extends PropertiesHelper
 		defaults.put(REQUIRE_CLIENT_AUTHN, new PropertyMD("true").
 				setDescription("Controls whether the SSL socket requires client-side authentication."));
 		defaults.put(DISABLED_CIPHER_SUITES, new PropertyMD("").
-				setDescription("Space separated list of SSL cipher suites to be disabled."));
+				setDescription("Space separated list of SSL cipher suites to be disabled. Names of the ciphers must adhere to the standard Java cipher names, available here: "
+						+ "http://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html#SupportedCipherSuites"));
 		defaults.put(MIN_GZIP_SIZE, new PropertyMD("100000").
 				setDescription("Specifies the minimal size of message that should be compressed."));
 		defaults.put(ENABLE_GZIP, new PropertyMD("false").
