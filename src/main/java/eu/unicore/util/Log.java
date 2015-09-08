@@ -170,6 +170,7 @@ public class Log {
 			logged = true;
 			if(errorLogTimes.size()<500){
 				errorLogTimes.put(hash, System.currentTimeMillis());
+				errorCounters.remove(hash);
 			}
 			if(cause!=null){
 				logger.error("The root error was: "+getDetailMessage(cause));
