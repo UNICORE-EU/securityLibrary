@@ -72,13 +72,13 @@
 		<dependency>
 			<groupId>pl.edu.icm.saml</groupId>
 			<artifactId>samly2</artifactId>
-			<version>2.2.2</version>
-                        <exclusions>
-                          <exclusion>
-			    <groupId>org.apache.xmlbeans</groupId>
-			    <artifactId>xmlbeans</artifactId>
-                          </exclusion>
-                        </exclusions>
+			<version>2.2.3-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.xmlbeans</groupId>
+					<artifactId>xmlbeans</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Jetty is required only if you use classes from the 
