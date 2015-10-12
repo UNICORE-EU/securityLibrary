@@ -7,9 +7,13 @@
  */
 package eu.unicore.security.util.client;
 
+import static org.junit.Assert.assertTrue;
+
 import java.security.cert.X509Certificate;
 
 import javax.security.auth.x500.X500Principal;
+
+import org.junit.Test;
 
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
@@ -17,10 +21,9 @@ import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.etd.DelegationRestrictions;
 import eu.unicore.util.httpclient.ETDClientSettings;
 
-import junit.framework.TestCase;
-
-public class TestETDClientSettings extends TestCase
+public class TestETDClientSettings 
 {
+	@Test
 	public void testGenSimple() throws Exception
 	{
 		X509Credential c = new KeystoreCredential("src/test/resources/client/httpclient.jks", 

@@ -4,11 +4,15 @@
  */
 package eu.unicore.security.util.client;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.security.cert.X509Certificate;
 
-import junit.framework.TestCase;
-
 import org.apache.log4j.Logger;
+import org.junit.Before;
+import org.junit.Test;
 
 import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.X509Credential;
@@ -21,10 +25,11 @@ import eu.unicore.util.httpclient.DefaultClientConfiguration;
 /**
  * @author K. Benedyczak
  */
-public class TestConnectionUtil extends TestCase
+public class TestConnectionUtil 
 {
 	private JettyServer4Testing server;
 	
+	@Before
 	public void setUp() throws Exception
 	{
 		server = JettyServer4Testing.getInstance(1);
@@ -32,6 +37,7 @@ public class TestConnectionUtil extends TestCase
 	}
 	
 	
+	@Test
 	public void testGetPeerCertificate()
 	{
 		try

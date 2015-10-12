@@ -8,6 +8,10 @@
 
 package eu.unicore.security.etd;
 
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+
 import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
 import eu.unicore.security.ValidationResult;
 import eu.unicore.security.etd.TrustDelegation;
@@ -17,6 +21,7 @@ import eu.unicore.security.etd.TrustDelegation;
  */
 public class ParseTest extends ETDTestBase
 {
+	@Test
 	public void testDN()
 	{
 		try
@@ -43,6 +48,7 @@ public class ParseTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testCert()
 	{
 		try

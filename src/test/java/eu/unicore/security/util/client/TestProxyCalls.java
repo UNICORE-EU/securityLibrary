@@ -1,5 +1,7 @@
 package eu.unicore.security.util.client;
 
+import static org.junit.Assert.assertTrue;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -7,8 +9,9 @@ import java.util.Properties;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import eu.unicore.util.httpclient.HttpClientProperties;
@@ -19,13 +22,14 @@ import eu.unicore.util.httpclient.HttpUtils;
  * 
  * @author schuller
  */
-public class TestProxyCalls extends TestCase{
+public class TestProxyCalls {
 
 	int port;
 	boolean gotCall=false;
 	ServerSocket s;
 	
-	protected void setUp()throws InterruptedException{
+	@Before
+	public void setUp()throws InterruptedException{
 		//start a fake proxy server...
 		Runnable r=new Runnable(){
 			public void run(){
@@ -53,8 +57,8 @@ public class TestProxyCalls extends TestCase{
 		Thread.sleep(2000);
 	}
 
-	@Override
-	protected void tearDown(){
+	@After
+	public void tearDown(){
 		try{
 			if(s!=null)s.close();
 		}catch(Exception ex){
@@ -62,6 +66,7 @@ public class TestProxyCalls extends TestCase{
 		}
 	}
 
+	@Test
 	public void testProxyCall()throws Exception{
 		HttpClientProperties props = new HttpClientProperties(new Properties());
 		props.setProperty(HttpClientProperties.HTTP_PROXY_HOST, "localhost");

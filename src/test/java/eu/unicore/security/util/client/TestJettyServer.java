@@ -4,6 +4,11 @@
  */
 package eu.unicore.security.util.client;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -15,14 +20,13 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSocketFactory;
 
-import junit.framework.TestCase;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.util.EntityUtils;
+import org.junit.Test;
 
 import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.X509Credential;
@@ -38,7 +42,7 @@ import eu.unicore.util.jetty.HttpServerProperties;
  * 
  * @author K. Benedyczak
  */
-public class TestJettyServer extends TestCase
+public class TestJettyServer 
 {
 	private void makeRequest(JettyServer4Testing server, boolean shouldBeOk, 
 			Class<? extends Exception> expected, boolean useClientCred) throws Exception
@@ -85,6 +89,7 @@ public class TestJettyServer extends TestCase
 		return server;
 	}
 
+	@Test
 	public void testSSLBio() throws Exception
 	{
 		Properties p1 = JettyServer4Testing.getSecureProperties();
@@ -93,6 +98,7 @@ public class TestJettyServer extends TestCase
 		makeRequest(server, true, null, true);
 	}
 	
+	@Test
 	public void testSSLNio() throws Exception
 	{
 		Properties p1 = JettyServer4Testing.getSecureProperties();
@@ -101,6 +107,7 @@ public class TestJettyServer extends TestCase
 		makeRequest(server, true, null, true);
 	}
 	
+	@Test
 	public void testGzip() throws Exception
 	{
 		Properties p1 = JettyServer4Testing.getSecureProperties();
@@ -140,6 +147,7 @@ public class TestJettyServer extends TestCase
 		}
 	}
 	
+	@Test
 	public void testDisabledCiphers() throws Exception
 	{
 		SSLContext context = SSLContext.getDefault();
@@ -160,6 +168,7 @@ public class TestJettyServer extends TestCase
 		makeRequest(server, false, SSLPeerUnverifiedException.class, true);
 	}
 
+	@Test
 	public void testThreads() throws Exception
 	{
 		Properties p1 = JettyServer4Testing.getSecureProperties();
@@ -236,6 +245,7 @@ public class TestJettyServer extends TestCase
 		}
 	}
 	
+	@Test
 	public void testClientAuthn() throws Exception
 	{
 		Properties p1 = JettyServer4Testing.getSecureProperties();

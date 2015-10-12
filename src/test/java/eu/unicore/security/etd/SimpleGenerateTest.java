@@ -8,6 +8,10 @@
 
 package eu.unicore.security.etd;
 
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+
 import eu.unicore.security.etd.TrustDelegation;
 
 /**
@@ -15,6 +19,7 @@ import eu.unicore.security.etd.TrustDelegation;
  */
 public class SimpleGenerateTest extends ETDTestBase
 {
+	@Test
 	public void testRSACert()
 	{
 		try
@@ -31,6 +36,7 @@ public class SimpleGenerateTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testDSACert()
 	{
 		try
@@ -47,6 +53,7 @@ public class SimpleGenerateTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testRSADN()
 	{
 		try
@@ -63,6 +70,7 @@ public class SimpleGenerateTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testDSADN()
 	{
 		try

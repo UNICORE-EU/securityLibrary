@@ -4,10 +4,14 @@
  */
 package eu.unicore.security.util.client;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 
-public class TestAnyPort extends TestCase
+import org.junit.Test;
+
+public class TestAnyPort 
 {
+	@Test
 	public void testAnyPort() throws Exception
 	{
 		JettyServer4Testing server = JettyServer4Testing.getAnyPortInstance(1);

@@ -7,6 +7,9 @@
  */
 package eu.unicore.security.util.client;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
@@ -23,6 +26,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.util.EntityUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.X509Credential;
@@ -34,12 +40,11 @@ import eu.unicore.util.httpclient.HttpUtils;
 import eu.unicore.util.httpclient.IClientConfiguration;
 import eu.unicore.util.httpclient.ServerHostnameCheckingMode;
 
-import junit.framework.TestCase;
-
-public class TestHttpUtils extends TestCase
+public class TestHttpUtils
 {
 	private JettyServer4Testing server;
 	
+	@Before
 	public void setUp() throws Exception
 	{
 		server = JettyServer4Testing.getInstance(1);
@@ -48,11 +53,13 @@ public class TestHttpUtils extends TestCase
 		server.start();
 	}
 	
+	@After
 	public void tearDown() throws Exception
 	{
 		server.stop();
 	}
 	
+	@Test
 	public void testPlainHttp() throws Exception
 	{
 		HttpClient client = HttpUtils.createClient(new DefaultClientConfiguration().getHttpClientProperties());
@@ -62,6 +69,7 @@ public class TestHttpUtils extends TestCase
 		assertTrue("Got: " + resp, SimpleServlet.OK_GET.equals(resp));
 	}
 	
+	@Test
 	public void testTimeouts() throws Exception
 	{
 		HttpClient client = HttpUtils.createClient(new DefaultClientConfiguration().getHttpClientProperties());
@@ -86,6 +94,7 @@ public class TestHttpUtils extends TestCase
 		fail("Execution was not timed out, took " + (end-start));
 	}
 
+	@Test
 	public void testRedirectSingle() throws Exception
 	{
 		URI uri = new URIBuilder(server.getUrl()+"/servlet2").
@@ -99,6 +108,7 @@ public class TestHttpUtils extends TestCase
 		assertTrue("Got: " + resp, SimpleServlet.OK_POST.equals(resp));
 	}
 
+	@Test
 	public void testRedirectsTooMany() throws Exception
 	{
 		HttpClientProperties p = new HttpClientProperties(new Properties());
@@ -121,6 +131,7 @@ public class TestHttpUtils extends TestCase
 		}
 	}
 
+	@Test
 	public void testRedirectsMany() throws Exception
 	{
 		HttpClientProperties p = new HttpClientProperties(new Properties());
@@ -138,6 +149,7 @@ public class TestHttpUtils extends TestCase
 		assertTrue("Got: " + resp, SimpleServlet.OK_POST.equals(resp));
 	}
 	
+	@Test
 	public void testHttps() throws Exception
 	{
 		X509Credential cred = new KeystoreCredential("src/test/resources/client/httpclient.jks",
@@ -154,6 +166,7 @@ public class TestHttpUtils extends TestCase
 		assertTrue("Got: " + resp, SimpleServlet.OK_GET.equals(resp));
 	}
 
+	@Test
 	public void testHttpsInvalidClient() throws Exception
 	{
 		X509Credential cred = new KeystoreCredential("src/test/resources/client/combined.jks",
@@ -189,6 +202,7 @@ public class TestHttpUtils extends TestCase
 	}
 	*/
 	
+	@Test
 	public void testSSLHostnameChecking() throws Exception
 	{
 		X509Credential cred = new KeystoreCredential("src/test/resources/client/httpclient.jks",

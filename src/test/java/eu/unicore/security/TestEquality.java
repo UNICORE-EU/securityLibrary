@@ -8,17 +8,21 @@
 
 package eu.unicore.security;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.security.cert.X509Certificate;
 
-import junit.framework.TestCase;
-import eu.unicore.security.SecurityTokens;
-import eu.unicore.security.SignatureStatus;
+import org.junit.Test;
 
 /**
  * @author K. Benedyczak
  */
-public class TestEquality extends TestCase
+public class TestEquality
 {
+	
+	@Test
 	public void test()
 	{
 		try

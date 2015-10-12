@@ -4,8 +4,33 @@
  */
 package eu.unicore.security.util;
 
+import static eu.unicore.security.canl.TrustedIssuersProperties.PROP_DIRECTORY_CACHE_PATH;
+import static eu.unicore.security.canl.TrustedIssuersProperties.PROP_DIRECTORY_CONNECTION_TIMEOUT;
+import static eu.unicore.security.canl.TrustedIssuersProperties.PROP_DIRECTORY_ENCODING;
+import static eu.unicore.security.canl.TrustedIssuersProperties.PROP_DIRECTORY_LOCATIONS;
+import static eu.unicore.security.canl.TrustedIssuersProperties.PROP_KS_PASSWORD;
+import static eu.unicore.security.canl.TrustedIssuersProperties.PROP_KS_PATH;
+import static eu.unicore.security.canl.TrustedIssuersProperties.PROP_OPENSSL_DIR;
+import static eu.unicore.security.canl.TrustedIssuersProperties.PROP_TYPE;
+import static eu.unicore.security.canl.TrustedIssuersProperties.PROP_UPDATE;
+import static eu.unicore.security.canl.TruststoreProperties.DEFAULT_PREFIX;
+import static eu.unicore.security.canl.TruststoreProperties.PROP_CRL_CACHE_PATH;
+import static eu.unicore.security.canl.TruststoreProperties.PROP_CRL_CONNECTION_TIMEOUT;
+import static eu.unicore.security.canl.TruststoreProperties.PROP_CRL_LOCATIONS;
+import static eu.unicore.security.canl.TruststoreProperties.PROP_CRL_MODE;
+import static eu.unicore.security.canl.TruststoreProperties.PROP_CRL_UPDATE;
+import static eu.unicore.security.canl.TruststoreProperties.PROP_OCSP_LOCAL_RESPONDERS;
+import static eu.unicore.security.canl.TruststoreProperties.PROP_OPENSSL_NS_MODE;
+import static eu.unicore.security.canl.TruststoreProperties.PROP_PROXY_SUPPORT;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.Collections;
 import java.util.Properties;
+
+import org.junit.Test;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.NamespaceCheckingMode;
@@ -14,17 +39,15 @@ import eu.emi.security.authn.x509.impl.DirectoryCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.OpensslCertChainValidator;
 import eu.unicore.security.canl.LoggingStoreUpdateListener;
+import eu.unicore.security.canl.TrustedIssuersProperties.TruststoreType;
 import eu.unicore.security.canl.TruststoreProperties;
 
-import static eu.unicore.security.canl.TruststoreProperties.*;
 
-import junit.framework.TestCase;
-
-
-public class TruststorePropertiesTest extends TestCase
+public class TruststorePropertiesTest
 {
 	private static final String PFX = "src/test/resources/truststores/";
 	
+	@Test
 	public void testOpenssl()
 	{
 		Properties p = new Properties();
@@ -44,6 +67,7 @@ public class TruststorePropertiesTest extends TestCase
 		assertTrue("Issuers: " + v.getTrustedIssuers().length, v.getTrustedIssuers().length == 1);
 	}
 
+	@Test
 	public void testOpensslDefaults()
 	{
 		Properties p = new Properties();
@@ -64,6 +88,7 @@ public class TruststorePropertiesTest extends TestCase
 		v.dispose();
 	}
 
+	@Test
 	public void testDirectory()
 	{
 		Properties p = new Properties();
@@ -117,6 +142,7 @@ public class TruststorePropertiesTest extends TestCase
 		v.dispose();
 	}
 
+	@Test
 	public void testDirectoryDefaults()
 	{
 		Properties p = new Properties();
@@ -139,6 +165,7 @@ public class TruststorePropertiesTest extends TestCase
 		v.dispose();
 	}
 
+	@Test
 	public void testJKS()
 	{
 		Properties p = new Properties();
@@ -151,6 +178,7 @@ public class TruststorePropertiesTest extends TestCase
 			TruststoreProperties.META.get(PROP_UPDATE).getDefault()+"000");
 	}
 	
+	@Test
 	public void testPKCS12()
 	{
 		Properties p = new Properties();

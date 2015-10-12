@@ -8,6 +8,10 @@
 
 package eu.unicore.security.user;
 
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+
 import eu.unicore.security.TestBase;
 import xmlbeans.org.oasis.saml2.assertion.AssertionDocument;
 
@@ -16,6 +20,7 @@ import xmlbeans.org.oasis.saml2.assertion.AssertionDocument;
  */
 public class UserTest extends TestBase
 {
+	@Test
 	public void testUserAsDN()
 	{
 		try
@@ -39,6 +44,7 @@ public class UserTest extends TestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testUserAsCert()
 	{
 		try

@@ -4,19 +4,32 @@
  */
 package eu.unicore.security.util;
 
+import static eu.unicore.util.httpclient.ClientProperties.DEFAULT_PREFIX;
+import static eu.unicore.util.httpclient.ClientProperties.PROP_HTTP_AUTHN_ENABLED;
+import static eu.unicore.util.httpclient.ClientProperties.PROP_HTTP_PASSWORD;
+import static eu.unicore.util.httpclient.ClientProperties.PROP_HTTP_USER;
+import static eu.unicore.util.httpclient.ClientProperties.PROP_IN_HANDLERS;
+import static eu.unicore.util.httpclient.ClientProperties.PROP_MESSAGE_SIGNING_ENABLED;
+import static eu.unicore.util.httpclient.ClientProperties.PROP_OUT_HANDLERS;
+import static eu.unicore.util.httpclient.ClientProperties.PROP_SERVER_HOSTNAME_CHECKING;
+import static eu.unicore.util.httpclient.ClientProperties.PROP_SSL_AUTHN_ENABLED;
+import static eu.unicore.util.httpclient.ClientProperties.PROP_SSL_ENABLED;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.Properties;
+
+import org.junit.Test;
 
 import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
 import eu.unicore.util.httpclient.ClientProperties;
 import eu.unicore.util.httpclient.ServerHostnameCheckingMode;
-import static eu.unicore.util.httpclient.ClientProperties.*;
-
-import junit.framework.TestCase;
 
 
-public class ClientPropertiesTest extends TestCase
+public class ClientPropertiesTest
 {
+	@Test
 	public void test()
 	{
 		Properties p = new Properties();

@@ -8,9 +8,13 @@
 
 package eu.unicore.security.consignor;
 
+import static org.junit.Assert.*;
+
 import java.security.cert.X509Certificate;
 
 import javax.security.auth.x500.X500Principal;
+
+import org.junit.Test;
 
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.samly2.SAMLConstants.AuthNClasses;
@@ -24,6 +28,7 @@ import xmlbeans.org.oasis.saml2.assertion.AssertionDocument;
  */
 public class SimpleGenerateTest extends TestBase
 {
+	@Test
 	public void test1()
 	{
 		try
@@ -54,6 +59,7 @@ public class SimpleGenerateTest extends TestBase
 		assertTrue(true);
 	}
 	
+	@Test
 	public void test2()
 	{
 		try
@@ -89,6 +95,7 @@ public class SimpleGenerateTest extends TestBase
 		assertTrue(true);
 	}
 	
+	@Test
 	public void testExpiredCert1()
 	{
 		try

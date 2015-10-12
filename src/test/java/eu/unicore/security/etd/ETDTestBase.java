@@ -8,6 +8,8 @@
 
 package eu.unicore.security.etd;
 
+import org.junit.Before;
+
 import eu.unicore.security.TestBase;
 import eu.unicore.security.UnicoreSecurityFactory;
 
@@ -19,7 +21,8 @@ public abstract class ETDTestBase extends TestBase
 {
 	protected ETDApi etdEngine;
 	
-	protected void setUp()
+	@Before
+	public void setUp()
 	{
 		super.setUp();
 		etdEngine = UnicoreSecurityFactory.getETDEngine();

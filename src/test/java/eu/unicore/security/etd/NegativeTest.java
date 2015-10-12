@@ -8,8 +8,12 @@
 
 package eu.unicore.security.etd;
 
+import static org.junit.Assert.*;
+
 import java.util.Calendar;
 import java.util.Date;
+
+import org.junit.Test;
 
 import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
 import eu.unicore.security.ValidationResult;
@@ -20,6 +24,7 @@ import eu.unicore.security.etd.TrustDelegation;
  */
 public class NegativeTest extends ETDTestBase
 {
+	@Test
 	public void testWrongCustodianDN()
 	{
 		try
@@ -40,6 +45,7 @@ public class NegativeTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testWrongCustodianCert()
 	{
 		try
@@ -60,6 +66,7 @@ public class NegativeTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testWrongIssuer()
 	{
 		try
@@ -80,6 +87,7 @@ public class NegativeTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testWrongReceiverDN()
 	{
 		try
@@ -100,6 +108,7 @@ public class NegativeTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testWrongReceiverCert()
 	{
 		try
@@ -121,6 +130,7 @@ public class NegativeTest extends ETDTestBase
 	}
 
 	
+	@Test
 	public void testWrongKey()
 	{
 		try
@@ -141,6 +151,7 @@ public class NegativeTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testWrongEndDate()
 	{
 		try
@@ -166,6 +177,7 @@ public class NegativeTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testWrongStartDate()
 	{
 		try
@@ -193,6 +205,7 @@ public class NegativeTest extends ETDTestBase
 	}
 
 
+	@Test
 	public void testExpiredCertVerify()
 	{ 
 		try

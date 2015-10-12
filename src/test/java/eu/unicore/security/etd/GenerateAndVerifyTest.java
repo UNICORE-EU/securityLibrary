@@ -8,9 +8,13 @@
 
 package eu.unicore.security.etd;
 
+import static org.junit.Assert.*;
+
 import java.util.Collections;
 
 import javax.security.auth.x500.X500Principal;
+
+import org.junit.Test;
 
 import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
@@ -23,6 +27,7 @@ import eu.unicore.security.etd.TrustDelegation;
  */
 public class GenerateAndVerifyTest extends ETDTestBase
 {
+	@Test
 	public void testWithCustomAttributes()
 	{
 		try
@@ -52,6 +57,7 @@ public class GenerateAndVerifyTest extends ETDTestBase
 	}
 
 	
+	@Test
 	public void testRSACert3()
 	{
 		try
@@ -77,6 +83,7 @@ public class GenerateAndVerifyTest extends ETDTestBase
 	}
 
 	
+	@Test
 	public void testRSACert2()
 	{
 		try
@@ -96,6 +103,7 @@ public class GenerateAndVerifyTest extends ETDTestBase
 	}
 
 	
+	@Test
 	public void testRSACert()
 	{
 		try
@@ -115,6 +123,7 @@ public class GenerateAndVerifyTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testDSACert()
 	{
 		try
@@ -134,6 +143,7 @@ public class GenerateAndVerifyTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testRSADN()
 	{
 		try
@@ -152,6 +162,7 @@ public class GenerateAndVerifyTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testDSADN()
 	{
 		try

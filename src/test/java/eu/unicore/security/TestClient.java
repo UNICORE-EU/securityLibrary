@@ -7,10 +7,13 @@
  */
 package eu.unicore.security;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
-public class TestClient extends TestCase
+import org.junit.Test;
+
+public class TestClient
 {
+	@Test
 	public void testToString()
 	{
 		Client c = new Client();
@@ -35,6 +38,7 @@ public class TestClient extends TestCase
 		System.out.println(c);
 	}
 	
+	@Test
 	public void testAuthenticatedWithDnOnly()throws InterruptedException{
 		Client c=new Client();
 		SecurityTokens t=new SecurityTokens();

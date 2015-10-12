@@ -15,13 +15,12 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 import org.apache.xmlbeans.XmlOptions;
-
-import junit.framework.TestCase;
+import org.junit.Before;
 
 /**
  * @author K. Benedyczak
  */
-public abstract class TestBase extends TestCase
+public abstract class TestBase
 {
 	private static final String PASSWORD = "dummypassword";
 	private static final String ALIAS = "a1";
@@ -44,7 +43,8 @@ public abstract class TestBase extends TestCase
 	protected PrivateKey privKey1, privKey2, privKey3, privKey4, privKeyExpired;
 	protected XmlOptions xmlOpts;
 	
-	protected void setUp()
+	@Before
+	public void setUp()
 	{
 		try
 		{

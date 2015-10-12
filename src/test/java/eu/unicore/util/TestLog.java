@@ -1,15 +1,19 @@
 package eu.unicore.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.junit.Test;
 
-import junit.framework.TestCase;
+public class TestLog {
 
-public class TestLog extends TestCase{
-
+	@Test
 	public void testExceptionLogging(){
 		Logger logger = Log.getLogger("test", TestLog.class);
 		logger.setLevel(Level.INFO);

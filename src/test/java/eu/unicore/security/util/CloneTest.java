@@ -4,28 +4,13 @@
  */
 package eu.unicore.security.util;
 
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.Properties;
-
-import junit.framework.TestCase;
-
-import eu.unicore.security.canl.AuthnAndTrustProperties;
-import eu.unicore.security.canl.TrustedIssuersProperties;
-import eu.unicore.security.canl.CredentialProperties;
-import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
-import eu.unicore.security.canl.LoggingStoreUpdateListener;
-import eu.unicore.security.canl.TruststoreProperties;
-import eu.unicore.security.canl.CredentialProperties.CredentialFormat;
-import eu.unicore.util.httpclient.ClientProperties;
-
 import static eu.unicore.security.canl.CredentialProperties.DEFAULT_PREFIX;
 import static eu.unicore.security.canl.CredentialProperties.PROP_FORMAT;
 import static eu.unicore.security.canl.CredentialProperties.PROP_LOCATION;
 import static eu.unicore.security.canl.CredentialProperties.PROP_PASSWORD;
-import static eu.unicore.security.canl.TruststoreProperties.PROP_KS_PASSWORD;
-import static eu.unicore.security.canl.TruststoreProperties.PROP_KS_PATH;
-import static eu.unicore.security.canl.TruststoreProperties.PROP_TYPE;
+import static eu.unicore.security.canl.TrustedIssuersProperties.PROP_KS_PASSWORD;
+import static eu.unicore.security.canl.TrustedIssuersProperties.PROP_KS_PATH;
+import static eu.unicore.security.canl.TrustedIssuersProperties.PROP_TYPE;
 import static eu.unicore.util.httpclient.ClientProperties.PROP_HTTP_AUTHN_ENABLED;
 import static eu.unicore.util.httpclient.ClientProperties.PROP_HTTP_PASSWORD;
 import static eu.unicore.util.httpclient.ClientProperties.PROP_HTTP_USER;
@@ -35,8 +20,25 @@ import static eu.unicore.util.httpclient.ClientProperties.PROP_OUT_HANDLERS;
 import static eu.unicore.util.httpclient.ClientProperties.PROP_SERVER_HOSTNAME_CHECKING;
 import static eu.unicore.util.httpclient.ClientProperties.PROP_SSL_AUTHN_ENABLED;
 import static eu.unicore.util.httpclient.ClientProperties.PROP_SSL_ENABLED;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-public class CloneTest extends TestCase
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.Properties;
+
+import org.junit.Test;
+
+import eu.unicore.security.canl.AuthnAndTrustProperties;
+import eu.unicore.security.canl.CredentialProperties;
+import eu.unicore.security.canl.CredentialProperties.CredentialFormat;
+import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
+import eu.unicore.security.canl.LoggingStoreUpdateListener;
+import eu.unicore.security.canl.TrustedIssuersProperties;
+import eu.unicore.security.canl.TruststoreProperties;
+import eu.unicore.util.httpclient.ClientProperties;
+
+public class CloneTest
 {
 	private void testByReflection(Object src, Object cloned)
 	{
@@ -59,6 +61,7 @@ public class CloneTest extends TestCase
 		}
 	}
 	
+	@Test
 	public void testClone()
 	{
 		Properties p = new Properties();

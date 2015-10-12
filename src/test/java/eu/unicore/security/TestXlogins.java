@@ -1,32 +1,41 @@
 package eu.unicore.security;
 
-import junit.framework.TestCase;
-import eu.unicore.security.Xlogin;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-public class TestXlogins extends TestCase{
+import org.junit.Test;
 
+public class TestXlogins 
+{
+
+	@Test
 	public void testEncode(){
 		Xlogin x=new Xlogin(new String[] {"foo", "bar"});
 		assertEquals("foo:bar", x.getEncoded());
 	}
 	
+	@Test
 	public void testEncodeSingle(){
 		Xlogin x=new Xlogin(new String[] {"foo"});
 		assertEquals("foo", x.getEncoded());
 		assertEquals("foo", x.getUserName());
 	}
 	
+	@Test
 	public void testRetrieve(){
 		Xlogin x=new Xlogin(new String[] {"foo", "bar", "baz"});
 		String[]xl=x.getLogins();
 		assertEquals(3,xl.length);
 	}
 	
+	@Test
 	public void testRetrieveDefault(){
 		Xlogin x=new Xlogin(new String[] {"foo", "bar"});
 		assertEquals("foo", x.getUserName());
 	}
 	
+	@Test
 	public void testRetrievePreferred(){
 		Xlogin x=new Xlogin(new String[] {"foo", "bar"});
 		assertEquals("foo",x.getUserName());
@@ -38,6 +47,7 @@ public class TestXlogins extends TestCase{
 	 * tests for the group frunctionality
 	 */
 	
+	@Test
 	public void testNoGroup(){
 		Xlogin x=new Xlogin(new String[] {"foo", "bar"});
 		assertEquals("foo:bar", x.getEncoded());
@@ -45,6 +55,7 @@ public class TestXlogins extends TestCase{
 		assertNull(x.getGroup());
 	}
 	
+	@Test
 	public void testEncodeGroups(){
 		Xlogin x=new Xlogin(new String[] {"foo", "bar"}, 
 				new String[] {"group1", "group2"});
@@ -53,12 +64,14 @@ public class TestXlogins extends TestCase{
 		
 	}
 	
+	@Test
 	public void testEncodeSingleGrp(){
 		Xlogin x=new Xlogin(new String[] {"foo"});
 		assertEquals("foo", x.getEncoded());
 		assertEquals("foo", x.getUserName());
 	}
 
+	@Test
 	public void testEncodeSelectedSupGroups(){
 		Xlogin x=new Xlogin(new String[] {"foo", "bar"}, 
 				new String[] {"group1", "group2", "group3"});
@@ -68,6 +81,7 @@ public class TestXlogins extends TestCase{
 		assertEquals("", x.getEncodedSelectedSupplementaryGroups());
 	}
 	
+	@Test
 	public void testRetrieveGrp(){
 		Xlogin x=new Xlogin(new String[] {"foo", "bar", "baz"}, 
 				new String[] {"group1", "group2", "group3"});
@@ -76,6 +90,7 @@ public class TestXlogins extends TestCase{
 		
 	}
 	
+	@Test
 	public void testRetrieveDefaultGrp(){
 		Xlogin x=new Xlogin(new String[] {"foo", "bar"},
 				new String[] {"grp1", "grp2"});

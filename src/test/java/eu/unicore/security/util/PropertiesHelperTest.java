@@ -4,6 +4,10 @@
  */
 package eu.unicore.security.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
@@ -17,6 +21,7 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.junit.Test;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.ProxySupport;
@@ -28,9 +33,8 @@ import eu.unicore.util.configuration.FilePropertiesHelper;
 import eu.unicore.util.configuration.PropertiesHelper;
 import eu.unicore.util.configuration.PropertyChangeListener;
 import eu.unicore.util.configuration.PropertyMD;
-import junit.framework.TestCase;
 
-public class PropertiesHelperTest extends TestCase
+public class PropertiesHelperTest
 {
 	private static final Logger log = Logger.getLogger(PropertiesHelperTest.class);
 	
@@ -63,6 +67,7 @@ public class PropertiesHelperTest extends TestCase
 	}
 
 	
+	@Test
 	public void testStructuredListEntryWithSubkeys()
 	{
 		Properties p = new Properties();
@@ -88,6 +93,7 @@ public class PropertiesHelperTest extends TestCase
 		assertEquals("c", helper.getValue("p15.1.sl4.subkey2"));
 	}
 	
+	@Test
 	public void testListKeys()
 	{
 		Map<String, PropertyMD> meta = new HashMap<String, PropertyMD>();
@@ -134,6 +140,7 @@ public class PropertiesHelperTest extends TestCase
 	 *  - whether it is possible to get entries
 	 *  - whether list as structured list entry works
 	 */
+	@Test
 	public void testStructuredList()
 	{
 		Properties p = new Properties();
@@ -233,6 +240,7 @@ public class PropertiesHelperTest extends TestCase
 	private int global = 0;
 	private int focused = 0;
 	
+	@Test
 	public void testUpdates()
 	{
 		Properties p = new Properties();
@@ -351,6 +359,7 @@ public class PropertiesHelperTest extends TestCase
 		return ret;
 	}
 	
+	@Test
 	public void testParsingMandatory()
 	{
 		String PROP = "prefix.p01 = ALLOW";
@@ -364,6 +373,7 @@ public class PropertiesHelperTest extends TestCase
 		}
 	}
 
+	@Test
 	public void testParsingDefault()
 	{
 		String PROP = "prefix.p09=mandatory\nprefix.p01 = ALLOW\nprefix.p15.44.sl1=asda";
@@ -378,6 +388,7 @@ public class PropertiesHelperTest extends TestCase
 		}
 	}
 	
+	@Test
 	public void testParsingNullDefault()
 	{
 		String PROP = "prefix.p09=mandatory\nprefix.p15.44.sl1=asda";
@@ -391,6 +402,7 @@ public class PropertiesHelperTest extends TestCase
 		}
 	}
 	
+	@Test
 	public void testParsingUnknown()
 	{
 		String PROP = "prefix.p09=mandatory\nprefix.foo = bar\nprefix.p15.44.sl1=asda";
@@ -404,6 +416,7 @@ public class PropertiesHelperTest extends TestCase
 		}
 	}
 
+	@Test
 	public void testParsingRanges()
 	{
 		String PROP = "prefix.p09=mandatory\nprefix.p07 = -300";
@@ -430,6 +443,7 @@ public class PropertiesHelperTest extends TestCase
 		new PropertiesHelper(PREFIX, load(PROP), METADATA, log);
 	}
 
+	@Test
 	public void testParsingEnums()
 	{
 		String PROP = "prefix.p09=mandatory\nprefix.p01 = DENY\nprefix.p15.44.sl1=asda";
@@ -443,6 +457,7 @@ public class PropertiesHelperTest extends TestCase
 		}
 	}
 
+	@Test
 	public void testParsingPaths()
 	{
 		String PROP = "prefix.p09=mandatory\nprefix.p10 = src/test/resources\nprefix.p15.44.sl1=asda";
@@ -466,6 +481,7 @@ public class PropertiesHelperTest extends TestCase
 		}
 	}
 
+	@Test
 	public void testParsingLists()
 	{
 		String PROP = "prefix.p09=mandatory\nprefix.p11.22 = ola\nprefix.p11.100 = ala\nprefix.p13.22 = ola\nprefix.p13.100 = ala\nprefix.p15.44.sl1=asda";
@@ -497,6 +513,7 @@ public class PropertiesHelperTest extends TestCase
 		}
 	}
 
+	@Test
 	public void testParsingSubkeys()
 	{
 		String PROP = "prefix.p09=mandatory\nprefix.p12 = def\nprefix.p12.sub = ala\nprefix.p15.44.sl1=asda";
@@ -511,6 +528,7 @@ public class PropertiesHelperTest extends TestCase
 		}
 	}
 	
+	@Test
 	public void testFileHelper() throws Exception
 	{
 		File cfg = new File("target/log4j.properties");
@@ -526,12 +544,14 @@ public class PropertiesHelperTest extends TestCase
 	}
 
 	
+	@Test
 	public void testAsciidocReference()
 	{
 		AsciidocFormatter formatter = new AsciidocFormatter();
 		System.out.println(formatter.format(PREFIX, METADATA));
 	}
 	
+	@Test
 	public void testReflection()
 	{
 		try

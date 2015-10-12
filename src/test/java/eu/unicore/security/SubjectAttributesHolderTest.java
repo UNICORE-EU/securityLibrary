@@ -7,19 +7,26 @@
  */
 package eu.unicore.security;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Test;
+
 import eu.unicore.security.XACMLAttribute.Type;
 
-import junit.framework.TestCase;
 
 
-
-public class SubjectAttributesHolderTest extends TestCase
+public class SubjectAttributesHolderTest
 {
+	@Test
 	public void testSetIncarnation()
 	{
 		Map<String, String[]> defA = new HashMap<String, String[]>(); 
@@ -68,6 +75,7 @@ public class SubjectAttributesHolderTest extends TestCase
 		}
 	}
 	
+	@Test
 	public void testAddMerging()
 	{
 		Map<String, String[]> defA = new HashMap<String, String[]>(); 
@@ -113,6 +121,7 @@ public class SubjectAttributesHolderTest extends TestCase
 	}
 
 
+	@Test
 	public void testAddOverwrite()
 	{
 		Map<String, String[]> defA = new HashMap<String, String[]>(); 
@@ -157,6 +166,7 @@ public class SubjectAttributesHolderTest extends TestCase
 		assertTrue(xacmlA2.size() == 4);
 	}
 	
+	@Test
 	public void testPreferedVo()
 	{
 		SubjectAttributesHolder holder = new SubjectAttributesHolder();
@@ -235,6 +245,7 @@ public class SubjectAttributesHolderTest extends TestCase
 	
 	
 	
+	@Test
 	public void testToString()
 	{
 		Map<String, String[]> defA = new HashMap<String, String[]>(); 

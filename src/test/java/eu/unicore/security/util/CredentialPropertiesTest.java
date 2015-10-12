@@ -4,19 +4,29 @@
  */
 package eu.unicore.security.util;
 
+import static eu.unicore.security.canl.CredentialProperties.DEFAULT_PREFIX;
+import static eu.unicore.security.canl.CredentialProperties.PROP_FORMAT;
+import static eu.unicore.security.canl.CredentialProperties.PROP_KEY_LOCATION;
+import static eu.unicore.security.canl.CredentialProperties.PROP_KS_ALIAS;
+import static eu.unicore.security.canl.CredentialProperties.PROP_KS_KEY_PASSWORD;
+import static eu.unicore.security.canl.CredentialProperties.PROP_LOCATION;
+import static eu.unicore.security.canl.CredentialProperties.PROP_PASSWORD;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
 import java.util.Properties;
 
+import org.junit.Test;
+
 import eu.unicore.security.canl.CredentialProperties;
-
-import static eu.unicore.security.canl.CredentialProperties.*;
-
-import junit.framework.TestCase;
+import eu.unicore.security.canl.CredentialProperties.CredentialFormat;
 
 
-public class CredentialPropertiesTest extends TestCase
+public class CredentialPropertiesTest
 {
 	private static final String PFX = "src/test/resources/credentials/";
 	
+	@Test
 	public void testPEM()
 	{
 		Properties p = new Properties();
@@ -27,6 +37,7 @@ public class CredentialPropertiesTest extends TestCase
 		verify(p);
 	}
 
+	@Test
 	public void testPEM2()
 	{
 		Properties p = new Properties();
@@ -36,6 +47,7 @@ public class CredentialPropertiesTest extends TestCase
 		verify(p);
 	}
 	
+	@Test
 	public void testDER()
 	{
 		Properties p = new Properties();
@@ -46,6 +58,7 @@ public class CredentialPropertiesTest extends TestCase
 		verify(p);
 	}
 	
+	@Test
 	public void testJKS()
 	{
 		Properties p = new Properties();
@@ -55,6 +68,7 @@ public class CredentialPropertiesTest extends TestCase
 		verify(p);
 	}
 
+	@Test
 	public void testPKCS12()
 	{
 		Properties p = new Properties();
@@ -65,6 +79,7 @@ public class CredentialPropertiesTest extends TestCase
 		verify(p);
 	}
 
+	@Test
 	public void testDetect()
 	{
 		Properties p = new Properties();

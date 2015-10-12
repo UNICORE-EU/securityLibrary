@@ -8,12 +8,16 @@
 
 package eu.unicore.security.etd;
 
+import static org.junit.Assert.*;
+
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Vector;
+
+import org.junit.Test;
 
 import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
 import eu.unicore.samly2.SAMLConstants;
@@ -26,6 +30,7 @@ import eu.unicore.security.etd.TrustDelegation;
  */
 public class TDChainTest extends ETDTestBase
 {
+	@Test
 	public void testNormalCert2()
 	{
 		try
@@ -55,6 +60,7 @@ public class TDChainTest extends ETDTestBase
 
 	
 
+	@Test
 	public void testNormalDN()
 	{
 		try
@@ -82,6 +88,7 @@ public class TDChainTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testNormalCert()
 	{
 		try
@@ -109,6 +116,7 @@ public class TDChainTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void test2()
 	{
 		try
@@ -137,6 +145,7 @@ public class TDChainTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testWrongUserDN()
 	{
 		try
@@ -164,6 +173,7 @@ public class TDChainTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testWrongUserCert()
 	{
 		try
@@ -191,6 +201,7 @@ public class TDChainTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testWrongCustodianDN()
 	{
 		try
@@ -223,6 +234,7 @@ public class TDChainTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testBootstrapCustodianDN()
 	{
 		try
@@ -255,6 +267,7 @@ public class TDChainTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testBootstrapCustodianEntity()
 	{
 		try
@@ -288,6 +301,7 @@ public class TDChainTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testWrongCustodianCert()
 	{
 		try
@@ -320,6 +334,7 @@ public class TDChainTest extends ETDTestBase
 		assertTrue(true);
 	}
 
+	@Test
 	public void testBootstrapCustodianCert()
 	{
 		try
@@ -353,6 +368,7 @@ public class TDChainTest extends ETDTestBase
 	}
 
 
+	@Test
 	public void testProxyLimit()
 	{
 		try

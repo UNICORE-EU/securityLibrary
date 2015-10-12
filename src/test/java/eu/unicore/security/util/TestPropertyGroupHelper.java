@@ -1,15 +1,19 @@
 package eu.unicore.security.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.junit.Test;
+
 import eu.unicore.util.configuration.PropertyGroupHelper;
 
-import junit.framework.TestCase;
+public class TestPropertyGroupHelper {
 
-public class TestPropertyGroupHelper extends TestCase {
-
+	@Test
 	public void test1(){
 	
 		HashMap<String,String>props=new HashMap<String, String>();
