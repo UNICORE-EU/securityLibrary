@@ -84,7 +84,6 @@ public class HttpUtils {
 	 */
 	public static synchronized HttpClient createClient(String uri, IClientConfiguration security)
 	{
-		@SuppressWarnings("resource")
 		PoolingHttpClientConnectionManager connMan = security.isSslEnabled() ? 
 				getSSLConnectionManager(security) : new PoolingHttpClientConnectionManager();
 				

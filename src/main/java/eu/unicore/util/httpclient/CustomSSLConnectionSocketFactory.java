@@ -6,12 +6,12 @@ package eu.unicore.util.httpclient;
 
 import java.io.IOException;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
 
 /**
  * HTTP Client bug workaround. The SSL socket, before the startHandshake is called has no timeout set
@@ -26,7 +26,7 @@ public class CustomSSLConnectionSocketFactory extends SSLConnectionSocketFactory
 	private int connectionTimeout;
 	
 	public CustomSSLConnectionSocketFactory(SSLContext sslContext,
-			X509HostnameVerifier hostnameVerifier, int connectionTimeout)
+			HostnameVerifier hostnameVerifier, int connectionTimeout)
 	{
 		super(sslContext, hostnameVerifier);
 		this.connectionTimeout = connectionTimeout;

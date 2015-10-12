@@ -43,6 +43,7 @@ public class TestProxyCalls extends TestCase{
 						socket.getOutputStream().write(answer.getBytes());
 						socket.close();
 					}catch(SocketTimeoutException te){};
+					s.close();
 				}catch(Exception ex){
 
 				}

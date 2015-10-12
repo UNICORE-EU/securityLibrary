@@ -4,25 +4,21 @@
  */
 package eu.unicore.util.httpclient;
 
-import java.io.IOException;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
-import javax.net.ssl.SSLException;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
 
-import org.apache.http.conn.ssl.X509HostnameVerifier;
-
-import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
+import eu.emi.security.authn.x509.helpers.ssl.HostnameToCertificateChecker;
 
 /**
  * Wiring of CANL hostname verification into Apache HTTP client.
  * 
- * Note: this implementation is fairly incomplete. The API is awkward as it forces the 
- * shape of implementation which is no go for us.
  * @author K. Benedyczak
  */
-public class CanlHostnameVerifier implements X509HostnameVerifier
+public class CanlHostnameVerifier implements HostnameVerifier
 {
 	private ServerHostnameCheckingMode mode;
 	
@@ -32,27 +28,45 @@ public class CanlHostnameVerifier implements X509HostnameVerifier
 	}
 
 	@Override
-	public void verify(String host, SSLSocket ssl) throws IOException
-	{
-		HostnameMismatchCallbackImpl callback = new HostnameMismatchCallbackImpl(mode);
-		SocketFactoryCreator.connectWithHostnameChecking(ssl, callback);
-	}
-	
-	@Override
 	public boolean verify(String hostname, SSLSession session)
 	{
-		throw new RuntimeException("This method is not implemented. Use verify(String, SSLSocket)");
+		HostnameMismatchCallbackImpl callback = new HostnameMismatchCallbackImpl(mode);
+		return connectWithHostnameChecking(session, callback);
+	}
+	
+	
+	private static boolean connectWithHostnameChecking(SSLSession session, HostnameMismatchCallbackImpl callback) 
+	{
+		HostnameToCertificateChecker checker = new HostnameToCertificateChecker();
+		
+		X509Certificate cert;
+		Certificate[] serverChain;
+		try
+		{
+			serverChain = session.getPeerCertificates();
+		} catch (SSLPeerUnverifiedException e1)
+		{
+			throw new IllegalStateException("Can't check peer's address as "
+					+ "peer's certificate is not available", e1);
+		}
+		if (serverChain == null || serverChain.length == 0)
+			throw new IllegalStateException("JDK BUG? Got null or empty peer certificate array");
+		if (!(serverChain[0] instanceof X509Certificate))
+			throw new ClassCastException("Peer certificate should be " +
+					"an X.509 certificate, but is " + serverChain[0].getClass().getName());
+		cert = (X509Certificate) serverChain[0];
+
+		String hostname = session.getPeerHost();
+		try
+		{
+			if (!checker.checkMatching(hostname, cert))
+				return callback.nameMismatch(session, cert, hostname);
+			else
+				return true;
+		} catch (Exception e)
+		{
+			throw new IllegalStateException("Can't check peer's address against its certificate", e);
+		}
 	}
 
-	@Override
-	public void verify(String host, X509Certificate cert) throws SSLException
-	{
-		throw new RuntimeException("This method is not implemented. Use verify(String, SSLSocket)");
-	}
-
-	@Override
-	public void verify(String host, String[] cns, String[] subjectAlts) throws SSLException
-	{
-		throw new RuntimeException("This method is not implemented. Use verify(String, SSLSocket)");
-	}
 }
