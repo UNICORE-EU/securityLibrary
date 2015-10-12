@@ -4,7 +4,7 @@
 	<groupId>eu.unicore.security</groupId>
 	<artifactId>securityLibrary</artifactId>
 	<packaging>jar</packaging>
-	<version>4.2.2-SNAPSHOT</version>
+	<version>5.0.0-SNAPSHOT</version>
 	<name>securityLibrary</name>
 
 	<properties>
@@ -14,12 +14,12 @@
 	<parent>
 		<groupId>eu.unicore</groupId>
 		<artifactId>unicore-parent</artifactId>
-		<version>1.18</version>
+		<version>1.19</version>
 	</parent>
 	
 	<scm>
-		<connection>scm:svn:https://svn.code.sf.net/p/unicore/svn/securityFramework/securityLibrary/trunk</connection>
-		<developerConnection>scm:svn:https://svn.code.sf.net/p/unicore/svn/securityFramework/securityLibrary/trunk</developerConnection>
+		<connection>scm:git://git.code.sf.net/p/unicore/securityLibrary</connection>
+		<developerConnection>scm:git:ssh://golbi@git.code.sf.net/p/unicore/securityLibrary</developerConnection>
 	</scm>
 
 	<developers>
@@ -72,7 +72,7 @@
 		<dependency>
 			<groupId>pl.edu.icm.saml</groupId>
 			<artifactId>samly2</artifactId>
-			<version>2.2.3</version>
+			<version>3.0.0-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.xmlbeans</groupId>
