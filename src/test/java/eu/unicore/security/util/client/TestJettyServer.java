@@ -11,8 +11,6 @@ import static org.junit.Assert.fail;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Properties;
 
@@ -23,8 +21,6 @@ import javax.net.ssl.SSLSocketFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 
@@ -90,19 +86,9 @@ public class TestJettyServer
 	}
 
 	@Test
-	public void testSSLBio() throws Exception
-	{
-		Properties p1 = JettyServer4Testing.getSecureProperties();
-		p1.setProperty("j." + HttpServerProperties.USE_NIO, "false");
-		JettyServer4Testing server = prepareServer(p1);
-		makeRequest(server, true, null, true);
-	}
-	
-	@Test
 	public void testSSLNio() throws Exception
 	{
 		Properties p1 = JettyServer4Testing.getSecureProperties();
-		p1.setProperty("j." + HttpServerProperties.USE_NIO, "true");
 		JettyServer4Testing server = prepareServer(p1);
 		makeRequest(server, true, null, true);
 	}
@@ -159,26 +145,29 @@ public class TestJettyServer
 		
 		Properties p1 = JettyServer4Testing.getSecureProperties();
 		p1.setProperty("j." + HttpServerProperties.DISABLED_CIPHER_SUITES, allCiphers.toString());
-		p1.setProperty("j." + HttpServerProperties.USE_NIO, "false");
 		JettyServer4Testing server = prepareServer(p1);
 		makeRequest(server, false, SSLPeerUnverifiedException.class, true);
-
-		p1.setProperty("j." + HttpServerProperties.USE_NIO, "true");
-		server = prepareServer(p1);
-		makeRequest(server, false, SSLPeerUnverifiedException.class, true);
 	}
-
+	
+	
+/* This test is not valid anymore as new Jetty has a quite complicated thread pool structure (threads are
+ * used not only to handle requests but also for other duties, min number is acceptors (2) + selectors(4) + 1.
+ * So it is likely that those 7 threads 2 can handle two connections at the same time.
+ * 
+ * However the thread pool in general works - maybe a different test can be added in future?
+ * */
+/*
 	@Test
 	public void testThreads() throws Exception
 	{
 		Properties p1 = JettyServer4Testing.getSecureProperties();
-		p1.setProperty("j." + HttpServerProperties.USE_NIO, "true");
-		p1.setProperty("j." + HttpServerProperties.MAX_THREADS, "1");
+		p1.setProperty("j." + HttpServerProperties.MAX_THREADS, "6");
+		p1.setProperty("j." + HttpServerProperties.HIGH_LOAD_CONNECTIONS, "-1");
 		JettyServer4Testing server = prepareServer(p1);
 
 		runThreadingCheck(server, 4000, 6000);
 		
-		p1.setProperty("j." + HttpServerProperties.MAX_THREADS, "2");
+		p1.setProperty("j." + HttpServerProperties.MAX_THREADS, "8");
 		server = prepareServer(p1);
 		
 		runThreadingCheck(server, 2000, 3500);
@@ -244,6 +233,7 @@ public class TestJettyServer
 			}
 		}
 	}
+*/
 	
 	@Test
 	public void testClientAuthn() throws Exception

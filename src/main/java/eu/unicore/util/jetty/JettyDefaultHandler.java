@@ -11,7 +11,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.http.HttpMethods;
+import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -35,14 +35,14 @@ public class JettyDefaultHandler extends AbstractHandler
 
 		String method = request.getMethod();
 
-		if (!method.equals(HttpMethods.GET) || !request.getRequestURI().equals("/"))
+		if (!method.equals(HttpMethod.GET.toString()) || !request.getRequestURI().equals("/"))
 		{
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 
 		response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-		response.setContentType(MimeTypes.TEXT_HTML);
+		response.setContentType(MimeTypes.Type.TEXT_HTML.toString());
 
 		ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(1500);
 

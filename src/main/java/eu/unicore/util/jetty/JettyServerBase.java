@@ -35,39 +35,33 @@ package eu.unicore.util.jetty;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.EnumSet;
-
-import javax.servlet.DispatcherType;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.rewrite.handler.HeaderPatternRule;
 import org.eclipse.jetty.rewrite.handler.RewriteHandler;
 import org.eclipse.jetty.rewrite.handler.Rule;
-import org.eclipse.jetty.server.AbstractConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.HandlerContainer;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.LowResourceMonitor;
+import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SessionIdManager;
-import org.eclipse.jetty.server.bio.SocketConnector;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.handler.AbstractHandlerContainer;
+import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.server.session.HashSessionIdManager;
-import org.eclipse.jetty.server.ssl.SslConnector;
-import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
-import org.eclipse.jetty.server.ssl.SslSocketConnector;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
-import eu.unicore.security.canl.AuthnAndTrustProperties;
 import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.jetty.HttpServerProperties.XFrameOptions;
 
 /**
- * Wraps a Jetty server and allows to configure it using {@link AuthnAndTrustProperties}<br/>
+ * Wraps a Jetty server and allows to configure it using {@link IAuthnAndTrustConfiguration}<br/>
  * This class is useful for subclassing when creating a custom Jetty server. Subclasses must call 
  * {@link #initServer()} method in constructor to initialize the server.
  * 
@@ -150,9 +144,9 @@ public abstract class JettyServerBase {
 				allAddresses.append(url).append(" ");
 			logger.info("Creating Jetty HTTP server, will listen on: " + allAddresses);	
 		}
-		theServer = new Server();
 		
-
+		theServer = new Server(getThreadPool());
+		
 		configureSessionIdManager(extraSettings.getBooleanValue(HttpServerProperties.FAST_RANDOM));
 
 		Connector[] connectors = createConnectors();
@@ -160,16 +154,24 @@ public abstract class JettyServerBase {
 			theServer.addConnector(connector);
 		}
 		
-		configureServer();
+		configureResourceMonitoring();
 		rootHandler = createRootHandler();
-		theServer.setHandler(configureHttpHeaders(rootHandler));
-		configureGzip();
-		theServer.setSendServerVersion(false);
+		AbstractHandlerContainer headersRewriteHandler = configureHttpHeaders(rootHandler);
+		Handler withGzip = configureGzip(headersRewriteHandler); 
+		theServer.setHandler(withGzip);
 		theServer.addBean(new JettyErrorHandler());
 	}
 
+	protected QueuedThreadPool getThreadPool()
+	{
+		QueuedThreadPool btPool=new QueuedThreadPool();
+		int extraThreads = listenUrls.length * 3;
+		btPool.setMaxThreads(extraSettings.getIntValue(HttpServerProperties.MAX_THREADS) + extraThreads);
+		btPool.setMinThreads(extraSettings.getIntValue(HttpServerProperties.MIN_THREADS) + extraThreads);
+		return btPool;
+	}
 
-	protected Handler configureHttpHeaders(Handler toWrap)
+	protected AbstractHandlerContainer configureHttpHeaders(Handler toWrap)
 	{
 		RewriteHandler rewriter = new RewriteHandler();
 		rewriter.setRewriteRequestURI(false);
@@ -218,7 +220,7 @@ public abstract class JettyServerBase {
 	}
 	
 	protected Connector[] createConnectors() throws ConfigurationException {
-		AbstractConnector[] ret = new AbstractConnector[listenUrls.length];
+		ServerConnector[] ret = new ServerConnector[listenUrls.length];
 		for (int i=0; i<listenUrls.length; i++) {
 			ret[i] = createConnector(listenUrls[i]);
 			configureConnector(ret[i], listenUrls[i]);
@@ -233,8 +235,8 @@ public abstract class JettyServerBase {
 	 * @return
 	 * @throws ConfigurationException 
 	 */
-	protected AbstractConnector createConnector(URL url) throws ConfigurationException {
-		AbstractConnector connector;
+	protected ServerConnector createConnector(URL url) throws ConfigurationException {
+		ServerConnector connector;
 		if (url.getProtocol().startsWith("https")) {
 			connector = createSecureConnector(url);
 		} else {
@@ -246,55 +248,37 @@ public abstract class JettyServerBase {
 	/**
 	 * @return an instance of NIO secure connector. It uses proper validators and credentials
 	 * and lowResourcesConnections are set to the difference between MAX and LOW THREADS.
+	 * @throws Exception 
 	 */
-	protected SslSelectChannelConnector getNioSecuredConnectorInstance() {
-		NIOSSLSocketConnector ssl;
+	protected SecuredServerConnector getSecuredConnectorInstance() throws ConfigurationException {
+		HttpConnectionFactory httpConnFactory = getHttpConnectionFactory();
+		SslContextFactory secureContextFactory;
 		try
 		{
-			ssl = new NIOSSLSocketConnector(securityConfiguration.getValidator(), 
+			secureContextFactory = SecuredServerConnector.createContextFactory(
+					securityConfiguration.getValidator(), 
 					securityConfiguration.getCredential());
 		} catch (Exception e)
 		{
-			throw new RuntimeException("Can not create Jetty NIO SSL connector, shouldn't happen.", e);
+			throw new ConfigurationException("Can't create secure context factory", e);
 		}
-		ssl.setLowResourcesConnections(extraSettings.getIntValue(HttpServerProperties.HIGH_LOAD_CONNECTIONS));
-		return ssl;
+		SecuredServerConnector connector = new SecuredServerConnector(theServer, 
+				secureContextFactory, httpConnFactory);
+		return connector;
 	}
 	
 	/**
-	 * @return an instance of OIO (classic) secure connector. It uses proper validators and credentials
-	 * but is not configured in any other way.  
-	 */
-	protected SslSocketConnector getClassicSecuredConnectorInstance() {
-		try
-		{
-			return new CustomSslSocketConnector(
-					securityConfiguration.getValidator(), securityConfiguration.getCredential());
-		} catch (Exception e)
-		{
-			throw new RuntimeException("Can not create Jetty SSL connector, shouldn't happen.", e);
-		}
-	}
-	
-	/**
-	 * Try not to override this method. It is better to override {@link #getClassicSecuredConnectorInstance()}
-	 * and/or {@link #getNioSecuredConnectorInstance()} instead. 
-	 * This method creates a NIO or OIO (classic) secure connector and configures 
+	 * Try not to override this method. It is better to override 
+	 * {@link #getSecuredConnectorInstance()} instead. 
+	 * This method creates a secure connector and configures 
 	 * it with security-related settings.
 	 * @param url
 	 * @return
 	 * @throws ConfigurationException
 	 */
-	protected AbstractConnector createSecureConnector(URL url) throws ConfigurationException {
-		boolean useNio = extraSettings.getBooleanValue(HttpServerProperties.USE_NIO);
-		SslConnector ssl;
-		if (useNio) {
-			logger.debug("Creating SSL NIO connector on: " + url);
-			ssl = getNioSecuredConnectorInstance();			
-		} else {
-			logger.debug("Creating SSL connector on: " + url);
-			ssl = getClassicSecuredConnectorInstance();
-		}
+	protected ServerConnector createSecureConnector(URL url) throws ConfigurationException {
+		logger.debug("Creating SSL NIO connector on: " + url);
+		SecuredServerConnector ssl = getSecuredConnectorInstance();			
 
 		SslContextFactory factory = ssl.getSslContextFactory();
 		factory.setNeedClientAuth(extraSettings.getBooleanValue(HttpServerProperties.REQUIRE_CLIENT_AUTHN));
@@ -306,42 +290,43 @@ public abstract class JettyServerBase {
 				factory.setExcludeCipherSuites(disabledCiphers.split("[ ]+"));
 		}
 		logger.debug("SSL protocol was set to: '"+factory.getProtocol()+"'");
-		return (AbstractConnector) ssl;
+		return ssl;
 	}	
 
 	/**
-	 * @return an instance of NIO insecure connector. It is not configured in any way.  
+	 * @return an instance of insecure connector. It is only configured not to send server version
+	 * and supports connections logging.  
+	 * @throws Exception 
 	 */
-	protected SelectChannelConnector getNioPlainConnectorInstance() {
-		return new SelectChannelConnector();
+	protected ServerConnector getPlainConnectorInstance() {
+		HttpConnectionFactory httpConnFactory = getHttpConnectionFactory();
+		return new PlainServerConnector(theServer, httpConnFactory);
 	}
 	
 	/**
-	 * @return an instance of OIO (classic) insecure connector. It is not configured in any way.  
+	 * By default http connection factory is configured not to send server identification data.
+	 * @return
 	 */
-	protected SocketConnector getClassicPlainConnectorInstance() {
-		return new SocketConnector();
+	protected HttpConnectionFactory getHttpConnectionFactory()
+	{
+		HttpConfiguration httpConfig = new HttpConfiguration();
+		httpConfig.setSendServerVersion(false);
+		httpConfig.setSendXPoweredBy(false);
+		return new HttpConnectionFactory(httpConfig);
 	}
-
+	
+	
 	/**
-	 * Try not to override this method. It is better to override {@link #getClassicPlainConnectorInstance()}
-	 * and/or {@link #getNioPlainConnectorInstance()} instead. 
-	 * This method creates a NIO or OIO (classic) insecure connector and configures it.
+	 * Try not to override this method. It is better to override 
+	 * {@link #getPlainConnectorInstance()} instead. 
+	 * This method creates an insecure connector and configures it.
 	 * 
 	 * @param url
 	 * @return
 	 */
-	protected AbstractConnector createPlainConnector(URL url){
-		boolean useNio = extraSettings.getBooleanValue(HttpServerProperties.USE_NIO);
-		if (useNio) {
-			logger.debug("Creating plain NIO HTTP connector on: " + url);
-			SelectChannelConnector ret = getNioPlainConnectorInstance();
-			ret.setLowResourcesConnections(extraSettings.getIntValue(HttpServerProperties.HIGH_LOAD_CONNECTIONS));
-			return ret;
-		} else {
-			logger.debug("Creating plain HTTP connector on: " + url);
-			return getClassicPlainConnectorInstance();
-		}
+	protected ServerConnector createPlainConnector(URL url){
+		logger.debug("Creating plain HTTP connector on: " + url);
+		return getPlainConnectorInstance();
 	}
 
 	/**
@@ -349,55 +334,37 @@ public abstract class JettyServerBase {
 	 * The default implementation sets port and hostname.
 	 * @throws ConfigurationException 
 	 */
-	protected void configureConnector(AbstractConnector connector, URL url) throws ConfigurationException {
+	protected void configureConnector(ServerConnector connector, URL url) throws ConfigurationException {
 		connector.setHost(url.getHost());
 		connector.setPort(url.getPort() == -1 ? url.getDefaultPort() : url.getPort());
 		connector.setSoLingerTime(extraSettings.getIntValue(HttpServerProperties.SO_LINGER_TIME));
-		connector.setLowResourcesMaxIdleTime(extraSettings.getIntValue(
-			HttpServerProperties.LOW_RESOURCE_MAX_IDLE_TIME));
-		connector.setMaxIdleTime(extraSettings.getIntValue(HttpServerProperties.MAX_IDLE_TIME));
+		connector.setIdleTimeout(extraSettings.getIntValue(HttpServerProperties.MAX_IDLE_TIME));
 	}
 
-	protected void configureServer() throws ConfigurationException {
-		QueuedThreadPool btPool=new QueuedThreadPool();
-		int connectorsNum = getUrls().length;
-		boolean useNio = extraSettings.getBooleanValue(HttpServerProperties.USE_NIO);
-		if (useNio)
-			connectorsNum *= 2;
-		btPool.setMaxThreads(extraSettings.getIntValue(HttpServerProperties.MAX_THREADS) + connectorsNum);
-		btPool.setMinThreads(extraSettings.getIntValue(HttpServerProperties.MIN_THREADS) + connectorsNum);
-		theServer.setThreadPool(btPool);
+	protected void configureResourceMonitoring() throws ConfigurationException {
+		Integer highLoadConnections = extraSettings.getIntValue(HttpServerProperties.HIGH_LOAD_CONNECTIONS);
+		if (highLoadConnections >= 0)
+			theServer.addBean(getResourcesMonitor());
 	}
 
 	/**
 	 * Configures Gzip filter if gzipping is enabled, for all servlet handlers which are configured.
 	 * Warning: if you use a complex setup of handlers it might be better to override this method and
-	 * set the filter for the propert handlers.
+	 * enable compression selectively.
 	 * @throws ConfigurationException
 	 */
-	protected void configureGzip() throws ConfigurationException {
+	protected AbstractHandlerContainer configureGzip(AbstractHandlerContainer handler) throws ConfigurationException {
 		boolean enableGzip = extraSettings.getBooleanValue(HttpServerProperties.ENABLE_GZIP);
 		if (enableGzip) {
-			FilterHolder gzipHolder = new FilterHolder(
-					new ConfigurableGzipFilter(extraSettings));
+			GzipHandler gzipHandler = new GzipHandler();
+			gzipHandler.setMinGzipSize(extraSettings.getIntValue(HttpServerProperties.MIN_GZIP_SIZE));
 			logger.info("Enabling GZIP compression filter");
-			tryToAddGzipFilter(gzipHolder, getRootHandler());
-		}
+			gzipHandler.setHandler(handler);
+			return gzipHandler;
+		} else
+			return handler;
 	}
 	
-	protected void tryToAddGzipFilter(FilterHolder gzipHolder, Handler h) {
-		if (h instanceof ServletContextHandler)
-		{
-			((ServletContextHandler)h).addFilter(gzipHolder, "/*", 
-					EnumSet.of(DispatcherType.REQUEST));
-		} else if (h instanceof HandlerContainer)
-		{
-			Handler[] handlers = ((HandlerContainer)h).getChildHandlers();
-			for (Handler handler: handlers)
-				tryToAddGzipFilter(gzipHolder, handler);
-		}
-	}
-
 	/**
 	 * Invoked after server is started: updates the listen URLs with the actual port,
 	 * if originally it was set to 0, what means that server should choose a random one
@@ -408,7 +375,7 @@ public abstract class JettyServerBase {
 		for (int i=0; i<listenUrls.length; i++) {
 			URL url = listenUrls[i];
 			if (url.getPort() == 0) {
-				int port = conns[i].getLocalPort();
+				int port = ((NetworkConnector)conns[i]).getLocalPort();
 				try {
 					listenUrls[i] = new URL(url.getProtocol(), 
 							url.getHost(), port, url.getFile());
@@ -437,12 +404,12 @@ public abstract class JettyServerBase {
 	
 	/**
 	 * 
-	 * @return the root handler of this Jetty server - usually it is a wrapper of the 
+	 * @return the root handler of this Jetty server - it is a wrapper of the 
 	 * handler returned by the {@link #getRootHandler()}
 	 */
-	public Handler getRootHandlerLowLevel() 
+	public AbstractHandlerContainer getRootHandlerLowLevel() 
 	{
-		return theServer.getHandler();
+		return (AbstractHandlerContainer) theServer.getHandler();
 	}
 	
 	/**
@@ -457,5 +424,17 @@ public abstract class JettyServerBase {
 	 */
 	public URL[] getUrls() {
 		return listenUrls;
+	}
+	
+	protected LowResourceMonitor getResourcesMonitor()
+	{
+		LowResourceMonitor ret = new LowResourceMonitor(theServer);
+		
+		ret.setMaxConnections(extraSettings.getIntValue(HttpServerProperties.HIGH_LOAD_CONNECTIONS));
+		ret.setLowResourcesIdleTimeout(extraSettings.getIntValue(
+			HttpServerProperties.LOW_RESOURCE_MAX_IDLE_TIME));
+		
+		
+		return ret;
 	}
 }

@@ -29,49 +29,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ********************************************************************************/
+
 package eu.unicore.util.jetty;
 
-import java.io.IOException;
 import java.net.Socket;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.server.ssl.SslSocketConnector;
+import org.eclipse.jetty.server.ConnectionFactory;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 
-import eu.emi.security.authn.x509.X509CertChainValidator;
-import eu.emi.security.authn.x509.X509Credential;
 import eu.unicore.util.Log;
 
-
 /**
- * Extension of the Jetty {@link SslSocketConnector}, allowing to customise trust
- * management. Will also log the address of the remote host trying to 
+ * Extension of the Jetty {@link ServerConnector} logging the address of the remote host trying to 
  * establish a connection.
+ * @author golbi
  */
-public class CustomSslSocketConnector extends SslSocketConnector
-{
-	private final static Logger log = Log.getLogger(Log.CONNECTIONS, CustomSslSocketConnector.class);
-
-	/**
-	 * Creates Socket connector with provided validator and credential
-	 * @param validator
-	 * @param credential
-	 * @throws NoSuchProviderException 
-	 * @throws NoSuchAlgorithmException 
-	 * @throws KeyManagementException 
-	 */
-	public CustomSslSocketConnector(X509CertChainValidator validator,
-			X509Credential credential) throws KeyManagementException, NoSuchAlgorithmException, 
-			NoSuchProviderException
+public class PlainServerConnector extends ServerConnector {
+	
+	private final static Logger log = Log.getLogger(Log.CONNECTIONS, PlainServerConnector.class);
+	
+	public PlainServerConnector(Server server, ConnectionFactory... factories)
 	{
-		super(JettyConnectorUtils.createJettyContextFactory(validator, credential, log));
+		super(server, factories);
 	}
-
+	
 	@Override
-	protected void configure(Socket socket)throws IOException{
+	protected void configure(Socket socket) 
+	{
 		JettyConnectorUtils.logConnection(socket, log);
 		super.configure(socket);
 	}
 }
+
+
+
+
+
+
+
+

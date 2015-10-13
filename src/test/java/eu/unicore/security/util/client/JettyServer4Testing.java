@@ -36,6 +36,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
 
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
@@ -51,7 +52,7 @@ import eu.unicore.util.jetty.JettyServerBase;
 
 
 /**
- * a Jetty server hosting an xfire servlet
+ * a Jetty server hosting an servlet handler
  * 
  * @author golbi
  */
@@ -123,13 +124,13 @@ public class JettyServer4Testing extends JettyServerBase {
 	}
 
 	public String getUrl() {
-		return "http://" + getServer().getConnectors()[0].getHost() + ":" + 
-				getServer().getConnectors()[0].getPort();
+		return "http://" + ((ServerConnector)getServer().getConnectors()[0]).getHost() + ":" + 
+				((ServerConnector)getServer().getConnectors()[0]).getPort();
 	}
 
 	public String getSecUrl() {
-		return "https://" + getServer().getConnectors()[1].getHost() + ":" + 
-				getServer().getConnectors()[1].getPort();
+		return "https://" + ((ServerConnector)getServer().getConnectors()[1]).getHost() + ":" + 
+				((ServerConnector)getServer().getConnectors()[1]).getPort();
 	}
 
 	public void addServlet(String servlet, String path) throws Exception {

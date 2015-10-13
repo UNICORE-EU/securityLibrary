@@ -79,13 +79,6 @@ public class HttpServerProperties extends PropertiesHelper
 	public static final String FAST_RANDOM = "fastRandom";
 
 	/**
-	 * Should the NIO connector be used?
-	 * NIO is best suited under high-load, when lots of connections
-	 * exist that are idle for long periods.
-	 */
-	public static final String USE_NIO = "useNIO";
-	
-	/**
 	 * minimum number of threads to have in the Jetty thread pool
 	 */
 	public static final String MIN_THREADS = "minThreads";
@@ -155,12 +148,20 @@ public class HttpServerProperties extends PropertiesHelper
 	protected final static Map<String, PropertyMD> defaults=new HashMap<String, PropertyMD>();
 	
 	static{
-		defaults.put(MAX_THREADS, new PropertyMD("255").setPositive().
-				setDescription("Maximum number of threads to have in the thread pool for processing HTTP connections."));
+		defaults.put(MAX_THREADS, new PropertyMD("255").
+				setDescription("Maximum number of threads to have in the thread pool for processing HTTP connections."
+						+ " Note that this number will be increased with few additional threads to handle connectors."));
 		defaults.put(MIN_THREADS, new PropertyMD("1").setPositive().
-				setDescription("Minimum number of threads to have in the thread pool for processing HTTP connections."));
-		defaults.put(HIGH_LOAD_CONNECTIONS, new PropertyMD("200").setPositive().
-				setDescription("If the number of connections exceeds this amount, then the connector is put into a special 'low on resources' state. Existing connections will be closed faster. Note that this value is honored only for NIO connectors. Legacy connectors go into low resources mode when no more threads are available."));
+				setDescription("Minimum number of threads to have in the thread pool for processing HTTP connections. "
+						+ " Note that this number will be increased with few additional threads to handle connectors."));
+		defaults.put(HIGH_LOAD_CONNECTIONS, new PropertyMD("200").
+				setDescription("If the number of connections exceeds this amount, then the connector is put into a special "
+						+ "'low on resources' state. Existing connections will be closed faster. "
+						+ "Note that the server will also go to the low on resources mode if "
+						+ "there are no available threads in the pool. You can set this to 0"
+						+ " to disable the connections limit (and have only thread pool "
+						+ "size governed limit). If set to a negative number then the "
+						+ "'low on resources' mode won't be used at all."));
 		defaults.put(MAX_IDLE_TIME, new PropertyMD("200000").setPositive().
 				setDescription("Time (in ms.) before an idle connection will time out. It should be large enough not to expire connections with slow clients, values below 30s are getting quite risky."));
 		defaults.put(LOW_RESOURCE_MAX_IDLE_TIME, new PropertyMD("100").setPositive().
@@ -180,8 +181,6 @@ public class HttpServerProperties extends PropertiesHelper
 				setDescription("Specifies the minimal size of message that should be compressed."));
 		defaults.put(ENABLE_GZIP, new PropertyMD("false").
 				setDescription("Controls whether to enable compression of HTTP responses."));
-		defaults.put(USE_NIO, new PropertyMD("true").
-				setDescription("Controls whether the NIO connector be used. NIO is best suited under high-load, when lots of connections exist that are idle for long periods."));
 		
 		defaults.put(ENABLE_HSTS, new PropertyMD("false").
 				setDescription("Control whether HTTP strict transport security is enabled. "

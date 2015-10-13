@@ -32,38 +32,53 @@
 
 package eu.unicore.util.jetty;
 
-import java.io.IOException;
 import java.net.Socket;
 
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
+import org.eclipse.jetty.server.ConnectionFactory;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.unicore.util.Log;
 
 /**
- * Extension of the Jetty {@link SslSelectChannelConnector}, allowing to customise trust
- * management. Will also log the address of the remote host trying to 
- * establish a connection.
+ * Extension of the Jetty {@link ServerConnector} logging the address of the remote host trying to 
+ * establish a connection. Additionally provides a method to retrieve {@link SslContextFactory} set for the connector.
  * 
  * @author schuller
  * @author golbi
  */
-public class NIOSSLSocketConnector extends SslSelectChannelConnector {
+public class SecuredServerConnector extends ServerConnector {
 	
-	private final static Logger log = Log.getLogger(Log.CONNECTIONS, NIOSSLSocketConnector.class);
+	private final static Logger log = Log.getLogger(Log.CONNECTIONS, SecuredServerConnector.class);
+	private SslContextFactory sslContextFactory;
 	
-	public NIOSSLSocketConnector(X509CertChainValidator validator,
-			X509Credential credential) throws Exception
+	public SecuredServerConnector(Server server, SslContextFactory sslContextFactory, 
+			ConnectionFactory... factories)
 	{
-		super(JettyConnectorUtils.createJettyContextFactory(validator, credential, log));
+		super(server, sslContextFactory, factories);
+		this.sslContextFactory = sslContextFactory;
 	}
 	
 	@Override
-	protected void configure(Socket socket)throws IOException{
+	protected void configure(Socket socket) 
+	{
 		JettyConnectorUtils.logConnection(socket, log);
 		super.configure(socket);
+	}
+
+	public SslContextFactory getSslContextFactory()
+	{
+		return sslContextFactory;
+	}
+	
+	public static SslContextFactory createContextFactory(X509CertChainValidator validator, 
+			X509Credential credential) throws Exception
+	{
+		return JettyConnectorUtils.createJettyContextFactory(validator, credential, log);
 	}
 }
 
