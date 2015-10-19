@@ -159,7 +159,7 @@ public abstract class JettyServerBase {
 		AbstractHandlerContainer headersRewriteHandler = configureHttpHeaders(rootHandler);
 		Handler withGzip = configureGzip(headersRewriteHandler); 
 		theServer.setHandler(withGzip);
-		theServer.addBean(new JettyErrorHandler());
+		theServer.addBean(new JettyErrorHandler(theServer));
 	}
 
 	protected QueuedThreadPool getThreadPool()

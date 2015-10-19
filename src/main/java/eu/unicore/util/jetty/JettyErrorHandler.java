@@ -9,6 +9,7 @@ import java.io.Writer;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 
 /**
@@ -17,6 +18,11 @@ import org.eclipse.jetty.server.handler.ErrorHandler;
  */
 public class JettyErrorHandler extends ErrorHandler
 {
+	public JettyErrorHandler(Server theServer)
+	{
+		setServer(theServer);
+	}
+	
 	@Override
 	protected void writeErrorPageHead(HttpServletRequest request, Writer writer, int code,
 			String message) throws IOException
