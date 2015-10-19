@@ -359,6 +359,7 @@ public abstract class JettyServerBase {
 			GzipHandler gzipHandler = new GzipHandler();
 			gzipHandler.setMinGzipSize(extraSettings.getIntValue(HttpServerProperties.MIN_GZIP_SIZE));
 			logger.info("Enabling GZIP compression filter");
+			gzipHandler.setServer(theServer);
 			gzipHandler.setHandler(handler);
 			return gzipHandler;
 		} else
