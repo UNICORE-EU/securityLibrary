@@ -10,7 +10,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 
-import eu.unicore.util.httpclient.AcceptAllValidator;
+import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
 import eu.unicore.util.httpclient.ClientProperties;
 import eu.unicore.util.httpclient.HttpUtils;
 
@@ -31,7 +31,7 @@ public class TestSSL extends TestCase {
 		ClientProperties cp = new ClientProperties(props);
 		cp.setSslAuthn(false);
 		cp.setSslEnabled(true);
-		cp.setValidator(new AcceptAllValidator());
+		cp.setValidator(new BinaryCertChainValidator(true));
 		
 		try{
 			String uri = "https://www.google.com";
