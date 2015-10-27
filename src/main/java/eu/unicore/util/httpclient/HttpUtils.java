@@ -103,10 +103,10 @@ public class HttpUtils {
 	}
 	
 	/**
-	 * Create a HTTP client.
-	 * The returned client has no HTTP proxy support configured.
+	 * Create a HTTPClientBuilder preconfigured with our settings
+	 * (without the HTTP proxy support)
 	 */
-	private static synchronized HttpClientBuilder createClientBuilder(HttpClientProperties properties,
+	public static synchronized HttpClientBuilder createClientBuilder(HttpClientProperties properties,
 			PoolingHttpClientConnectionManager connMan)
 	{
 		boolean connClose = properties.getBooleanValue(HttpClientProperties.CONNECTION_CLOSE);
@@ -142,6 +142,10 @@ public class HttpUtils {
 		return clientBuilder;
 	}
 
+	/**
+	 * get a http connection manager with our default ssl socket factory
+	 * @param security - security settings
+	 */
 	public static PoolingHttpClientConnectionManager getSSLConnectionManager(IClientConfiguration security)
 	{
 		SSLContext sslContext = createSSLContext(security);
@@ -151,13 +155,20 @@ public class HttpUtils {
 				getIntValue(HttpClientProperties.CONNECT_TIMEOUT);
 		SSLConnectionSocketFactory sslsf = new CustomSSLConnectionSocketFactory(sslContext, hostnameVerifier,
 				connectTimeout);
-		PlainConnectionSocketFactory plainsf = new PlainConnectionSocketFactory();
-		
+		return getSSLConnectionManager(security,sslsf);
+	}
+	
+	/**
+	 * get a http connection manager with a custom ssl socket factory
+	 * @param security - security settings
+	 * @param sslSocketFactory - custom ssl socket factory
+	 */
+	public static PoolingHttpClientConnectionManager getSSLConnectionManager(IClientConfiguration security, SSLConnectionSocketFactory sslSocketFactory)
+	{
 		Registry<ConnectionSocketFactory> r = RegistryBuilder.<ConnectionSocketFactory>create()
-		        .register("http", plainsf)
-		        .register("https", sslsf)
+		        .register("http", new PlainConnectionSocketFactory())
+		        .register("https", sslSocketFactory)
 		        .build();
-
 		return new PoolingHttpClientConnectionManager(r);
 	}
 	
@@ -310,18 +321,14 @@ public class HttpUtils {
 			}
 		}
 	}
-	
 
-	static String[] protocols = {"TLSv1","TLSv1.1","TLSv1.2"};
-	
-	private static SSLContext createSSLContext(IPlainClientConfiguration sec)
+	public static SSLContext createSSLContext(IPlainClientConfiguration sec)
 	{
 		X509Credential credential = sec.doSSLAuthn() ? sec.getCredential() : null;
 		try
 		{
 			SSLContext sslContext = SSLContextCreator.createSSLContext(credential, sec.getValidator(), 
 					"TLS", "HTTP Client", logger);
-			sslContext.getSupportedSSLParameters().setProtocols(protocols);
 			return sslContext;
 		} catch (Exception e)
 		{
