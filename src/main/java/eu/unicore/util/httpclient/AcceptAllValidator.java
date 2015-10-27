@@ -1,4 +1,4 @@
-package eu.unicore.security.util.client;
+package eu.unicore.util.httpclient;
 
 import java.security.cert.CertPath;
 import java.security.cert.X509Certificate;
