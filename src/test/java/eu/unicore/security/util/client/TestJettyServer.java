@@ -12,6 +12,7 @@ import java.net.URL;
 import java.util.Properties;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -69,7 +70,7 @@ public class TestJettyServer extends TestCase
 			if (!expected.isAssignableFrom(e.getClass()))
 			{ 
 				e.printStackTrace();
-				fail("Should get OTHER exception");
+				fail("Should get OTHER exception: "+expected.getName()+" got: "+e.getClass().getName());
 			}
 		} finally
 		{
@@ -153,11 +154,11 @@ public class TestJettyServer extends TestCase
 		p1.setProperty("j." + HttpServerProperties.DISABLED_CIPHER_SUITES, allCiphers.toString());
 		p1.setProperty("j." + HttpServerProperties.USE_NIO, "false");
 		JettyServer4Testing server = prepareServer(p1);
-		makeRequest(server, false, SSLPeerUnverifiedException.class, true);
+		makeRequest(server, false, SSLException.class, true);
 
 		p1.setProperty("j." + HttpServerProperties.USE_NIO, "true");
 		server = prepareServer(p1);
-		makeRequest(server, false, SSLPeerUnverifiedException.class, true);
+		makeRequest(server, false, SSLException.class, true);
 	}
 
 	public void testThreads() throws Exception
@@ -279,6 +280,6 @@ public class TestJettyServer extends TestCase
 		server = JettyServer4Testing.getInstance(p1, 65432, 1);
 		server.addServlet(SimpleServlet.class.getName(), "/servlet1");
 		server.start();
-		makeRequest(server, false, SSLPeerUnverifiedException.class, false);
+		makeRequest(server, false, SSLException.class, false);
 	}
 }
