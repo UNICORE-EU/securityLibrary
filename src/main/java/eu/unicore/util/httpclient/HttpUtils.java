@@ -26,7 +26,6 @@ import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.auth.NTLMSchemeFactory;
 import org.apache.http.impl.client.BasicAuthCache;
@@ -148,7 +147,7 @@ public class HttpUtils {
 				security.getServerHostnameCheckingMode());
 		int connectTimeout = security.getHttpClientProperties().
 				getIntValue(HttpClientProperties.CONNECT_TIMEOUT);
-		SSLConnectionSocketFactory sslsf = new CustomSSLConnectionSocketFactory(sslContext, hostnameVerifier,
+		CustomSSLConnectionSocketFactory sslsf = new CustomSSLConnectionSocketFactory(sslContext, hostnameVerifier,
 				connectTimeout);
 		PlainConnectionSocketFactory plainsf = new PlainConnectionSocketFactory();
 		
