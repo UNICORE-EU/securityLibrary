@@ -19,6 +19,7 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.RedirectException;
@@ -166,6 +167,24 @@ public class TestHttpUtils
 		assertTrue("Got: " + resp, SimpleServlet.OK_GET.equals(resp));
 	}
 
+	@Test
+	public void testHttpsWithGoogle() throws Exception
+	{
+		String defaultTS = System.getProperty("java.home") + "/lib/security/cacerts";
+		X509CertChainValidatorExt validator = new KeystoreCertChainValidator(
+				defaultTS, "changeit".toCharArray(), "JKS", -1);
+		DefaultClientConfiguration secCfg = new DefaultClientConfiguration();
+		secCfg.setValidator(validator);
+		secCfg.setSslEnabled(true);
+		
+		String url = "https://google.com";
+		HttpClient client = HttpUtils.createClient(url, secCfg);
+		HttpGet get = new HttpGet(url);
+		HttpResponse response = client.execute(get);
+		String resp = EntityUtils.toString(response.getEntity());
+		assertTrue("Got: " + resp, HttpStatus.SC_OK == response.getStatusLine().getStatusCode());
+	}
+	
 	@Test
 	public void testHttpsInvalidClient() throws Exception
 	{
