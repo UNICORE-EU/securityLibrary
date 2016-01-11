@@ -122,7 +122,7 @@
 		<repository>
 			<id>unicore.eu</id>
 			<name>UNICORE repository</name>
-			<url>http://unicore-dev.zam.kfa-juelich.de/maven</url>
+			<url>https://unicore-dev.zam.kfa-juelich.de/maven</url>
 		</repository>
 	</repositories>
 
