@@ -45,7 +45,14 @@ public class ConnectionUtil
 		SSLSocketFactory socketFactory = SocketFactoryCreator.getSocketFactory(
 				securityCfg.getCredential(), 
 				securityCfg.getValidator());
-		SSLSocket s = (SSLSocket) socketFactory.createSocket(u.getHost(), u.getPort());
+		
+		int port = u.getPort();
+		if (port == -1)
+			port = u.getDefaultPort();
+		if (port == -1)
+			port = 443;
+		
+		SSLSocket s = (SSLSocket) socketFactory.createSocket(u.getHost(), port);
 		s.setSoTimeout(timeout);
 		
 		X509Certificate[] peer = CertificateUtils.convertToX509Chain(s.getSession().getPeerCertificates());
