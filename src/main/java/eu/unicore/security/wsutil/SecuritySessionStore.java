@@ -33,13 +33,13 @@ public class SecuritySessionStore
 	/**
 	 * store security tokens keyed by security session ID
 	 */
-	private final Map<String, SecuritySession> sessions = new HashMap<String, SecuritySession>();
+	private final Map<String, SecuritySession> sessions;
 
 	/**
 	 * stores number of sessions per user (identified as effective DN + Client IP)
 	 * If this exceeds a threshold, the least-recently-used session is removed
 	 */
-	private final Map<String, AtomicInteger> sessionsPerUser = new HashMap<String, AtomicInteger>();
+	private final Map<String, AtomicInteger> sessionsPerUser;
 
 	/**
 	 * When the sessions were cleaned the last time.
@@ -55,9 +55,16 @@ public class SecuritySessionStore
 
 	public SecuritySessionStore(int maxPerUser)
 	{
-		this.maxPerUser = maxPerUser;
+		this(maxPerUser, new HashMap<String, SecuritySession>(), new HashMap<String, AtomicInteger>());
 	}
 
+	public SecuritySessionStore(int maxPerUser, Map<String, SecuritySession> sessions, Map<String, AtomicInteger> sessionsPerUser)
+	{
+		this.maxPerUser = maxPerUser;
+		this.sessionsPerUser = sessionsPerUser;
+		this.sessions = sessions;
+	}
+	
 	public synchronized void storeSession(SecuritySession session, SecurityTokens tokens)
 	{
 		sessions.put(session.getSessionID(), session);
