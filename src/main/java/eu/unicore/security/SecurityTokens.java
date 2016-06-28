@@ -50,8 +50,10 @@ import eu.emi.security.authn.x509.proxy.ProxyUtils;
 import eu.unicore.security.etd.TrustDelegation;
 
 /**
- * A set of security tokens with authentication information: Unicore
- * consignor and user are hold here. Also trust delegation tokens 
+ * A set of security tokens with authentication information collected and held 
+ * during request processing.
+ * 
+ * E.g., the consignor and user are held here. Also trust delegation tokens 
  * and digital signature status are kept here. The additional data  
  * can be stored in a <i>context</i> map. Some keys of objects that can 
  * be found in the context are defined here too 
@@ -100,10 +102,14 @@ public class SecurityTokens implements Serializable, Cloneable
 	private transient X509Certificate[] user;
 	private transient X509Certificate[] consignor;
 	private transient SignatureStatus signatureStatus = SignatureStatus.UNCHECKED;
-	private transient Map<String, Object> context;
+	
 	private String userName;
 	private String consignorName;
 	private String clientIP;
+	
+	private final Map<String, String[]> userPreferences = new HashMap<>();
+	
+	private transient Map<String, Object> context;
 	
 	/**
 	 * If true then tdTokens confirmed that the User allowed the Consignor to act 
@@ -131,8 +137,8 @@ public class SecurityTokens implements Serializable, Cloneable
 	 */
 	public SecurityTokens(boolean supportProxy)
 	{
-		context = new HashMap<String, Object>();
 		this.supportProxy = supportProxy;
+		context = new HashMap<>();
 	}
 
 	public SecurityTokens clone()throws CloneNotSupportedException{
@@ -346,14 +352,25 @@ public class SecurityTokens implements Serializable, Cloneable
         }
 
 	/**
-	 * Returns a map with additional security related settings. This can be used 
-	 * by handlers to pass additional data. 
+	 * Returns a map with additional security related data. This can be used 
+	 * by handlers to store additional data to be used during request processing.
+	 * NOTE: this information is only available during request processing and is never stored.
+	 * To store something permanently, use {@link #getUserPreferences()}
 	 */
-	public Map<String, Object> getContext()
+	public synchronized Map<String, Object> getContext()
 	{
+		if(context == null)context = new HashMap<>();
 		return context;
 	}
 
+	/**
+	 * Returns a map holding the user's preferences (xlogin, groups, ...)
+	 * @return
+	 */
+	public Map<String, String[]> getUserPreferences()
+	{
+		return userPreferences;
+	}
 
 	/**
 	 * Returns the status of the request's signature.

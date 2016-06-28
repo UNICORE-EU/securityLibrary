@@ -33,13 +33,13 @@ public class SecuritySessionStore
 	/**
 	 * store security tokens keyed by security session ID
 	 */
-	private final Map<String, SecuritySession> sessions;
-
+	protected Map<String, SecuritySession> sessions = new HashMap<>();
+			
 	/**
 	 * stores number of sessions per user (identified as effective DN + Client IP)
 	 * If this exceeds a threshold, the least-recently-used session is removed
 	 */
-	private final Map<String, AtomicInteger> sessionsPerUser;
+	protected Map<String, AtomicInteger> sessionsPerUser = new HashMap<>();
 
 	/**
 	 * When the sessions were cleaned the last time.
@@ -55,23 +55,18 @@ public class SecuritySessionStore
 
 	public SecuritySessionStore(int maxPerUser)
 	{
-		this(maxPerUser, new HashMap<String, SecuritySession>(), new HashMap<String, AtomicInteger>());
+		this.maxPerUser = maxPerUser;
 	}
 
-	public SecuritySessionStore(int maxPerUser, Map<String, SecuritySession> sessions, Map<String, AtomicInteger> sessionsPerUser)
-	{
-		this.maxPerUser = maxPerUser;
-		this.sessionsPerUser = sessionsPerUser;
-		this.sessions = sessions;
-	}
-	
 	public synchronized void storeSession(SecuritySession session, SecurityTokens tokens)
 	{
-		sessions.put(session.getSessionID(), session);
 		String userKey=getUserKey(tokens);
 		session.setUserKey(userKey);
+		sessions.put(session.getSessionID(), session);
+		
 		AtomicInteger i = getOrCreateSessionCounter(userKey);
 		int sessions=i.incrementAndGet();
+		
 		if(log.isDebugEnabled()){
 			log.debug("Created new security session <"+session.getSessionID()+" for <"+userKey+
 					"> will expire in " + (session.getLifetime()/1000.0) + "s");
