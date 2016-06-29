@@ -1,5 +1,7 @@
 package eu.unicore.security.wsutil;
 
+import java.io.Serializable;
+
 import eu.unicore.security.SecurityTokens;
 
 /**
@@ -7,7 +9,10 @@ import eu.unicore.security.SecurityTokens;
  * 
  * @author schuller
  */
-public class SecuritySession {
+public class SecuritySession implements Serializable {
+	
+	private static final long serialVersionUID=1l;
+	
 	private final String sessionID;
 
 	private final SecurityTokens tokens;
@@ -35,7 +40,6 @@ public class SecuritySession {
 	 * get a COPY of the tokens stored for this session
 	 */
 	public SecurityTokens getTokens() {
-		lastAccessed=System.currentTimeMillis();
 		try{
 			return this.tokens.clone();
 		}
@@ -71,7 +75,11 @@ public class SecuritySession {
 	public long getLastAccessed(){
 		return lastAccessed;
 	}
-
+	
+	public void setLastAccessed(long lastAccessed){
+		this.lastAccessed = lastAccessed;
+	}
+	
 	/**
 	 * return the remaining lifetime in milliseconds
 	 * @return
