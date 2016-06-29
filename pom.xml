@@ -8,7 +8,8 @@
 	<name>securityLibrary</name>
 
 	<properties>
-		<jetty.version>9.3.7.v20160115</jetty.version>
+	  <jetty.version>9.3.7.v20160115</jetty.version>
+	  <slf.version>1.7.13</slf.version>
 	</properties>
 
 	<parent>
@@ -55,6 +56,17 @@
 			<artifactId>apache-log4j-extras</artifactId>
 			<version>1.1</version>
 		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>${slf.version}</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>eu.eu-emi.security</groupId>
 			<artifactId>canl</artifactId>
