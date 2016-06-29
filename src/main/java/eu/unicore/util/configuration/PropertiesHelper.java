@@ -70,7 +70,7 @@ import eu.unicore.util.jetty.HttpServerProperties;
  * 
  * @author K. Benedyczak
  */
-public class PropertiesHelper implements Cloneable, UpdateableConfiguration
+public class PropertiesHelper implements Cloneable, UpdateableConfiguration, PropertiesHelperAPI
 {
 	private Set<String> warned = Collections.synchronizedSet(new HashSet<String>());
 	protected Logger log;
@@ -124,6 +124,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		this.structuredPrefixes.addAll(source.structuredPrefixes);
 	}
 	
+	@Override
 	public synchronized void setProperties(Properties properties) throws ConfigurationException
 	{
 		checkConstraints(properties);
@@ -137,6 +138,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 			notifyFocusedListeners(changedP);
 	}
 
+	@Override
 	public synchronized void setProperty(String key, String value)
 	{
 		Properties tmp = new Properties();
@@ -235,6 +237,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		}		
 	}
 	
+	@Override
 	public void addPropertyChangeListener(PropertyChangeListener listener) 
 	{
 		synchronized(genericListeners)
@@ -258,6 +261,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		}
 	}
 	
+	@Override
 	public void removePropertyChangeListener(PropertyChangeListener listener)
 	{
 		synchronized(genericListeners)
@@ -553,6 +557,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	 * @param key
 	 * @return string with a full name of the key and its description if set.
 	 */
+	@Override
 	public String getKeyDescription(String key) 
 	{
 		PropertyMD meta = getMetadata(key);
@@ -567,6 +572,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 			return prefix + key;
 	}
 	
+	@Override
 	public String getValue(String name)
 	{
 		String val;
@@ -680,24 +686,28 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 		return current;
 	}
 	
+	@Override
 	public Long getLongValue(String name) throws ConfigurationException
 	{
 		Long retVal = getLongValueNoCheck(name);
 		return checkBounds(name, retVal);
 	}	
 	
+	@Override
 	public Integer getIntValue(String name) throws ConfigurationException
 	{
 		Integer retVal = getIntValueNoCheck(name);
 		return checkBounds(name, retVal);
 	}
 
+	@Override
 	public Double getDoubleValue(String name) throws ConfigurationException
 	{
 		Double retVal = getDoubleValueNoCheck(name);
 		return checkBounds(name, retVal);
 	}
 
+	@Override
 	public Boolean getBooleanValue(String name) throws ConfigurationException
 	{
 		String val = getValue(name);
@@ -711,6 +721,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 				+ getKeyDescription(name) + ", must be one of yes|true|no|false");
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> Class<? extends T> getClassValue(String name, Class<T> desiredBase) throws ConfigurationException
 	{
@@ -741,6 +752,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	 * @return
 	 * @throws ConfigurationException
 	 */
+	@Override
 	public <T extends Enum<T>> T getEnumValue(String name, Class<T> type) throws ConfigurationException
 	{
 		String val = getValue(name);
@@ -762,6 +774,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	 * See {@link #getFileValue(String, boolean, boolean)}. This version converts the result
 	 * to String, handling nulls.
 	 */
+	@Override
 	public String getFileValueAsString(String name, boolean isDirectory) 
 			throws ConfigurationException
 	{
@@ -778,6 +791,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	 * @return
 	 * @throws ConfigurationException
 	 */
+	@Override
 	public File getFileValue(String name, boolean isDirectory) 
 			throws ConfigurationException
 	{
@@ -816,6 +830,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	 * @param subKey the sub key
 	 * @return property value or null if not set and there is no default
 	 */
+	@Override
 	public String getSubkeyValue(String key, String subKey) {
 		String perServiceKey = key + "." + subKey; 
 		if (isSet(perServiceKey))
@@ -829,6 +844,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	 * @param subKey
 	 * @return
 	 */
+	@Override
 	public Boolean getSubkeyBooleanValue(String key, String subKey) {
 		String perServiceKey = key + "." + subKey; 
 		if (isSet(perServiceKey))
@@ -842,6 +858,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	 * @param subKey
 	 * @return
 	 */
+	@Override
 	public Integer getSubkeyIntValue(String key, String subKey) {
 		String perServiceKey = key + "." + subKey; 
 		if (isSet(perServiceKey))
@@ -855,6 +872,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	 * @param subKey
 	 * @return
 	 */
+	@Override
 	public Long getSubkeyLongValue(String key, String subKey) {
 		String perServiceKey = key + "." + subKey; 
 		if (isSet(perServiceKey))
@@ -868,6 +886,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	 * @param subKey
 	 * @return
 	 */
+	@Override
 	public <T extends Enum<T>> T getSubkeyEnumValue(String key, String subKey, Class<T> type) {
 		String perServiceKey = key + "." + subKey; 
 		if (isSet(perServiceKey))
@@ -883,6 +902,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	 * @param locale
 	 * @return
 	 */
+	@Override
 	public String getLocalizedValue(String key, Locale locale)
 	{
 		boolean hasCountry = !locale.getCountry().equals("");
@@ -924,6 +944,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	 * @param prefix2 the prefix to be used.
 	 * @return
 	 */
+	@Override
 	public synchronized List<String> getListOfValues(String prefix2)
 	{
 		String base = prefix + prefix2;
@@ -1008,6 +1029,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	 * @return list of keys defined for the structured list. The returned keys can be iterated and
 	 * glued with an actual interesting parameter which is a member of this structured list.
 	 */
+	@Override
 	public synchronized Set<String> getStructuredListKeys(String listKey)
 	{
 		PropertyMD listMeta = metadata.get(listKey);
@@ -1040,6 +1062,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 				(hideValue ? "--SECRET--" : val));
 	}
 	
+	@Override
 	public synchronized boolean isSet(String name)
 	{
 		return properties.containsKey(prefix+name);
@@ -1049,6 +1072,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration
 	 * @param key a full key
 	 * @return value of a raw property, i.e. without any metadata checking, usage of prefix etc.
 	 */
+	@Override
 	public synchronized String getRawProperty(String key)
 	{
 		return properties.getProperty(key);
