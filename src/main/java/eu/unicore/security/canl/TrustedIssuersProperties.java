@@ -116,7 +116,9 @@ public class TrustedIssuersProperties extends PropertiesHelper
 		META.put(PROP_DIRECTORY_LOCATIONS, new PropertyMD().setList(false).setUpdateable().setCategory(dirCat).
 				setDescription("List of CA certificates locations. Can contain URLs, local files and wildcard expressions."));
 		META.put(PROP_DIRECTORY_ENCODING, new PropertyMD(Encoding.PEM).setCategory(dirCat).
-				setDescription("For directory truststore controls whether certificates are encoded in PEM or DER."));
+				setDescription("For directory truststore controls whether certificates are encoded "
+						+ "in PEM or DER. Note that the PEM file can contain arbitrary number "
+						+ "of concatenated, PEM-encoded certificates."));
 		META.put(PROP_DIRECTORY_CONNECTION_TIMEOUT, new PropertyMD("15").setCategory(dirCat).
 				setDescription("Connection timeout for fetching the remote CA certificates in seconds."));
 		META.put(PROP_DIRECTORY_CACHE_PATH, new PropertyMD().setPath().setCategory(dirCat).
