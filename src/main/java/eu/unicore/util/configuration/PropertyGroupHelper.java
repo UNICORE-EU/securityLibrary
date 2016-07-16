@@ -77,54 +77,60 @@ public class PropertyGroupHelper {
 	/**
 	 * returns an iterator over the valid keys
 	 */
-	public Iterator<String> keys() {
+	public Iterator<String> keys()
+	{
 		final Iterator<String> backing = properties.keySet().iterator();
-		return new Iterator<String>() {
+		return new Iterator<String>()
+		{
 			private String next = null;
 
-			boolean filter(String key) {
-				if(isRegexp){
-					return filterRegexp(key);
-				}
-				else return filterPlain(key);
+			boolean matchesFilter(String key)
+			{
+				return isRegexp ? matchesRegexpFilter(key) : matchesPalinFilter(key);
 			}
 
-			public boolean hasNext() {
-				return getNextMatching()!=null;
+			public boolean hasNext()
+			{
+				return getNextMatching() != null;
 			}
 
-			//this is idempotent
-			private String getNextMatching() {
-				if(next!=null)return next;
-				if(!backing.hasNext()){
-					next=null;
-					return null;
-				}
-				String res = backing.next();
-				if (res == null){
-					next=null;
-					return null;
-				}
-
-				if(!filter(res)){
-					//skip
-					return getNextMatching();
-				}
-
-				next=res;
+			// this is idempotent
+			private String getNextMatching()
+			{
+				if (next != null)
+					return next;
+				String res;
+				do
+				{
+					if (!backing.hasNext())
+					{
+						next = null;
+						return null;
+					}
+					
+					res = backing.next();
+					if (res == null)
+					{
+						next = null;
+						return null;
+					}
+				} while (!matchesFilter(res));
+				
+				next = res;
 				return res;
 			}
 
-			public String next() {
-				String res=getNextMatching();
-				next=null;
+			public String next()
+			{
+				String res = getNextMatching();
+				next = null;
 				return res;
 			}
 
-			public void remove() {
+			public void remove()
+			{
 				backing.remove();
 			}
-
 		};
 	}
 	
@@ -136,14 +142,14 @@ public class PropertyGroupHelper {
 		return ps;
 	}
 
-	private boolean filterRegexp(String key){
+	private boolean matchesRegexpFilter(String key){
 		for(Pattern p: patterns){
 			if(p.matcher(key).matches())return true;
 		}
 		return false;
 	}
 	
-	private boolean filterPlain(String key){
+	private boolean matchesPalinFilter(String key){
 		for (String p : acceptedPatterns) {
 			if (key.startsWith(p))
 				return true;

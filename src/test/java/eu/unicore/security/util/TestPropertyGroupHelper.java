@@ -1,6 +1,8 @@
 package eu.unicore.security.util;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
@@ -45,7 +47,26 @@ public class TestPropertyGroupHelper {
 		while(i2.hasNext()){
 			assertTrue(i2.next().contains("group"));
 		}
+	}
+	
+	@Test
+	public void iterationOverLargePropertiesSetWorksWithoutStackOverflow()
+	{
+		HashMap<String,String> props = new HashMap<String, String>();
+		for (int i=0; i<200000; i++)
+			props.put("g1.p" + i, "v");
+		for (int i=0; i<2000; i++)
+			props.put("g2.p" + i, "v");
 		
+		PropertyGroupHelper ah = new PropertyGroupHelper(props, "g2");
+		int c = 0;
+		Iterator<String> i = ah.keys();
+		while (i.hasNext())
+		{
+			c++;
+			assertThat(i.next().startsWith("g2."), is(true));
+		}
+		assertThat(c, is(2000));
 	}
 	
 }
