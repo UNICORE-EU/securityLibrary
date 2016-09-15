@@ -12,6 +12,7 @@ import xmlbeans.org.w3.x2000.x09.xmldsig.SignatureType;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.unicore.samly2.exceptions.SAMLValidationException;
+import eu.unicore.samly2.trust.CheckingMode;
 import eu.unicore.samly2.trust.DsigSamlTrustCheckerBase;
 import eu.unicore.samly2.trust.SamlTrustChecker;
 

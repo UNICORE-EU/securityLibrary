@@ -70,7 +70,7 @@
 		<dependency>
 			<groupId>eu.eu-emi.security</groupId>
 			<artifactId>canl</artifactId>
-			<version>2.4.0</version>
+			<version>2.4.1</version>
 		</dependency>
 
 		<!-- XMLBeans and samly2 are required only if you use classes from the 
@@ -85,7 +85,7 @@
 		<dependency>
 			<groupId>pl.edu.icm.saml</groupId>
 			<artifactId>samly2</artifactId>
-			<version>2.3.1</version>
+			<version>2.3.2</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.xmlbeans</groupId>
