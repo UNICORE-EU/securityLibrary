@@ -50,7 +50,6 @@ import javax.security.auth.x500.X500Principal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
-import org.apache.http.annotation.ThreadSafe;
 import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -68,7 +67,6 @@ import org.apache.http.util.TextUtils;
  * 
  * @see SSLConnectionSocketFactory
  */
-@ThreadSafe
 public class CustomSSLConnectionSocketFactory implements LayeredConnectionSocketFactory {
 
     public static final String TLS   = "TLS";

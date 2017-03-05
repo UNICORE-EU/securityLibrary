@@ -51,7 +51,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SessionIdManager;
 import org.eclipse.jetty.server.handler.AbstractHandlerContainer;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.server.session.HashSessionIdManager;
+import org.eclipse.jetty.server.session.DefaultSessionIdManager;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
@@ -214,7 +214,8 @@ public abstract class JettyServerBase {
 	protected void configureSessionIdManager(boolean useFastRandom) {
 		if (useFastRandom){
 			logger.info("Using fast (but less secure) session ID generator");
-			SessionIdManager sm = new HashSessionIdManager(new java.util.Random());
+			SessionIdManager sm = new DefaultSessionIdManager(theServer, 
+					new java.util.Random());
 			theServer.setSessionIdManager(sm);
 		}
 	}
