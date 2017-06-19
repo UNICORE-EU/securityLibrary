@@ -144,6 +144,17 @@ public class HttpServerProperties extends PropertiesHelper
 	public static final String FRAME_OPTIONS = "xFrameOptions";
 	public static final String ALLOWED_TO_EMBED = "xFrameAllowed";
 	
+	/**
+	 * CORS support. For the parameters see 
+	 * https://www.eclipse.org/jetty/documentation/9.4.x/cross-origin-filter.html
+	 */
+	public static final String ENABLE_CORS = "enableCORS";
+	public static final String CORS_ALLOWED_ORIGINS = "CORS_allowedOrigins";
+	public static final String CORS_ALLOWED_METHODS = "CORS_allowedMethods";
+	public static final String CORS_ALLOWED_HEADERS = "CORS_allowedHeaders";
+	public static final String CORS_EXPOSED_HEADERS = "CORS_exposedHeaders";
+	public static final String CORS_CHAIN_PREFLIGHT = "CORS_chainPreflight";
+	
 	@DocumentationReferenceMeta
 	protected final static Map<String, PropertyMD> defaults=new HashMap<String, PropertyMD>();
 	
@@ -198,7 +209,20 @@ public class HttpServerProperties extends PropertiesHelper
 				setDescription("URI origin that is allowed to embed web interface inside a (i)frame."
 						+ " Meaningful only if the " + FRAME_OPTIONS + " is set to 'allowFrom'."
 						+ " The value should be in the form: 'http[s]://host[:port]'"));
-
+		
+		defaults.put(ENABLE_CORS, new PropertyMD("false").
+				setDescription("Control whether Cross-Origin Resource Sharing is enabled. "
+						+ "Enable to allow e.g. accesing REST services from client-side JavaScript."));
+		defaults.put(CORS_ALLOWED_ORIGINS, new PropertyMD("*").
+				setDescription("CORS: allowed script origins."));
+		defaults.put(CORS_ALLOWED_METHODS, new PropertyMD("GET,PUT,POST,DELETE,HEAD").
+				setDescription("CORS: comma separated list of allowed HTTP verbs."));
+		defaults.put(CORS_ALLOWED_HEADERS, new PropertyMD("*").
+				setDescription("CORS: comma separated list of allowed HTTP headers (default: any)"));
+		defaults.put(CORS_EXPOSED_HEADERS, new PropertyMD("Location,Content-Type").
+				setDescription("CORS: comma separated list of HTTP headers that are allowed to be exposed to the client."));
+		defaults.put(CORS_CHAIN_PREFLIGHT, new PropertyMD("false").
+				setDescription("CORS: whether preflight OPTION requests are chained (passed on) to the resource or handled via the CORS filter."));
 	}
 
 	public HttpServerProperties() throws ConfigurationException 

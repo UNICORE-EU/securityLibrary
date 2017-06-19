@@ -35,6 +35,11 @@ package eu.unicore.util.jetty;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Enumeration;
+
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.rewrite.handler.HeaderPatternRule;
@@ -52,6 +57,9 @@ import org.eclipse.jetty.server.SessionIdManager;
 import org.eclipse.jetty.server.handler.AbstractHandlerContainer;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.server.session.DefaultSessionIdManager;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
@@ -156,8 +164,13 @@ public abstract class JettyServerBase {
 		
 		configureResourceMonitoring();
 		rootHandler = createRootHandler();
+		try{
+			rootHandler = configureCORS(rootHandler);
+		}catch(ServletException se){
+			throw new ConfigurationException("Error setting up CORS", se);
+		}
 		AbstractHandlerContainer headersRewriteHandler = configureHttpHeaders(rootHandler);
-		Handler withGzip = configureGzip(headersRewriteHandler); 
+		Handler withGzip = configureGzip(headersRewriteHandler);
 		theServer.setHandler(withGzip);
 		theServer.addBean(new JettyErrorHandler(theServer));
 	}
@@ -365,6 +378,48 @@ public abstract class JettyServerBase {
 			return gzipHandler;
 		} else
 			return handler;
+	}
+	
+	/**
+	 * configures Cross Origin Resource Sharing
+	 * @throws ConfigurationException
+	 */
+	protected Handler configureCORS(Handler handler) throws ConfigurationException, ServletException {
+		boolean enable = extraSettings.getBooleanValue(HttpServerProperties.ENABLE_CORS);
+		if (enable && handler instanceof ServletContextHandler) {
+			logger.info("Enabling CORS");
+			CrossOriginFilter cors = new CrossOriginFilter();
+			FilterConfig config = new FilterConfig() {
+				
+				@Override
+				public ServletContext getServletContext() {
+					// TODO Auto-generated method stub
+					return null;
+				}
+				
+				@Override
+				public Enumeration<String> getInitParameterNames() {
+					// TODO Auto-generated method stub
+					return null;
+				}
+				
+				@Override
+				public String getInitParameter(String name) {
+					return extraSettings.getValue("CORS_"+name); 
+				}
+				
+				@Override
+				public String getFilterName() {
+					// TODO Auto-generated method stub
+					return null;
+				}
+			};
+			cors.init(config);
+			FilterHolder h = new FilterHolder();
+			h.setFilter(cors);
+			((ServletContextHandler)handler).addFilter(h, "*", null);
+		}
+		return handler;
 	}
 	
 	/**
