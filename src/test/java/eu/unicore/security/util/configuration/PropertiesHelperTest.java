@@ -87,6 +87,21 @@ public class PropertiesHelperTest
 	}
 	
 	@Test
+	public void shouldResolveVariables() throws IOException
+	{
+		Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
+		META.put("p1", new PropertyMD());
+		
+		Properties props = new Properties();
+		props.setProperty("$var.var1", "Dynamic");
+		props.setProperty("regular.p1", "some${var1}Value");
+		
+		PropertiesHelper tested = new PropertiesHelper("regular.", props, META, log);
+		
+		assertThat(tested.getValue("p1"), is("someDynamicValue"));
+	}
+	
+	@Test
 	public void testStructuredListEntryWithSubkeys()
 	{
 		Properties p = new Properties();

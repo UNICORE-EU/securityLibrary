@@ -44,6 +44,17 @@ import eu.unicore.util.jetty.HttpServerProperties;
  * $include.includeName = file/path
  * </pre>
  * <p>
+ * Variables can be used in values of properties. Variable is defined as: 
+ * <pre>
+ * $var.PROP = dynamic
+ * </pre>
+ * and is used:
+ * <pre>
+ * some.property = Value with ${PROP} variable 
+ * </pre>
+ * Additionally in the same way one can reference environment variables and system properties 
+ * (e.g. ${user.home} will work). See {@link VariableResolver} for precedence rules.
+ * <p>
  * The object maintains a private copy of properties passed as constructor argument. All modifications of the
  * source properties must be signaled using {@link #setProperty(String, String)} or 
  * {@link #setProperties(Properties)} methods. 
@@ -86,7 +97,6 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	protected Map<String, List<PropertyChangeListener>> propertyFocusedListeners = new HashMap<>(); 
 	protected Set<String> structuredPrefixes = new HashSet<>();
 	
-	
 	/**
 	 * 
 	 * @param prefix prefix which is always added to any property being queried
@@ -107,6 +117,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 		if (this.metadata == null)
 			this.metadata = Collections.emptyMap();
 		ConfigIncludesProcessor.processIncludes(this.properties);
+		this.properties = VariablesProcessor.process(this.properties, log);
 		checkConstraints();
 		findUnknown(this.properties);
 		checkDeprecated(this.properties);
@@ -135,6 +146,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 		Properties copied = new Properties();
 		copied.putAll(properties);
 		ConfigIncludesProcessor.processIncludes(copied);
+		copied = VariablesProcessor.process(copied, log);
 		checkConstraints(copied);
 		findUnknown(copied);
 		checkDeprecated(copied);
