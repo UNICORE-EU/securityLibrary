@@ -39,6 +39,11 @@ import eu.unicore.util.jetty.HttpServerProperties;
  * corresponding to the property type. If you do so you can be sure that no exception is raised. If you 
  * try to change the type at runtime you have no such guarantee. 
  * <p>
+ * Property format allows for including additional property files with the syntax:
+ * <pre>
+ * $include.includeName = file/path
+ * </pre>
+ * <p>
  * The object maintains a private copy of properties passed as constructor argument. All modifications of the
  * source properties must be signaled using {@link #setProperty(String, String)} or 
  * {@link #setProperties(Properties)} methods. 
@@ -77,10 +82,9 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	protected Properties properties;
 	protected String prefix;
 	protected Map<String, PropertyMD> metadata;
-	protected List<PropertyChangeListener> genericListeners = new ArrayList<PropertyChangeListener>();
-	protected Map<String, List<PropertyChangeListener>> propertyFocusedListeners = 
-			new HashMap<String, List<PropertyChangeListener>>(); 
-	protected Set<String> structuredPrefixes = new HashSet<String>();
+	protected List<PropertyChangeListener> genericListeners = new ArrayList<>();
+	protected Map<String, List<PropertyChangeListener>> propertyFocusedListeners = new HashMap<>(); 
+	protected Set<String> structuredPrefixes = new HashSet<>();
 	
 	
 	/**
@@ -93,7 +97,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	 * message can be presented to the user.
 	 */
 	public PropertiesHelper(String prefix, Properties properties, Map<String, PropertyMD> propertiesMD, 
-			Logger log) throws ConfigurationException
+			Logger log)
 	{
 		this.properties = new Properties();
 		this.properties.putAll(properties);
@@ -102,9 +106,10 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 		this.metadata = propertiesMD;
 		if (this.metadata == null)
 			this.metadata = Collections.emptyMap();
+		ConfigIncludesProcessor.processIncludes(this.properties);
 		checkConstraints();
-		findUnknown(properties);
-		checkDeprecated();
+		findUnknown(this.properties);
+		checkDeprecated(this.properties);
 	}
 
 	/**
@@ -113,7 +118,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	 * @param source
 	 * @throws ConfigurationException
 	 */
-	protected PropertiesHelper(PropertiesHelper source) throws ConfigurationException
+	protected PropertiesHelper(PropertiesHelper source)
 	{
 		this.properties = new Properties();
 		this.properties.putAll(source.properties);
@@ -125,14 +130,18 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	}
 	
 	@Override
-	public synchronized void setProperties(Properties properties) throws ConfigurationException
+	public synchronized void setProperties(Properties properties)
 	{
-		checkConstraints(properties);
-		findUnknown(properties);
-		checkDeprecated();
-		Set<String> changed = filterChanged(propertyFocusedListeners.keySet(), this.properties, properties);
+		Properties copied = new Properties();
+		copied.putAll(properties);
+		ConfigIncludesProcessor.processIncludes(copied);
+		checkConstraints(copied);
+		findUnknown(copied);
+		checkDeprecated(copied);
+		Set<String> changed = filterChanged(propertyFocusedListeners.keySet(), 
+				this.properties, copied);
 		this.properties.clear();
-		this.properties.putAll(properties);
+		this.properties.putAll(copied);
 		notifyGenericListeners();
 		for (String changedP: changed)
 			notifyFocusedListeners(changedP);
@@ -174,7 +183,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	
 	protected Set<String> filterChanged(Set<String> toCheck, Properties orig, Properties updated)
 	{
-		Set<String> ret = new HashSet<String>();
+		Set<String> ret = new HashSet<>();
 		for (String p: toCheck)
 		{
 			boolean group = canHaveSubkeys(p);
@@ -252,7 +261,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 					List<PropertyChangeListener> propListeners = propertyFocusedListeners.get(prop);
 					if (propListeners == null) 
 					{
-						propListeners = new ArrayList<PropertyChangeListener>();
+						propListeners = new ArrayList<>();
 						propertyFocusedListeners.put(prop, propListeners);
 					}
 					propListeners.add(listener);
@@ -277,7 +286,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	 * @param properties properties to be checked.
 	 * @throws ConfigurationException
 	 */
-	protected void checkConstraints(Properties properties) throws ConfigurationException
+	protected void checkConstraints(Properties properties)
 	{
 		//tricky but short
 		new PropertiesHelper(prefix, properties, metadata, log);
@@ -286,12 +295,12 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	/**
 	 * Logs all deprecated settings 
 	 */
-	protected void checkDeprecated()
+	protected void checkDeprecated(Properties toCheck)
 	{
 		for (Map.Entry<String, PropertyMD> o : metadata.entrySet())
 		{
 			PropertyMD meta = o.getValue();
-			if (meta.isDeprecated() && isSet(o.getKey()))
+			if (meta.isDeprecated() && toCheck.containsKey(prefix + o.getKey()))
 				log.warn("The setting " + getKeyDescription(o.getKey()) + 
 						" is deprecated and will be ignored. "
 						+ "Please remove it from configuration.");
@@ -302,7 +311,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	 * Checks if the properties set to this object are correct.
 	 * @throws ConfigurationException
 	 */
-	protected void checkConstraints() throws ConfigurationException
+	protected void checkConstraints()
 	{
 		StringBuilder builder = new StringBuilder();
 		

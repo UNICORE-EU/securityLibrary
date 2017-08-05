@@ -2,9 +2,11 @@
  * Copyright (c) 2012 ICM Uniwersytet Warszawski All rights reserved.
  * See LICENCE.txt file for licensing information.
  */
-package eu.unicore.security.util;
+package eu.unicore.security.util.configuration;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -66,6 +68,23 @@ public class PropertiesHelperTest
 		METADATA.put("sl4", new PropertyMD().setStructuredListEntry("p15.").setCanHaveSubkeys());
 	}
 
+	
+	@Test
+	public void shouldIncludeIncludedProperties() throws IOException
+	{
+		Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
+		META.put("property", new PropertyMD());
+		META.put("property2", new PropertyMD());
+		META.put("property3", new PropertyMD());
+		
+		PropertiesHelper tested = new PropertiesHelper("regular.", 
+				FilePropertiesHelper.load("src/test/resources/props/base.properties"), 
+				META, log);
+		
+		assertThat(tested.getValue("property"), is("value1"));
+		assertThat(tested.getValue("property2"), is("value2"));
+		assertThat(tested.getValue("property3"), is("value3"));
+	}
 	
 	@Test
 	public void testStructuredListEntryWithSubkeys()

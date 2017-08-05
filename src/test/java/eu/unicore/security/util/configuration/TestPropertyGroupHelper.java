@@ -1,4 +1,4 @@
-package eu.unicore.security.util;
+package eu.unicore.security.util.configuration;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;

@@ -2,7 +2,7 @@
  * Copyright (c) 2011-2012 ICM Uniwersytet Warszawski All rights reserved.
  * See LICENCE.txt file for licensing information.
  */
-package eu.unicore.security.util;
+package eu.unicore.security.canl;
 
 import static eu.unicore.security.canl.CredentialProperties.DEFAULT_PREFIX;
 import static eu.unicore.security.canl.CredentialProperties.PROP_FORMAT;
