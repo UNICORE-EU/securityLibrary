@@ -116,8 +116,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 		this.metadata = propertiesMD;
 		if (this.metadata == null)
 			this.metadata = Collections.emptyMap();
-		ConfigIncludesProcessor.processIncludes(this.properties);
-		this.properties = VariablesProcessor.process(this.properties, log);
+		this.properties = ConfigIncludesProcessor.preprocess(this.properties, log);
 		checkConstraints();
 		findUnknown(this.properties);
 		checkDeprecated(this.properties);
@@ -145,8 +144,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	{
 		Properties copied = new Properties();
 		copied.putAll(properties);
-		ConfigIncludesProcessor.processIncludes(copied);
-		copied = VariablesProcessor.process(copied, log);
+		copied = ConfigIncludesProcessor.preprocess(copied, log);
 		checkConstraints(copied);
 		findUnknown(copied);
 		checkDeprecated(copied);

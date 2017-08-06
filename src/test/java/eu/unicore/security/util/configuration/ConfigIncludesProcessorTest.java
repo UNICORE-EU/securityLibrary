@@ -12,6 +12,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import eu.unicore.util.configuration.ConfigIncludesProcessor;
@@ -20,12 +21,14 @@ import eu.unicore.util.configuration.FilePropertiesHelper;
 
 public class ConfigIncludesProcessorTest
 {
+	private static final Logger log = Logger.getLogger(ConfigIncludesProcessorTest.class);
+	
 	@Test
 	public void shouldIncludeRecursivelyIncludedProperties() throws IOException
 	{
 		Properties ret = FilePropertiesHelper.load(
 				"src/test/resources/props/base.properties");
-		ConfigIncludesProcessor.processIncludes(ret); 
+		ret = ConfigIncludesProcessor.preprocess(ret, log); 
 		
 		assertThat(ret.getProperty("regular.property"), is("value1"));
 		assertThat(ret.getProperty("regular.property2"), is("value2"));
@@ -34,12 +37,25 @@ public class ConfigIncludesProcessorTest
 	}
 
 	@Test
+	public void shouldIncludeFromFileGivenWithVariable() throws IOException
+	{
+		Properties ret = FilePropertiesHelper.load(
+				"src/test/resources/props/baseWithVars.properties");
+		ret = ConfigIncludesProcessor.preprocess(ret, log); 
+		
+		assertThat(ret.getProperty("regular.property"), is("value1"));
+		assertThat(ret.getProperty("regular.property2"), is("value2"));
+		assertThat(ret.getProperty("regular.property3"), is("Dynamic"));
+		assertThat(ret.size(), is(3));
+	}
+	
+	@Test
 	public void shouldFailOnDuplicateKeyInIncludedProperties() throws IOException
 	{
 		try
 		{
-			ConfigIncludesProcessor.processIncludes(FilePropertiesHelper.load(
-				"src/test/resources/props/baseWithDuplicate.properties"));
+			ConfigIncludesProcessor.preprocess(FilePropertiesHelper.load(
+				"src/test/resources/props/baseWithDuplicate.properties"), log);
 			fail("Should throw an exception");
 		} catch (ConfigurationException e)
 		{

@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 /**
  * Utility class supporting {@link Properties} includes. Scans the given properties object for 
  * include statements, loads the given properties and adds them to the original object. 
@@ -18,23 +20,37 @@ import java.util.Properties;
  */
 public class ConfigIncludesProcessor
 {
+	private Logger log;
 	public static final String INCLUDE = "$include.";
 
-	public static void processIncludes(Properties src)
+	public ConfigIncludesProcessor(Logger log)
 	{
+		this.log = log;
+	}
+
+	public static Properties preprocess(Properties src, Logger log)
+	{
+		ConfigIncludesProcessor processor = new ConfigIncludesProcessor(log);
+		return processor.processIncludes(src);
+	}
+	
+	public Properties processIncludes(Properties src)
+	{
+		Properties withVars = VariablesProcessor.process(src, log);
 		Map<String, String> includes = new HashMap<>();
-		src.forEach((keyO, value) -> {
+		withVars.forEach((keyO, value) -> {
 			String key = (String) keyO;
 			if (key.startsWith(INCLUDE))
 				includes.put(key, (String)value);
 		});
 		includes.forEach((keyO, value) -> {
-			src.remove(keyO);
-			processInclude(src, (String)value);
+			withVars.remove(keyO);
+			processInclude(withVars, (String)value);
 		});
+		return withVars;
 	}
 
-	public static void addIncludedProperties(Properties target, Properties included, String fromFile)
+	public void addIncludedProperties(Properties target, Properties included, String fromFile)
 	{
 		Map<String, String> includes = new HashMap<>();
 		included.forEach((keyO, value) -> {
@@ -53,7 +69,7 @@ public class ConfigIncludesProcessor
 		);
 	}
 	
-	private static void processInclude(Properties src, String includedFile)
+	private void processInclude(Properties src, String includedFile)
 	{
 		Properties included;
 		try
@@ -64,7 +80,7 @@ public class ConfigIncludesProcessor
 			throw new ConfigurationException("Can not load an included "
 					+ "configuration file " + includedFile, e);
 		}
-		
-		addIncludedProperties(src, included, includedFile);
+		Properties withVars = VariablesProcessor.process(included, log);
+		addIncludedProperties(src, withVars, includedFile);
 	}
 }
