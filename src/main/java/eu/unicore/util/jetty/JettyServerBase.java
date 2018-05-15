@@ -170,11 +170,21 @@ public abstract class JettyServerBase {
 			throw new ConfigurationException("Error setting up CORS", se);
 		}
 		AbstractHandlerContainer headersRewriteHandler = configureHttpHeaders(rootHandler);
-		Handler withGzip = configureGzip(headersRewriteHandler);
-		theServer.setHandler(withGzip);
-		theServer.addBean(new JettyErrorHandler(theServer));
+		configureGzipHandler(headersRewriteHandler);
+		configureErrorHandler();
 	}
 
+	protected void configureGzipHandler(AbstractHandlerContainer headersRewriteHandler)
+	{
+		Handler withGzip = configureGzip(headersRewriteHandler);
+		theServer.setHandler(withGzip);
+	}
+	
+	protected void configureErrorHandler()
+	{
+		theServer.addBean(new JettyErrorHandler(theServer));
+	}
+	
 	protected QueuedThreadPool getThreadPool()
 	{
 		QueuedThreadPool btPool=new QueuedThreadPool();
