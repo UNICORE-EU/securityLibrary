@@ -25,6 +25,7 @@ import org.junit.Test;
 import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
 import eu.unicore.util.httpclient.ClientProperties;
 import eu.unicore.util.httpclient.ServerHostnameCheckingMode;
+import eu.unicore.util.httpclient.SessionIDProviderImpl;
 
 
 public class ClientPropertiesTest
@@ -55,4 +56,13 @@ public class ClientPropertiesTest
 		assertEquals(ServerHostnameCheckingMode.FAIL, cp.getServerHostnameCheckingMode());
 	}
 
+	@Test
+	public void testSessionIDProviderImpl(){
+		String url = "https://gw:123/SITE/services/x/y";
+		assertEquals("https://gw:123/SITE", SessionIDProviderImpl.extractServerID(url));
+		url = "https://gw:123/SITE/rest/core";
+		assertEquals("https://gw:123/SITE", SessionIDProviderImpl.extractServerID(url));
+		url = "https://gw:123/SITE";
+		assertEquals("https://gw:123/SITE", SessionIDProviderImpl.extractServerID(url));
+	}
 }

@@ -43,10 +43,15 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 	public static String extractServerID(String uri){
 		try{
 			//TODO better way?
-			String parts[] = uri.split("services");
+			String parts[] = uri.split("/services");
 			if (parts.length > 1)
 			{
-				return parts[0] + "services";
+				return parts[0];
+			}
+			parts = uri.split("/rest");
+			if (parts.length > 1)
+			{
+				return parts[0];
 			}
 			return uri;
 		}catch(Exception ex){
