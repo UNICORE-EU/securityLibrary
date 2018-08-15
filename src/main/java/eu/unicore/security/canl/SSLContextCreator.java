@@ -38,7 +38,7 @@ public class SSLContextCreator
 	 * @param protocol protocol to be used, e.g. "TLS".
 	 * @param loginfo message which will be used on TRACE level to identify the component
 	 * @param log logger, used on TRACE level to dump some extra information
-	 * @return
+	 * @return SSLContext
 	 * @throws NoSuchAlgorithmException 
 	 * @throws KeyManagementException 
 	 */

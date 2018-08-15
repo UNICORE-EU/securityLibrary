@@ -103,7 +103,6 @@ public class XACMLAttribute implements Serializable
 	
 	/**
 	 * Sets XACML 2.0 type
-	 * @return
 	 */
 	public Type getType()
 	{

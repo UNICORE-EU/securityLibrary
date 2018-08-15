@@ -106,7 +106,7 @@ public abstract class JettyServerBase {
 	
 	/**
 	 * 
-	 * @param listenUrl listen URL
+	 * @param listenUrls listen URLs
 	 * @param secConfiguration security configuration, providing local credential and trust settings.
 	 * Useful only for https:// URLs
 	 * @param extraSettings additional Jetty settings
@@ -253,10 +253,9 @@ public abstract class JettyServerBase {
 	}
 
 	/**
-	 * Default connector creation: uses {@link #createSecureConnector()} and {@link #createPlainConnector()}
+	 * Default connector creation: uses {@link #createSecureConnector(URL)} and {@link #createPlainConnector(URL)}
 	 * depending on the URL protocol. Returns a fully configured connector.
 	 * @param url
-	 * @return
 	 * @throws ConfigurationException 
 	 */
 	protected ServerConnector createConnector(URL url) throws ConfigurationException {
@@ -297,7 +296,6 @@ public abstract class JettyServerBase {
 	 * This method creates a secure connector and configures 
 	 * it with security-related settings.
 	 * @param url
-	 * @return
 	 * @throws ConfigurationException
 	 */
 	protected ServerConnector createSecureConnector(URL url) throws ConfigurationException {
@@ -329,7 +327,6 @@ public abstract class JettyServerBase {
 	
 	/**
 	 * By default http connection factory is configured not to send server identification data.
-	 * @return
 	 */
 	protected HttpConnectionFactory getHttpConnectionFactory()
 	{
@@ -346,7 +343,6 @@ public abstract class JettyServerBase {
 	 * This method creates an insecure connector and configures it.
 	 * 
 	 * @param url
-	 * @return
 	 */
 	protected ServerConnector createPlainConnector(URL url){
 		logger.debug("Creating plain HTTP connector on: " + url);
@@ -461,7 +457,6 @@ public abstract class JettyServerBase {
 	protected abstract Handler createRootHandler() throws ConfigurationException;
 	
 	/**
-	 * 
 	 * @return the root handler of this Jetty server as returned by {@link #createRootHandler()} 
 	 */
 	public Handler getRootHandler() 
@@ -470,7 +465,6 @@ public abstract class JettyServerBase {
 	}
 	
 	/**
-	 * 
 	 * @return the root handler of this Jetty server - it is a wrapper of the 
 	 * handler returned by the {@link #getRootHandler()}
 	 */

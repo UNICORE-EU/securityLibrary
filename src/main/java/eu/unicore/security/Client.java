@@ -256,7 +256,6 @@ public class Client implements Serializable {
 	
 	/**
 	 * convenience method for setting the user's xlogin
-	 * @return an {@link Xlogin}
 	 */
 	public void setXlogin(Xlogin xlogin){
 		if (xlogin == null)
@@ -266,7 +265,6 @@ public class Client implements Serializable {
 
 	/**
 	 * Convenience method returning the selected Xlogin name.
-	 * @return
 	 */
 	public String getSelectedXloginName() {
 		return xlogin.getUserName();

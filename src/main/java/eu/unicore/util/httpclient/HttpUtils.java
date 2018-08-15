@@ -45,7 +45,7 @@ import eu.unicore.util.Log;
  * <ul>
  *  <li> maximum redirects which are automatically taken,
  *  <li> whether to set Connection: close HTTP header
- *  <li> {@link MultiThreadedHttpConnectionManager} is used with a preconfigured default 
+ *  <li> {@link PoolingHttpClientConnectionManager} is used with a preconfigured default 
  *  values of max connection attempts. 
  *  <li> user agent is set to Mozilla/4.0.
  * </ul>
@@ -58,7 +58,7 @@ import eu.unicore.util.Log;
  * The returned client can be configured further by using standard {@link HttpClient}
  * parameters API. Note that for convenience many parameters can be set using the {@link HttpClientProperties}.
  * <p>
- * Contains some code from XFire's {@link CommonsHttpMessageSender}
+ * Contains some code from XFire's CommonsHttpMessageSender
  * 
  * @author schuller
  * @author golbi
@@ -162,8 +162,9 @@ public class HttpUtils {
 	/**
 	 * configure the HTTP proxy settings on the given client
 	 * 
-	 * @param client - the HttpClient instance
+	 * @param clientBuilder - the HttpClientBuilder instance
 	 * @param uri - the URI to connect to
+	 * @param properties
 	 */
 	public static void configureProxy(HttpClientBuilder clientBuilder, String uri, HttpClientProperties properties){
 		if (isNonProxyHost(uri, properties)) 

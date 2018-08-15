@@ -4,11 +4,11 @@
 	<groupId>eu.unicore.security</groupId>
 	<artifactId>securityLibrary</artifactId>
 	<packaging>jar</packaging>
-	<version>4.5.3-SNAPSHOT</version>
+	<version>4.5.3</version>
 	<name>securityLibrary</name>
 
 	<properties>
-	  <jetty.version>9.4.2.v20170220</jetty.version>
+	  <jetty.version>9.4.11.v20180605</jetty.version>
 	  <slf.version>1.7.13</slf.version>
 	</properties>
 

@@ -94,7 +94,7 @@ public class LoggingX509TrustManager implements X509TrustManager {
 	}
 
 	/**
-	 * @see X509TrustManager#isServerTrusted(X509Certificate[])
+	 * @see X509TrustManager#checkServerTrusted(X509Certificate[], String)
 	 */
 	public void checkServerTrusted(X509Certificate[] certificates, String s)
 			throws CertificateException {

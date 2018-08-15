@@ -36,13 +36,11 @@ public interface IPlainClientConfiguration extends IAuthnAndTrustConfiguration
 	/**
 	 * Returns true if the client-side TLS authentication should be done.
 	 * If false then the local credential won't be used.
-	 * @return
 	 */
 	public boolean doSSLAuthn();
 
 	/**
 	 * whether to check if server hostname matches server's certificate
-	 * @return
 	 */
 	public ServerHostnameCheckingMode getServerHostnameCheckingMode();
 }

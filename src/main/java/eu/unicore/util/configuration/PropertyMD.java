@@ -228,7 +228,6 @@ public class PropertyMD implements Cloneable
 	 * Sets enum type. Note that the value passed as argument doesn't matter, it
 	 * must be only of the proper enum, which shall make an enum type of the property.
 	 * @param defaultValue
-	 * @return
 	 */
 	public <T extends Enum<T>> PropertyMD setEnum(T defaultValue) {
 		enumTypeInstance = defaultValue;
@@ -398,7 +397,6 @@ public class PropertyMD implements Cloneable
 	
 	/**
 	 * Returns human friendly description of the property type
-	 * @return
 	 */
 	public String getTypeDescription() {
 		switch(type)
@@ -462,7 +460,7 @@ public class PropertyMD implements Cloneable
 	}
 
 	/**
-	 * @param optional property category
+	 * @param category property category
 	 */
 	public PropertyMD setCategory(DocumentationCategory category) {
 		this.category = category;

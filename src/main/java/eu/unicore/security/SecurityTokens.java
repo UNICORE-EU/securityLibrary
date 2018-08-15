@@ -1,5 +1,5 @@
 /*********************************************************************************
- * Copyright (c) 2006 Forschungszentrum Juelich GmbH 
+ * @đCopyright (c) 2006 Forschungszentrum Juelich GmbH 
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -158,7 +158,7 @@ public class SecurityTokens implements Serializable, Cloneable
 	/**
 	 * Sets a consignor as a DN. It should be a VALIDATED identity.
 	 * This method clears any consignor certificate previously set.
-	 * @param consignor
+	 * @param consignorName
 	 */
 	public void setConsignorName(String consignorName)
 	{
@@ -168,7 +168,6 @@ public class SecurityTokens implements Serializable, Cloneable
 
 	/**
 	 * Retrieves the stored consignor as a certificate path.
-	 * @return
 	 */
 	public X509Certificate[] getConsignor()
 	{
@@ -178,7 +177,6 @@ public class SecurityTokens implements Serializable, Cloneable
 	/**
 	 * Retrieves stored consignor as X509 certificate. In proxy mode the EEC certificate
 	 * is returned.
-	 * @return
 	 */
 	public X509Certificate getConsignorCertificate()
 	{
@@ -210,7 +208,6 @@ public class SecurityTokens implements Serializable, Cloneable
 	 * Returns user's certificates path. Note that it <b>may not represent a 
 	 * valid user</b>, i.e. there might 
 	 * be no trust delegation chain from the returned user to the actual consignor.
-	 * @return
 	 */
 	public X509Certificate[] getUser()
 	{
@@ -253,8 +250,6 @@ public class SecurityTokens implements Serializable, Cloneable
 	 * be no trust delegation chain from the returned user to the actual consignor.
 	 * In proxy mode this method will return DN of EEC only if certificate (with proxies)
 	 * was also set. Otherwise the same userName as was set is returned.
-	 * 
-	 * @return
 	 */
 	public String getUserName()
 	{
@@ -265,7 +260,6 @@ public class SecurityTokens implements Serializable, Cloneable
 
 	/**
 	 * Returns a consignor's DN. In proxy mode the consignor's EEC DN is returned.
-	 * @return
 	 */
 	public String getConsignorName()
 	{
@@ -365,7 +359,6 @@ public class SecurityTokens implements Serializable, Cloneable
 
 	/**
 	 * Returns a map holding the user's preferences (xlogin, groups, ...)
-	 * @return
 	 */
 	public Map<String, String[]> getUserPreferences()
 	{
@@ -374,7 +367,6 @@ public class SecurityTokens implements Serializable, Cloneable
 
 	/**
 	 * Returns the status of the request's signature.
-	 * @return
 	 */
 	public SignatureStatus getMessageSignatureStatus()
 	{
@@ -418,7 +410,6 @@ public class SecurityTokens implements Serializable, Cloneable
 	/**
 	 * Returns true if the Consignor is anyhow allowed to work on
 	 * User's behalf, as set by the setConsignorTrusted method. 
-	 * @return
 	 */
 	public boolean isConsignorTrusted()
 	{
@@ -443,7 +434,6 @@ public class SecurityTokens implements Serializable, Cloneable
 	 * Returns true iff the trust delegation attached is valid and 
 	 * issued by the User. This does not mean that the trust is delegated to 
 	 * the consignor, use isValidConsig
-	 * @return
 	 */
 	public boolean isTrustDelegationValidated()
 	{
@@ -484,7 +474,6 @@ public class SecurityTokens implements Serializable, Cloneable
 
 	/**
 	 * Sets client's IP
-	 * @param clientsIP
 	 */
 	public void setClientIP(String clientIP) {
 		this.clientIP = clientIP;

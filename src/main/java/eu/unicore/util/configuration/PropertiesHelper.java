@@ -73,13 +73,13 @@ import eu.unicore.util.jetty.HttpServerProperties;
  * have subkeys.
  * <p>
  * This class can be used in two ways: either as a helper class of a high-level configuration class,
- * which provides a custom interface to obtaining configuration data (e.g. {@link ClientProperties})
+ * which provides a custom interface to obtaining configuration data
  * or can be extended if the interface of this class is enough (as in the case of {@link HttpServerProperties}. 
  * The first solution is suggested when there are
  * many complicated interconnections between properties or if high level objects should be returned for convenience.
  * <p>
  * If this class is extended, then the extending class should take care to properly check for its custom constraints,
- * by overriding {@link #checkPropertyConstraints(Properties, PropertyMD, String)} method (not forgetting to call
+ * by overriding {@link #checkPropertyConstraints(PropertyMD, String)} method (not forgetting to call
  * super). 
  * <p>
  * This class is thread safe.
@@ -532,7 +532,6 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	 * list entry is returned. 
 	 * 
 	 * @param propertyKey
-	 * @return
 	 */
 	protected String getMetadataKey(String propertyKey)
 	{
@@ -768,7 +767,6 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	 * only in case, do not use this method.
 	 * @param name
 	 * @param type
-	 * @return
 	 * @throws ConfigurationException
 	 */
 	@Override
@@ -790,7 +788,7 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	}
 	
 	/**
-	 * See {@link #getFileValue(String, boolean, boolean)}. This version converts the result
+	 * See {@link #getFileValue(String, boolean)}. This version converts the result
 	 * to String, handling nulls.
 	 */
 	@Override
@@ -807,7 +805,6 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	 * The file must exist and must be readable.
 	 * @param name
 	 * @param isDirectory whether the File must be a directory (true) or a plain file (false)
-	 * @return
 	 * @throws ConfigurationException
 	 */
 	@Override
@@ -861,7 +858,6 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	 * @see #getSubkeyValue(String, String)
 	 * @param key
 	 * @param subKey
-	 * @return
 	 */
 	@Override
 	public Boolean getSubkeyBooleanValue(String key, String subKey) {
@@ -875,7 +871,6 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	 * @see #getSubkeyValue(String, String)
 	 * @param key
 	 * @param subKey
-	 * @return
 	 */
 	@Override
 	public Integer getSubkeyIntValue(String key, String subKey) {
@@ -889,7 +884,6 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	 * @see #getSubkeyValue(String, String)
 	 * @param key
 	 * @param subKey
-	 * @return
 	 */
 	@Override
 	public Long getSubkeyLongValue(String key, String subKey) {
@@ -903,7 +897,6 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	 * @see #getSubkeyValue(String, String)
 	 * @param key
 	 * @param subKey
-	 * @return
 	 */
 	@Override
 	public <T extends Enum<T>> T getSubkeyEnumValue(String key, String subKey, Class<T> type) {
@@ -919,7 +912,6 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	 * absent then the {@link #getValue(String)} is used.
 	 * @param key
 	 * @param locale
-	 * @return
 	 */
 	@Override
 	public String getLocalizedValue(String key, Locale locale)
@@ -961,7 +953,6 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	 * property metadata defines whether list sub keys should be restricted to numerical values only.
 	 * If so list keys are sorted as numbers and keys which are not numbers are skipped with warning.  
 	 * @param prefix2 the prefix to be used.
-	 * @return
 	 */
 	@Override
 	public synchronized List<String> getListOfValues(String prefix2)
@@ -1099,7 +1090,6 @@ public class PropertiesHelper implements Cloneable, UpdateableConfiguration, Pro
 	
 	/**
 	 * Only for use in the package
-	 * @return
 	 */
 	Logger getLoger()
 	{

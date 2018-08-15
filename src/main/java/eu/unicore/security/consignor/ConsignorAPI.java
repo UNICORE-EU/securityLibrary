@@ -55,12 +55,10 @@ public interface ConsignorAPI
 	 * Generates signed consignor assertion without a subject. Used by gateway
 	 * to state that connection is NOT AUTHENTICATED. 
 	 * @param issuerDN issuer (usually gateway) DN
-	 * @param consignorCert certificate of consignor
-	 * @param pk issuer's private key
 	 * @param negativeTolerance backwards validity in seconds form current time
 	 * @param validity lifetime of assertion in seconds from current time
-	 * @param acClass authentication context class choice (not implemented right now)
-	 * @param ip clieent's IP address in dotted decimal form
+	 * @param pk issuer's private key
+	 * @param ip client's IP address in dotted decimal form
 	 * @return created assertion
 	 * @throws DSigException if there are problems with signing assertion
 	 */
@@ -73,8 +71,6 @@ public interface ConsignorAPI
 	 * Generates unsigned consignor assertion with an anonymous subject (without any confirmation). 
 	 * Used by gateway to state that connection is NOT AUTHENTICATED. 
 	 * @param issuerDN issuer (usually gateway) DN
-	 * @param consignorCert certificate of consignor
-	 * @param acClass authentication context class choice (not implemented right now)
 	 * @return created assertion
 	 */
 	public ConsignorAssertion generateConsignorToken(String issuerDN);

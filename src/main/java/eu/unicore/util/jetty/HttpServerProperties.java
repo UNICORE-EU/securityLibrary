@@ -101,7 +101,7 @@ public class HttpServerProperties extends PropertiesHelper
 
 	/**
 	 * in low resource conditions, time (in ms.) before an idle connection will time out
-	 * @see #LOW_THREADS
+	 * @see #HIGH_LOAD_CONNECTIONS
 	 */
 	public static final String LOW_RESOURCE_MAX_IDLE_TIME = "lowResourceMaxIdleTime";
 

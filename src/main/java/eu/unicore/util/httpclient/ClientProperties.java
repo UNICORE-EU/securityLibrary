@@ -160,7 +160,6 @@ public class ClientProperties extends DefaultClientConfiguration
 	 * @param trustPrefix
 	 * @param credPrefix
 	 * @param clientPrefix
-	 * @return
 	 */
 	public static AuthnAndTrustProperties getDefaultAuthnAndTrust(Properties p, PasswordCallback callback, String trustPrefix, 
 			String credPrefix, String clientPrefix)
@@ -263,8 +262,6 @@ public class ClientProperties extends DefaultClientConfiguration
 	/**
 	 * This version clones the object as normal clone(), but authnAndTrustConfiguration is
 	 * simply copied by reference so is shared with the cloned instance.
-	 * @return
-	 * @Deprecated use clone()
 	 */
 	@Override
 	public ClientProperties clone()
@@ -276,7 +273,7 @@ public class ClientProperties extends DefaultClientConfiguration
 	}
 	
 	/**
-	 * @Deprecated use clone(), works in the same way.
+	 * @deprecated use clone(), works in the same way.
 	 */
 	@Deprecated
 	public ClientProperties shallowClone()

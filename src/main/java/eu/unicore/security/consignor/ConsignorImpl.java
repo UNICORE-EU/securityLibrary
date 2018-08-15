@@ -31,9 +31,7 @@ import eu.unicore.security.dsig.DSigException;
  */
 public class ConsignorImpl implements ConsignorAPI
 {
-	/**
-	 * @see eu.unicore.security.consignor.ConsignorAPI#generateConsignorToken(java.lang.String, java.security.cert.X509Certificate, java.security.PrivateKey, eu.unicore.saml.SAMLConstants.AuthNClasses)
-	 */
+
 	public ConsignorAssertion generateConsignorToken(String issuerDN, 
 			X509Certificate []consignorCert, PrivateKey pk, int negativeTolerance,
 			int validity, AuthNClasses acClass, String ip) 
@@ -86,9 +84,6 @@ public class ConsignorImpl implements ConsignorAPI
 		return assertion;
 	}
 	
-	/**
-	 * @see eu.unicore.security.consignor.ConsignorAPI#verifyConsignorToken(eu.unicore.security.consignor.ConsignorAssertion, java.security.cert.X509Certificate)
-	 */
 	public ValidationResult verifyConsignorToken(ConsignorAssertion assertion,
 			X509Certificate issuerCertificate)
 	{

@@ -18,7 +18,7 @@ import eu.unicore.util.configuration.PropertiesHelper;
 
 
 /**
- * A default implementation of the {@link IAuthenticationConfiguration} interface
+ * A default implementation of the {@link IClientConfiguration} interface
  * which can be used to manually configure all aspects of the interface with constructor parameters.
  * 
  * @author golbi
@@ -248,7 +248,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	}
 
 	/**
-	 * @param doSignMessages the doSignMessages to set
+	 * @param doSignMessage the doSignMessage to set
 	 */
 	public void setDoSignMessage(boolean doSignMessage)
 	{
@@ -401,7 +401,6 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	/**
 	 * for implementing clone in subclasses
 	 * @param ret
-	 * @return
 	 */
 	protected IClientConfiguration cloneTo(DefaultClientConfiguration ret)
 	{

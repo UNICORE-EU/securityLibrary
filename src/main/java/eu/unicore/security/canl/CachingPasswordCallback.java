@@ -33,7 +33,6 @@ public abstract class CachingPasswordCallback implements PasswordCallback
 	 * per type and description combination.
 	 * @param protectedArtifactType
 	 * @param protectedArtifactDescription
-	 * @return
 	 */
 	protected abstract char[] getPasswordFromUser(String protectedArtifactType, String protectedArtifactDescription);
 }

@@ -38,7 +38,7 @@ public interface ETDApi
 	 * @param pk
 	 * @param receiverDN
 	 * @param restrictions
-	 * @return
+	 * @return trust delegation chain
 	 * @throws DSigException
 	 * @throws InconsistentTDChainException
 	 */
@@ -55,7 +55,7 @@ public interface ETDApi
 	 * @param pk
 	 * @param receiver
 	 * @param restrictions
-	 * @return
+	 * @return trust delegation chain
 	 * @throws DSigException
 	 * @throws InconsistentTDChainException
 	 * @throws CertificateEncodingException 
@@ -89,7 +89,7 @@ public interface ETDApi
 	 * chain then it is equal to issuer's DN)
 	 * @param issuer Actual issuer certificate of this trust delegation
 	 * @param issuerName Issuer's identity
-	 * @param issuerName Issuer's identity format
+	 * @param issuerFormat Issuer's identity format
 	 * @param pk Private key of the issuer
 	 * @param receiverDN DN of the receiver of this trust delegation
 	 * @param restrictions Set of restrictions (can be null)
@@ -103,7 +103,7 @@ public interface ETDApi
 	
 	/**
 	 * Generates trust delegation in terms of certificates.
-	 * @param custodian DN of initial trust delegation issuer (if not in trust delegation chain 
+	 * @param custodian of initial trust delegation issuer (if not in trust delegation chain 
 	 * it is equal to issuer)
 	 * @param issuer Actual issuer certificate of this trust delegation
 	 * @param pk Private key of issuer
@@ -119,7 +119,7 @@ public interface ETDApi
 		throws DSigException, CertificateEncodingException;
 	
 	/**
-	 * As {@link #generateTD(X509Certificate, X509Certificate[], PrivateKey, X509Certificate[], DelegationRestrictions)
+	 * As {@link #generateTD(X509Certificate, X509Certificate[], PrivateKey, X509Certificate[], DelegationRestrictions)}
 	 * but additionally allows to add custom attributes to the assertion being generated.
 	 * @since 3.1.0
 	 * @param custodian
@@ -128,7 +128,7 @@ public interface ETDApi
 	 * @param receiver
 	 * @param restrictions
 	 * @param attributes
-	 * @return
+	 * @return new trust delegation
 	 * @throws DSigException
 	 * @throws CertificateEncodingException
 	 */
@@ -146,7 +146,7 @@ public interface ETDApi
 	 * @param issuer
 	 * @param receiver
  	 * @param validator certificate chain validator, used to check issuer cert chain.
-	 * @return
+	 * @return validation result
 	 */
 	public ValidationResult validateTD(TrustDelegation td, String custodian,
 			String issuer, String receiver, X509CertChainValidator validator);
@@ -161,7 +161,7 @@ public interface ETDApi
 	 * @param issuer
 	 * @param receiver
  	 * @param validator certificate chain validator, used to check issuer cert chain.
-	 * @return
+	 * @return validation result
 	 */
 	public ValidationResult validateTD(TrustDelegation td, X509Certificate custodian,
 			X509Certificate []issuer, X509Certificate []receiver, X509CertChainValidator validator);

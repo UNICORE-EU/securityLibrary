@@ -58,7 +58,6 @@ public class SecuritySession implements Serializable {
 
 	/**
 	 * get the identifier of the user who "owns" the session
-	 * @return
 	 */
 	public String getUserKey() {
 		return userKey;
@@ -82,7 +81,6 @@ public class SecuritySession implements Serializable {
 	
 	/**
 	 * return the remaining lifetime in milliseconds
-	 * @return
 	 */
 	public long getLifetime(){
 		long lt = expires-System.currentTimeMillis();

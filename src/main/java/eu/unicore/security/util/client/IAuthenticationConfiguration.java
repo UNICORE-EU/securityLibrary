@@ -5,6 +5,7 @@
 package eu.unicore.security.util.client;
 
 import eu.unicore.util.httpclient.IClientConfiguration;
+import eu.unicore.util.httpclient.IPlainClientConfiguration;
 
 /**
  * @deprecated Use {@link IClientConfiguration} instead, but please note that it is not one-to-one mapping.

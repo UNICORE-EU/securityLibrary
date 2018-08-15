@@ -34,7 +34,7 @@ public enum SignatureStatus
 	/**
 	 * Request is correctly signed, but not all elements required by policy
 	 * were signed. Can be treated as UNSIGNED.
-	 * @Deprecated - no longer reported: the WRONG is returned for this situation.
+	 * @deprecated - no longer reported: the WRONG is returned for this situation.
 	 */
 	@Deprecated
 	OK_BUT_NOT_IN_POLICY

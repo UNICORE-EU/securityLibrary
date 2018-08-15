@@ -8,18 +8,18 @@ import java.util.Collection;
  * @author K. Benedyczak
  */
 public interface SessionIDProvider {
+	
 	/**
 	 * Tries to find a session id for the given url and security settings. A session id is returned
 	 * only if it is matching the URL container, session was established with the equivalent 
 	 * settings and the session is not expired.
 	 * @param url
 	 * @param currentSettings
-	 * @return
+	 * @return session ID or null if no valid session ID exists
 	 */
 	public String getSessionID(String url, IClientConfiguration currentSettings);
 	
 	/**
-	 * 
 	 * @return all known security sessions 
 	 */
 	public Collection<ClientSecuritySession> getAllSessions();

@@ -35,8 +35,6 @@ public class JettyLogger extends AbstractLogger implements Logger
 
 	/**
 	 * Override this method to create a non-default logger.
-	 * 
-	 * @return
 	 */
 	protected String getDefaultLog4jLoggerName()
 	{

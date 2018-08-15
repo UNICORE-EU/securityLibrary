@@ -13,7 +13,7 @@ import eu.emi.security.authn.x509.X509Credential;
 
 
 /**
- * A default implementation of the {@link IAuthenticationConfiguration} interface
+ * A default implementation of the {@link IAuthnAndTrustConfiguration} interface
  * which can be used to manually configure all aspects of the interface with constructor parameters.
  * 
  * @author golbi

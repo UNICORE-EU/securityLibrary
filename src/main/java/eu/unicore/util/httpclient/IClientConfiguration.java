@@ -39,19 +39,16 @@ public interface IClientConfiguration extends IPlainClientConfiguration
 	
 	/**
 	 * Returns true if HTTP BASIC Auth should be used.
-	 * @return
 	 */
 	public boolean doHttpAuthn();
 	
 	/**
 	 * Returns HTTP BASIC Auth user. Required if doHttpAuthn is true.
-	 * @return
 	 */
 	public String getHttpUser();
 	
 	/**
 	 * Returns HTTP BASIC Auth user's password. Required if doHttpAuthn is true.
-	 * @return
 	 */
 	public String getHttpPassword();
 	
@@ -106,7 +103,6 @@ public interface IClientConfiguration extends IPlainClientConfiguration
 	
 	/**
 	 * returns true if messages should be logged
-	 * @return
 	 */
 	public boolean isMessageLogging();
 	
@@ -140,7 +136,6 @@ public interface IClientConfiguration extends IPlainClientConfiguration
 	/**
 	 * gets the configuration handler, if it exists
 	 * @param key - the class of the configuration handler
-	 * @return
 	 */
 	public <T extends PropertiesHelper> T getConfigurationHandler(Class<T>key);
 

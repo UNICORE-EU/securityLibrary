@@ -38,17 +38,6 @@ public class ETDImpl implements ETDApi
 {
 	public static final int DEFAULT_VALIDITY_DAYS = 14;
 
-	/**
-	 * Generates trust delegation in terms of DNs.
-	 * @param custodianDN DN of initial trust delegation issuer (if not in trust delegation 
-	 * chain then it is equal to issuer's DN)
-	 * @param issuer Actual issuer of this trust delegation
-	 * @param pk Private key of the issuer
-	 * @param receiverDN DN of the receiver of this trust delegation
-	 * @param restrictions Set of restrictions (can be null)
-	 * @return The new trust delegation
-	 * @throws DSigException
-	 */
 	@Override
 	public TrustDelegation generateTD(String custodian, X509Certificate []issuer, 
 			PrivateKey pk, String subject, DelegationRestrictions restrictions) 
@@ -71,19 +60,8 @@ public class ETDImpl implements ETDApi
 		td.setX509Subject(receiverDN);
 		return addRestrictionsAndSign(td, issuer, pk, restrictions);
 	}
+
 	
-	/**
-	 * Generates trust delegation in terms of certificates.
-	 * @param custodian DN of initial trust delegation issuer (if not in trust delegation chain 
-	 * it is equal to issuer)
-	 * @param issuer Actual issuer certificate of this trust delegation
-	 * @param pk Private key of issuer
-	 * @param receiver The receiver of this trust delegation
-	 * @param restrictions Set of restrictions (can be null)
-	 * @return The new trust delegation
-	 * @throws DSigException
-	 * @throws CertificateEncodingException 
-	 */
 	@Override
 	public TrustDelegation generateTD(X509Certificate custodian, X509Certificate[] issuer,
 			PrivateKey pk, X509Certificate[] receiver,
@@ -150,19 +128,7 @@ public class ETDImpl implements ETDApi
 		return td;
 	}
 	
-	
-	/**
-	 * Extends existing delegation chain by adding the next entry, that further delegates trust
-	 * to the receiver. Generated assertion will hold DNs.
-	 * @param chain
-	 * @param pk
-	 * @param receiverDN
-	 * @param restrictions
-	 * @return
-	 * @throws DSigException
-	 * @throws InconsistentTDChainException
-	 * @throws IllegalArgumentException
-	 */
+
 	@Override
 	public List<TrustDelegation> issueChainedTD(List<TrustDelegation> chain,
 			X509Certificate []issuer, PrivateKey pk,
@@ -178,20 +144,7 @@ public class ETDImpl implements ETDApi
 		return chain;
 	}
 	
-	
-	/**
-	 * Extends existing delegation chain by adding the next entry, that further delegates trust
-	 * to the receiver. Generated assertion will hold full certificates.
-	 * @param chain
-	 * @param issuer
-	 * @param pk
-	 * @param receiver
-	 * @param restrictions
-	 * @return
-	 * @throws DSigException
-	 * @throws InconsistentTDChainException
-	 * @throws CertificateEncodingException 
-	 */
+
 	@Override
 	public List<TrustDelegation> issueChainedTD(List<TrustDelegation> chain, 
 		X509Certificate[] issuer, PrivateKey pk, X509Certificate[] receiver, 
@@ -211,19 +164,6 @@ public class ETDImpl implements ETDApi
 	}
 	
 
-	
-	/**
-	 * Validate single trust delegation assertion. Checks if receiver has trust of custodian 
-	 * delegated by issuer. This validation is done in terms of DNs.
-	 *  
-	 * @param td
-	 * @param custodian
-	 * @param issuer
-	 * @param receiver
- 	 * @param validator certificate chain validator, used to check issuer cert chain
- 	 * received from the assertion
-	 * @return
-	 */
 	@Override
 	public ValidationResult validateTD(TrustDelegation td, String custodian, 
 			String issuer, String receiver, X509CertChainValidator validator)
@@ -273,19 +213,7 @@ public class ETDImpl implements ETDApi
 		return validateTDBasic(validator, td, issuerCert, custodian, null, null);
 	}
 
-	
-	/**
-	 * Validate single trust delegation assertion. Checks if receiver has trust of custodian 
-	 * delegated by issuer. This validation is done in terms of certificates and it is assumed
-	 * that assertion includes necessary certificates.
-	 *  
-	 * @param td
-	 * @param custodian
-	 * @param issuer expected issuer certificate chain (it is verified if it is a valid chain).
-	 * @param receiver
-	 * @param validator certificate chain validator, used to check issuer cert chain.
-	 * @return
-	 */
+
 	@Override
 	public ValidationResult validateTD(TrustDelegation td, X509Certificate custodian, 
 			X509Certificate[] issuer, X509Certificate[] receiver, X509CertChainValidator validator)
@@ -363,22 +291,7 @@ public class ETDImpl implements ETDApi
 		return new ValidationResult(true, "Validation OK");
 	}
 	
-	/**
-	 * Tests if the specified trust delegation chain delegates the trust from user to
-	 * subject. 
-	 * <p>
-	 * Please note that if the subject is the receiver of the assertion that is not
-	 * the last one in the chain, then the rest of the chain not need to be checked 
-	 * (and can be theoretically invalid).
-	 * <p>
-	 * This validation is done in terms of DNs.
-	 * @param td
-	 * @param subject
-	 * @param user
-	 * @param validator certificate chain validator, used to check all issuers certificates.
-	 * @param trustedIssuers collection of certificates which are trusted as bootstrap delegation issuers (since U7)
-	 * @return validation result
-	 */
+
 	@Override
 	public ValidationResult isTrustDelegated(List<TrustDelegation> td, String subject, 
 			String user, X509CertChainValidator validator, Collection<X509Certificate> trustedIssuers)
@@ -447,20 +360,7 @@ public class ETDImpl implements ETDApi
 		return new ValidationResult(true, "Validation OK");
 	}
 	
-	
-	/**
-	 * Tests if the specified trust delegation chain delegates the trust from user to
-	 * subject. Please note that if the subject is the receiver of the assertion that is not
-	 * the last one in the chain, then the rest of the chain not need to be checked 
-	 * (and can be theoretically invalid).
-	 * This validation is done in terms of certificates.
-	 * @param td
-	 * @param subject
-	 * @param user
-	 * @param validator certificate chain validator, used to check all issuers certificates.
-	 * @param trustedIssuers collection of certificates which are trusted as bootstrap delegation issuers (since U7)
-	 * @return validation result
-	 */
+
 	@Override
 	public ValidationResult isTrustDelegated(List<TrustDelegation> td, 
 			X509Certificate[] subject, X509Certificate[] user, X509CertChainValidator validator, 

@@ -12,7 +12,7 @@ import java.util.Set;
 
 /**
  * Interface of {@link PropertiesHelper} class. Useful sometimes, when lack of multiinheritance 
- * in Java makes lfie difficult.
+ * in Java makes life difficult.
  * @author K. Benedyczak
  */
 public interface PropertiesHelperAPI
@@ -52,14 +52,13 @@ public interface PropertiesHelperAPI
 	 * only in case, do not use this method.
 	 * @param name
 	 * @param type
-	 * @return
 	 * @throws ConfigurationException
 	 */
 	<T extends Enum<T>> T getEnumValue(String name, Class<T> type)
 			throws ConfigurationException;
 
 	/**
-	 * See {@link #getFileValue(String, boolean, boolean)}. This version converts the result
+	 * See {@link #getFileValue(String, boolean)}. This version converts the result
 	 * to String, handling nulls.
 	 */
 	String getFileValueAsString(String name, boolean isDirectory) throws ConfigurationException;
@@ -69,7 +68,6 @@ public interface PropertiesHelperAPI
 	 * The file must exist and must be readable.
 	 * @param name
 	 * @param isDirectory whether the File must be a directory (true) or a plain file (false)
-	 * @return
 	 * @throws ConfigurationException
 	 */
 	File getFileValue(String name, boolean isDirectory) throws ConfigurationException;
@@ -94,7 +92,6 @@ public interface PropertiesHelperAPI
 	 * @see #getSubkeyValue(String, String)
 	 * @param key
 	 * @param subKey
-	 * @return
 	 */
 	Boolean getSubkeyBooleanValue(String key, String subKey);
 
@@ -102,7 +99,6 @@ public interface PropertiesHelperAPI
 	 * @see #getSubkeyValue(String, String)
 	 * @param key
 	 * @param subKey
-	 * @return
 	 */
 	Integer getSubkeyIntValue(String key, String subKey);
 
@@ -110,7 +106,6 @@ public interface PropertiesHelperAPI
 	 * @see #getSubkeyValue(String, String)
 	 * @param key
 	 * @param subKey
-	 * @return
 	 */
 	Long getSubkeyLongValue(String key, String subKey);
 
@@ -118,7 +113,6 @@ public interface PropertiesHelperAPI
 	 * @see #getSubkeyValue(String, String)
 	 * @param key
 	 * @param subKey
-	 * @return
 	 */
 	<T extends Enum<T>> T getSubkeyEnumValue(String key, String subKey, Class<T> type);
 
@@ -128,7 +122,6 @@ public interface PropertiesHelperAPI
 	 * absent then the {@link #getValue(String)} is used.
 	 * @param key
 	 * @param locale
-	 * @return
 	 */
 	String getLocalizedValue(String key, Locale locale);
 
@@ -147,7 +140,6 @@ public interface PropertiesHelperAPI
 	 * property metadata defines whether list sub keys should be restricted to numerical values only.
 	 * If so list keys are sorted as numbers and keys which are not numbers are skipped with warning.  
 	 * @param prefix2 the prefix to be used.
-	 * @return
 	 */
 	List<String> getListOfValues(String prefix2);
 

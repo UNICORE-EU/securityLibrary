@@ -82,7 +82,7 @@ public class Xlogin implements Serializable{
 	 * sets the login that should be used. The selection is checked.
 	 * 
 	 * @param login - the login to use
-	 * @throws AAAException - in case the selected login is not one of the allowed logins
+	 * @throws SecurityException - in case the selected login is not one of the allowed logins
 	 */
 	public void setSelectedLogin(String login)throws SecurityException{
 		if(isValid(login)){
@@ -156,10 +156,10 @@ public class Xlogin implements Serializable{
 	}
 	
 	/**
-	 * sets the login that should be used. The selection is checked.
+	 * sets the group that should be used. The selection is checked.
 	 * 
-	 * @param login - the login to use
-	 * @throws AAAException - in case the selected login is not one of the allowed logins
+	 * @param group - the group to use
+	 * @throws SecurityException - in case the selected login is not one of the allowed logins
 	 */
 	public void setSelectedGroup(String group)throws SecurityException{
 		if(isValidGroup(group))
@@ -172,10 +172,10 @@ public class Xlogin implements Serializable{
 	}
 
 	/**
-	 * sets the login that should be used. The selection is checked.
+	 * sets the supplementary groups that should be used. The selection is checked.
 	 * 
-	 * @param login - the login to use
-	 * @throws AAAException - in case the selected login is not one of the allowed logins
+	 * @param groups - the groups to use
+	 * @throws SecurityException - in case the selected login is not one of the allowed logins
 	 */
 	public void setSelectedSupplementaryGroups(String[] groups)throws SecurityException{
 		for (int i=0; i<groups.length; i++)

@@ -50,7 +50,7 @@ public class ETDClientSettings implements Cloneable
 	 * rights to invoke operations on the requestedUser behalf (i.e. because of possession of 
 	 * a trusted agent role in the XUUDB/UVOS). It is also useful in cases when there is no delegation
 	 * and security preferences should be passed on - then it should be set to a local identity.
-	 * @param requested user's DN 
+	 * @param requestedUserDN 
 	 */
 	public void setRequestedUser(String requestedUserDN)
 	{
@@ -166,7 +166,6 @@ public class ETDClientSettings implements Cloneable
 
 	/**
 	 * Gets delegation restrictions
-	 * @return
 	 */
 	public DelegationRestrictions getDelegationRestrictions()
 	{

@@ -50,7 +50,6 @@ public abstract class DBPropertiesHelper
 	 * @param prefix prefix which should be added to the properties. In case when those properties are merged 
 	 * with others this should be typically {@link DBPropertiesHelper#PREFIX}. When the metadata should form a 
 	 * separate DBProperties class, then should be empty string and the prefix should be set in the class. 
-	 * @return
 	 */
 	public static <T extends Enum<T>> Map<String, PropertyMD> getMetadata(Class<? extends Driver> defaultDriver, 
 			String defaultUrl, T defaultDialect, String prefix)

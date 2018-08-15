@@ -193,7 +193,7 @@ public class Log {
 	 * exception
 	 * 
 	 * @param throwable - the exception
-	 * @return datailed error message
+	 * @return detailed error message
 	 */
 	public static String getDetailMessage(Throwable throwable){
 		StringBuilder sb=new StringBuilder();
@@ -217,7 +217,6 @@ public class Log {
 	 * 
 	 * @param message
 	 * @param cause
-	 * @return
 	 */
 	public static String createFaultMessage(String message, Throwable cause){
 		return message+": "+getDetailMessage(cause);

@@ -38,8 +38,9 @@ import java.util.Set;
  * to initialize the object. Additionally there are two methods which allows
  * for combining data from this class with other instance: using merge or overwrite mode. 
  * 
+ * See also the IAttributeSource class in use-core.
+ * 
  * @author golbi
- * @see IAttributeSource class in use-core
  */
 public class SubjectAttributesHolder implements Serializable
 {
@@ -274,8 +275,7 @@ public class SubjectAttributesHolder implements Serializable
 	 * lower index - higher preference.
 	 * Negative value - vo is not preferred.
 	 * @param vo
-	 * @return
-	 */
+	 */ 
 	public int getVoPreferrence(String vo)
 	{
 		for (int i=0; i<preferredVos.length; i++)
