@@ -46,12 +46,12 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 			String parts[] = uri.split("/services");
 			if (parts.length > 1)
 			{
-				return parts[0];
+				return parts[0]+"/services";
 			}
 			parts = uri.split("/rest");
 			if (parts.length > 1)
 			{
-				return parts[0];
+				return parts[0]+"/services";
 			}
 			return uri;
 		}catch(Exception ex){
