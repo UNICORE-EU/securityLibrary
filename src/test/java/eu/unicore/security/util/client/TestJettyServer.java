@@ -17,10 +17,12 @@ import java.util.Properties;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSocketFactory;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 
@@ -146,9 +148,36 @@ public class TestJettyServer
 		Properties p1 = JettyServer4Testing.getSecureProperties();
 		p1.setProperty("j." + HttpServerProperties.DISABLED_CIPHER_SUITES, allCiphers.toString());
 		JettyServer4Testing server = prepareServer(p1);
-		makeRequest(server, false, SSLPeerUnverifiedException.class, true);
+		try{
+			makeRequest(server, false, SSLPeerUnverifiedException.class, true);
+		}
+		finally{
+			server.stop();
+		}
 	}
 	
+	@Test
+	public void testDisabledTRACE() throws Exception
+	{
+		Properties p1 = JettyServer4Testing.getSecureProperties();
+		JettyServer4Testing server = prepareServer(p1);
+		try{
+			String url = server.getSecUrl()+"/servlet1";
+			X509Credential cred = new KeystoreCredential("src/test/resources/client/httpclient.jks",
+					"the!client".toCharArray(), "the!client".toCharArray(), null, "JKS");
+			X509CertChainValidatorExt validator = new KeystoreCertChainValidator("src/test/resources/client/httpclient.jks",
+					"the!client".toCharArray(), "JKS", -1);
+			DefaultClientConfiguration secCfg = new DefaultClientConfiguration(validator, cred);
+			HttpClient client = HttpUtils.createClient(url, secCfg);
+			HttpTrace tr = new HttpTrace(url);
+			HttpResponse response = client.execute(tr);
+			assertTrue("Got: " + response, 
+					HttpServletResponse.SC_METHOD_NOT_ALLOWED==response.getStatusLine().getStatusCode());
+		}
+		finally{
+			server.stop();
+		}
+	}
 	
 /* This test is not valid anymore as new Jetty has a quite complicated thread pool structure (threads are
  * used not only to handle requests but also for other duties, min number is acceptors (2) + selectors(4) + 1.

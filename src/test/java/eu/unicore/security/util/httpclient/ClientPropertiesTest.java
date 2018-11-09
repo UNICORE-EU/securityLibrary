@@ -59,9 +59,9 @@ public class ClientPropertiesTest
 	@Test
 	public void testSessionIDProviderImpl(){
 		String url = "https://gw:123/SITE/services/x/y";
-		assertEquals("https://gw:123/SITE", SessionIDProviderImpl.extractServerID(url));
+		assertEquals("https://gw:123/SITE/services", SessionIDProviderImpl.extractServerID(url));
 		url = "https://gw:123/SITE/rest/core";
-		assertEquals("https://gw:123/SITE", SessionIDProviderImpl.extractServerID(url));
+		assertEquals("https://gw:123/SITE/services", SessionIDProviderImpl.extractServerID(url));
 		url = "https://gw:123/SITE";
 		assertEquals("https://gw:123/SITE", SessionIDProviderImpl.extractServerID(url));
 	}

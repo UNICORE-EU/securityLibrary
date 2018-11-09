@@ -4,7 +4,7 @@
 	<groupId>eu.unicore.security</groupId>
 	<artifactId>securityLibrary</artifactId>
 	<packaging>jar</packaging>
-	<version>4.5.5-SNAPSHOT</version>
+	<version>4.5.5</version>
 	<name>securityLibrary</name>
 
 	<properties>
@@ -144,7 +144,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<forkMode>pertest</forkMode>
+				  <forkCount>1</forkCount>
+				  <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
 				</configuration>
 			</plugin>
 			<plugin>

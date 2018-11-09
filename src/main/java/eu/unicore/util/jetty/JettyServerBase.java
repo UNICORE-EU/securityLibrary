@@ -33,6 +33,7 @@
 
 package eu.unicore.util.jetty;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
@@ -40,6 +41,7 @@ import java.util.Enumeration;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.rewrite.handler.HeaderPatternRule;
@@ -47,10 +49,13 @@ import org.eclipse.jetty.rewrite.handler.RewriteHandler;
 import org.eclipse.jetty.rewrite.handler.Rule;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HttpChannel;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.LowResourceMonitor;
 import org.eclipse.jetty.server.NetworkConnector;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SessionIdManager;
@@ -153,7 +158,7 @@ public abstract class JettyServerBase {
 			logger.info("Creating Jetty HTTP server, will listen on: " + allAddresses);	
 		}
 		
-		theServer = new Server(getThreadPool());
+		theServer = createServer();
 		
 		configureSessionIdManager(extraSettings.getBooleanValue(HttpServerProperties.FAST_RANDOM));
 
@@ -174,6 +179,24 @@ public abstract class JettyServerBase {
 		configureErrorHandler();
 	}
 
+	protected Server createServer(){
+		Server server = new Server(getThreadPool()){
+			@Override
+		    public void handle(HttpChannel connection) throws IOException, ServletException {
+		        Request request=connection.getRequest();
+		        Response response=connection.getResponse();
+
+		        if ("TRACE".equals(request.getMethod())){
+		            request.setHandled(true);
+		            response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		        } else {
+		            super.handle(connection);
+		        }
+		    }
+		};
+		return server;
+	}
+	
 	protected void configureGzipHandler(AbstractHandlerContainer headersRewriteHandler)
 	{
 		Handler withGzip = configureGzip(headersRewriteHandler);
