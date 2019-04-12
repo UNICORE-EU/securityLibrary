@@ -87,7 +87,7 @@ public class JettyServer4Testing extends JettyServerBase {
 		return p;
 	}
 	
-	public static JettyServer4Testing getInstance(Properties p, int port, int soLinger) throws Exception {
+	public static JettyServer4Testing getInstance(Properties p, int port) throws Exception {
 		String host = "127.0.0.1";
 		URL[] urls = new URL[] {new URL("http://" + host + ":" + port),
 				new URL("https://" + host + ":" + (port+1))};
@@ -97,19 +97,17 @@ public class JettyServer4Testing extends JettyServerBase {
 		return new JettyServer4Testing(urls, secCfg, extra);
 	}
 	
-	public static JettyServer4Testing getInstance(int soLinger) throws Exception {
+	public static JettyServer4Testing getInstance() throws Exception {
 		int port = 62407;
 		Properties p = getSecureProperties();
-		p.setProperty("j." + HttpServerProperties.SO_LINGER_TIME, soLinger+"");
-		return getInstance(p, port, soLinger);
+		return getInstance(p, port);
 	}
 	
-	public static JettyServer4Testing getAnyPortInstance(int soLinger) throws Exception {
+	public static JettyServer4Testing getAnyPortInstance() throws Exception {
 		int port = 0;
 		String host = "127.0.0.1";
 		URL[] urls = new URL[] {new URL("http://" + host + ":" + port)};
 		Properties p = new Properties();
-		p.setProperty("j." + HttpServerProperties.SO_LINGER_TIME, soLinger+"");
 		p.setProperty("j." + HttpServerProperties.FAST_RANDOM, "true");
 		
 		IAuthnAndTrustConfiguration secCfg = new DefaultAuthnAndTrustConfiguration();

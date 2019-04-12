@@ -14,7 +14,7 @@ public class TestAnyPort
 	@Test
 	public void testAnyPort() throws Exception
 	{
-		JettyServer4Testing server = JettyServer4Testing.getAnyPortInstance(1);
+		JettyServer4Testing server = JettyServer4Testing.getAnyPortInstance();
 		assertEquals(0, server.getUrls()[0].getPort());
 		server.start();
 		assertNotSame(0, server.getUrls()[0].getPort());

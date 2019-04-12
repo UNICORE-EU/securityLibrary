@@ -32,7 +32,7 @@ public class TestConnectionUtil
 	@Before
 	public void setUp() throws Exception
 	{
-		server = JettyServer4Testing.getInstance(1);
+		server = JettyServer4Testing.getInstance();
 		server.start();
 	}
 	

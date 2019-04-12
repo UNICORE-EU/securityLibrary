@@ -48,7 +48,7 @@ public class TestHttpUtils
 	@Before
 	public void setUp() throws Exception
 	{
-		server = JettyServer4Testing.getInstance(1);
+		server = JettyServer4Testing.getInstance();
 		server.addServlet(SimpleServlet.class.getName(), "/servlet1");
 		server.addServlet(RedirectServlet.class.getName(), "/servlet2");
 		server.start();

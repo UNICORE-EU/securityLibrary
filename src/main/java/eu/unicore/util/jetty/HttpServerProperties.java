@@ -105,10 +105,7 @@ public class HttpServerProperties extends PropertiesHelper
 	 */
 	public static final String LOW_RESOURCE_MAX_IDLE_TIME = "lowResourceMaxIdleTime";
 
-	/**
-	 * Socket linger time
-	 */
-	public static final String SO_LINGER_TIME = "soLingerTime";
+	private static final String SO_LINGER_TIME = "soLingerTime";
 
 	/**
 	 * Whether the SSL socket accept client-side authentication
@@ -179,8 +176,8 @@ public class HttpServerProperties extends PropertiesHelper
 				setDescription("In low resource conditions, time (in ms.) before an idle connection will time out."));
 		defaults.put(FAST_RANDOM, new PropertyMD("false").
 				setDescription("Use insecure, but fast pseudo random generator to generate session ids instead of secure generator for SSL sockets."));
-		defaults.put(SO_LINGER_TIME, new PropertyMD("-1").
-				setDescription("Socket linger time."));
+		defaults.put(SO_LINGER_TIME, new PropertyMD().setDeprecated().
+				setDescription("Socket linger time can not be set on async sockets"));
 		defaults.put(WANT_CLIENT_AUTHN, new PropertyMD("true").
 				setDescription("Controls whether the SSL socket accepts (but does not require) client-side authentication."));
 		defaults.put(REQUIRE_CLIENT_AUTHN, new PropertyMD("true").

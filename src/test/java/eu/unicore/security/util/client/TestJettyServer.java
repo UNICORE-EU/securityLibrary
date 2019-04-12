@@ -81,7 +81,7 @@ public class TestJettyServer
 	
 	private JettyServer4Testing prepareServer(Properties p1) throws Exception
 	{
-		JettyServer4Testing server = JettyServer4Testing.getInstance(p1, 65432, 1);
+		JettyServer4Testing server = JettyServer4Testing.getInstance(p1, 65432);
 		server.addServlet(SimpleServlet.class.getName(), "/servlet1");
 		server.start();
 		return server;
@@ -272,12 +272,12 @@ public class TestJettyServer
 		p1.setProperty("j." + HttpServerProperties.REQUIRE_CLIENT_AUTHN, "false");
 
 		System.out.println("Authn want: NO require: NO");
-		JettyServer4Testing server = JettyServer4Testing.getInstance(p1, 65432, 1);
+		JettyServer4Testing server = JettyServer4Testing.getInstance(p1, 65432);
 		server.addServlet(SimpleServlet.class.getName(), "/servlet1");
 		server.start();
 		makeRequest(server, true, null, true);
 		
-		server = JettyServer4Testing.getInstance(p1, 65432, 1);
+		server = JettyServer4Testing.getInstance(p1, 65432);
 		server.addServlet(SimpleServlet.class.getName(), "/servlet1");
 		server.start();
 		makeRequest(server, true, null, false);
@@ -286,12 +286,12 @@ public class TestJettyServer
 		p1.setProperty("j." + HttpServerProperties.REQUIRE_CLIENT_AUTHN, "false");
 		System.out.println("Authn want: YES require: NO");
 		
-		server = JettyServer4Testing.getInstance(p1, 65432, 1);
+		server = JettyServer4Testing.getInstance(p1, 65432);
 		server.addServlet(SimpleServlet.class.getName(), "/servlet1");
 		server.start();
 		makeRequest(server, true, null, true);
 		
-		server = JettyServer4Testing.getInstance(p1, 65432, 1);
+		server = JettyServer4Testing.getInstance(p1, 65432);
 		server.addServlet(SimpleServlet.class.getName(), "/servlet1");
 		server.start();
 		makeRequest(server, true, null, false);
@@ -300,12 +300,12 @@ public class TestJettyServer
 		p1.setProperty("j." + HttpServerProperties.REQUIRE_CLIENT_AUTHN, "true");
 		System.out.println("Authn want: YES require: YES");
 		
-		server = JettyServer4Testing.getInstance(p1, 65432, 1);
+		server = JettyServer4Testing.getInstance(p1, 65432);
 		server.addServlet(SimpleServlet.class.getName(), "/servlet1");
 		server.start();
 		makeRequest(server, true, null, true);
 		
-		server = JettyServer4Testing.getInstance(p1, 65432, 1);
+		server = JettyServer4Testing.getInstance(p1, 65432);
 		server.addServlet(SimpleServlet.class.getName(), "/servlet1");
 		server.start();
 		makeRequest(server, false, SSLPeerUnverifiedException.class, false);

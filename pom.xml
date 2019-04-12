@@ -8,7 +8,7 @@
 	<name>securityLibrary</name>
 
 	<properties>
-	  <jetty.version>9.4.11.v20180605</jetty.version>
+	  <jetty.version>9.4.16.v20190411</jetty.version>
 	  <slf.version>1.7.13</slf.version>
 	</properties>
 

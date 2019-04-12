@@ -31,11 +31,11 @@ import eu.unicore.security.canl.SSLContextCreator;
  */
 public class JettyConnectorUtils
 {
-	public static SslContextFactory createJettyContextFactory(X509CertChainValidator validator,
+	public static SslContextFactory.Server createJettyContextFactory(X509CertChainValidator validator,
 			X509Credential credential, Logger log) throws NoSuchAlgorithmException, 
 			NoSuchProviderException, KeyManagementException
 	{
-		SslContextFactory ret = new SslContextFactory();
+		SslContextFactory.Server ret = new SslContextFactory.Server();
 		String protocol = "TLS"; 
 		ret.setSslContext(SSLContextCreator.createSSLContext(credential, validator, protocol, 
 				"Jetty HTTP Server", log));

@@ -54,9 +54,9 @@ import eu.unicore.util.Log;
 public class SecuredServerConnector extends ServerConnector {
 	
 	private final static Logger log = Log.getLogger(Log.CONNECTIONS, SecuredServerConnector.class);
-	private SslContextFactory sslContextFactory;
+	private SslContextFactory.Server sslContextFactory;
 	
-	public SecuredServerConnector(Server server, SslContextFactory sslContextFactory, 
+	public SecuredServerConnector(Server server, SslContextFactory.Server sslContextFactory, 
 			ConnectionFactory... factories)
 	{
 		super(server, sslContextFactory, factories);
@@ -70,12 +70,12 @@ public class SecuredServerConnector extends ServerConnector {
 		super.configure(socket);
 	}
 
-	public SslContextFactory getSslContextFactory()
+	public SslContextFactory.Server getSslContextFactory()
 	{
 		return sslContextFactory;
 	}
 	
-	public static SslContextFactory createContextFactory(X509CertChainValidator validator, 
+	public static SslContextFactory.Server createContextFactory(X509CertChainValidator validator, 
 			X509Credential credential) throws Exception
 	{
 		return JettyConnectorUtils.createJettyContextFactory(validator, credential, log);

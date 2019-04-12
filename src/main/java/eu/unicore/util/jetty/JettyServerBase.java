@@ -298,7 +298,7 @@ public abstract class JettyServerBase {
 	 */
 	protected SecuredServerConnector getSecuredConnectorInstance() throws ConfigurationException {
 		HttpConnectionFactory httpConnFactory = getHttpConnectionFactory();
-		SslContextFactory secureContextFactory;
+		SslContextFactory.Server secureContextFactory;
 		try
 		{
 			secureContextFactory = SecuredServerConnector.createContextFactory(
@@ -325,7 +325,7 @@ public abstract class JettyServerBase {
 		logger.debug("Creating SSL NIO connector on: " + url);
 		SecuredServerConnector ssl = getSecuredConnectorInstance();			
 
-		SslContextFactory factory = ssl.getSslContextFactory();
+		SslContextFactory.Server factory = ssl.getSslContextFactory();
 		factory.setNeedClientAuth(extraSettings.getBooleanValue(HttpServerProperties.REQUIRE_CLIENT_AUTHN));
 		factory.setWantClientAuth(extraSettings.getBooleanValue(HttpServerProperties.WANT_CLIENT_AUTHN));
 		String disabledCiphers = extraSettings.getValue(HttpServerProperties.DISABLED_CIPHER_SUITES);
@@ -380,7 +380,6 @@ public abstract class JettyServerBase {
 	protected void configureConnector(ServerConnector connector, URL url) throws ConfigurationException {
 		connector.setHost(url.getHost());
 		connector.setPort(url.getPort() == -1 ? url.getDefaultPort() : url.getPort());
-		connector.setSoLingerTime(extraSettings.getIntValue(HttpServerProperties.SO_LINGER_TIME));
 		connector.setIdleTimeout(extraSettings.getIntValue(HttpServerProperties.MAX_IDLE_TIME));
 	}
 
