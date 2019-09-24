@@ -202,8 +202,8 @@ public class TestHttpUtils
 		try
 		{
 			client.execute(get);
-			fail("Managed to conenct with untrusted certificate!!!!!");
-		} catch (SSLPeerUnverifiedException e)
+			fail("Managed to connect with untrusted certificate!!!!!");
+		} catch (SSLException e)
 		{
 			//OK
 		} catch (Exception e)

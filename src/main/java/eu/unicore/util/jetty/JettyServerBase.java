@@ -512,7 +512,6 @@ public abstract class JettyServerBase {
 	protected LowResourceMonitor getResourcesMonitor()
 	{
 		LowResourceMonitor ret = new LowResourceMonitor(theServer);
-		
 		ret.setMaxConnections(extraSettings.getIntValue(HttpServerProperties.HIGH_LOAD_CONNECTIONS));
 		ret.setLowResourcesIdleTimeout(extraSettings.getIntValue(
 			HttpServerProperties.LOW_RESOURCE_MAX_IDLE_TIME));
