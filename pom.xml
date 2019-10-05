@@ -4,7 +4,7 @@
 	<groupId>eu.unicore.security</groupId>
 	<artifactId>securityLibrary</artifactId>
 	<packaging>jar</packaging>
-	<version>4.5.8-SNAPSHOT</version>
+	<version>4.5.8</version>
 	<name>securityLibrary</name>
 
 	<properties>
@@ -21,7 +21,7 @@
 	<scm>
 		<connection>scm:git://git.code.sf.net/p/unicore/securityLibrary</connection>
 		<developerConnection>scm:git:ssh://git.code.sf.net/p/unicore/securityLibrary</developerConnection>
-		<tag>HEAD</tag>
+		<tag>securityLibrary-4.5.8</tag>
 	</scm>
 
 	<developers>
