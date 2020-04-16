@@ -80,16 +80,6 @@ public interface IClientConfiguration extends IPlainClientConfiguration
 	public ETDClientSettings getETDSettings();
 	
 	/**
-	 * Returns additional settings which are used to set up the client call,
-	 * e.g. additional security handler settings.
-	 * 
-	 * @return see above
-	 * @deprecated - don't use, will be removed. repalaced bny the {@link #getHttpClientProperties()}
-	 */
-	@Deprecated
-	public Properties getExtraSettings();
-	
-	/**
 	 * @return settings for the HTTP client.
 	 */
 	public HttpClientProperties getHttpClientProperties();

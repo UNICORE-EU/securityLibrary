@@ -4,24 +4,24 @@
 	<groupId>eu.unicore.security</groupId>
 	<artifactId>securityLibrary</artifactId>
 	<packaging>jar</packaging>
-	<version>4.5.9-SNAPSHOT</version>
+	<version>4.5.10-SNAPSHOT</version>
 	<name>securityLibrary</name>
 
 	<properties>
-	  <jetty.version>9.4.20.v20190813</jetty.version>
+	  <jetty.version>9.4.28.v20200408</jetty.version>
 	  <slf.version>1.7.13</slf.version>
 	</properties>
 
 	<parent>
 		<groupId>eu.unicore</groupId>
 		<artifactId>unicore-parent</artifactId>
-		<version>1.21</version>
+		<version>1.22</version>
 	</parent>
 	
 	<scm>
 		<connection>scm:git://git.code.sf.net/p/unicore/securityLibrary</connection>
 		<developerConnection>scm:git:ssh://git.code.sf.net/p/unicore/securityLibrary</developerConnection>
-		<tag>securityLibrary-4.5.8</tag>
+		<tag>securityLibrary-4.5.9</tag>
 	</scm>
 
 	<developers>

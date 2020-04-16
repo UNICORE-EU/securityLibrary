@@ -17,7 +17,7 @@ public class Log {
 			try
 			{
 				Class<?> factClazz = Class.forName(factName);
-				Object factRaw = factClazz.newInstance();
+				Object factRaw = factClazz.getConstructor().newInstance();
 				spi = (LoggerFactory) factRaw;
 			} catch (Exception e)
 			{
@@ -199,14 +199,12 @@ public class Log {
 		StringBuilder sb=new StringBuilder();
 		Throwable cause=throwable;
 		String message=null;
-		String type=null;type=cause.getClass().getName();
-		do{
+		String type="";
+		while(cause!=null){
 			type=cause.getClass().getName();
 			message=cause.getMessage();
 			cause=cause.getCause();
 		}
-		while(cause!=null);
-
 		if(message!=null)sb.append(type).append(": ").append(message);
 		else sb.append(type).append(" (no further message available)");
 		return sb.toString();

@@ -273,25 +273,6 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	}
 
 	/**
-	 * @deprecated returns null 
-	 */
-	@Override
-	@Deprecated
-	public Properties getExtraSettings()
-	{
-		return null;
-	}
-
-	/**
-	 * @param extraSettings the extraSettings to set
-	 * @deprecated Not used anymore, no op
-	 */
-	@Deprecated
-	public void setExtraSettings(Properties extraSettings)
-	{
-	}
-
-	/**
 	 * @return the extraSecurityTokens
 	 */
 	@Override

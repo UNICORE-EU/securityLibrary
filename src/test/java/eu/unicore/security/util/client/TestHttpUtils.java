@@ -16,7 +16,6 @@ import java.net.URI;
 import java.util.Properties;
 
 import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLPeerUnverifiedException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
