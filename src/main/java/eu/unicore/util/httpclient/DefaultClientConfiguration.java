@@ -398,7 +398,6 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 		ret.setInHandlerClassNames(inHandlerClassNames);
 		ret.setOutHandlerClassNames(outHandlerClassNames);
 		ret.setSslAuthn(sslAuthn);
-		ret.setSslAuthn(sslAuthn);
 		ret.setSslEnabled(sslEnabled);
 		ret.setValidator(getValidator());
 		ret.setServerHostnameCheckingMode(serverHostnameCheckingMode);

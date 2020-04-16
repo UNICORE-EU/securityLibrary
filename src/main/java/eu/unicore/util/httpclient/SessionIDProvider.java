@@ -25,6 +25,17 @@ public interface SessionIDProvider {
 	public Collection<ClientSecuritySession> getAllSessions();
 
 	/**
+	 * Tries to find a session id for the given url and custom key. A session id is returned
+	 * only if it is matching the URL container, session was established with the equivalent 
+	 * key and the session is not expired.
+	 * 
+	 * @param url
+	 * @param myKey
+	 * @return session ID or null if no valid session ID exists
+	 */
+	public String getSessionID(String url, String myKey);
+	
+	/**
 	 * Registers a new security session.
 	 * @param sessionId
 	 * @param url
@@ -32,6 +43,15 @@ public interface SessionIDProvider {
 	 * @param sessionsettings
 	 */
 	public void registerSession(String sessionId, String url, long lifetime, IClientConfiguration sessionsettings);
+	
+	/**
+	 * Registers a new security session.
+	 * @param sessionId
+	 * @param url
+	 * @param lifetime
+	 * @param key
+	 */
+	public void registerSession(String sessionId, String url, long lifetime, String key);
 	
 	/**
 	 * Adds a complete session, ready to be used

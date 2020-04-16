@@ -8,7 +8,6 @@
 package eu.unicore.util.httpclient;
 
 import java.util.Map;
-import java.util.Properties;
 
 import eu.unicore.util.configuration.PropertiesHelper;
 

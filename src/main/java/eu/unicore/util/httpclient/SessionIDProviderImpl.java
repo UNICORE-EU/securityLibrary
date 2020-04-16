@@ -62,11 +62,19 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 	@Override
 	public synchronized String getSessionID(String url, IClientConfiguration currentSettings)
 	{
+		String sessionHash = checksumSecuritySettings(currentSettings);
+		return getSessionID(url, sessionHash);
+	}
+	
+	@Override
+	public synchronized String getSessionID(String url, String myKey)
+	{
+		if(myKey==null)return null;
+		
 		String scope = extractServerID(url);
 		ArrayList<ClientSecuritySession> scoped = sessions.get(scope);
 		if (scoped == null)
 			return null;
-		String sessionHash = checksumSecuritySettings(currentSettings);
 		long currentTime = System.currentTimeMillis();
 		for (int i=0; i<scoped.size(); i++)
 		{
@@ -79,14 +87,14 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 				continue;
 			}
 			
-			if (existing.getSessionHash().equals(sessionHash))
+			if (existing.getSessionHash().equals(myKey))
 			{
 				return existing.getSessionId();
 			}
 		}
 		return null;
 	}
-
+	
 	@Override
 	public synchronized Collection<ClientSecuritySession> getAllSessions()
 	{
@@ -118,6 +126,13 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 	public synchronized void registerSession(String sessionId, String url, long lifetime, 
 			IClientConfiguration sessionSettings)
 	{
+		registerSession(sessionId, url, lifetime, checksumSecuritySettings(sessionSettings));
+	}
+	
+	@Override
+	public synchronized void registerSession(String sessionId, String url, long lifetime, 
+			String myKey)
+	{
 		String scope = extractServerID(url);
 		ArrayList<ClientSecuritySession> scoped = sessions.get(scope);
 		if (scoped == null)
@@ -125,14 +140,13 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 			scoped = new ArrayList<ClientSecuritySession>(5);
 			sessions.put(scope, scoped);
 		}
-		String sessionHash = checksumSecuritySettings(sessionSettings);
 		
 		boolean add = true;
 		long expiry = lifetime+System.currentTimeMillis()-EXPIRY_BEFORE;
 		for (int i=0; i<scoped.size(); i++)
 		{
 			ClientSecuritySession existing = scoped.get(i);
-			if (existing.getSessionHash().equals(sessionHash))
+			if (existing.getSessionHash().equals(myKey))
 			{
 				if (existing.getExpiryTS() > expiry)
 				{
@@ -148,10 +162,10 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 		
 		if (add)
 		{
-			scoped.add(new ClientSecuritySession(sessionId, expiry, sessionHash, scope));
+			scoped.add(new ClientSecuritySession(sessionId, expiry, myKey, scope));
 		}
 	}
-	
+
 	/**
 	 * Calculate a hash of security settings. This must allow to determine
 	 * whether the settings have changed, so that a new security session is required.
