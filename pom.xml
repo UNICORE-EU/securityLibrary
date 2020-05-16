@@ -75,6 +75,11 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>${slf.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>eu.unicore</groupId>
+			<artifactId>jproperties-conf</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 
 		<!-- XMLBeans and samly2 are required only if you use classes from the 
 		         eu.unicore.security and eu.unicore.security.{consignor|etd|user} 
