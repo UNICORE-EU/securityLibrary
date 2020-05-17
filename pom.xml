@@ -38,15 +38,6 @@
 		</developer>
 	</developers>
 
-	<!-- to be removed after xmlbeans-jdk8 issue is solved -->
-	<repositories>
-		<repository>
-			<id>unicore.eu</id>
-			<name>UNICORE repository</name>
-			<url>https://unicore-dev.zam.kfa-juelich.de/maven</url>
-		</repository>
-	</repositories>
-
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -85,11 +76,6 @@
 		         eu.unicore.security and eu.unicore.security.{consignor|etd|user} 
 		     packages.
 		     If you use them then you need the below dependencies. -->
- 		<dependency>
-			<groupId>org.apache.xmlbeans</groupId>
-			<artifactId>xmlbeans-jdk8</artifactId>
-			<version>2.6.0</version>
-		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.woodstox</groupId>
 			<artifactId>woodstox-core</artifactId>
@@ -99,12 +85,6 @@
 			<groupId>io.imunity.samly</groupId>
 			<artifactId>samly2</artifactId>
 			<version>2.5.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.xmlbeans</groupId>
-					<artifactId>xmlbeans</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- Jetty is required only if you use classes from the 
