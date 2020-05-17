@@ -4,7 +4,7 @@
 	<groupId>eu.unicore.security</groupId>
 	<artifactId>securityLibrary</artifactId>
 	<packaging>jar</packaging>
-	<version>5.0.1-SNAPSHOT</version>
+	<version>5.0.0-SNAPSHOT</version>
 	<name>securityLibrary</name>
 	<description>Low level security library for UNICORE: config, utils and data types</description>
 	<url>https://github.com/UNICORE-EU/securityLibrary</url>
@@ -23,6 +23,13 @@
 		<url>https://github.com/UNICORE-EU/securityLibrary</url>
 		<tag>HEAD</tag>
 	</scm>
+
+	<licenses>
+		<license>
+			<name>BSD</name>
+			<url>https://opensource.org/licenses/BSD-3-Clause</url>
+		</license>
+	</licenses>
 
 	<developers>
 		<developer>
