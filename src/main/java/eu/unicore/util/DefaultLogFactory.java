@@ -4,7 +4,8 @@
  */
 package eu.unicore.util;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Default {@link LoggerFactory} - creates logger from the given prefix (as-is) and simple class name.
@@ -25,6 +26,10 @@ public class DefaultLogFactory implements LoggerFactory
 	 */
 	@Override
 	public Logger getLogger(String prefix, Class<?>clazz){
-		return Logger.getLogger(getLoggerName(prefix, clazz));
+		return LogManager.getLogger(getLoggerName(prefix, clazz));
+	}
+	
+	public org.apache.log4j.Logger get12Logger(String prefix, Class<?>clazz){
+		return org.apache.log4j.LogManager.getLogger(getLoggerName(prefix, clazz));
 	}
 }

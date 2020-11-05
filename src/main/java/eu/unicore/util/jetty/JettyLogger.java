@@ -1,6 +1,6 @@
 package eu.unicore.util.jetty;
 
-import org.apache.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.eclipse.jetty.util.log.AbstractLogger;
 import org.eclipse.jetty.util.log.Logger;
 
@@ -17,8 +17,7 @@ import eu.unicore.util.Log;
 public class JettyLogger extends AbstractLogger implements Logger
 {
 
-	private final org.apache.log4j.Logger log;
-	private Level configuredLevel;
+	private final org.apache.logging.log4j.Logger log;
 
 	public JettyLogger()
 	{
@@ -29,8 +28,7 @@ public class JettyLogger extends AbstractLogger implements Logger
 	{
 		if (name == null)
 			name = getDefaultLog4jLoggerName();
-		log = org.apache.log4j.Logger.getLogger(name);
-		configuredLevel = log.getLevel();
+		log = LogManager.getLogger(name);
 	}
 
 	/**
@@ -84,14 +82,7 @@ public class JettyLogger extends AbstractLogger implements Logger
 
 	public void setDebugEnabled(boolean enabled)
 	{
-		if (enabled)
-		{
-			configuredLevel = log.getLevel();
-			log.setLevel(Level.DEBUG);
-		} else
-		{
-			log.setLevel(configuredLevel);
-		}
+		//nop
 	}
 
 	public void debug(String msg, Object... args)

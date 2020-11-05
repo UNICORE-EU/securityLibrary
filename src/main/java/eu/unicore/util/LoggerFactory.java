@@ -4,7 +4,7 @@
  */
 package eu.unicore.util;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This interface implementation can be used to change the default Logger 
@@ -34,4 +34,6 @@ public interface LoggerFactory
 	 * @return logger
 	 */
 	public Logger getLogger(String prefix, Class<?>clazz);
+	
+	public org.apache.log4j.Logger get12Logger(String prefix, Class<?>clazz);
 }

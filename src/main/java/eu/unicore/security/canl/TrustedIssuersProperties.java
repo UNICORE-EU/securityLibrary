@@ -59,7 +59,7 @@ import eu.unicore.util.configuration.PropertyMD.DocumentationCategory;
  */
 public class TrustedIssuersProperties extends PropertiesHelper
 {
-	private static final Logger log = Log.getLogger(Log.CONFIGURATION, TrustedIssuersProperties.class);
+	private static final Logger log = Log.get12Logger(Log.CONFIGURATION, TrustedIssuersProperties.class);
 
 	public static final String DEFAULT_PREFIX = "trustedIssuers.";
 	

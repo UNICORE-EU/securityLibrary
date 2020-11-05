@@ -52,7 +52,7 @@ import eu.unicore.util.configuration.PropertyMD;
  */
 public class HttpServerProperties extends PropertiesHelper
 {
-	private static final Logger log = Log.getLogger(Log.CONFIGURATION, HttpServerProperties.class);
+	private static final Logger log = Log.get12Logger(Log.CONFIGURATION, HttpServerProperties.class);
 	
 
 	public enum XFrameOptions {

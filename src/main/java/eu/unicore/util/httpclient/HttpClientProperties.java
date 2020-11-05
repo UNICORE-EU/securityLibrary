@@ -25,7 +25,7 @@ import eu.unicore.util.configuration.PropertyMD.DocumentationCategory;
  */
 public class HttpClientProperties extends PropertiesHelper
 {
-	private static final Logger log = Log.getLogger(Log.CONFIGURATION, HttpClientProperties.class);
+	private static final Logger log = Log.get12Logger(Log.CONFIGURATION, HttpClientProperties.class);
 	
 	public static final String PREFIX = "http.";
 	

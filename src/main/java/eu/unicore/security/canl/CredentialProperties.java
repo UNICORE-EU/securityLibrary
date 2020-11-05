@@ -41,7 +41,7 @@ import eu.unicore.util.configuration.PropertyMD;
  */
 public class CredentialProperties extends PropertiesHelper
 {
-	private static final Logger log = Log.getLogger(Log.CONFIGURATION, CredentialProperties.class);
+	private static final Logger log = Log.get12Logger(Log.CONFIGURATION, CredentialProperties.class);
 
 	private static final long WEEK=7*24*60*60*1000;
 	public static final String DEFAULT_PREFIX = "credential.";

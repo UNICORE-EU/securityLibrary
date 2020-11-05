@@ -33,7 +33,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.X509Credential;
 import eu.unicore.security.canl.SSLContextCreator;
@@ -67,7 +67,7 @@ import eu.unicore.util.Log;
  */
 public class HttpUtils {
 
-	private static final Logger logger=Log.getLogger(Log.CLIENT, HttpUtils.class);
+	private static final Logger logger = Log.getLogger(Log.CLIENT, HttpUtils.class);
 	private static final ConnectionCloseInterceptor CONN_CLOSE_INTERCEPTOR = new ConnectionCloseInterceptor();
 
 	//prevent instantiation 

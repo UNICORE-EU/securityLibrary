@@ -4,7 +4,7 @@
  */
 package eu.unicore.security.canl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.unicore.util.Log;

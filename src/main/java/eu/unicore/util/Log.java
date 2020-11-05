@@ -4,13 +4,16 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.log4j.MDC;
 
 import eu.unicore.util.configuration.PropertiesHelper;
 
 public class Log {
+	
 	private static LoggerFactory spi;
+	
 	static {
 		String factName = System.getProperty(LoggerFactory.LOGGER_FACTORY_PROPERTY);
 		if (factName != null) {
@@ -45,14 +48,9 @@ public class Log {
 	public static final String ADMIN=UNICORE+".admin";
 
 	/**
-	 * logger prefix for general WSRFlite code
-	 */
-	public static final String WSRFLITE=UNICORE+".wsrflite";
-
-	/**
 	 * logger prefix for persistence related code
 	 */
-	public static final String PERSISTENCE=UNICORE+".wsrflite.persistence";
+	public static final String PERSISTENCE=UNICORE+".persistence";
 
 	/**
 	 * logger prefix for services
@@ -77,7 +75,7 @@ public class Log {
 	/**
 	 * logger prefix for HTTP server logging
 	 */
-	public static final String HTTP_SERVER=UNICORE+".httpserver";
+	public static final String HTTP_SERVER=UNICORE+".http.server";
 
 	/**
 	 * logger prefix for general logging of properties based configuration handling, used
@@ -109,9 +107,17 @@ public class Log {
 		return spi.getLogger(prefix, clazz);
 	}
 
+	/**
+	 * log4j-1.2 logger 
+	 * 
+	 * will be removed eventually ...
+	 */
+	public static org.apache.log4j.Logger get12Logger(String prefix, Class<?>clazz){
+		return spi.get12Logger(prefix, clazz);
+	}
 
 	/** 
-	 * log an error message to the default logger ("unicore.wsrflite")
+	 * log an error message to the default logger ("unicore")
 	 * A human-friendly message is constructed and logged at "INFO" level.
 	 * The stack trace is logged at "DEBUG" level.
 	 * 
@@ -120,7 +126,7 @@ public class Log {
 	 *
 	 */
 	public static void logException(String message, Throwable cause){
-		logException(message,cause,Logger.getLogger(WSRFLITE));
+		logException(message, cause, LogManager.getLogger(UNICORE));
 	}
 
 	// keep track of when message was last logged
