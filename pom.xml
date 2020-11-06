@@ -4,7 +4,7 @@
 	<groupId>eu.unicore.security</groupId>
 	<artifactId>securityLibrary</artifactId>
 	<packaging>jar</packaging>
-	<version>5.0.1-SNAPSHOT</version>
+	<version>5.1.0-SNAPSHOT</version>
 	<name>securityLibrary</name>
 	<description>Low level security library for UNICORE: config, utils and data types</description>
 	<url>https://github.com/UNICORE-EU/securityLibrary</url>
@@ -13,6 +13,7 @@
 	  <jetty.version>9.4.31.v20200723</jetty.version>
 	  <log4j.version>2.13.3</log4j.version>
 	  <slf.version>1.7.30</slf.version>
+	  <jproperties.version>1.1.0</jproperties.version>
 	  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	  <maven.compiler.target>1.8</maven.compiler.target>
 	  <maven.compiler.source>1.8</maven.compiler.source>
@@ -92,7 +93,7 @@
 		<dependency>
 			<groupId>eu.unicore</groupId>
 			<artifactId>jproperties-conf</artifactId>
-			<version>1.0.0</version>
+			<version>${jproperties.version}</version>
 		</dependency>
 
 		<!-- XMLBeans and samly2 are required only if you use classes from the 
@@ -108,6 +109,12 @@
 			<groupId>io.imunity.samly</groupId>
 			<artifactId>samly2</artifactId>
 			<version>2.5.0</version>
+			<exclusions>
+			  <exclusion>
+			    <groupId>log4j</groupId>
+			    <artifactId>log4j</artifactId>
+			  </exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Jetty is required only if you use classes from the 

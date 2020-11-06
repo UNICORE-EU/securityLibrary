@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import eu.unicore.security.canl.AuthnAndTrustProperties;
 import eu.unicore.security.canl.CredentialProperties;
@@ -46,7 +46,7 @@ import eu.unicore.util.configuration.PropertyMD;
  */
 public class ClientProperties extends DefaultClientConfiguration
 {
-	private static final Logger log = Log.get12Logger(Log.CONFIGURATION, ClientProperties.class);
+	private static final Logger log = Log.getLogger(Log.CONFIGURATION, ClientProperties.class);
 	public static final String DEFAULT_PREFIX = "client.";
 	
 	public static final String PROP_HTTP_AUTHN_ENABLED = "httpAuthnEnabled";

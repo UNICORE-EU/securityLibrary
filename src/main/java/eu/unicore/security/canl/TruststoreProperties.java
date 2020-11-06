@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.NamespaceCheckingMode;
@@ -59,7 +59,7 @@ import eu.unicore.util.configuration.PropertyMD.DocumentationCategory;
  */
 public class TruststoreProperties extends TrustedIssuersProperties
 {
-	private static final Logger log = Log.get12Logger(Log.CONFIGURATION, TruststoreProperties.class);
+	private static final Logger log = Log.getLogger(Log.CONFIGURATION, TruststoreProperties.class);
 
 	public static final String DEFAULT_PREFIX = "truststore.";
 	

@@ -43,6 +43,7 @@ import eu.unicore.util.jetty.HttpServerProperties;
  */
 public class TestJettyServer 
 {
+
 	private void makeRequest(JettyServer4Testing server, boolean shouldBeOk, 
 			Class<? extends Exception> expected, boolean useClientCred) throws Exception
 	{
@@ -180,91 +181,6 @@ public class TestJettyServer
 		}
 	}
 	
-/* This test is not valid anymore as new Jetty has a quite complicated thread pool structure (threads are
- * used not only to handle requests but also for other duties, min number is acceptors (2) + selectors(4) + 1.
- * So it is likely that those 7 threads 2 can handle two connections at the same time.
- * 
- * However the thread pool in general works - maybe a different test can be added in future?
- * */
-/*
-	@Test
-	public void testThreads() throws Exception
-	{
-		Properties p1 = JettyServer4Testing.getSecureProperties();
-		p1.setProperty("j." + HttpServerProperties.MAX_THREADS, "6");
-		p1.setProperty("j." + HttpServerProperties.HIGH_LOAD_CONNECTIONS, "-1");
-		JettyServer4Testing server = prepareServer(p1);
-
-		runThreadingCheck(server, 4000, 6000);
-		
-		p1.setProperty("j." + HttpServerProperties.MAX_THREADS, "8");
-		server = prepareServer(p1);
-		
-		runThreadingCheck(server, 2000, 3500);
-	}
-
-	private void runThreadingCheck(JettyServer4Testing server, long minTime, long maxTime) throws Exception
-	{
-		HttpClient client = HttpUtils.createClient(new HttpClientProperties(new Properties()));
-
-		MethodRunner r1 = new MethodRunner(client, server.getUrl()+"/servlet1");
-		MethodRunner r2 = new MethodRunner(client, server.getUrl()+"/servlet1");
-		
-		try
-		{
-			long start = System.currentTimeMillis();
-			r1.start();
-			r2.start();
-			r1.join();
-			r2.join();
-			long end = System.currentTimeMillis();
-			long time = end-start;
-			System.out.println("Exec time: " + time);
-			if (time < minTime || time > maxTime)
-				fail("Execution was not timed out, took " + time);
-		} finally
-		{
-			server.stop();
-		}
-	}
-	
-	private static class MethodRunner extends Thread
-	{
-		private String url;
-		private HttpClient client;
-		
-		public MethodRunner(HttpClient client, String url)
-		{
-			this.client = client;
-			this.url = url;
-		}
-		
-		public void run()
-		{
-			URI uri;
-			try
-			{
-				uri = new URIBuilder(url).addParameter("timeout", "2000").build();
-			} catch (URISyntaxException e1)
-			{
-				e1.printStackTrace();
-				fail(e1.toString());
-				return;
-			}
-			HttpPost post = new HttpPost(uri);
-			HttpUtils.setConnectionTimeout(post, 20000, 20000);
-			try
-			{
-				client.execute(post);
-			} catch(Exception e)
-			{
-				e.printStackTrace();
-				fail(e.toString());
-			}
-		}
-	}
-*/
-	
 	@Test
 	public void testClientAuthn() throws Exception
 	{
@@ -311,4 +227,5 @@ public class TestJettyServer
 		server.start();
 		makeRequest(server, false, SSLException.class, false);
 	}
+
 }

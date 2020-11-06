@@ -28,8 +28,5 @@ public class DefaultLogFactory implements LoggerFactory
 	public Logger getLogger(String prefix, Class<?>clazz){
 		return LogManager.getLogger(getLoggerName(prefix, clazz));
 	}
-	
-	public org.apache.log4j.Logger get12Logger(String prefix, Class<?>clazz){
-		return org.apache.log4j.LogManager.getLogger(getLoggerName(prefix, clazz));
-	}
+
 }

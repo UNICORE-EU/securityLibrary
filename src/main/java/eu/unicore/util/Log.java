@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.log4j.MDC;
 
 import eu.unicore.util.configuration.PropertiesHelper;
 
@@ -15,6 +14,8 @@ public class Log {
 	private static LoggerFactory spi;
 	
 	static {
+		System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
+		
 		String factName = System.getProperty(LoggerFactory.LOGGER_FACTORY_PROPERTY);
 		if (factName != null) {
 			try
@@ -33,7 +34,6 @@ public class Log {
 		} else
 			spi = new DefaultLogFactory();
 	}
-
 
 	protected Log(){}
 
@@ -105,15 +105,6 @@ public class Log {
 	 */
 	public static Logger getLogger(String prefix, Class<?>clazz){
 		return spi.getLogger(prefix, clazz);
-	}
-
-	/**
-	 * log4j-1.2 logger 
-	 * 
-	 * will be removed eventually ...
-	 */
-	public static org.apache.log4j.Logger get12Logger(String prefix, Class<?>clazz){
-		return spi.get12Logger(prefix, clazz);
 	}
 
 	/** 
@@ -226,7 +217,4 @@ public class Log {
 		return message+": "+getDetailMessage(cause);
 	}
 
-	public static void cleanLogContext(){
-		MDC.remove("clientName");
-	}
 }

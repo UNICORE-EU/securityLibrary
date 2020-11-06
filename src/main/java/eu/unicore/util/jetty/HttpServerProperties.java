@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
@@ -52,7 +52,7 @@ import eu.unicore.util.configuration.PropertyMD;
  */
 public class HttpServerProperties extends PropertiesHelper
 {
-	private static final Logger log = Log.get12Logger(Log.CONFIGURATION, HttpServerProperties.class);
+	private static final Logger log = Log.getLogger(Log.CONFIGURATION, HttpServerProperties.class);
 	
 
 	public enum XFrameOptions {
