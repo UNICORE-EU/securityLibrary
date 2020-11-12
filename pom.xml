@@ -10,8 +10,8 @@
 	<url>https://github.com/UNICORE-EU/securityLibrary</url>
 	
 	<properties>
-	  <jetty.version>9.4.31.v20200723</jetty.version>
-	  <log4j.version>2.13.3</log4j.version>
+	  <jetty.version>9.4.34.v20201102</jetty.version>
+	  <log4j.version>2.14.0</log4j.version>
 	  <slf.version>1.7.30</slf.version>
 	  <jproperties.version>1.1.0</jproperties.version>
 	  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
