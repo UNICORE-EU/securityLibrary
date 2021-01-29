@@ -89,8 +89,12 @@ public class HttpServerProperties extends PropertiesHelper
 	public static final String MAX_THREADS = "maxThreads";
 
 	/**
-	 * If the number of connections exceeds this amount, then connector is put into a special 
-	 * "low on resources" state. Existing connections will be closed faster. 
+	 * maximum number of incoming connections (0 = no limit)
+	 */
+	public static final String MAX_CONNECTIONS = "maxConnections";
+
+	/**
+	 * @deprecated
 	 */
 	public static final String HIGH_LOAD_CONNECTIONS = "highLoadConnections";
 
@@ -100,8 +104,7 @@ public class HttpServerProperties extends PropertiesHelper
 	public static final String MAX_IDLE_TIME = "maxIdleTime";
 
 	/**
-	 * in low resource conditions, time (in ms.) before an idle connection will time out
-	 * @see #HIGH_LOAD_CONNECTIONS
+	 * @deprecated
 	 */
 	public static final String LOW_RESOURCE_MAX_IDLE_TIME = "lowResourceMaxIdleTime";
 
@@ -162,18 +165,15 @@ public class HttpServerProperties extends PropertiesHelper
 		defaults.put(MIN_THREADS, new PropertyMD("1").setPositive().
 				setDescription("Minimum number of threads to have in the thread pool for processing HTTP connections. "
 						+ " Note that this number will be increased with few additional threads to handle connectors."));
-		defaults.put(HIGH_LOAD_CONNECTIONS, new PropertyMD("200").
-				setDescription("If the number of connections exceeds this amount, then the connector is put into a special "
-						+ "'low on resources' state. Existing connections will be closed faster. "
-						+ "Note that the server will also go to the low on resources mode if "
-						+ "there are no available threads in the pool. You can set this to 0"
-						+ " to disable the connections limit (and have only thread pool "
-						+ "size governed limit). If set to a negative number then the "
-						+ "'low on resources' mode won't be used at all."));
+		defaults.put(MAX_CONNECTIONS, new PropertyMD("0").setNonNegative().
+				setDescription("Maximum number of incoming connections to this server. If set to a value larger than 0, "
+						+ "incoming connections will be limited to that number. Default is 0 = unlimited."));
+				defaults.put(HIGH_LOAD_CONNECTIONS, new PropertyMD("200").
+				setDescription("deprecated"));
 		defaults.put(MAX_IDLE_TIME, new PropertyMD("200000").setPositive().
 				setDescription("Time (in ms.) before an idle connection will time out. It should be large enough not to expire connections with slow clients, values below 30s are getting quite risky."));
 		defaults.put(LOW_RESOURCE_MAX_IDLE_TIME, new PropertyMD("100").setPositive().
-				setDescription("In low resource conditions, time (in ms.) before an idle connection will time out."));
+				setDescription("deprecated"));
 		defaults.put(FAST_RANDOM, new PropertyMD("false").
 				setDescription("Use insecure, but fast pseudo random generator to generate session ids instead of secure generator for SSL sockets."));
 		defaults.put(SO_LINGER_TIME, new PropertyMD().setDeprecated().
@@ -206,8 +206,7 @@ public class HttpServerProperties extends PropertiesHelper
 				setDescription("URI origin that is allowed to embed web interface inside a (i)frame."
 						+ " Meaningful only if the " + FRAME_OPTIONS + " is set to 'allowFrom'."
 						+ " The value should be in the form: 'http[s]://host[:port]'"));
-		
-		defaults.put(ENABLE_CORS, new PropertyMD("false").
+				defaults.put(ENABLE_CORS, new PropertyMD("false").
 				setDescription("Control whether Cross-Origin Resource Sharing is enabled. "
 						+ "Enable to allow e.g. accesing REST services from client-side JavaScript."));
 		defaults.put(CORS_ALLOWED_ORIGINS, new PropertyMD("*").

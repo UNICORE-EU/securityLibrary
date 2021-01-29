@@ -47,12 +47,12 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.rewrite.handler.HeaderPatternRule;
 import org.eclipse.jetty.rewrite.handler.RewriteHandler;
 import org.eclipse.jetty.rewrite.handler.Rule;
+import org.eclipse.jetty.server.ConnectionLimit;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpChannel;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.LowResourceMonitor;
 import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
@@ -259,7 +259,7 @@ public abstract class JettyServerBase {
 	
 	protected void configureSessionIdManager(boolean useFastRandom) {
 		if (useFastRandom){
-			logger.info("Using fast (but less secure) session ID generator");
+			logger.debug("Using fast (but less secure) session ID generator");
 			SessionIdManager sm = new DefaultSessionIdManager(theServer, 
 					new java.util.Random());
 			theServer.setSessionIdManager(sm);
@@ -384,9 +384,10 @@ public abstract class JettyServerBase {
 	}
 
 	protected void configureResourceMonitoring() throws ConfigurationException {
-		Integer highLoadConnections = extraSettings.getIntValue(HttpServerProperties.HIGH_LOAD_CONNECTIONS);
-		if (highLoadConnections >= 0)
-			theServer.addBean(getResourcesMonitor());
+		Integer maxConnections = extraSettings.getIntValue(HttpServerProperties.MAX_CONNECTIONS);
+		if (maxConnections > 0) {
+			theServer.addBean(new ConnectionLimit(maxConnections, theServer));
+		}
 	}
 
 	/**
@@ -508,15 +509,5 @@ public abstract class JettyServerBase {
 	public URL[] getUrls() {
 		return listenUrls;
 	}
-	
-	protected LowResourceMonitor getResourcesMonitor()
-	{
-		LowResourceMonitor ret = new LowResourceMonitor(theServer);
-		ret.setMaxConnections(extraSettings.getIntValue(HttpServerProperties.HIGH_LOAD_CONNECTIONS));
-		ret.setLowResourcesIdleTimeout(extraSettings.getIntValue(
-			HttpServerProperties.LOW_RESOURCE_MAX_IDLE_TIME));
-		
-		
-		return ret;
-	}
+
 }

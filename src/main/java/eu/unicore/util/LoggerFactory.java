@@ -35,4 +35,10 @@ public interface LoggerFactory
 	 */
 	public Logger getLogger(String prefix, Class<?>clazz);
 
+	/**
+	 * returns a logger, using the given logger name
+	 * @param name - the logger name
+	 * @return logger
+	 */
+	public Logger getLogger(String name);
 }

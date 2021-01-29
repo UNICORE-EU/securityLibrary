@@ -14,7 +14,11 @@ public class Log {
 	private static LoggerFactory spi;
 	
 	static {
-		System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
+		try {
+			// if Log4j's j.u.l. adapter is on the classpath, use it
+			Class.forName("org.apache.logging.log4j.jul.LogManager");
+			System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
+		}catch(Throwable t) {}
 		
 		String factName = System.getProperty(LoggerFactory.LOGGER_FACTORY_PROPERTY);
 		if (factName != null) {

@@ -29,4 +29,8 @@ public class DefaultLogFactory implements LoggerFactory
 		return LogManager.getLogger(getLoggerName(prefix, clazz));
 	}
 
+	@Override
+	public Logger getLogger(String name){
+		return LogManager.getLogger(name);
+	}
 }
