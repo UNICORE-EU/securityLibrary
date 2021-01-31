@@ -32,10 +32,12 @@
 
 package eu.unicore.security.canl;
 
+import java.net.Socket;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.X509ExtendedTrustManager;
 
 import org.apache.logging.log4j.Logger;
 
@@ -51,20 +53,15 @@ import eu.unicore.util.Log;
  * <p>
  * The class adds a very short (20ms) grace period before sending an error, when client's certificate is not
  * valid. This should minimize the chance of getting broken pipe error on client's side.
- * 
- * @author golbi
  */
-public class LoggingX509TrustManager implements X509TrustManager {
+public class LoggingX509TrustManager extends X509ExtendedTrustManager {
 
 	private static final Logger log = Log.getLogger(Log.SECURITY, LoggingX509TrustManager.class);
 
-	private X509TrustManager defaultTrustManager = null;
-	private String info;
+	private final X509ExtendedTrustManager defaultTrustManager;
+	private final String info;
 
-	/**
-	 * Constructor for AuthSSLX509TrustManager.
-	 */
-	public LoggingX509TrustManager(final X509TrustManager defaultTrustManager, String info) {
+	public LoggingX509TrustManager(final X509ExtendedTrustManager defaultTrustManager, String info) {
 		if (defaultTrustManager == null) {
 			throw new IllegalArgumentException("Trust manager may not be null");
 		}
@@ -72,14 +69,57 @@ public class LoggingX509TrustManager implements X509TrustManager {
 		this.defaultTrustManager = defaultTrustManager;
 	}
 	
-
+	@Override
 	public void checkClientTrusted(X509Certificate[] certificates, String s)
 			throws CertificateException {
-		logCerts("Checking client's certificate:\n", certificates);
+		wrapClientCertCheck(certificates, () -> defaultTrustManager.checkClientTrusted(certificates, s));
+	}
+
+	@Override
+	public void checkServerTrusted(X509Certificate[] certificates, String s)
+			throws CertificateException {
+		wrapServerCertCheck(certificates, () -> defaultTrustManager.checkServerTrusted(certificates, s));
+	}
+
+	@Override
+	public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket)
+			throws CertificateException
+	{
+		wrapClientCertCheck(chain, () -> defaultTrustManager.checkClientTrusted(chain, authType, socket));
+	}
+
+
+	@Override
+	public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket)
+			throws CertificateException
+	{
+		wrapServerCertCheck(chain, () -> defaultTrustManager.checkServerTrusted(chain, authType, socket));
+	}
+
+
+	@Override
+	public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine)
+			throws CertificateException
+	{
+		wrapClientCertCheck(chain, () -> defaultTrustManager.checkClientTrusted(chain, authType, engine));
+	}
+
+
+	@Override
+	public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine)
+			throws CertificateException
+	{
+		wrapServerCertCheck(chain, () -> defaultTrustManager.checkServerTrusted(chain, authType, engine));
+	}
+	
+	private void wrapServerCertCheck(X509Certificate[] chain, CertChecker checker)
+			throws CertificateException
+	{
+		logCerts("Checking server's certificate:\n", chain);
 		try
 		{
-			defaultTrustManager.checkClientTrusted(certificates, s);
-			logSuccessfulVerification("client", certificates);			
+			checker.check();
+			logSuccessfulVerification("server", chain);			
 		} catch (CertificateException e)
 		{
 			//let's wait so client has bigger chance to finish its sending of handshake material
@@ -88,33 +128,30 @@ public class LoggingX509TrustManager implements X509TrustManager {
 			{
 				Thread.sleep(20);
 			} catch (InterruptedException e1) { /*ignored*/ }
-			logFailedVerification("client", e);
-			throw e;
-		}
-	}
-
-	/**
-	 * @see X509TrustManager#checkServerTrusted(X509Certificate[], String)
-	 */
-	public void checkServerTrusted(X509Certificate[] certificates, String s)
-			throws CertificateException {
-		logCerts("Checking server's certificate:\n", certificates);
-		try
-		{
-			defaultTrustManager.checkServerTrusted(certificates, s);
-			logSuccessfulVerification("server", certificates);
-		} catch (CertificateException e)
-		{
 			logFailedVerification("server", e);
 			throw e;
 		}
 	}
 
-	/**
-	 * @see X509TrustManager#getAcceptedIssuers()
-	 */
+	private void wrapClientCertCheck(X509Certificate[] chain, CertChecker checker)
+			throws CertificateException
+	{
+		logCerts("Checking client's certificate:\n", chain);
+		try
+		{
+			checker.check();
+			logSuccessfulVerification("client", chain);			
+		} catch (CertificateException e)
+		{
+			logFailedVerification("client", e);
+			throw e;
+		}
+	}
+
+	
+	@Override
 	public X509Certificate[] getAcceptedIssuers() {
-		return this.defaultTrustManager.getAcceptedIssuers();
+		return defaultTrustManager.getAcceptedIssuers();
 	}
 	
 	private void logCerts(String type, X509Certificate[] certificates)
@@ -139,5 +176,10 @@ public class LoggingX509TrustManager implements X509TrustManager {
 			" certificate with subject DN " + 
 			X500NameUtils.getReadableForm(certificates[0].getSubjectX500Principal())
 			+ " was successful");
+	}
+
+	private interface CertChecker
+	{
+		void check() throws CertificateException;
 	}
 }

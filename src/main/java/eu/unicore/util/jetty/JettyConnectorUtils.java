@@ -24,6 +24,7 @@ import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.canl.SSLContextCreator;
+import eu.unicore.util.httpclient.ServerHostnameCheckingMode;
 
 /**
  * low level utility methods useful for secured Jetty connectors
@@ -38,7 +39,7 @@ public class JettyConnectorUtils
 		SslContextFactory.Server ret = new SslContextFactory.Server();
 		String protocol = "TLS"; 
 		ret.setSslContext(SSLContextCreator.createSSLContext(credential, validator, protocol, 
-				"Jetty HTTP Server", log));
+				"Jetty HTTP Server", log, ServerHostnameCheckingMode.NONE));
 		return ret;
 	}
 	

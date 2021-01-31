@@ -15,7 +15,7 @@ import javax.net.ssl.SSLSocketFactory;
 import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.impl.CertificateUtils;
-import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
+import eu.emi.security.authn.x509.impl.SocketFactoryCreator2;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
 import eu.unicore.util.Log;
@@ -42,9 +42,8 @@ public class ConnectionUtil
 			throw new IllegalArgumentException("Can not establish peer's identity " +
 					"without having credential and validator set.");
 		URL u=new URL(url);
-		SSLSocketFactory socketFactory = SocketFactoryCreator.getSocketFactory(
-				securityCfg.getCredential(), 
-				securityCfg.getValidator());
+		SSLSocketFactory socketFactory = new SocketFactoryCreator2(securityCfg.getCredential(), 
+				securityCfg.getValidator(), null).getSocketFactory();
 		
 		int port = u.getPort();
 		if (port == -1)

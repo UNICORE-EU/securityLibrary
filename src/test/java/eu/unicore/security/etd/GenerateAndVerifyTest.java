@@ -20,11 +20,7 @@ import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.samly2.elements.SAMLAttribute;
 import eu.unicore.security.ValidationResult;
-import eu.unicore.security.etd.TrustDelegation;
 
-/**
- * @author K. Benedyczak
- */
 public class GenerateAndVerifyTest extends ETDTestBase
 {
 	@Test

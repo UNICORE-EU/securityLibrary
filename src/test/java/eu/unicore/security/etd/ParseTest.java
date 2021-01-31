@@ -14,11 +14,7 @@ import org.junit.Test;
 
 import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
 import eu.unicore.security.ValidationResult;
-import eu.unicore.security.etd.TrustDelegation;
 
-/**
- * @author K. Benedyczak
- */
 public class ParseTest extends ETDTestBase
 {
 	@Test

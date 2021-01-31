@@ -12,11 +12,6 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import eu.unicore.security.etd.TrustDelegation;
-
-/**
- * @author K. Benedyczak
- */
 public class SimpleGenerateTest extends ETDTestBase
 {
 	@Test

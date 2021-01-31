@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Properties;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpException;
@@ -143,8 +144,7 @@ public class HttpUtils {
 	public static PoolingHttpClientConnectionManager getSSLConnectionManager(IClientConfiguration security)
 	{
 		SSLContext sslContext = createSSLContext(security);
-		CanlHostnameVerifier hostnameVerifier = new CanlHostnameVerifier(
-				security.getServerHostnameCheckingMode());
+		HostnameVerifier hostnameVerifier = new EmptyHostnameVerifier();
 		int connectTimeout = security.getHttpClientProperties().
 				getIntValue(HttpClientProperties.CONNECT_TIMEOUT);
 		CustomSSLConnectionSocketFactory sslsf = new CustomSSLConnectionSocketFactory(sslContext, hostnameVerifier,
@@ -319,7 +319,7 @@ public class HttpUtils {
 		try
 		{
 			SSLContext sslContext = SSLContextCreator.createSSLContext(credential, sec.getValidator(), 
-					"TLS", "HTTP Client", logger);
+					"TLS", "HTTP Client", logger, sec.getServerHostnameCheckingMode());
 			sslContext.getSupportedSSLParameters().setProtocols(protocols);
 			return sslContext;
 		} catch (Exception e)

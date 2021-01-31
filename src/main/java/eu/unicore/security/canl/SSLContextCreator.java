@@ -12,6 +12,7 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509ExtendedTrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.logging.log4j.Logger;
@@ -20,8 +21,11 @@ import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.FormatMode;
-import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
+import eu.emi.security.authn.x509.impl.HostnameMismatchCallback2;
+import eu.emi.security.authn.x509.impl.SocketFactoryCreator2;
+import eu.unicore.util.httpclient.HostnameMismatchCallbackImpl;
 import eu.unicore.util.httpclient.NoAuthKeyManager;
+import eu.unicore.util.httpclient.ServerHostnameCheckingMode;
 
 /**
  * This class should be used to create {@link SSLContext} or {@link SSLSocketFactory} in the "UNICORE
@@ -43,7 +47,8 @@ public class SSLContextCreator
 	 * @throws KeyManagementException 
 	 */
 	public static SSLContext createSSLContext(X509Credential credential, 
-			X509CertChainValidator validator, String protocol, String loginfo, Logger log) 
+			X509CertChainValidator validator, String protocol, String loginfo, Logger log, 
+			ServerHostnameCheckingMode hostnameCheckingMode) 
 					throws NoSuchAlgorithmException, KeyManagementException
 	{
 		KeyManager km;
@@ -58,8 +63,10 @@ public class SSLContextCreator
 			log.trace("Creating SSL context without client's certificate for " + loginfo);
 		}
 
-		X509TrustManager tm = SocketFactoryCreator.getSSLTrustManager(validator);
-		tm = new LoggingX509TrustManager(tm, loginfo);
+		HostnameMismatchCallback2 hostnameVerificationCallback = new HostnameMismatchCallbackImpl(hostnameCheckingMode);
+		X509ExtendedTrustManager baseTM = (X509ExtendedTrustManager) new SocketFactoryCreator2(
+				validator, hostnameVerificationCallback).getSSLTrustManager();
+		X509TrustManager tm = new LoggingX509TrustManager(baseTM, loginfo);
 		if (log.isTraceEnabled())
 			debugTS(validator, loginfo, log);
 

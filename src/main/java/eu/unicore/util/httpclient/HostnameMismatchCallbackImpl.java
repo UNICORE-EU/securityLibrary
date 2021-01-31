@@ -4,21 +4,19 @@
  */
 package eu.unicore.util.httpclient;
 
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLSession;
 
 import org.apache.logging.log4j.Logger;
 
+import eu.emi.security.authn.x509.impl.HostnameMismatchCallback2;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.util.Log;
 
 /**
  * Depending on the configured mode either log problems or log problems and close connections. 
- * @author K. Benedyczak
  */
-public class HostnameMismatchCallbackImpl
+public class HostnameMismatchCallbackImpl implements HostnameMismatchCallback2
 {
 	private static final Logger log = Log.getLogger(Log.SECURITY, HostnameMismatchCallbackImpl.class);
 	
@@ -29,11 +27,11 @@ public class HostnameMismatchCallbackImpl
 		this.mode = mode;
 	}
 	
-	public boolean nameMismatch(SSLSession session, X509Certificate peerCertificate, String hostName)
-			throws SSLException
+	@Override
+	public void nameMismatch(X509Certificate peerCertificate, String hostName) throws CertificateException
 	{
 		if (mode == ServerHostnameCheckingMode.NONE)
-			return true;
+			return;
 		String message = "The server hostname is not matching its certificate subject. This might mean that" +
 				" somebody is trying to perform a man-in-the-middle attack by pretending to be" +
 				" the server you are trying to connect to. However it is also possible that" +
@@ -43,12 +41,10 @@ public class HostnameMismatchCallbackImpl
 		if (mode == ServerHostnameCheckingMode.WARN)
 		{
 			log.warn(message);
-			return true;
+			return;
 		}
 		
 		log.error(message);
-		log.error("Invalidating connection.");
-		session.invalidate();
-		return false;
+		throw new CertificateException(message);
 	}
 }

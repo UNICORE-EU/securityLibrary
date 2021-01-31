@@ -18,7 +18,6 @@ import java.util.Properties;
 
 import org.junit.Test;
 
-import eu.unicore.security.canl.CredentialProperties;
 import eu.unicore.security.canl.CredentialProperties.CredentialFormat;
 
 

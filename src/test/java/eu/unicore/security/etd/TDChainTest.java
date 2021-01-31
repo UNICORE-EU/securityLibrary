@@ -22,8 +22,6 @@ import org.junit.Test;
 import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
 import eu.unicore.samly2.SAMLConstants;
 import eu.unicore.security.ValidationResult;
-import eu.unicore.security.etd.DelegationRestrictions;
-import eu.unicore.security.etd.TrustDelegation;
 
 /**
  * @author K. Benedyczak
