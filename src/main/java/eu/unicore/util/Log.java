@@ -111,6 +111,10 @@ public class Log {
 		return spi.getLogger(prefix, clazz);
 	}
 
+	public static Logger getLogger(String name){
+		return spi.getLogger(name);
+	}
+
 	/** 
 	 * log an error message to the default logger ("unicore")
 	 * A human-friendly message is constructed and logged at "INFO" level.
