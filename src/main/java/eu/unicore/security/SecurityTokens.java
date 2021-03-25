@@ -301,48 +301,21 @@ public class SecurityTokens implements Serializable, Cloneable
         public String toString()
         {
         	StringBuilder sb = new StringBuilder();
-        	if (userName != null)
-        		sb.append("User name: ").append(X500NameUtils.getReadableForm(userName)).append(lineSep);
-        	if (user != null) 
-        	{
-        		sb.append("(have user cert)").append(lineSep);
-        		if (ProxyUtils.isProxy(user))
-        		{
-        			sb.append("User certificate is a proxy certificate");
-        			if (supportProxy)
-        				sb.append(lineSep);
-        			else
-        				sb.append(" but proxy handling is NOT enabled" + lineSep);
-        		}
+        	if (userName != null) {
+        		sb.append("User: ").append(X500NameUtils.getReadableForm(userName));
         	}
-        	if (consignorName != null)
-        	{
-        		String consignor = getConsignorName(); 
-        		sb.append("Consignor DN: ").append(X500NameUtils.getReadableForm(consignor));
+        	String consignor = getConsignorName(); 
+    		if (consignor != null) {
         		sb.append(lineSep);
-        		if (this.consignor != null && ProxyUtils.isProxy(this.consignor))
-        		{
-        			sb.append("Consignor's certificate is a proxy certificate");
-        			if (supportProxy)
-        				sb.append(lineSep);
-        			else
-        				sb.append(" but proxy handling is NOT enabled" + lineSep);
-        		}
+        		sb.append("Consignor: ").append(X500NameUtils.getReadableForm(consignor));
+    		}
+        	if (clientIP != null) {
+        		sb.append(lineSep).append("Client's original IP: ").append(clientIP);
         	}
-        	sb.append("Delegation to consignor status: " + isConsignorTrusted() + 
-        			", core delegation status: " + isTrustDelegationValidated());
-        	if (signatureStatus != null)
-        	{
-        		sb.append(lineSep+"Message signature status: ").append(signatureStatus.toString());
+        	if (sb.length() == 0) {
+        		sb.append(super.toString()).append(" [no details available]");
         	}
-        	if (clientIP != null)
-        	{
-        		sb.append(lineSep+"Client's original IP: ").append(clientIP);
-        	}
-        	String res = sb.toString();
-        	if (res.length() == 0)
-        		return super.toString() + " [no details available]";
-        	return res;
+        	return sb.toString();
         }
 
 	/**
@@ -353,7 +326,6 @@ public class SecurityTokens implements Serializable, Cloneable
 	 */
 	public synchronized Map<String, Object> getContext()
 	{
-		if(context == null)context = new HashMap<>();
 		return context;
 	}
 

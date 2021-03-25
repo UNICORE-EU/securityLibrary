@@ -283,8 +283,12 @@ public class Client implements Serializable {
 	}
 	
 	public void setUserEmail(String email){
-		if(email==null)extraAttributes.remove(ATTRIBUTE_USER_EMAIL);
-		extraAttributes.put(ATTRIBUTE_USER_EMAIL,email);
+		if(email==null) {
+			extraAttributes.remove(ATTRIBUTE_USER_EMAIL);
+		}
+		else{
+			extraAttributes.put(ATTRIBUTE_USER_EMAIL,email);
+		}
 	}
 
 	public void setSubjectAttributes(SubjectAttributesHolder subjectAttributes) {
