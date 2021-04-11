@@ -137,7 +137,7 @@ public class NegativeTest extends ETDTestBase
 			ValidationResult result = 
 				etdEngine.validateTD(td, issuerDN1, issuerDN1, receiverDN1, new BinaryCertChainValidator(true));
 			if (result.isValid() || 
-				!result.getInvalidResaon().contains("Signature is incorrect"))
+				!result.getInvalidResaon().contains("signature is incorrect"))
 				fail("Validation of wrong key succeeded/error is wrong: " + 
 						result.getInvalidResaon());
 		} catch (Exception e)

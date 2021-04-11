@@ -6,15 +6,16 @@ package eu.unicore.security.etd;
 
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
+import java.util.List;
 
-import xmlbeans.org.oasis.saml2.assertion.NameIDType;
-import xmlbeans.org.w3.x2000.x09.xmldsig.SignatureType;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.X509CertChainValidator;
-import eu.unicore.samly2.exceptions.SAMLValidationException;
 import eu.unicore.samly2.trust.CheckingMode;
 import eu.unicore.samly2.trust.DsigSamlTrustCheckerBase;
 import eu.unicore.samly2.trust.SamlTrustChecker;
+import xmlbeans.org.oasis.saml2.assertion.NameIDType;
+import xmlbeans.org.w3.x2000.x09.xmldsig.SignatureType;
 
 /**
  * This implementation of {@link SamlTrustChecker} checks if the signature is correct,
@@ -38,16 +39,16 @@ public class ETDSamlTrustChecker extends DsigSamlTrustCheckerBase
 	}
 
 	@Override
-	protected PublicKey establishKey(NameIDType issuer, SignatureType signature)
-			throws SAMLValidationException
+	protected List<PublicKey> establishKey(NameIDType issuer, SignatureType signature)
+			throws SAMLTrustedKeyDiscoveryException
 	{
 		ValidationResult result = validator.validate(expectedIssuer);
 		if (!result.isValid())
 		{
-			throw new SAMLValidationException("Delegation signature was conducted by an untrusted entity: " 
+			throw new SAMLTrustedKeyDiscoveryException("Delegation signature was conducted by an untrusted entity: " 
 					+ result.toShortString());
 		}
-		return expectedIssuer[0].getPublicKey();
+		return Collections.singletonList(expectedIssuer[0].getPublicKey());
 	}
 
 }
