@@ -181,7 +181,7 @@ public class Log {
 				logger.error("The root error was: "+getDetailMessage(cause));
 				if(logger.isDebugEnabled())logger.debug("Stack trace",cause);
 				else{
-					logger.error("To see the full error stack trace, set log4j.logger."+logger.getName()+"=DEBUG");
+					logger.error("To see the full error stack trace, set logger <"+logger.getName()+"> to DEBUG");
 				}
 			}
 		}

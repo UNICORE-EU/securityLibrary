@@ -51,23 +51,20 @@ public class ConnectionUtil
 		if (port == -1)
 			port = 443;
 		
-		SSLSocket s = (SSLSocket) socketFactory.createSocket(u.getHost(), port);
-		s.setSoTimeout(timeout);
-		
-		X509Certificate[] peer = CertificateUtils.convertToX509Chain(s.getSession().getPeerCertificates());
-		if (logger.isDebugEnabled()) {
-			try{
-				logger.debug("Got peer cert of <"+url+">,\n" +
-						"Name: "+
-						X500NameUtils.getReadableForm(peer[0].getSubjectX500Principal())+
-						"\nIssued by: "+
-						X500NameUtils.getReadableForm(peer[0].getIssuerX500Principal()));
-			} catch(Exception e) {
-				Log.logException("Problem with certificate for <"+url+">",e,logger);
-				return null;
+		try(SSLSocket s = (SSLSocket) socketFactory.createSocket(u.getHost(), port)){
+			s.setSoTimeout(timeout);
+			X509Certificate[] peer = CertificateUtils.convertToX509Chain(s.getSession().getPeerCertificates());
+			if (logger.isDebugEnabled()) {
+				try{
+					logger.debug("Got peer cert of <{}>\nName: {}\nIssued by: {}",
+							url,
+							X500NameUtils.getReadableForm(peer[0].getSubjectX500Principal()),
+							X500NameUtils.getReadableForm(peer[0].getIssuerX500Principal()));
+				} catch(Exception e) {
+					Log.logException("Problem with certificate for <"+url+">",e,logger);
+				}
 			}
+			return peer;
 		}
-		s.close();
-		return peer;
 	}
 }

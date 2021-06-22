@@ -10,8 +10,8 @@
 	<url>https://github.com/UNICORE-EU/securityLibrary</url>
 	
 	<properties>
-	  <jetty.version>9.4.38.v20210224</jetty.version>
-	  <log4j.version>2.14.0</log4j.version>
+	  <jetty.version>9.4.41.v20210516</jetty.version>
+	  <log4j.version>2.14.1</log4j.version>
 	  <slf.version>1.7.30</slf.version>
 	  <jproperties.version>1.1.0</jproperties.version>
 	  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -42,7 +42,7 @@
 		<developer>
 			<name>Bernd Schuller</name>
 			<email>bschuller at users.sourceforge.net</email>
-			<organization>Research Center Juelich</organization>
+			<organization>Forschungszentrum Juelich GmbH</organization>
 			<organizationUrl>http://www.fz-juelich.de/jsc</organizationUrl>
 		</developer>
 	</developers>

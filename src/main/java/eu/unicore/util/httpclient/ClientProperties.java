@@ -271,16 +271,7 @@ public class ClientProperties extends DefaultClientConfiguration
 		ret.clientPropertiesHelper= this.clientPropertiesHelper.clone();
 		return ret;
 	}
-	
-	/**
-	 * @deprecated use clone(), works in the same way.
-	 */
-	@Deprecated
-	public ClientProperties shallowClone()
-	{
-		return clone();
-	}
-	
+
 	/**
 	 * @return the authnAndTrustConfiguration
 	 */
