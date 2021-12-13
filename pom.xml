@@ -10,9 +10,10 @@
 	<url>https://github.com/UNICORE-EU/securityLibrary</url>
 	
 	<properties>
-	  <jetty.version>9.4.41.v20210516</jetty.version>
+	  <jetty.version>9.4.44.v20210927</jetty.version>
 	  <log4j.version>2.15.0</log4j.version>
 	  <slf.version>1.7.30</slf.version>
+	  <xmlsec.version>2.2.2</xmlsec.version>
 	  <jproperties.version>1.1.0</jproperties.version>
 	  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	  <maven.compiler.target>1.8</maven.compiler.target>
@@ -104,6 +105,11 @@
 			<groupId>com.fasterxml.woodstox</groupId>
 			<artifactId>woodstox-core</artifactId>
 			<version>5.1.0</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.santuario</groupId>
+		  <artifactId>xmlsec</artifactId>
+		  <version>${xmlsec.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.imunity.samly</groupId>
