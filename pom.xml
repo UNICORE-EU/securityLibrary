@@ -11,7 +11,7 @@
 	
 	<properties>
 	  <jetty.version>9.4.44.v20210927</jetty.version>
-	  <log4j.version>2.15.0</log4j.version>
+	  <log4j.version>2.16.0</log4j.version>
 	  <slf.version>1.7.30</slf.version>
 	  <xmlsec.version>2.2.3</xmlsec.version>
 	  <jproperties.version>1.1.0</jproperties.version>
