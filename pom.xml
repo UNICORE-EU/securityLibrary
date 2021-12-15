@@ -13,7 +13,7 @@
 	  <jetty.version>9.4.44.v20210927</jetty.version>
 	  <log4j.version>2.16.0</log4j.version>
 	  <slf.version>1.7.30</slf.version>
-	  <xmlsec.version>2.2.3</xmlsec.version>
+	  <xmlsec.version>2.3.0</xmlsec.version>
 	  <jproperties.version>1.1.0</jproperties.version>
 	  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	  <maven.compiler.target>1.8</maven.compiler.target>
