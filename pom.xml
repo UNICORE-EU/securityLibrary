@@ -11,9 +11,13 @@
 	
 	<properties>
 	  <jetty.version>9.4.48.v20220622</jetty.version>
-	  <log4j.version>2.17.2</log4j.version>
+	  <log4j.version>2.18.0</log4j.version>
 	  <slf.version>1.7.30</slf.version>
-	  <xmlsec.version>2.3.0</xmlsec.version>
+	  <samly.version>2.7.1</samly.version>
+	  <canl.version>2.7.0</canl.version>	  
+	  <xmlsec.version>3.0.0</xmlsec.version>
+	  <woodstox.version>6.3.0</woodstox.version>
+	  <httpclient.version>4.5.13</httpclient.version>
 	  <jproperties.version>1.1.1</jproperties.version>
 	  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	  <maven.compiler.target>1.8</maven.compiler.target>
@@ -52,7 +56,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.13.1</version>
+			<version>4.13.2</version>
 			<scope>test</scope>
 		</dependency>
 		
@@ -104,7 +108,7 @@
 		<dependency>
 			<groupId>com.fasterxml.woodstox</groupId>
 			<artifactId>woodstox-core</artifactId>
-			<version>5.1.0</version>
+			<version>${woodstox.version}</version>
 		</dependency>
 		<dependency>
 		  <groupId>org.apache.santuario</groupId>
@@ -114,7 +118,7 @@
 		<dependency>
 			<groupId>io.imunity.samly</groupId>
 			<artifactId>samly2</artifactId>
-			<version>2.7.0</version>
+			<version>${samly.version}</version>
 			<exclusions>
 			  <exclusion>
 			    <groupId>log4j</groupId>
@@ -125,7 +129,7 @@
 		<dependency>
 			<groupId>eu.eu-emi.security</groupId>
 			<artifactId>canl</artifactId>
-			<version>2.7.0</version>
+			<version>${canl.version}</version>
 		</dependency>
 
 		<!-- Jetty is required only if you use classes from the 
@@ -159,7 +163,7 @@
 		<dependency>
 		 	<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.5.13</version>
+			<version>${httpclient.version}</version>
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
