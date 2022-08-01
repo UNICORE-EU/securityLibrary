@@ -123,8 +123,8 @@
 			<version>${samly.version}</version>
 			<exclusions>
 			  <exclusion>
-			    <groupId>log4j</groupId>
-			    <artifactId>log4j</artifactId>
+			    <groupId>com.sun.xml.ws</groupId>
+			    <artifactId>jaxws-ri</artifactId>
 			  </exclusion>
 			</exclusions>
 		</dependency>
