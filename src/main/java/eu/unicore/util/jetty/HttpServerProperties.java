@@ -155,6 +155,10 @@ public class HttpServerProperties extends PropertiesHelper
 	public static final String CORS_EXPOSED_HEADERS = "CORS_exposedHeaders";
 	public static final String CORS_CHAIN_PREFLIGHT = "CORS_chainPreflight";
 	
+
+	// enables more strict hostname checking e.g. no "localhost"
+	public static final String ENABLE_SNI = "enableSNI";
+	
 	@DocumentationReferenceMeta
 	protected final static Map<String, PropertyMD> defaults=new HashMap<String, PropertyMD>();
 	
@@ -219,6 +223,8 @@ public class HttpServerProperties extends PropertiesHelper
 				setDescription("CORS: comma separated list of HTTP headers that are allowed to be exposed to the client."));
 		defaults.put(CORS_CHAIN_PREFLIGHT, new PropertyMD("false").
 				setDescription("CORS: whether preflight OPTION requests are chained (passed on) to the resource or handled via the CORS filter."));
+		defaults.put(ENABLE_SNI, new PropertyMD("false").
+				setDescription("Enable Server Name Indication (SNI)"));
 	}
 
 	public HttpServerProperties() throws ConfigurationException 

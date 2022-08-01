@@ -46,7 +46,6 @@ import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
 import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
 import eu.unicore.security.canl.TruststoreProperties;
 import eu.unicore.util.configuration.ConfigurationException;
-import eu.unicore.util.jetty.JettyLogger;
 import eu.unicore.util.jetty.HttpServerProperties;
 import eu.unicore.util.jetty.JettyServerBase;
 
@@ -66,7 +65,7 @@ public class JettyServer4Testing extends JettyServerBase {
 	public JettyServer4Testing(URL[] listenUrls, IAuthnAndTrustConfiguration secProperties,
 			HttpServerProperties extraSettings) throws ConfigurationException
 	{
-		super(listenUrls, secProperties, extraSettings, JettyLogger.class);
+		super(listenUrls, secProperties, extraSettings);
 		initServer();
 	}
 

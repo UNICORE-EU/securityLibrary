@@ -56,6 +56,7 @@ import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SessionIdManager;
@@ -85,7 +86,6 @@ public abstract class JettyServerBase {
 
 	private static final Logger logger=Log.getLogger(Log.HTTP_SERVER, JettyServerBase.class);
 
-	protected final Class<? extends JettyLogger> jettyLogger;
 	protected final URL[] listenUrls;
 	protected final IAuthnAndTrustConfiguration securityConfiguration;
 	protected final HttpServerProperties extraSettings;
@@ -106,7 +106,7 @@ public abstract class JettyServerBase {
 			IAuthnAndTrustConfiguration secConfiguration,
 			HttpServerProperties extraSettings) throws ConfigurationException
 	{
-		this(new URL[] {listenUrl}, secConfiguration, extraSettings, JettyLogger.class);
+		this(new URL[] {listenUrl}, secConfiguration, extraSettings);
 	}
 	
 	/**
@@ -122,11 +122,9 @@ public abstract class JettyServerBase {
 	 */
 	public JettyServerBase(URL[] listenUrls,
 			IAuthnAndTrustConfiguration secConfiguration,
-			HttpServerProperties extraSettings,
-			Class<? extends JettyLogger> jettyLogger) throws ConfigurationException
+			HttpServerProperties extraSettings) throws ConfigurationException
 	{
 		this.securityConfiguration = secConfiguration;
-		this.jettyLogger = jettyLogger;
 		this.listenUrls = listenUrls;
 		this.extraSettings = extraSettings;
 	}
@@ -145,17 +143,13 @@ public abstract class JettyServerBase {
 	}
 
 	protected void initServer() throws ConfigurationException{
-		if (jettyLogger != null) {
-			logger.debug("Setting a custom class for handling Jetty logging: " + jettyLogger.getName());
-			System.setProperty("org.eclipse.jetty.util.log.class", jettyLogger.getName());
-		}
 		if (listenUrls.length == 1 && "0.0.0.0".equals(listenUrls[0].getHost())) {
 			logger.info("Creating Jetty HTTP server, will listen on all network interfaces");
 		} else {
 			StringBuilder allAddresses = new StringBuilder();
 			for (URL url: listenUrls)
 				allAddresses.append(url).append(" ");
-			logger.info("Creating Jetty HTTP server, will listen on: " + allAddresses);	
+			logger.info("Creating Jetty HTTP server, will listen on: {}", allAddresses);	
 		}
 		
 		theServer = createServer();
@@ -356,6 +350,10 @@ public abstract class JettyServerBase {
 		HttpConfiguration httpConfig = new HttpConfiguration();
 		httpConfig.setSendServerVersion(false);
 		httpConfig.setSendXPoweredBy(false);
+		boolean sni = extraSettings.getBooleanValue(HttpServerProperties.ENABLE_SNI);
+		SecureRequestCustomizer src = new SecureRequestCustomizer();
+		src.setSniHostCheck(sni);
+		httpConfig.addCustomizer(src);
 		return new HttpConnectionFactory(httpConfig);
 	}
 	

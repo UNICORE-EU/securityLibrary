@@ -32,8 +32,6 @@
 
 package eu.unicore.util.jetty;
 
-import java.net.Socket;
-
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.Server;
@@ -61,13 +59,6 @@ public class SecuredServerConnector extends ServerConnector {
 	{
 		super(server, sslContextFactory, factories);
 		this.sslContextFactory = sslContextFactory;
-	}
-	
-	@Override
-	protected void configure(Socket socket) 
-	{
-		JettyConnectorUtils.logConnection(socket, log);
-		super.configure(socket);
 	}
 
 	public SslContextFactory.Server getSslContextFactory()
