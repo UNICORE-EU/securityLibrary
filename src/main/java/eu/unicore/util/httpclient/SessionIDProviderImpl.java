@@ -11,13 +11,10 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.security.auth.x500.X500Principal;
-
 import org.w3c.dom.Element;
 
 import eu.unicore.samly2.assertion.Assertion;
 import eu.unicore.security.dsig.DigSignatureUtil;
-import eu.unicore.security.etd.TrustDelegation;
 
 /**
  * In-memory storage of security sessions. Thread safe. 
@@ -192,29 +189,9 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 			else
 				md.update(safeToBytes(null));
 			
-			ETDClientSettings etd = settings.getETDSettings();
-			//requested user
-			md.update(safeToBytes(etd.getRequestedUser()));
-
-			//base ETD chain
-			List<TrustDelegation> baseChain = etd.getTrustDelegationTokens();
-			if (baseChain != null)
-			{
-				for (TrustDelegation td: baseChain)
-					md.update(safeToBytes(td.getXMLBeanDoc().xmlText()));
-			} else
-				md.update(safeToBytes(null));
-
-			//TD target
-			X500Principal receiver = etd.getReceiver();
-			if (receiver != null)
-				md.update(safeToBytes((receiver.getName())));
-			else
-				md.update(safeToBytes(null));
-			
 			//preferences
-			Map<String,String[]>attrs=settings.getETDSettings().getRequestedUserAttributes2();
-			SortedSet<String> sortedAttr = new TreeSet<String>(attrs.keySet());
+			Map<String,String[]>attrs=settings.getRequestedUserAttributes();
+			SortedSet<String> sortedAttr = new TreeSet<>(attrs.keySet());
 			for(String k: sortedAttr){
 				String val=Arrays.asList(attrs.get(k)).toString();
 				md.update(safeToBytes(k));

@@ -31,19 +31,16 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	private boolean httpAuthn;
 	private boolean messageLogging;
 	private boolean useSecuritySessions = true;
-	private String[] inHandlerClassNames;
-	private String[] outHandlerClassNames;
-	private ClassLoader classLoader;
 	private boolean sslEnabled;
 	private boolean doSignMessage;
 	private int maxWSRetries=1;
 	private long retryDelay=0;
-	private ETDClientSettings etdSettings = new ETDClientSettings();
-	private Map<String, Object> extraSecurityTokens = new HashMap<String, Object>();
+	private Map<String,String[]> requestedAttributes = new HashMap<>();
+	private Map<String, Object> extraSecurityTokens = new HashMap<>();
 	private ServerHostnameCheckingMode serverHostnameCheckingMode = ServerHostnameCheckingMode.NONE;
 	private HttpClientProperties httpClientProperties = new HttpClientProperties(new Properties());
 	private final Map<Class<? extends PropertiesHelper>,PropertiesHelper> extraConfigurationHandlers 
-			= new HashMap<Class<? extends PropertiesHelper>, PropertiesHelper>();
+			= new HashMap<>();
 
 	private SessionIDProvider sessionIDProvider = new SessionIDProviderImpl();
 	
@@ -64,19 +61,6 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 		super(validator, credential);
 		this.sslAuthn = true;
 		this.sslEnabled = true;
-		etdSettings.setIssuerCertificateChain(credential.getCertificateChain());
-	}
-
-	/**
-	 * This method also updates issuer in ETD settings, which basically always must be set.
-	 * @param credential the credential to set
-	 */
-	@Override
-	public void setCredential(X509Credential credential)
-	{
-		super.setCredential(credential);
-		if (getCredential() != null)
-			etdSettings.setIssuerCertificateChain(credential.getCertificateChain());
 	}
 
 	/**
@@ -148,57 +132,6 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	}
 
 	/**
-	 * @return the inHandlerClassNames
-	 */
-	@Override
-	public String[] getInHandlerClassNames()
-	{
-		return inHandlerClassNames;
-	}
-
-	/**
-	 * @param inHandlerClassNames the inHandlerClassNames to set
-	 */
-	public void setInHandlerClassNames(String[] inHandlerClassNames)
-	{
-		this.inHandlerClassNames = inHandlerClassNames;
-	}
-
-	/**
-	 * @return the outHandlerClassNames
-	 */
-	@Override
-	public String[] getOutHandlerClassNames()
-	{
-		return outHandlerClassNames;
-	}
-
-	/**
-	 * @param outHandlerClassNames the outHandlerClassNames to set
-	 */
-	public void setOutHandlerClassNames(String[] outHandlerClassNames)
-	{
-		this.outHandlerClassNames = outHandlerClassNames;
-	}
-
-	/**
-	 * @return the classLoader
-	 */
-	@Override
-	public ClassLoader getClassLoader()
-	{
-		return classLoader;
-	}
-
-	/**
-	 * @param classLoader the classLoader to set
-	 */
-	public void setClassLoader(ClassLoader classLoader)
-	{
-		this.classLoader = classLoader;
-	}
-
-	/**
 	 * @return the sslEnabled
 	 */
 	@Override
@@ -254,24 +187,12 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	{
 		this.doSignMessage = doSignMessage;
 	}
-
-	/**
-	 * @return the etdClientSettings
-	 */
+	
 	@Override
-	public ETDClientSettings getETDSettings()
+	public Map<String,String[]> getRequestedUserAttributes()
 	{
-		return etdSettings;
+		return requestedAttributes;
 	}
-
-	/**
-	 * @param etdSettings the etdSettings to set
-	 */
-	public void setEtdSettings(ETDClientSettings etdSettings)
-	{
-		this.etdSettings = etdSettings;
-	}
-
 	/**
 	 * @return the extraSecurityTokens
 	 */
@@ -385,18 +306,15 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 	 */
 	protected IClientConfiguration cloneTo(DefaultClientConfiguration ret)
 	{
-		ret.setClassLoader(classLoader);
 		ret.setCredential(getCredential());
 		ret.setDoSignMessage(doSignMessage);
-		ret.setEtdSettings(etdSettings.clone());
-		Map<String, Object> extra = new HashMap<String, Object>();
+		Map<String, Object> extra = new HashMap<>();
 		extra.putAll(extraSecurityTokens);
+		ret.getRequestedUserAttributes().putAll(requestedAttributes);
 		ret.setExtraSecurityTokens(extra);
 		ret.setHttpAuthn(httpAuthn);
 		ret.setHttpPassword(httpPassword);
 		ret.setHttpUser(httpUser);
-		ret.setInHandlerClassNames(inHandlerClassNames);
-		ret.setOutHandlerClassNames(outHandlerClassNames);
 		ret.setSslAuthn(sslAuthn);
 		ret.setSslEnabled(sslEnabled);
 		ret.setValidator(getValidator());

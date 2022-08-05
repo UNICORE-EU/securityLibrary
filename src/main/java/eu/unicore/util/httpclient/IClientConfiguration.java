@@ -52,31 +52,21 @@ public interface IClientConfiguration extends IPlainClientConfiguration
 	public String getHttpPassword();
 	
 	/**
-	 * Returns the handler classes for outbound messages. Those classes in general 
-	 * are used only in XFire stack.
-	 */
-	public String[] getOutHandlerClassNames();
-	
-	/**
-	 * Returns the handler classes for incoming messages. Those classes in general 
-	 * are used only in XFire stack.
-	 */
-	public String[] getInHandlerClassNames();
-	
-	/**
-	 * Get the classloader to be used e.g. for dynamically loading security handlers.
-	 */
-	public ClassLoader getClassLoader();
-	
-	/**
 	 * Digital signature mechanism can be disabled with this method returning false.
 	 */
 	public boolean doSignMessage();
 
 	/**
-	 * Returns an object with setup of ETD to be used in outgoing calls.
+	 * For outgoing calls, get extra attributes that are
+	 * used to express various preferences regarding the request.
+	 * <br/>
+	 * This will return a modifiable map, never <code>null</code>.
+	 * To add an attribute request to a client call, do<br/>
+	 * <pre>
+	 * sec.getRequestedUserAttributes().put("XLOGIN", "test");
+	 * </pre>
 	 */
-	public ETDClientSettings getETDSettings();
+	public Map<String, String[]> getRequestedUserAttributes();
 	
 	/**
 	 * @return settings for the HTTP client.

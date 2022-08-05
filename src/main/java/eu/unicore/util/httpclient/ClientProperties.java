@@ -55,8 +55,6 @@ public class ClientProperties extends DefaultClientConfiguration
 	public static final String PROP_SSL_ENABLED = "sslEnabled";
 	public static final String PROP_SSL_AUTHN_ENABLED = "sslAuthnEnabled";
 	public static final String PROP_MESSAGE_SIGNING_ENABLED = "digitalSigningEnabled";
-	public static final String PROP_IN_HANDLERS = "inHandlers";
-	public static final String PROP_OUT_HANDLERS = "outHandlers";
 	public static final String PROP_SERVER_HOSTNAME_CHECKING = "serverHostnameChecking";
 	public static final String PROP_MESSAGE_LOGGING = "messageLogging";
 	public static final String PROP_SECURITY_SESSIONS = "securitySessions";
@@ -76,12 +74,8 @@ public class ClientProperties extends DefaultClientConfiguration
 				setDescription("Password for use with HTTP basic authentication (if enabled)."));
 		META.put(PROP_HTTP_USER, new PropertyMD("").
 				setDescription("Username for use with HTTP basic authentication (if enabled)."));
-		META.put(PROP_IN_HANDLERS, new PropertyMD("").
-				setDescription("Space separated list of additional handler class names for handling incoming WS messages"));
 		META.put(PROP_MESSAGE_SIGNING_ENABLED, new PropertyMD("true").
 				setDescription("Controls whether signing of key web service requests should be performed."));
-		META.put(PROP_OUT_HANDLERS, new PropertyMD("").
-				setDescription("Space separated list of additional handler class names for handling outgoing WS messages"));
 		META.put(PROP_SSL_AUTHN_ENABLED, new PropertyMD("true").
 				setDescription("Controls whether SSL authentication of the client should be performed."));
 		META.put(PROP_SSL_ENABLED, new PropertyMD("true").
@@ -218,8 +212,6 @@ public class ClientProperties extends DefaultClientConfiguration
 			if (doSSLAuthn() && getCredential() == null)
 				throw new ConfigurationException("When SSL authentication is enabled the credential " +
 							"must be provided");
-			if (getCredential() != null)
-				getETDSettings().setIssuerCertificateChain(getCredential().getCertificateChain());
 		}
 		setDoSignMessage(clientPropertiesHelper.getBooleanValue(PROP_MESSAGE_SIGNING_ENABLED));
 		if (doSignMessage() && getCredential() == null)
@@ -231,9 +223,6 @@ public class ClientProperties extends DefaultClientConfiguration
 			setHttpPassword(clientPropertiesHelper.getValue(PROP_HTTP_PASSWORD));
 			setHttpUser(clientPropertiesHelper.getValue(PROP_HTTP_USER));
 		}
-		
-		setInHandlerClassNames(parseHandlers(clientPropertiesHelper, PROP_IN_HANDLERS));
-		setOutHandlerClassNames(parseHandlers(clientPropertiesHelper, PROP_OUT_HANDLERS));
 		
 		ServerHostnameCheckingMode hostnameMode = clientPropertiesHelper.getEnumValue(PROP_SERVER_HOSTNAME_CHECKING, 
 				ServerHostnameCheckingMode.class);
@@ -247,16 +236,6 @@ public class ClientProperties extends DefaultClientConfiguration
 		setUseSecuritySessions(clientPropertiesHelper.getBooleanValue(PROP_SECURITY_SESSIONS));
 		setMaxWSRetries(clientPropertiesHelper.getIntValue(PROP_MAX_RETRIES));
 		setRetryDelay(clientPropertiesHelper.getLongValue(PROP_RETRY_DELAY));
-	}
-	
-	private String[] parseHandlers(PropertiesHelper properties, String key)
-	{
-		String handlers = properties.getValue(key);
-		if (handlers != null)
-			handlers.trim();
-		if (handlers != null)
-			return handlers.split("[ ]+");
-		return new String[0];
 	}
 	
 	/**
