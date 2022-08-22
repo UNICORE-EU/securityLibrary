@@ -15,8 +15,6 @@ public class Log {
 	
 	static {
 		try {
-			// if Log4j's j.u.l. adapter is on the classpath, use it
-			Class.forName("org.apache.logging.log4j.jul.LogManager");
 			System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
 		}catch(Throwable t) {}
 		
