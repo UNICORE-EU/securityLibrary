@@ -16,7 +16,7 @@
 	  <samly.version>2.7.1</samly.version>
 	  <canl.version>2.8.2</canl.version>
 	  <xmlsec.version>3.0.0</xmlsec.version>
-	  <woodstox.version>6.3.0</woodstox.version>
+	  <woodstox.version>6.4.0</woodstox.version>
 	  <httpclient.version>4.5.13</httpclient.version>
 	  <jproperties.version>1.1.1</jproperties.version>
 	  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
