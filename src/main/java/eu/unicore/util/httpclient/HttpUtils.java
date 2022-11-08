@@ -4,36 +4,39 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.auth.AuthScheme;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.NTCredentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.AuthCache;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.auth.NTLMSchemeFactory;
-import org.apache.http.impl.client.BasicAuthCache;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.client5.http.auth.AuthCache;
+import org.apache.hc.client5.http.auth.AuthScheme;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.Credentials;
+import org.apache.hc.client5.http.auth.CredentialsStore;
+import org.apache.hc.client5.http.auth.NTCredentials;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.DefaultRedirectStrategy;
+import org.apache.hc.client5.http.impl.auth.BasicAuthCache;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.auth.BasicScheme;
+import org.apache.hc.client5.http.impl.auth.NTLMSchemeFactory;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.core5.http.config.Registry;
+import org.apache.hc.core5.http.config.RegistryBuilder;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.X509Credential;
@@ -121,8 +124,7 @@ public class HttpUtils {
 
 		HttpClientBuilder clientBuilder = HttpClientBuilder.create();
 		clientBuilder.setConnectionManager(connMan);
-		clientBuilder.setRedirectStrategy(new VeryLaxRedirectStrategy());
-
+		clientBuilder.setRedirectStrategy(new DefaultRedirectStrategy());
 		RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
 		int socketTimeout = properties.getIntValue(HttpClientProperties.SO_TIMEOUT);
 		int connectTimeout = properties.getIntValue(HttpClientProperties.CONNECT_TIMEOUT);
@@ -136,8 +138,9 @@ public class HttpUtils {
 		clientBuilder.setDefaultRequestConfig(requestConfig);
 
 		clientBuilder.setUserAgent(USER_AGENT);
-		if (connClose)
-			clientBuilder.addInterceptorFirst(CONN_CLOSE_INTERCEPTOR);
+		if (connClose) {
+			clientBuilder.addRequestInterceptorFirst(CONN_CLOSE_INTERCEPTOR);
+		}
 		return clientBuilder;
 	}
 
@@ -145,12 +148,8 @@ public class HttpUtils {
 	{
 		SSLContext sslContext = createSSLContext(security);
 		HostnameVerifier hostnameVerifier = new EmptyHostnameVerifier();
-		int connectTimeout = security.getHttpClientProperties().
-				getIntValue(HttpClientProperties.CONNECT_TIMEOUT);
-		CustomSSLConnectionSocketFactory sslsf = new CustomSSLConnectionSocketFactory(sslContext, hostnameVerifier,
-				connectTimeout);
+		CustomSSLConnectionSocketFactory sslsf = new CustomSSLConnectionSocketFactory(sslContext, hostnameVerifier);
 		PlainConnectionSocketFactory plainsf = new PlainConnectionSocketFactory();
-		
 		Registry<ConnectionSocketFactory> r = RegistryBuilder.<ConnectionSocketFactory>create()
 		        .register("http", plainsf)
 		        .register("https", sslsf)
@@ -198,11 +197,11 @@ public class HttpUtils {
 				Credentials credentials = getCredentials(proxyUser, proxyPass);
 				boolean ntlm = credentials instanceof NTCredentials;
 
-				CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+				CredentialsStore credentialsProvider = new BasicCredentialsProvider();
 				credentialsProvider.setCredentials(new AuthScope(proxyHost, port), 
 						credentials);
 				clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-				clientBuilder.addInterceptorLast(new ProxyPreemptiveAuthnInterceptor(proxy, ntlm));
+				clientBuilder.addRequestInterceptorLast(new ProxyPreemptiveAuthnInterceptor(proxy, ntlm));
 			}
 		}
 
@@ -230,18 +229,17 @@ public class HttpUtils {
 		if (domainIndex > 0 && username.length() > domainIndex + 1) {
 			return new NTCredentials(
 					username.substring(0, domainIndex), 
-					password, 
+					password.toCharArray(), 
 					"localhost", 
 					username.substring(domainIndex+1));
 		} 
-		return new UsernamePasswordCredentials(username, password);
+		return new UsernamePasswordCredentials(username, password.toCharArray());
 	}
 
 	private static void setConnectionTimeout(RequestConfig.Builder reqConfigBuilder, 
 			int socketTimeout, int connectTimeout) {
-		reqConfigBuilder.setSocketTimeout(socketTimeout);
-		reqConfigBuilder.setConnectTimeout(connectTimeout);
-		reqConfigBuilder.setConnectionRequestTimeout(connectTimeout);
+		reqConfigBuilder.setResponseTimeout(socketTimeout, TimeUnit.MILLISECONDS);
+		reqConfigBuilder.setConnectionRequestTimeout(connectTimeout, TimeUnit.MILLISECONDS);
 	}
 
 	/**
@@ -250,7 +248,7 @@ public class HttpUtils {
 	 * @param socketTimeout socket timeout in milliseconds
 	 * @param connectTimeout connection timeout in milliseconds
 	 */
-	public static void setConnectionTimeout(HttpRequestBase request, 
+	public static void setConnectionTimeout(HttpUriRequestBase request, 
 			int socketTimeout, int connectTimeout) {
 		RequestConfig current = request.getConfig();
 		RequestConfig.Builder reqConfigBuilder = current != null ? 
@@ -266,7 +264,7 @@ public class HttpUtils {
 	private static class ConnectionCloseInterceptor implements HttpRequestInterceptor
 	{
 		@Override
-		public void process(HttpRequest request, HttpContext context) throws HttpException,
+		public void process(HttpRequest request, EntityDetails details, HttpContext context) throws HttpException,
 				IOException
 		{
 			request.setHeader("Connection", "close");
@@ -291,7 +289,7 @@ public class HttpUtils {
 		}
 
 		@Override
-		public void process(HttpRequest request, HttpContext context) throws HttpException,
+		public void process(HttpRequest request, EntityDetails details, HttpContext context) throws HttpException,
 				IOException
 		{
 			AuthCache authCache = (AuthCache) context.getAttribute(HttpClientContext.AUTH_CACHE);
@@ -303,7 +301,7 @@ public class HttpUtils {
 			
 			if (authCache.get(host) == null)
 			{
-				AuthScheme scheme = ntlm ? new NTLMSchemeFactory().newInstance(null):
+				AuthScheme scheme = ntlm ? NTLMSchemeFactory.INSTANCE.create(null):
 					new BasicScheme();
 				authCache.put(host, scheme);
 			}

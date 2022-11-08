@@ -7,8 +7,8 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Properties;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -80,7 +80,7 @@ public class TestProxyCalls {
 			client.execute(httpget);
 			assertTrue(gotCall);
 		} finally {
-			httpget.releaseConnection();
+			httpget.reset();
 		}
 	}
 

@@ -4,21 +4,21 @@
 	<groupId>eu.unicore.security</groupId>
 	<artifactId>securityLibrary</artifactId>
 	<packaging>jar</packaging>
-	<version>5.4.4-SNAPSHOT</version>
+	<version>6.0.0-SNAPSHOT</version>
 	<name>securityLibrary</name>
 	<description>Low level security library for UNICORE: config, utils and data types</description>
 	<url>https://github.com/UNICORE-EU/securityLibrary</url>
 	
 	<properties>
-	  <jetty.version>10.0.11</jetty.version>
-	  <log4j.version>2.18.0</log4j.version>
+	  <jetty.version>10.0.12</jetty.version>
+	  <log4j.version>2.19.0</log4j.version>
 	  <slf.version>1.7.36</slf.version>
 	  <samly.version>2.7.1</samly.version>
 	  <canl.version>2.8.2</canl.version>
-	  <xmlsec.version>3.0.0</xmlsec.version>
+	  <xmlsec.version>3.0.1</xmlsec.version>
 	  <woodstox.version>6.4.0</woodstox.version>
-	  <httpclient.version>4.5.13</httpclient.version>
-	  <jproperties.version>1.1.1</jproperties.version>
+	  <httpclient.version>5.2-beta1</httpclient.version>
+	  <jproperties.version>1.1.2</jproperties.version>
 	  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	  <maven.compiler.target>1.8</maven.compiler.target>
 	  <maven.compiler.source>1.8</maven.compiler.source>
@@ -157,16 +157,15 @@
 			<optional>true</optional>
 		</dependency>
 		
-		<!-- commons-httpclient is required only if you use classes from the 
-		         eu.unicore.util.httpclient 
-		     package.
-		     If you use them then you need the below dependency. 
+		<!-- Apache httpclient is required if you use classes from the
+		         eu.unicore.util.httpclient
+		     package. If you use them then you need this dependency:
 		-->
 		<dependency>
-		 	<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>${httpclient.version}</version>
-			<optional>true</optional>
+		  <groupId>org.apache.httpcomponents.client5</groupId>
+		  <artifactId>httpclient5</artifactId>
+		  <version>${httpclient.version}</version>
+		  <optional>true</optional>
 		</dependency>
 	</dependencies>
 
