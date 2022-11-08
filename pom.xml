@@ -49,7 +49,7 @@
   </developers>
   <dependencyManagement>
     <dependencies>
-            </dependencies>
+    </dependencies>
   </dependencyManagement>
   <dependencies>
     <dependency>
@@ -99,7 +99,7 @@
       <version>${jproperties.version}</version>
     </dependency>
     <!-- XMLBeans and samly2 are required only if you use classes from the
-	 eu.unicore.security and eu.unicore.security.{consignor|etd|user}
+	 eu.unicore.security and eu.unicore.security.consignor
          packages.
          If you use them then you need the below dependencies. -->
     <dependency>
@@ -129,9 +129,9 @@
       <version>${canl.version}</version>
     </dependency>
     <!-- Jetty is required only if you use classes from the 
-		         eu.unicore.util.jetty 
-		     package.
-		     If you use them then you need Jetty on classpath as below. -->
+         eu.unicore.util.jetty 
+	 package.
+	 If you use them then you need Jetty on classpath as below. -->
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-servlet</artifactId>
@@ -151,9 +151,9 @@
       <optional>true</optional>
     </dependency>
     <!-- Apache httpclient is required if you use classes from the
-		         eu.unicore.util.httpclient
-		     package. If you use them then you need this dependency:
-		-->
+	 eu.unicore.util.httpclient
+	 package. If you use them then you need this dependency:
+    -->
     <dependency>
       <groupId>org.apache.httpcomponents.client5</groupId>
       <artifactId>httpclient5</artifactId>
@@ -169,7 +169,6 @@
         <version>2.22.2</version>
         <configuration>
           <forkCount>1</forkCount>
-          <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
         </configuration>
       </plugin>
       <plugin>
