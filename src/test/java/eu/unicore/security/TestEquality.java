@@ -10,7 +10,6 @@ package eu.unicore.security;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.security.cert.X509Certificate;
 
@@ -23,45 +22,31 @@ public class TestEquality
 {
 	
 	@Test
-	public void test()
-	{
-		try
-		{
-			MockSecurityConfig cfg = new MockSecurityConfig(false, true, true);
-			MockSecurityConfig cfgWrong = new MockSecurityConfig(false, true, false);
-			
-			X509Certificate cp1[] = new X509Certificate[] {cfg.getCredential().getCertificate()};
+	public void test() throws Exception {
+		MockSecurityConfig cfg = new MockSecurityConfig(false, true, true);
+		MockSecurityConfig cfgWrong = new MockSecurityConfig(false, true, false);
 
-			X509Certificate[] cp2 = new X509Certificate[] {cfgWrong.getCredential().getCertificate()};
+		X509Certificate cp1[] = new X509Certificate[] {cfg.getCredential().getCertificate()};
 
-			SecurityTokens t1 = new SecurityTokens();
-			SecurityTokens t2 = new SecurityTokens();
-			assertTrue(t1.equals(t2));
+		X509Certificate[] cp2 = new X509Certificate[] {cfgWrong.getCredential().getCertificate()};
 
-			t1.setConsignor(cp1);
-			assertFalse(t1.equals(t2));			
-			t2.setConsignor(cp1);
-			assertTrue(t1.equals(t2));
-			
-			t1.setConsignorTrusted(true);
-			assertFalse(t1.equals(t2));			
-			t2.setConsignorTrusted(true);
-			assertTrue(t1.equals(t2));
-			
-			t1.setMessageSignatureStatus(SignatureStatus.OK);
-			assertFalse(t1.equals(t2));			
-			t2.setMessageSignatureStatus(SignatureStatus.OK);
-			assertTrue(t1.equals(t2));
-			
-			t1.setUser(cp2);
-			assertFalse(t1.equals(t2));			
-			t2.setUser(cp2);
-			assertTrue(t1.equals(t2));
-		} catch(Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-		
+		SecurityTokens t1 = new SecurityTokens();
+		SecurityTokens t2 = new SecurityTokens();
+		assertTrue(t1.equals(t2));
+
+		t1.setConsignor(cp1);
+		assertFalse(t1.equals(t2));			
+		t2.setConsignor(cp1);
+		assertTrue(t1.equals(t2));
+
+		t1.setConsignorTrusted(true);
+		assertFalse(t1.equals(t2));			
+		t2.setConsignorTrusted(true);
+		assertTrue(t1.equals(t2));
+
+		t1.setUser(cp2);
+		assertFalse(t1.equals(t2));			
+		t2.setUser(cp2);
+		assertTrue(t1.equals(t2));
 	}
 }

@@ -22,8 +22,8 @@ import org.apache.hc.client5.http.RedirectException;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
 import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.core5.http.HttpEntityContainer;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
@@ -38,6 +38,7 @@ import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import eu.unicore.util.httpclient.HttpClientProperties;
+import eu.unicore.util.httpclient.HttpResponseHandler;
 import eu.unicore.util.httpclient.HttpUtils;
 import eu.unicore.util.httpclient.IClientConfiguration;
 import eu.unicore.util.httpclient.ServerHostnameCheckingMode;
@@ -66,9 +67,8 @@ public class TestHttpUtils
 	{
 		HttpClient client = HttpUtils.createClient(new DefaultClientConfiguration().getHttpClientProperties());
 		HttpGet get = new HttpGet(server.getUrl()+"/servlet1");
-		HttpEntityContainer response = (HttpEntityContainer)client.execute(get);
-		String resp = EntityUtils.toString(response.getEntity());
-		assertTrue("Got: " + resp, SimpleServlet.OK_GET.equals(resp));
+		String response = client.execute(get, new BasicHttpClientResponseHandler());
+		assertTrue("Got: " + response, SimpleServlet.OK_GET.equals(response));
 	}
 	
 	@Test
@@ -82,7 +82,7 @@ public class TestHttpUtils
 		long start = System.currentTimeMillis();
 		try
 		{
-			client.execute(post);
+			client.execute(post, new BasicHttpClientResponseHandler());
 		} catch(SocketTimeoutException e)
 		{
 			long end = System.currentTimeMillis();
@@ -105,8 +105,7 @@ public class TestHttpUtils
 		HttpClientProperties p = new HttpClientProperties(new Properties());
 		p.setProperty(HttpClientProperties.HTTP_MAX_REDIRECTS, "1");
 		HttpClient client = HttpUtils.createClient(p);
-		ClassicHttpResponse response = (ClassicHttpResponse)client.execute(post);
-		String resp = EntityUtils.toString(response.getEntity());
+		String resp = client.execute(post, new BasicHttpClientResponseHandler());
 		assertTrue("Got: " + resp, SimpleServlet.OK_GET.equals(resp));
 	}
 
@@ -126,7 +125,7 @@ public class TestHttpUtils
 		
 		try
 		{
-			client.execute(post);
+			client.execute(post, new BasicHttpClientResponseHandler());
 			fail("Got proper response when redirects limit should be hit");
 		} catch(ClientProtocolException e)
 		{
@@ -147,9 +146,7 @@ public class TestHttpUtils
 				.addParameter("redirect-to-first", server.getUrl()+"/servlet2")
 				.addParameter("num", "4").build();
 		HttpPost post = new HttpPost(uri);
-		
-		ClassicHttpResponse response = (ClassicHttpResponse)client.execute(post);
-		String resp = EntityUtils.toString(response.getEntity());
+		String resp = client.execute(post, new BasicHttpClientResponseHandler());
 		assertTrue("Got: " + resp, SimpleServlet.OK_POST.equals(resp));
 	}
 	
@@ -165,8 +162,7 @@ public class TestHttpUtils
 		String url = server.getSecUrl()+"/servlet1";
 		HttpClient client = HttpUtils.createClient(url, secCfg);
 		HttpGet get = new HttpGet(url);
-		ClassicHttpResponse response = (ClassicHttpResponse)client.execute(get);
-		String resp = EntityUtils.toString(response.getEntity());
+		String resp = client.execute(get, new BasicHttpClientResponseHandler());
 		assertTrue("Got: " + resp, SimpleServlet.OK_GET.equals(resp));
 	}
 
@@ -183,9 +179,10 @@ public class TestHttpUtils
 		String url = "https://google.com";
 		HttpClient client = HttpUtils.createClient(url, secCfg);
 		HttpGet get = new HttpGet(url);
-		ClassicHttpResponse response = (ClassicHttpResponse) client.execute(get);
-		String resp = EntityUtils.toString(response.getEntity());
-		assertTrue("Got: " + resp, HttpStatus.SC_OK == response.getCode());
+		ClassicHttpResponse resp = client.execute(get, new HttpResponseHandler());
+		assertTrue("Got: " + resp, HttpStatus.SC_OK == resp.getCode());
+		EntityUtils.consumeQuietly(resp.getEntity());
+		resp.close();
 	}
 	
 	@Test
@@ -204,7 +201,7 @@ public class TestHttpUtils
 		HttpGet get = new HttpGet(url);
 		try
 		{
-			client.execute(get);
+			client.execute(get, new BasicHttpClientResponseHandler());
 			fail("Managed to connect with untrusted certificate!!!!!");
 		} catch (SSLException e)
 		{
@@ -263,7 +260,6 @@ public class TestHttpUtils
 		secCfg.setServerHostnameCheckingMode(mode);
 		HttpClient client = HttpUtils.createClient(url, secCfg);
 		HttpGet get = new HttpGet(url);
-		ClassicHttpResponse response = (ClassicHttpResponse)client.execute(get);
-		EntityUtils.toString(response.getEntity());
+		client.execute(get, new BasicHttpClientResponseHandler());
 	}
 }

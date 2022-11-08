@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
@@ -29,8 +28,7 @@ public class CustomSSLConnectionSocketFactory extends SSLConnectionSocketFactory
 
     @Override
     protected void prepareSocket(final SSLSocket socket) throws IOException {
-        SSLSession session = socket.getSession();
-        session.getPeerCertificates();
+        socket.getSession().getPeerCertificates();
     }
 
 }

@@ -127,9 +127,9 @@ public class Log {
 	}
 
 	// keep track of when message was last logged
-	static final Map<Integer,Long>errorLogTimes = new ConcurrentHashMap<Integer, Long>();
+	static final Map<Integer,Long>errorLogTimes = new ConcurrentHashMap<>();
 	// keep track of how often a message was NOT logged
-	static final Map<Integer,Long>errorCounters = new ConcurrentHashMap<Integer, Long>(); 
+	static final Map<Integer,Long>errorCounters = new ConcurrentHashMap<>(); 
 
 	/**
 	 * log an error message to the specified logger.

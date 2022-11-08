@@ -42,12 +42,10 @@ package eu.unicore.security;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.emi.security.authn.x509.proxy.ProxyUtils;
-import eu.unicore.security.etd.TrustDelegation;
 
 /**
  * A set of security tokens with authentication information collected and held 
@@ -101,8 +99,7 @@ public class SecurityTokens implements Serializable, Cloneable
 
 	private transient X509Certificate[] user;
 	private transient X509Certificate[] consignor;
-	private transient SignatureStatus signatureStatus = SignatureStatus.UNCHECKED;
-	
+
 	private String userName;
 	private String consignorName;
 	private String clientIP;
@@ -116,12 +113,7 @@ public class SecurityTokens implements Serializable, Cloneable
 	 * on her behalf or Consignor is equal to User or this is a local call.
 	 */
 	private boolean consignorTrusted;
-	/**
-	 * If true then tdTokens contains a valid TD which was issued by the User.
-	 */
-	private boolean trustDelegationValidated;
-	private List<TrustDelegation> tdTokens;
-	
+
 	private boolean supportProxy;
 
 	/**
@@ -338,23 +330,6 @@ public class SecurityTokens implements Serializable, Cloneable
 	}
 
 	/**
-	 * Returns the status of the request's signature.
-	 */
-	public SignatureStatus getMessageSignatureStatus()
-	{
-		return signatureStatus;
-	}
-
-	/**
-	 * Sets a status of the request's signature.
-	 * @param status
-	 */
-	public void setMessageSignatureStatus(SignatureStatus status)
-	{
-		signatureStatus = status;
-	}
-
-	/**
 	 * @return true only if the consignor's certificate is a proxy and proxy support is turned on.
 	 */
 	public boolean isConsignorUsingProxy()
@@ -403,41 +378,6 @@ public class SecurityTokens implements Serializable, Cloneable
 	}
 
 	/**
-	 * Returns true iff the trust delegation attached is valid and 
-	 * issued by the User. This does not mean that the trust is delegated to 
-	 * the consignor, use isValidConsig
-	 */
-	public boolean isTrustDelegationValidated()
-	{
-		return trustDelegationValidated;
-	}
-
-	/**
-	 * Sets the attached trust delegation general validation status.
-	 */
-	public void setTrustDelegationValidated(boolean validTrustDelegation)
-	{
-		this.trustDelegationValidated = validTrustDelegation;
-	}
-
-	/**
-	 * Sets trust delegation tokens. Note that those need not to be anyhow verified.
-	 * @param tdTokens
-	 */
-	public void setTrustDelegationTokens(List<TrustDelegation> tdTokens)
-	{
-		this.tdTokens = tdTokens;
-	}
-
-	/**
-	 * Gets trust delegation tokens. Note that those need not to be anyhow verified.
-	 */
-	public List<TrustDelegation> getTrustDelegationTokens()
-	{
-		return tdTokens;
-	}
-
-	/**
 	 * @return the real client's IP as obtained from gateway or local network stack
 	 */
 	public String getClientIP() {
@@ -463,12 +403,8 @@ public class SecurityTokens implements Serializable, Cloneable
 			return false;
 		}
 		SecurityTokens other = (SecurityTokens) otherO;
-		
-		if (!other.getMessageSignatureStatus().equals(getMessageSignatureStatus()))
-			return false;
+
 		if (other.isConsignorTrusted() != isConsignorTrusted())
-			return false;
-		if (other.isTrustDelegationValidated() != isTrustDelegationValidated())
 			return false;
 		
 		if (other.getConsignorName() == null)
@@ -504,9 +440,7 @@ public class SecurityTokens implements Serializable, Cloneable
 		int consignorHash = cons == null ? 0 : cons.hashCode(); 
 		String user = getEffectiveUserName();
 		int userHash = user == null ? 0 : user.hashCode();
-		return getMessageSignatureStatus().hashCode()
-				^ (isConsignorTrusted()?0x1:0x0)
-				^ (isTrustDelegationValidated()?0x2:0x0)
+		return (isConsignorTrusted()?0x1:0x0)
 				^ consignorHash
 				^ userHash;
 	}

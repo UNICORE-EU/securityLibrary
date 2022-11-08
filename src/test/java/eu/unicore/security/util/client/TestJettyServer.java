@@ -23,9 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpTrace;
-import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
 import org.apache.hc.core5.http.HttpResponse;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.X509CertChainValidatorExt;
@@ -34,6 +33,7 @@ import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import eu.unicore.util.httpclient.HttpClientProperties;
+import eu.unicore.util.httpclient.HttpResponseHandler;
 import eu.unicore.util.httpclient.HttpUtils;
 import eu.unicore.util.jetty.HttpServerProperties;
 
@@ -62,8 +62,7 @@ public class TestJettyServer
 			String url = server.getSecUrl()+"/servlet1";
 			HttpClient client = HttpUtils.createClient(url, secCfg);
 			HttpGet get = new HttpGet(url);
-			ClassicHttpResponse response = (ClassicHttpResponse)client.execute(get);
-			String resp = EntityUtils.toString(response.getEntity());
+			String resp = client.execute(get, new BasicHttpClientResponseHandler());
 			if (shouldBeOk)
 				assertTrue("Got: " + resp, SimpleServlet.OK_GET.equals(resp));
 			else
@@ -173,7 +172,7 @@ public class TestJettyServer
 			DefaultClientConfiguration secCfg = new DefaultClientConfiguration(validator, cred);
 			HttpClient client = HttpUtils.createClient(url, secCfg);
 			HttpTrace tr = new HttpTrace(url);
-			HttpResponse response = client.execute(tr);
+			HttpResponse response = client.execute(tr, new HttpResponseHandler());
 			assertTrue("Got: " + response, 
 					HttpServletResponse.SC_METHOD_NOT_ALLOWED==response.getCode());
 		}

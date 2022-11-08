@@ -9,6 +9,7 @@ import java.util.Properties;
 
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,7 +78,7 @@ public class TestProxyCalls {
 		HttpClient client=HttpUtils.createClient(uri, config);
 		HttpGet httpget = new HttpGet("http://www.verisign.com/");
 		try { 
-			client.execute(httpget);
+			client.execute(httpget, new BasicHttpClientResponseHandler());
 			assertTrue(gotCall);
 		} finally {
 			httpget.reset();
