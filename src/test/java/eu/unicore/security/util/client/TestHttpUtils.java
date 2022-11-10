@@ -38,7 +38,6 @@ import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import eu.unicore.util.httpclient.HttpClientProperties;
-import eu.unicore.util.httpclient.HttpResponseHandler;
 import eu.unicore.util.httpclient.HttpUtils;
 import eu.unicore.util.httpclient.IClientConfiguration;
 import eu.unicore.util.httpclient.ServerHostnameCheckingMode;
@@ -179,7 +178,7 @@ public class TestHttpUtils
 		String url = "https://google.com";
 		HttpClient client = HttpUtils.createClient(url, secCfg);
 		HttpGet get = new HttpGet(url);
-		ClassicHttpResponse resp = client.execute(get, new HttpResponseHandler());
+		ClassicHttpResponse resp = client.executeOpen(null, get, null);
 		assertTrue("Got: " + resp, HttpStatus.SC_OK == resp.getCode());
 		EntityUtils.consumeQuietly(resp.getEntity());
 		resp.close();

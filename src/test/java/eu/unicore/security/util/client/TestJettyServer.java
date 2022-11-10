@@ -24,7 +24,7 @@ import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpTrace;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
-import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.X509CertChainValidatorExt;
@@ -33,7 +33,6 @@ import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import eu.unicore.util.httpclient.HttpClientProperties;
-import eu.unicore.util.httpclient.HttpResponseHandler;
 import eu.unicore.util.httpclient.HttpUtils;
 import eu.unicore.util.jetty.HttpServerProperties;
 
@@ -172,9 +171,10 @@ public class TestJettyServer
 			DefaultClientConfiguration secCfg = new DefaultClientConfiguration(validator, cred);
 			HttpClient client = HttpUtils.createClient(url, secCfg);
 			HttpTrace tr = new HttpTrace(url);
-			HttpResponse response = client.execute(tr, new HttpResponseHandler());
+			ClassicHttpResponse response = client.executeOpen(null, tr, null);
 			assertTrue("Got: " + response, 
 					HttpServletResponse.SC_METHOD_NOT_ALLOWED==response.getCode());
+			response.close();
 		}
 		finally{
 			server.stop();
