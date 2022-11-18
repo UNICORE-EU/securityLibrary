@@ -1,8 +1,10 @@
 package eu.unicore.util.httpclient;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.channels.SocketChannel;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -106,10 +108,10 @@ public class HttpUtils {
 	}
 	
 	/**
-	 * Create a HTTP client.
+	 * Create a HTTP client builder
 	 * The returned client has no HTTP proxy support configured.
 	 */
-	private static synchronized HttpClientBuilder createClientBuilder(HttpClientProperties properties,
+	public static synchronized HttpClientBuilder createClientBuilder(HttpClientProperties properties,
 			PoolingHttpClientConnectionManager connMan)
 	{
 		boolean connClose = properties.getBooleanValue(HttpClientProperties.CONNECTION_CLOSE);
@@ -137,7 +139,6 @@ public class HttpUtils {
 				setRedirectsEnabled(allowRedirects).
 				build();
 		clientBuilder.setDefaultRequestConfig(requestConfig);
-
 		clientBuilder.setUserAgent(USER_AGENT);
 		if (connClose) {
 			clientBuilder.addRequestInterceptorFirst(CONN_CLOSE_INTERCEPTOR);
@@ -150,15 +151,23 @@ public class HttpUtils {
 		SSLContext sslContext = createSSLContext(security);
 		HostnameVerifier hostnameVerifier = new EmptyHostnameVerifier();
 		SSLConnectionSocketFactory sslsf = new CustomSSLConnectionSocketFactory(sslContext, hostnameVerifier);
-		PlainConnectionSocketFactory plainsf = new PlainConnectionSocketFactory();
+		ConnectionSocketFactory plainsf = nioSocketFactory();
 		Registry<ConnectionSocketFactory> r = RegistryBuilder.<ConnectionSocketFactory>create()
 		        .register("http", plainsf)
 		        .register("https", sslsf)
 		        .build();
-
 		return new PoolingHttpClientConnectionManager(r);
 	}
 	
+	private static ConnectionSocketFactory nioSocketFactory() {
+		return new PlainConnectionSocketFactory() {
+			@Override
+			public Socket createSocket(HttpContext context) throws IOException {
+				return SocketChannel.open().socket();
+			}
+		};
+	}
+
 	/**
 	 * configure the HTTP proxy settings on the given client
 	 * 
@@ -312,7 +321,7 @@ public class HttpUtils {
 
 	static String[] protocols = {"TLSv1","TLSv1.1","TLSv1.2"};
 	
-	private static SSLContext createSSLContext(IPlainClientConfiguration sec)
+	public static SSLContext createSSLContext(IPlainClientConfiguration sec)
 	{
 		X509Credential credential = sec.doSSLAuthn() ? sec.getCredential() : null;
 		try
@@ -323,7 +332,6 @@ public class HttpUtils {
 			return sslContext;
 		} catch (Exception e)
 		{
-			logger.fatal(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
