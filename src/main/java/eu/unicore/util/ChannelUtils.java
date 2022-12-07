@@ -121,9 +121,10 @@ public class ChannelUtils {
     /**
      * Write all remaining bytes in the buffer to the given channel.
      *
+     * @return number of bytes written
      * @throws  IOException if the channel is closed.
      */
-    public static void writeFully(WritableByteChannel ch, ByteBuffer bb)
+    public static int writeFully(WritableByteChannel ch, ByteBuffer bb)
     		throws IOException
     {
     	int written = 0;
@@ -137,6 +138,7 @@ public class ChannelUtils {
     			Thread.sleep(10);
     		}catch(InterruptedException ie) {}
     	}
+    	return written;
     }
 	
 }
