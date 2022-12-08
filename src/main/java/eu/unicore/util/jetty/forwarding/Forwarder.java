@@ -6,8 +6,10 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.util.Callback;
 
@@ -72,29 +74,38 @@ public class Forwarder implements Runnable {
 			log.info("TCP port forwarder starting.");
 			while(true) {
 				selector.select(50);
-				selector.selectedKeys().forEach(key -> dataAvailable(key));
+				Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
+				while(iter.hasNext()) {
+					SelectionKey key = iter.next();
+					iter.remove();
+					if(key.isValid())dataAvailable(key);
+				}
 			}
 		}catch(Exception ex) {
 			log.error(ex);
 		}
 	}
 
-
 	public synchronized void dataAvailable(SelectionKey key) {
 		ForwardingConnection toClient = (ForwardingConnection)key.attachment();
-		SocketChannel vsite = toClient.getBackend();
+		SocketChannel backend = toClient.getBackend();
 		try{
-			if(key.isReadable()) {
-				buffer.clear();
-				int n = vsite.read(buffer);
-				if(n>0) {
-					buffer.flip();
-					toClient.getEndPoint().write(Callback.NOOP, buffer);
-					log.debug("Wrote {} bytes from vsite to client.", n);
-				}
+			buffer.clear();
+			int n = backend.read(buffer);
+			if(n>0) {
+				buffer.flip();
+				toClient.getEndPoint().write(Callback.NOOP, buffer);
+				log.debug("Wrote {} bytes from backend to client.", n);
+			}
+			if(n==-1) {
+				log.debug("Backend at EOF, closing.", n);
+				IOUtils.closeQuietly(toClient);
+				key.cancel();
 			}
 		}catch(IOException ioe) {
 			log.error(ioe);
+			IOUtils.closeQuietly(toClient);
+			key.cancel();
 		}
 	}
 

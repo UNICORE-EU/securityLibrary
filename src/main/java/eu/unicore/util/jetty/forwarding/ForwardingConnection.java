@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.Executor;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.io.AbstractConnection;
 import org.eclipse.jetty.io.Connection;
@@ -56,12 +57,27 @@ public class ForwardingConnection extends AbstractConnection implements Connecti
 			buffer.clear();
 			buffer.limit(0);
 			int n = getEndPoint().fill(buffer);
-			int written = ChannelUtils.writeFully(backend, buffer);
-			LOG.debug("<-- {} bytes from client --> {} to backend", n, written);
+			if(n==-1) {
+				LOG.debug("Client shutdown, closing.");
+				close();
+			}
+			else {
+				if(n>0) {
+					int written = ChannelUtils.writeFully(backend, buffer);
+					LOG.debug("<-- {} bytes from client --> {} to backend", n, written);
+				}
 			fillInterested();
+			}
 		}catch(Exception ioe) {
 			Log.logException("Error handling forwarding to backend "+backend, ioe, LOG);
+			this.close();
 		}
+	}
+
+	@Override
+	public void close() {
+		IOUtils.closeQuietly(backend);
+		super.close();
 	}
 
 	@Override
