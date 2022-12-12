@@ -2,9 +2,11 @@ package eu.unicore.util.jetty.forwarding;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.WritePendingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -70,9 +72,9 @@ public class Forwarder implements Runnable {
 	}
 
 	public void run() {
-		try{
-			log.info("TCP port forwarder starting.");
-			while(true) {
+		log.info("TCP port forwarder starting.");
+		while(true) {
+			try{
 				selector.select(50);
 				Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
 				while(iter.hasNext()) {
@@ -81,9 +83,13 @@ public class Forwarder implements Runnable {
 					if(key.isValid())dataAvailable(key);
 				}
 			}
-		}catch(Exception ex) {
-			log.error(ex);
+			catch(ClosedSelectorException cse) {
+				break;
+			}catch(Exception ex) {
+				log.error(ex);
+			}
 		}
+		log.info("TCP port forwarder exiting.");
 	}
 
 	public synchronized void dataAvailable(SelectionKey key) {
@@ -102,7 +108,7 @@ public class Forwarder implements Runnable {
 				IOUtils.closeQuietly(toClient);
 				key.cancel();
 			}
-		}catch(IOException ioe) {
+		}catch(WritePendingException | IOException ioe) {
 			log.error(ioe);
 			IOUtils.closeQuietly(toClient);
 			key.cancel();
