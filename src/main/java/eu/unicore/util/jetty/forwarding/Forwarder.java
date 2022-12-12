@@ -6,14 +6,14 @@ import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.nio.channels.WritePendingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.FutureCallback;
 
 import eu.unicore.util.Log;
 import eu.unicore.util.SSLSocketChannel;
@@ -100,7 +100,11 @@ public class Forwarder implements Runnable {
 			int n = backend.read(buffer);
 			if(n>0) {
 				buffer.flip();
-				toClient.getEndPoint().write(Callback.NOOP, buffer);
+				// make sure we write everything
+				FutureCallback callback = new FutureCallback();
+				toClient.getEndPoint().write(callback, buffer);
+				// don't want to hang forever though
+				callback.get(60, TimeUnit.SECONDS);
 				log.debug("Wrote {} bytes from backend to client.", n);
 			}
 			if(n==-1) {
@@ -108,9 +112,10 @@ public class Forwarder implements Runnable {
 				IOUtils.closeQuietly(toClient);
 				key.cancel();
 			}
-		}catch(WritePendingException | IOException ioe) {
-			log.error(ioe);
+		}catch(Throwable ioe) {
+			log.error("Error handling write to client "+toClient, ioe);
 			IOUtils.closeQuietly(toClient);
+			IOUtils.closeQuietly(backend);
 			key.cancel();
 		}
 	}
