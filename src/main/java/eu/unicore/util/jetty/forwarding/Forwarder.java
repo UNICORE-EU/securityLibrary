@@ -6,9 +6,7 @@ import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -28,8 +26,6 @@ public class Forwarder implements Runnable {
 	private static final Logger log = Log.getLogger(Log.HTTP_SERVER, Forwarder.class);
 
 	private final Selector selector;
-
-	private final List<SelectionKey> keys = new ArrayList<>();
 
 	private final ByteBuffer buffer;
 
@@ -64,10 +60,7 @@ public class Forwarder implements Runnable {
 		SocketChannel selectable = backend instanceof SSLSocketChannel ?
 				((SSLSocketChannel)backend).getWrappedSocketChannel():
 					backend;
-				SelectionKey key  = selectable.register(selector,
-						SelectionKey.OP_READ,
-						forwardingConnection);
-				keys.add(key);
+				selectable.register(selector, SelectionKey.OP_READ, forwardingConnection);
 				log.info("New forwarding connection to {} started.", backend.getRemoteAddress());
 	}
 
