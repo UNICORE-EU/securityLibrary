@@ -9,18 +9,18 @@
   <description>Low level security library for UNICORE: config, utils and data types</description>
   <url>https://github.com/UNICORE-EU/securityLibrary</url>
   <properties>
-    <jetty.version>10.0.13</jetty.version>
-    <log4j.version>2.19.0</log4j.version>
+    <jetty.version>10.0.15</jetty.version>
+    <log4j.version>2.20.0</log4j.version>
     <slf.version>1.7.36</slf.version>
     <samly.version>2.7.1</samly.version>
-    <canl.version>2.8.2</canl.version>
-    <xmlsec.version>3.0.1</xmlsec.version>
-    <woodstox.version>6.4.0</woodstox.version>
+    <canl.version>2.8.3</canl.version>
+    <xmlsec.version>3.0.2</xmlsec.version>
+    <woodstox.version>6.5.1</woodstox.version>
     <httpclient.version>5.2.1</httpclient.version>
-    <jproperties.version>1.1.2</jproperties.version>
+    <jproperties.version>1.1.3</jproperties.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.source>11</maven.compiler.source>
   </properties>
   <scm>
     <connection>scm:git:git://github.com/UNICORE-EU/securityLibrary.git</connection>
@@ -121,6 +121,14 @@
           <groupId>com.sun.xml.ws</groupId>
           <artifactId>jaxws-ri</artifactId>
         </exclusion>
+	<exclusion>
+	  <groupId>stax</groupId>
+	  <artifactId>stax-api</artifactId>
+	</exclusion>
+	<exclusion>
+	  <groupId>xml-apis</groupId>
+	  <artifactId>xml-apis</artifactId>
+	</exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -165,6 +173,22 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Automatic-Module-Name>eu.unicore.security.securityLibrary</Automatic-Module-Name>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.22.2</version>
         <configuration>
@@ -187,7 +211,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.6</version>
+        <version>3.0.1</version>
         <executions>
           <execution>
             <id>sign-artifacts</id>
