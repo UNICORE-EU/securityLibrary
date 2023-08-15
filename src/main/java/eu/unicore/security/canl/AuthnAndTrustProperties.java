@@ -164,6 +164,11 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 		clonedRaw.credentialProperties = cp;
 		clonedRaw.truststoreProperties = tp;
 		return clonedRaw;
-		
 	}
+
+	public void reloadCredential() throws ConfigurationException {
+		credentialProperties.reloadCredential();
+		setCredential(credentialProperties.getCredential());
+	}
+
 }

@@ -316,7 +316,7 @@ public abstract class JettyServerBase {
 	 * @throws ConfigurationException
 	 */
 	protected ServerConnector createSecureConnector(URL url) throws ConfigurationException {
-		logger.debug("Creating SSL NIO connector on: " + url);
+		logger.debug("Creating SSL connector on: {}", url);
 		SecuredServerConnector ssl = getSecuredConnectorInstance();			
 
 		SslContextFactory.Server factory = ssl.getSslContextFactory();
@@ -328,7 +328,7 @@ public abstract class JettyServerBase {
 			if (disabledCiphers.length() > 1)
 				factory.setExcludeCipherSuites(disabledCiphers.split("[ ]+"));
 		}
-		logger.debug("SSL protocol was set to: '"+factory.getProtocol()+"'");
+		logger.debug("SSL protocol was set to: '{}'", factory.getProtocol());
 		return ssl;
 	}	
 
@@ -366,7 +366,7 @@ public abstract class JettyServerBase {
 	 * @param url
 	 */
 	protected ServerConnector createPlainConnector(URL url){
-		logger.debug("Creating plain HTTP connector on: " + url);
+		logger.debug("Creating plain HTTP connector on: {}", url);
 		return getPlainConnectorInstance();
 	}
 
@@ -506,6 +506,25 @@ public abstract class JettyServerBase {
 	 */
 	public URL[] getUrls() {
 		return listenUrls;
+	}
+	
+	public void reloadCredential() {
+		for(Connector connector: theServer.getConnectors()) {
+			try{
+				if(connector instanceof SecuredServerConnector) {
+					logger.info("Reloading credential on {}", connector.getServer().getURI());
+					@SuppressWarnings("resource")
+					SecuredServerConnector sConnector = (SecuredServerConnector)connector;
+					SslContextFactory.Server scf = sConnector.getSslContextFactory();
+					JettyConnectorUtils.reloadCredential(scf,
+							securityConfiguration.getCredential(),
+							securityConfiguration.getValidator(),
+							logger);
+				}
+			}catch(Exception ex) {
+				logger.error("Cannot reload credential.",ex);
+			}
+		}
 	}
 
 }

@@ -52,7 +52,8 @@ public class CredentialProperties extends PropertiesHelper
 
 	public static final String PROP_LOCATION = "path";
 	public static final String PROP_PASSWORD = "password";
-
+	public static final String PROP_RELOAD_DYNAMICALLY= "reloadOnChange";
+	
 	//type-specific
 	public static final String PROP_KEY_LOCATION = "keyPath";
 	public static final String PROP_KS_ALIAS = "keyAlias";
@@ -73,6 +74,8 @@ public class CredentialProperties extends PropertiesHelper
 				setDescription("Private key password, which might be needed only for 'jks' or 'pkcs12', if key is encrypted with different password then the main credential password."));
 		META.put(PROP_KS_ALIAS, new PropertyMD().setSortKey("6").
 				setDescription("Keystore alias of the key entry to be used. Can be ignored if the keystore contains only one key entry. Only applicable for 'jks' and 'pkcs12'."));
+		META.put(PROP_RELOAD_DYNAMICALLY, new PropertyMD("true").setBoolean().setSortKey("6").
+				setDescription("Monitor credential location and trigger dynamical reload if file changes."));
 	}
 	
 
@@ -179,7 +182,7 @@ public class CredentialProperties extends PropertiesHelper
 		{
 			throw new ConfigurationException("Certificate loaded from " + credPath + " (" + 
 					CertificateUtils.format(cert, FormatMode.COMPACT_ONE_LINE) + ") " +
-					" is NOT YED VALID: " + e.getMessage());
+					" is NOT YET VALID: " + e.getMessage());
 		} 
 	}
 	
@@ -309,11 +312,23 @@ public class CredentialProperties extends PropertiesHelper
 			return CredentialFormat.der;
 		return CredentialFormat.pem;
 	}
+
+	public boolean isDynamicalReloadEnabled() {
+		return getBooleanValue(PROP_RELOAD_DYNAMICALLY);
+	}
 	
+	public void reloadCredential() throws ConfigurationException {
+		if(isDynamicalReloadEnabled()) {
+			createCredentialSafe();
+		}
+	}
+
 	public CredentialProperties clone()
 	{
 		CredentialProperties ret = new CredentialProperties(properties, passwordCallback, prefix);
 		super.cloneTo(ret);
 		return ret;
 	}
+	
+	
 }

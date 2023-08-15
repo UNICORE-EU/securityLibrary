@@ -43,12 +43,20 @@ public class JettyConnectorUtils
 		return ret;
 	}
 	
+	
+	public static void reloadCredential(SslContextFactory.Server contextFactory, X509Credential newCredential, 
+			X509CertChainValidator validator, Logger log) throws Exception {
+		String protocol = "TLS";
+		contextFactory.setSslContext(SSLContextCreator.createSSLContext(newCredential, validator, protocol, 
+				"Jetty HTTP Server", log, ServerHostnameCheckingMode.NONE));
+		contextFactory.reload(scf->{});	
+	}
+
 	public static void logConnection(final Socket socket, final Logger log) {
 		InetSocketAddress peer=(InetSocketAddress)socket.getRemoteSocketAddress();
 		if(log.isDebugEnabled() && peer!=null && peer.getAddress()!=null){
 			final String hostAddress = peer.getAddress().getHostAddress();
-			log.debug("Connection attempt from " + hostAddress);
-
+			log.debug("Connection attempt from {}", hostAddress);
 			if (socket instanceof SSLSocket)
 			{
 				SSLSocket ssl = (SSLSocket) socket;
@@ -58,11 +66,11 @@ public class JettyConnectorUtils
 							X509Certificate[] peer = CertificateUtils.convertToX509Chain(
 									hce.getPeerCertificates());
 							String msg = X500NameUtils.getReadableForm(peer[0].getSubjectX500Principal());
-							log.debug("SSL connection with " + msg + ", connected from " + 
-									hostAddress + " was established.");
+							log.debug("SSL connection with {}, connected from {} was established.",
+									msg, hostAddress);
 						} catch (SSLPeerUnverifiedException spe) {
-							log.debug("An identity of the peer connecting from " + hostAddress + 
-									" was not established on TLS layer");
+							log.debug("An identity of the peer connecting from {} was not established on TLS layer",
+									hostAddress);
 						}
 					}
 				});
