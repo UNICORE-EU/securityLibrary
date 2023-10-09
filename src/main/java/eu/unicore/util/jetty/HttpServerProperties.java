@@ -94,23 +94,9 @@ public class HttpServerProperties extends PropertiesHelper
 	public static final String MAX_CONNECTIONS = "maxConnections";
 
 	/**
-	 * @deprecated
-	 */
-	@Deprecated
-	public static final String HIGH_LOAD_CONNECTIONS = "highLoadConnections";
-
-	/**
 	 * time (in ms.) before an idle connection will time out
 	 */
 	public static final String MAX_IDLE_TIME = "maxIdleTime";
-
-	/**
-	 * @deprecated
-	 */
-	@Deprecated
-	public static final String LOW_RESOURCE_MAX_IDLE_TIME = "lowResourceMaxIdleTime";
-
-	private static final String SO_LINGER_TIME = "soLingerTime";
 
 	/**
 	 * Whether the SSL socket accept client-side authentication
@@ -162,7 +148,7 @@ public class HttpServerProperties extends PropertiesHelper
 	public static final String ENABLE_SNI = "enableSNI";
 	
 	@DocumentationReferenceMeta
-	protected final static Map<String, PropertyMD> defaults=new HashMap<String, PropertyMD>();
+	protected final static Map<String, PropertyMD> defaults = new HashMap<>();
 	
 	static{
 		defaults.put(MAX_THREADS, new PropertyMD("255").
@@ -174,16 +160,10 @@ public class HttpServerProperties extends PropertiesHelper
 		defaults.put(MAX_CONNECTIONS, new PropertyMD("0").setNonNegative().
 				setDescription("Maximum number of incoming connections to this server. If set to a value larger than 0, "
 						+ "incoming connections will be limited to that number. Default is 0 = unlimited."));
-				defaults.put(HIGH_LOAD_CONNECTIONS, new PropertyMD("200").
-				setDescription("deprecated"));
 		defaults.put(MAX_IDLE_TIME, new PropertyMD("200000").setPositive().
 				setDescription("Time (in ms.) before an idle connection will time out. It should be large enough not to expire connections with slow clients, values below 30s are getting quite risky."));
-		defaults.put(LOW_RESOURCE_MAX_IDLE_TIME, new PropertyMD("100").setPositive().
-				setDescription("deprecated"));
 		defaults.put(FAST_RANDOM, new PropertyMD("false").
 				setDescription("Use insecure, but fast pseudo random generator to generate session ids instead of secure generator for SSL sockets."));
-		defaults.put(SO_LINGER_TIME, new PropertyMD().setDeprecated().
-				setDescription("(DEPRECATED, ignored)"));
 		defaults.put(WANT_CLIENT_AUTHN, new PropertyMD("true").
 				setDescription("Controls whether the SSL socket accepts (but does not require) client-side authentication."));
 		defaults.put(REQUIRE_CLIENT_AUTHN, new PropertyMD("true").
