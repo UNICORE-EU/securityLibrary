@@ -96,6 +96,7 @@ public class HttpServerProperties extends PropertiesHelper
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	public static final String HIGH_LOAD_CONNECTIONS = "highLoadConnections";
 
 	/**
@@ -106,6 +107,7 @@ public class HttpServerProperties extends PropertiesHelper
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	public static final String LOW_RESOURCE_MAX_IDLE_TIME = "lowResourceMaxIdleTime";
 
 	private static final String SO_LINGER_TIME = "soLingerTime";
