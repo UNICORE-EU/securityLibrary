@@ -270,7 +270,7 @@ public class CredentialProperties extends PropertiesHelper
 		String errorPfx = "Credential type was not set with the property " 
 				+ prefix + PROP_FORMAT;
 		if (keyLocation != null && (ksAlias != null || ksKeyPassword != null))
-			new ConfigurationException(errorPfx + " and settings for both " + 
+			throw new ConfigurationException(errorPfx + " and settings for both " + 
 					CredentialFormat.pem + " and JKS/PKCS12 keystore are present." +
 					" Either set the type explicitely or delete settings of not used credential type (" 
 					+ PROP_KEY_LOCATION + " or " + PROP_KS_ALIAS + " and " + PROP_KS_KEY_PASSWORD +")");

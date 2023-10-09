@@ -429,7 +429,7 @@ public class SecurityTokens implements Serializable, Cloneable
 		{
 			if (getClientIP() != null)
 				return false;
-		} else if (!other.getClientIP().equals(getClass()))
+		} else if (!other.getClientIP().equals(getClientIP()))
 			return false;
 		
 		return true;
