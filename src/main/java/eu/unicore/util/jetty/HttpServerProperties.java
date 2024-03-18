@@ -40,6 +40,7 @@ import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.configuration.DocumentationReferenceMeta;
 import eu.unicore.util.configuration.PropertiesHelper;
 import eu.unicore.util.configuration.PropertyMD;
+import eu.unicore.util.configuration.PropertyMD.DocumentationCategory;
 
 /**
  * Defines constants and defaults for HTTP server (i.e. Jetty) settings, so simplifies 
@@ -114,6 +115,11 @@ public class HttpServerProperties extends PropertiesHelper
 	public static final String DISABLED_CIPHER_SUITES = "disabledCipherSuites";
 
 	/**
+	 * Space separated list of SSL protocols to be disabled
+	 */
+	public static final String DISABLED_PROTOCOLS = "disabledProtocols";
+
+	/**
 	 * Prefix for the below defined gzip properties
 	 */
 	public static final String GZIP_PREFIX = "gzip.";
@@ -151,61 +157,71 @@ public class HttpServerProperties extends PropertiesHelper
 	protected final static Map<String, PropertyMD> defaults = new HashMap<>();
 	
 	static{
-		defaults.put(MAX_THREADS, new PropertyMD("255").
+		DocumentationCategory _general= new DocumentationCategory("General settings", "1");
+		DocumentationCategory _cors = new DocumentationCategory("CORS settings", "7");
+		DocumentationCategory _advanced = new DocumentationCategory("Advanced settings", "9");
+		
+		defaults.put(MAX_THREADS, new PropertyMD("255").setCategory(_general).
 				setDescription("Maximum number of threads to have in the thread pool for processing HTTP connections."
 						+ " Note that this number will be increased with few additional threads to handle connectors."));
-		defaults.put(MIN_THREADS, new PropertyMD("1").setPositive().
+		defaults.put(MIN_THREADS, new PropertyMD("1").setPositive().setCategory(_general).
 				setDescription("Minimum number of threads to have in the thread pool for processing HTTP connections. "
 						+ " Note that this number will be increased with few additional threads to handle connectors."));
-		defaults.put(MAX_CONNECTIONS, new PropertyMD("0").setNonNegative().
+		defaults.put(MAX_CONNECTIONS, new PropertyMD("0").setNonNegative().setCategory(_general).
 				setDescription("Maximum number of incoming connections to this server. If set to a value larger than 0, "
 						+ "incoming connections will be limited to that number. Default is 0 = unlimited."));
-		defaults.put(MAX_IDLE_TIME, new PropertyMD("200000").setPositive().
+		defaults.put(MAX_IDLE_TIME, new PropertyMD("200000").setPositive().setCategory(_general).
 				setDescription("Time (in ms.) before an idle connection will time out. It should be large enough not to expire connections with slow clients, values below 30s are getting quite risky."));
-		defaults.put(FAST_RANDOM, new PropertyMD("false").
-				setDescription("Use insecure, but fast pseudo random generator to generate session ids instead of secure generator for SSL sockets."));
-		defaults.put(WANT_CLIENT_AUTHN, new PropertyMD("true").
+		defaults.put(FAST_RANDOM, new PropertyMD("false").setCategory(_advanced).
+				setDescription("Use insecure, but fast pseudo random generator to generate SSL session ids."));
+		defaults.put(WANT_CLIENT_AUTHN, new PropertyMD("true").setCategory(_general).
 				setDescription("Controls whether the SSL socket accepts (but does not require) client-side authentication."));
-		defaults.put(REQUIRE_CLIENT_AUTHN, new PropertyMD("true").
+		defaults.put(REQUIRE_CLIENT_AUTHN, new PropertyMD("true").setCategory(_general).
 				setDescription("Controls whether the SSL socket requires client-side authentication."));
-		defaults.put(DISABLED_CIPHER_SUITES, new PropertyMD("").
-				setDescription("Space separated list of SSL cipher suites to be disabled. Names of the ciphers must adhere to the standard Java cipher names, available here: "
-						+ "http://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html#SupportedCipherSuites"));
-		defaults.put(MIN_GZIP_SIZE, new PropertyMD("100000").
+		defaults.put(DISABLED_CIPHER_SUITES, new PropertyMD("").setCategory(_advanced).
+				setDescription("Space separated list of SSL cipher suites to be disabled. "
+				+ "The cipher names are documented at: "
+				+ "https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#sslcontext-algorithms"));
+		defaults.put(DISABLED_PROTOCOLS, new PropertyMD("TLSv1.1 TLSv1").setCategory(_advanced).
+				setDescription("Space separated list of protocol variants to be disabled. "
+				+ "The protocol names are documened under 'Protocol Parameters' at "
+				+ "https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#jsse-cipher-suite-names"));
+
+		defaults.put(MIN_GZIP_SIZE, new PropertyMD("100000").setCategory(_advanced).
 				setDescription("Specifies the minimal size of message that should be compressed."));
-		defaults.put(ENABLE_GZIP, new PropertyMD("false").
+		defaults.put(ENABLE_GZIP, new PropertyMD("false").setCategory(_advanced).
 				setDescription("Controls whether to enable compression of HTTP responses."));
 		
-		defaults.put(ENABLE_HSTS, new PropertyMD("false").
+		defaults.put(ENABLE_HSTS, new PropertyMD("false").setCategory(_advanced).
 				setDescription("Control whether HTTP strict transport security is enabled. "
 						+ "It is a good and strongly suggested security mechanism for all production sites. "
 						+ "At the same time it can not be used with self-signed or not "
 						+ "issued by a generally trusted CA server certificates, "
 						+ "as with HSTS a user can't opt in to enter such site."));
-		defaults.put(FRAME_OPTIONS, new PropertyMD(XFrameOptions.deny).
+		defaults.put(FRAME_OPTIONS, new PropertyMD(XFrameOptions.deny).setCategory(_advanced).
 				setDescription("Defines whether a clickjacking prevention should be turned on, by insertion"
 						+ "of the X-Frame-Options HTTP header. The 'allow' value disables the feature."
 						+ " See the RFC 7034 for details. Note that for the 'allowFrom' "
 						+ "you should define also the " + ALLOWED_TO_EMBED + 
 						" option and it is not fully supported by all the browsers."));
-		defaults.put(ALLOWED_TO_EMBED, new PropertyMD("http://localhost").
+		defaults.put(ALLOWED_TO_EMBED, new PropertyMD("http://localhost").setCategory(_advanced).
 				setDescription("URI origin that is allowed to embed web interface inside a (i)frame."
 						+ " Meaningful only if the " + FRAME_OPTIONS + " is set to 'allowFrom'."
 						+ " The value should be in the form: 'http[s]://host[:port]'"));
-				defaults.put(ENABLE_CORS, new PropertyMD("false").
+				defaults.put(ENABLE_CORS, new PropertyMD("false").setCategory(_cors).
 				setDescription("Control whether Cross-Origin Resource Sharing is enabled. "
 						+ "Enable to allow e.g. accesing REST services from client-side JavaScript."));
-		defaults.put(CORS_ALLOWED_ORIGINS, new PropertyMD("*").
+		defaults.put(CORS_ALLOWED_ORIGINS, new PropertyMD("*").setCategory(_cors).
 				setDescription("CORS: allowed script origins."));
-		defaults.put(CORS_ALLOWED_METHODS, new PropertyMD("GET,PUT,POST,DELETE,HEAD").
+		defaults.put(CORS_ALLOWED_METHODS, new PropertyMD("GET,PUT,POST,DELETE,HEAD").setCategory(_cors).
 				setDescription("CORS: comma separated list of allowed HTTP verbs."));
-		defaults.put(CORS_ALLOWED_HEADERS, new PropertyMD("*").
+		defaults.put(CORS_ALLOWED_HEADERS, new PropertyMD("*").setCategory(_cors).
 				setDescription("CORS: comma separated list of allowed HTTP headers (default: any)"));
-		defaults.put(CORS_EXPOSED_HEADERS, new PropertyMD("Location,Content-Type").
+		defaults.put(CORS_EXPOSED_HEADERS, new PropertyMD("Location,Content-Type").setCategory(_cors).
 				setDescription("CORS: comma separated list of HTTP headers that are allowed to be exposed to the client."));
-		defaults.put(CORS_CHAIN_PREFLIGHT, new PropertyMD("false").
+		defaults.put(CORS_CHAIN_PREFLIGHT, new PropertyMD("false").setCategory(_cors).
 				setDescription("CORS: whether preflight OPTION requests are chained (passed on) to the resource or handled via the CORS filter."));
-		defaults.put(ENABLE_SNI, new PropertyMD("false").
+		defaults.put(ENABLE_SNI, new PropertyMD("false").setCategory(_advanced).
 				setDescription("Enable Server Name Indication (SNI)"));
 	}
 

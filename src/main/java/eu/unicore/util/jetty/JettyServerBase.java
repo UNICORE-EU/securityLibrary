@@ -327,6 +327,13 @@ public abstract class JettyServerBase {
 			if (disabledCiphers.length() > 1)
 				factory.setExcludeCipherSuites(disabledCiphers.split("[ ]+"));
 		}
+		String disabledProtocols = extraSettings.getValue(HttpServerProperties.DISABLED_PROTOCOLS);
+		if (disabledProtocols != null) {
+			disabledProtocols = disabledProtocols.trim();
+			if (disabledProtocols.length() > 1)
+				factory.setExcludeProtocols(disabledProtocols.split("[ ]+"));
+		}
+		
 		logger.debug("SSL protocol was set to: '{}'", factory.getProtocol());
 		return ssl;
 	}	
