@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpServletResponse;
 /**
  * from Jetty's websocket module
  */
-@SuppressWarnings("deprecation")
 public class UpgradeHttpServletResponse implements HttpServletResponse
 {
     private static final String UNSUPPORTED = "Feature unsupported after Connection: Upgrade";
@@ -154,7 +153,7 @@ public class UpgradeHttpServletResponse implements HttpServletResponse
     {
         if (_response == null)
             throw new UnsupportedOperationException(UNSUPPORTED);
-        return _response.encodeUrl(s);
+        return _response.encodeURL(s);
     }
 
     @Override
@@ -162,7 +161,7 @@ public class UpgradeHttpServletResponse implements HttpServletResponse
     {
         if (_response == null)
             throw new UnsupportedOperationException(UNSUPPORTED);
-        return _response.encodeRedirectUrl(s);
+        return _response.encodeRedirectURL(s);
     }
 
     @Override
@@ -350,6 +349,7 @@ public class UpgradeHttpServletResponse implements HttpServletResponse
     }
 
     @Override
+    @Deprecated
     public void setStatus(int i, String s)
     {
         if (_response == null)

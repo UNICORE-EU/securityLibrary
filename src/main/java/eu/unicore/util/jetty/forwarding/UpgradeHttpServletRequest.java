@@ -35,7 +35,9 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpUpgradeHandler;
 import jakarta.servlet.http.Part;
 
-@SuppressWarnings("deprecation")
+/**
+ * from Jetty's websocket module
+ */
 public class UpgradeHttpServletRequest implements HttpServletRequest
 {
     private static final String UNSUPPORTED = "Feature unsupported after Connection: Upgrade";
@@ -323,7 +325,7 @@ public class UpgradeHttpServletRequest implements HttpServletRequest
     {
         if (request == null)
             throw new UnsupportedOperationException(UNSUPPORTED);
-        return request.isRequestedSessionIdFromUrl();
+        return request.isRequestedSessionIdFromURL();
     }
 
     @Override

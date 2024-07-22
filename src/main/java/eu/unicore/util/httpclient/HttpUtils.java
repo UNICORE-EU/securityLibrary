@@ -16,7 +16,6 @@ import org.apache.hc.client5.http.auth.AuthScheme;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.Credentials;
 import org.apache.hc.client5.http.auth.CredentialsStore;
-import org.apache.hc.client5.http.auth.NTCredentials;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
@@ -25,7 +24,6 @@ import org.apache.hc.client5.http.impl.DefaultRedirectStrategy;
 import org.apache.hc.client5.http.impl.auth.BasicAuthCache;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.auth.BasicScheme;
-import org.apache.hc.client5.http.impl.auth.NTLMSchemeFactory;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
@@ -205,13 +203,11 @@ public class HttpUtils {
 			if (proxyUser != null && proxyPass != null)
 			{
 				Credentials credentials = getCredentials(proxyUser, proxyPass);
-				boolean ntlm = credentials instanceof NTCredentials;
-
 				CredentialsStore credentialsProvider = new BasicCredentialsProvider();
 				credentialsProvider.setCredentials(new AuthScope(proxyHost, port), 
 						credentials);
 				clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-				clientBuilder.addRequestInterceptorLast(new ProxyPreemptiveAuthnInterceptor(proxy, ntlm));
+				clientBuilder.addRequestInterceptorLast(new ProxyPreemptiveAuthnInterceptor(proxy));
 			}
 		}
 
@@ -237,11 +233,7 @@ public class HttpUtils {
 	private static Credentials getCredentials(String username, String password){
 		int domainIndex = username.indexOf('\\');
 		if (domainIndex > 0 && username.length() > domainIndex + 1) {
-			return new NTCredentials(
-					username.substring(0, domainIndex), 
-					password.toCharArray(), 
-					"localhost", 
-					username.substring(domainIndex+1));
+			throw new RuntimeException("Domain credentials not supported.");
 		} 
 		return new UsernamePasswordCredentials(username, password.toCharArray());
 	}
@@ -290,12 +282,10 @@ public class HttpUtils {
 	private static class ProxyPreemptiveAuthnInterceptor implements HttpRequestInterceptor
 	{
 		private HttpHost host;
-		private boolean ntlm;
 		
-		public ProxyPreemptiveAuthnInterceptor(HttpHost host, boolean ntlm)
+		public ProxyPreemptiveAuthnInterceptor(HttpHost host)
 		{
 			this.host = host;
-			this.ntlm = ntlm;
 		}
 
 		@Override
@@ -311,8 +301,7 @@ public class HttpUtils {
 			
 			if (authCache.get(host) == null)
 			{
-				AuthScheme scheme = ntlm ? NTLMSchemeFactory.INSTANCE.create(null):
-					new BasicScheme();
+				AuthScheme scheme = new BasicScheme();
 				authCache.put(host, scheme);
 			}
 		}
