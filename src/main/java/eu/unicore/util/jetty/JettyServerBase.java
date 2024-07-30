@@ -317,7 +317,6 @@ public abstract class JettyServerBase {
 	protected ServerConnector createSecureConnector(URL url) throws ConfigurationException {
 		logger.debug("Creating SSL connector on: {}", url);
 		SecuredServerConnector ssl = getSecuredConnectorInstance();			
-
 		SslContextFactory.Server factory = ssl.getSslContextFactory();
 		factory.setNeedClientAuth(extraSettings.getBooleanValue(HttpServerProperties.REQUIRE_CLIENT_AUTHN));
 		factory.setWantClientAuth(extraSettings.getBooleanValue(HttpServerProperties.WANT_CLIENT_AUTHN));
@@ -333,7 +332,6 @@ public abstract class JettyServerBase {
 			if (disabledProtocols.length() > 1)
 				factory.setExcludeProtocols(disabledProtocols.split("[ ]+"));
 		}
-		
 		logger.debug("SSL protocol was set to: '{}'", factory.getProtocol());
 		return ssl;
 	}	

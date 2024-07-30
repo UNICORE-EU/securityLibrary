@@ -160,7 +160,7 @@ public class HttpServerProperties extends PropertiesHelper
 		DocumentationCategory _general= new DocumentationCategory("General settings", "1");
 		DocumentationCategory _cors = new DocumentationCategory("CORS settings", "7");
 		DocumentationCategory _advanced = new DocumentationCategory("Advanced settings", "9");
-		
+
 		defaults.put(MAX_THREADS, new PropertyMD("255").setCategory(_general).
 				setDescription("Maximum number of threads to have in the thread pool for processing HTTP connections."
 						+ " Note that this number will be increased with few additional threads to handle connectors."));
