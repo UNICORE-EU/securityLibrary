@@ -93,11 +93,11 @@ public abstract class JettyServerBase {
 	private Server theServer;
 
 	/**
-	 * Simplified constructor: only one listen URL, standard {@link JettyLogger} is used which is logging to log4j 
-	 * without SLF.
+	 * Simplified constructor with only a single listen URL
+	 *
 	 * @param listenUrl listen URL
 	 * @param secConfiguration security configuration, providing local credential and trust settings.
-	 * Useful only for https:// URLs
+	 *        Useful only for https:// URLs
 	 * @param extraSettings additional Jetty settings
 	 * @throws ConfigurationException
 	 */
@@ -109,14 +109,10 @@ public abstract class JettyServerBase {
 	}
 	
 	/**
-	 * 
 	 * @param listenUrls listen URLs
 	 * @param secConfiguration security configuration, providing local credential and trust settings.
-	 * Useful only for https:// URLs
+	 *        Useful only for https:// URLs
 	 * @param extraSettings additional Jetty settings
-	 * @param jettyLogger either a custom extension of {@link JettyLogger} or null. In latter case a default
-	 * Jetty logging will be used, which is either SLF or trivial logging to standard error if SLF 
-	 * is not present. 
 	 * @throws ConfigurationException
 	 */
 	public JettyServerBase(URL[] listenUrls,

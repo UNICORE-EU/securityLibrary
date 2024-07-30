@@ -18,7 +18,7 @@ import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
  *  <li> whether to check server hostnames
  * </ul>
  * In the typical UNICORE-related cases, the {@link IClientConfiguration} interface is
- * the better choice. This one is used e.g. in case of XNJS->TSI communication.
+ * the better choice. This one is used e.g. in case of XNJS-to-TSI communication.
  * @author golbi
  */
 public interface IPlainClientConfiguration extends IAuthnAndTrustConfiguration
