@@ -11,12 +11,11 @@ import static eu.unicore.security.canl.CredentialProperties.PROP_KS_ALIAS;
 import static eu.unicore.security.canl.CredentialProperties.PROP_KS_KEY_PASSWORD;
 import static eu.unicore.security.canl.CredentialProperties.PROP_LOCATION;
 import static eu.unicore.security.canl.CredentialProperties.PROP_PASSWORD;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.security.canl.CredentialProperties.CredentialFormat;
 
@@ -26,7 +25,7 @@ public class CredentialPropertiesTest
 	private static final String PFX = "src/test/resources/credentials/";
 	
 	@Test
-	public void testPEM()
+	public void testPEM() throws Exception
 	{
 		Properties p = new Properties();
 		p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, CredentialFormat.pem.toString());
@@ -37,7 +36,7 @@ public class CredentialPropertiesTest
 	}
 
 	@Test
-	public void testPEM2()
+	public void testPEM2() throws Exception
 	{
 		Properties p = new Properties();
 		p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, CredentialFormat.pem.toString());
@@ -47,7 +46,7 @@ public class CredentialPropertiesTest
 	}
 	
 	@Test
-	public void testDER()
+	public void testDER() throws Exception
 	{
 		Properties p = new Properties();
 		p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, CredentialFormat.der.toString());
@@ -58,7 +57,7 @@ public class CredentialPropertiesTest
 	}
 	
 	@Test
-	public void testJKS()
+	public void testJKS() throws Exception
 	{
 		Properties p = new Properties();
 		p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, CredentialFormat.jks.toString());
@@ -68,7 +67,7 @@ public class CredentialPropertiesTest
 	}
 
 	@Test
-	public void testPKCS12()
+	public void testPKCS12() throws Exception
 	{
 		Properties p = new Properties();
 		p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, CredentialFormat.pkcs12.toString());
@@ -79,7 +78,7 @@ public class CredentialPropertiesTest
 	}
 
 	@Test
-	public void testDetect()
+	public void testDetect() throws Exception
 	{
 		Properties p = new Properties();
 		//p.setProperty(DEFAULT_PREFIX + PROP_FORMAT, CredentialFormat.pkcs12.toString());
@@ -89,20 +88,12 @@ public class CredentialPropertiesTest
 		verify(p);
 	}
 
-	private void verify(Properties p)
-	{
-		try
-		{
-			CredentialProperties cfg = new CredentialProperties(p);
-			assertNotNull(cfg.getCredential().getCertificate());
+	private void verify(Properties p) throws Exception {
+		CredentialProperties cfg = new CredentialProperties(p);
+		assertNotNull(cfg.getCredential().getCertificate());
 
-			p.remove(DEFAULT_PREFIX + PROP_FORMAT);
-			cfg = new CredentialProperties(p);
-			assertNotNull(cfg.getCredential().getCertificate());
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.toString());
-		}
+		p.remove(DEFAULT_PREFIX + PROP_FORMAT);
+		cfg = new CredentialProperties(p);
+		assertNotNull(cfg.getCredential().getCertificate());
 	}
 }

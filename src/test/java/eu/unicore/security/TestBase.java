@@ -15,7 +15,7 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 import org.apache.xmlbeans.XmlOptions;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 /**
  * @author K. Benedyczak
@@ -43,7 +43,7 @@ public abstract class TestBase
 	protected PrivateKey privKey1, privKey2, privKey3, privKey4, privKeyExpired;
 	protected XmlOptions xmlOpts;
 	
-	@Before
+	@BeforeEach
 	public void setUp()
 	{
 		try

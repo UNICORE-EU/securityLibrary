@@ -22,15 +22,14 @@ import static eu.unicore.security.canl.TruststoreProperties.PROP_CRL_UPDATE;
 import static eu.unicore.security.canl.TruststoreProperties.PROP_OCSP_LOCAL_RESPONDERS;
 import static eu.unicore.security.canl.TruststoreProperties.PROP_OPENSSL_NS_MODE;
 import static eu.unicore.security.canl.TruststoreProperties.PROP_PROXY_SUPPORT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.NamespaceCheckingMode;
@@ -44,9 +43,9 @@ import eu.unicore.security.canl.TrustedIssuersProperties.TruststoreType;
 public class TruststorePropertiesTest
 {
 	private static final String PFX = "src/test/resources/truststores/";
-	
+
 	@Test
-	public void testOpenssl()
+	public void testOpenssl() throws Exception
 	{
 		Properties p = new Properties();
 		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TruststoreType.openssl.toString());
@@ -55,23 +54,23 @@ public class TruststorePropertiesTest
 		p.setProperty(DEFAULT_PREFIX + PROP_CRL_MODE, "REQUIRE");
 		p.setProperty(DEFAULT_PREFIX + PROP_UPDATE, "1234");
 		p.setProperty(DEFAULT_PREFIX + PROP_PROXY_SUPPORT, "DENY");
-		
+
 		OpensslCertChainValidator v = (OpensslCertChainValidator) verify(p).getValidator();
 		assertEquals(v.getTruststorePath(), PFX+"openssl");
 		assertEquals(v.getUpdateInterval(), 1234000);
 		assertEquals(v.getProxySupport(), ProxySupport.DENY);
 		assertEquals(v.getNamespaceCheckingMode(), NamespaceCheckingMode.EUGRIDPMA_GLOBUS_REQUIRE);
 		assertEquals(v.getRevocationCheckingMode().getCrlCheckingMode(), CrlCheckingMode.REQUIRE);
-		assertTrue("Issuers: " + v.getTrustedIssuers().length, v.getTrustedIssuers().length == 1);
+		assertTrue(v.getTrustedIssuers().length == 1);
 	}
 
 	@Test
-	public void testOpensslDefaults()
+	public void testOpensslDefaults() throws Exception
 	{
 		Properties p = new Properties();
 		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TruststoreType.openssl.toString());
 		p.setProperty(DEFAULT_PREFIX + PROP_OPENSSL_DIR, PFX+"openssl");
-		
+
 		OpensslCertChainValidator v = (OpensslCertChainValidator) verify(p).getValidator();
 		assertEquals(v.getTruststorePath(), PFX+"openssl");
 		assertEquals(v.getUpdateInterval()+"", 
@@ -79,15 +78,15 @@ public class TruststorePropertiesTest
 		assertEquals(v.getProxySupport().name(), 
 				TruststoreProperties.META.get(PROP_PROXY_SUPPORT).getDefault());
 		assertEquals(v.getNamespaceCheckingMode().name(), 
-			TruststoreProperties.META.get(PROP_OPENSSL_NS_MODE).getDefault());
+				TruststoreProperties.META.get(PROP_OPENSSL_NS_MODE).getDefault());
 		assertEquals(v.getRevocationCheckingMode().getCrlCheckingMode().name(), 
-			TruststoreProperties.META.get(PROP_CRL_MODE).getDefault());
-		
+				TruststoreProperties.META.get(PROP_CRL_MODE).getDefault());
+
 		v.dispose();
 	}
 
 	@Test
-	public void testDirectory()
+	public void testDirectory() throws Exception
 	{
 		Properties p = new Properties();
 		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TruststoreType.directory.toString());
@@ -103,10 +102,10 @@ public class TruststorePropertiesTest
 		p.setProperty(DEFAULT_PREFIX + PROP_CRL_CONNECTION_TIMEOUT, "200");
 		p.setProperty(DEFAULT_PREFIX + PROP_CRL_LOCATIONS + "1", PFX+"dir/*.crl");
 		p.setProperty(DEFAULT_PREFIX + PROP_CRL_UPDATE, "400");
-		
+
 		p.setProperty(DEFAULT_PREFIX + PROP_OCSP_LOCAL_RESPONDERS + "1", "http://some.responder/foo src/test/resources/credentials/cert-1.pem");
 		p.setProperty(DEFAULT_PREFIX + PROP_OCSP_LOCAL_RESPONDERS + "2", "http://some.responder/bar src/test/resources/credentials/cert-1.pem");
-		
+
 		TruststoreProperties tp = verify(p);
 		DirectoryCertChainValidator v = (DirectoryCertChainValidator) tp.getValidator();
 		assertEquals(v.getTruststorePaths().get(0), PFX+"dir/*.pem");
@@ -114,39 +113,36 @@ public class TruststorePropertiesTest
 		assertEquals(v.getProxySupport(), ProxySupport.DENY);
 		assertEquals(v.getRevocationCheckingMode().getCrlCheckingMode(), CrlCheckingMode.REQUIRE);
 		assertEquals(v.getRevocationParameters().getCrlParameters().getCrlUpdateInterval() + "", 
-			"400000");
+				"400000");
 		assertEquals(v.getRevocationParameters().getCrlParameters().getCrls().get(0), 
-			PFX+"dir/*.crl");
+				PFX+"dir/*.crl");
 		assertEquals(v.getRevocationParameters().getCrlParameters().getDiskCachePath(), 
 				"/tmp");
-		assertTrue("Issuers: " + v.getTrustedIssuers().length, v.getTrustedIssuers().length == 1);
+		assertTrue(v.getTrustedIssuers().length == 1);
 		assertEquals(2, v.getRevocationParameters().getOcspParameters().getLocalResponders().length);
-		
+
 		//test update
 		tp.setProperty(PROP_UPDATE, "12");
 		tp.setProperty(PROP_DIRECTORY_LOCATIONS + "1", PFX+"dir/ss*.pem");
 		tp.setProperty(PROP_CRL_LOCATIONS + "1", PFX+"dir/ss*.crl");
 		tp.setProperty(PROP_CRL_UPDATE, "40");
 		v = (DirectoryCertChainValidator) tp.getValidator();
-		
-		
+
 		assertEquals(12000, v.getTruststoreUpdateInterval());
 		assertEquals("40000", v.getRevocationParameters().getCrlParameters().getCrlUpdateInterval() + "");
 		assertEquals(PFX+"dir/ss*.pem", v.getTruststorePaths().get(0));
 		assertEquals(PFX+"dir/ss*.crl", v.getRevocationParameters().getCrlParameters().getCrls().get(0));
-		
-		
-		
+
 		v.dispose();
 	}
 
 	@Test
-	public void testDirectoryDefaults()
+	public void testDirectoryDefaults() throws Exception
 	{
 		Properties p = new Properties();
 		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TruststoreType.directory.toString());
 		p.setProperty(DEFAULT_PREFIX + PROP_DIRECTORY_LOCATIONS, PFX+"dir/*.pem");
-		
+
 		DirectoryCertChainValidator v = (DirectoryCertChainValidator) verify(p).getValidator();
 		assertEquals(v.getTruststorePaths().get(0), PFX+"dir/*.pem");
 		assertEquals(v.getTruststoreUpdateInterval()+"", 
@@ -154,17 +150,17 @@ public class TruststorePropertiesTest
 		assertEquals(v.getProxySupport().name(), 
 				TruststoreProperties.META.get(PROP_PROXY_SUPPORT).getDefault());
 		assertEquals(v.getRevocationCheckingMode().getCrlCheckingMode().name(), 
-			TruststoreProperties.META.get(PROP_CRL_MODE).getDefault());
+				TruststoreProperties.META.get(PROP_CRL_MODE).getDefault());
 		assertEquals(v.getRevocationParameters().getCrlParameters().getCrlUpdateInterval() + "", 
-			TruststoreProperties.META.get(PROP_CRL_UPDATE).getDefault()+"000");
+				TruststoreProperties.META.get(PROP_CRL_UPDATE).getDefault()+"000");
 		assertEquals(v.getRevocationParameters().getCrlParameters().getDiskCachePath(), 
 				null);
-		assertTrue("Issuers: " + v.getTrustedIssuers().length, v.getTrustedIssuers().length == 1);
+		assertTrue(v.getTrustedIssuers().length == 1);
 		v.dispose();
 	}
 
 	@Test
-	public void testJKS()
+	public void testJKS() throws Exception
 	{
 		Properties p = new Properties();
 		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TruststoreType.keystore.toString());
@@ -173,11 +169,11 @@ public class TruststorePropertiesTest
 		KeystoreCertChainValidator v = (KeystoreCertChainValidator) verify(p).getValidator();
 		assertEquals(v.getTruststorePath(), PFX+"truststore1.jks");
 		assertEquals(v.getTruststoreUpdateInterval()+"", 
-			TruststoreProperties.META.get(PROP_UPDATE).getDefault()+"000");
+				TruststoreProperties.META.get(PROP_UPDATE).getDefault()+"000");
 	}
-	
+
 	@Test
-	public void testPKCS12()
+	public void testPKCS12() throws Exception
 	{
 		Properties p = new Properties();
 		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TruststoreType.keystore.toString());
@@ -186,22 +182,14 @@ public class TruststorePropertiesTest
 		KeystoreCertChainValidator v = (KeystoreCertChainValidator) verify(p).getValidator();
 		assertEquals(v.getTruststorePath(), PFX+"keystore-1.p12");
 		assertEquals(v.getTruststoreUpdateInterval()+"", 
-			TruststoreProperties.META.get(PROP_UPDATE).getDefault()+"000");
+				TruststoreProperties.META.get(PROP_UPDATE).getDefault()+"000");
 	}
 
-	private TruststoreProperties verify(Properties p)
+	private TruststoreProperties verify(Properties p) throws Exception
 	{
-		try
-		{
-			TruststoreProperties cfg = new TruststoreProperties(p, 
+		TruststoreProperties cfg = new TruststoreProperties(p, 
 				Collections.singleton(new LoggingStoreUpdateListener()));
-			assertNotNull(cfg.getValidator());
-			return cfg;
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.toString());
-			return null;
-		}
+		assertNotNull(cfg.getValidator());
+		return cfg;
 	}
 }

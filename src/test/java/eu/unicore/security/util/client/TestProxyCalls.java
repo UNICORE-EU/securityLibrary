@@ -1,6 +1,6 @@
 package eu.unicore.security.util.client;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,9 +10,9 @@ import java.util.Properties;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.util.httpclient.DefaultClientConfiguration;
 import eu.unicore.util.httpclient.HttpClientProperties;
@@ -29,7 +29,7 @@ public class TestProxyCalls {
 	boolean gotCall=false;
 	ServerSocket s;
 	
-	@Before
+	@BeforeEach
 	public void setUp()throws InterruptedException{
 		//start a fake proxy server...
 		Runnable r=new Runnable(){
@@ -58,7 +58,7 @@ public class TestProxyCalls {
 		Thread.sleep(2000);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown(){
 		try{
 			if(s!=null)s.close();

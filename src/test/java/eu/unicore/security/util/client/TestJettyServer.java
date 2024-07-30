@@ -4,10 +4,7 @@
  */
 package eu.unicore.security.util.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -25,7 +22,7 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpTrace;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
 import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.X509Credential;
@@ -63,7 +60,7 @@ public class TestJettyServer
 			HttpGet get = new HttpGet(url);
 			String resp = client.execute(get, new BasicHttpClientResponseHandler());
 			if (shouldBeOk)
-				assertTrue("Got: " + resp, SimpleServlet.OK_GET.equals(resp));
+				assertTrue(SimpleServlet.OK_GET.equals(resp));
 			else
 				fail("Should get an exception");
 
@@ -172,8 +169,7 @@ public class TestJettyServer
 			HttpClient client = HttpUtils.createClient(url, secCfg);
 			HttpTrace tr = new HttpTrace(url);
 			ClassicHttpResponse response = client.executeOpen(null, tr, null);
-			assertTrue("Got: " + response, 
-					HttpServletResponse.SC_METHOD_NOT_ALLOWED==response.getCode());
+			assertTrue(HttpServletResponse.SC_METHOD_NOT_ALLOWED==response.getCode());
 			response.close();
 		}
 		finally{

@@ -7,8 +7,8 @@
  */
 package eu.unicore.security.util.client;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -27,10 +27,10 @@ import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.X509Credential;
@@ -44,10 +44,10 @@ import eu.unicore.util.httpclient.ServerHostnameCheckingMode;
 
 public class TestHttpUtils
 {
-	private JettyServer4Testing server;
+	private static JettyServer4Testing server;
 	
-	@Before
-	public void setUp() throws Exception
+	@BeforeAll
+	public static void setUp() throws Exception
 	{
 		server = JettyServer4Testing.getInstance();
 		server.addServlet(SimpleServlet.class.getName(), "/servlet1");
@@ -55,8 +55,8 @@ public class TestHttpUtils
 		server.start();
 	}
 	
-	@After
-	public void tearDown() throws Exception
+	@AfterAll
+	public static void tearDown() throws Exception
 	{
 		server.stop();
 	}
@@ -67,7 +67,7 @@ public class TestHttpUtils
 		HttpClient client = HttpUtils.createClient(new DefaultClientConfiguration().getHttpClientProperties());
 		HttpGet get = new HttpGet(server.getUrl()+"/servlet1");
 		String response = client.execute(get, new BasicHttpClientResponseHandler());
-		assertTrue("Got: " + response, SimpleServlet.OK_GET.equals(response));
+		assertTrue(SimpleServlet.OK_GET.equals(response), "Got: " + response);
 	}
 	
 	@Test
@@ -86,11 +86,9 @@ public class TestHttpUtils
 		{
 			long end = System.currentTimeMillis();
 			System.out.println("Return after: " + (end-start));
-			assertTrue("Execution was not timed out, took " + (end-start), 
-					end-start < 600);
+			assertTrue(end-start < 600, "Execution was not timed out, took " + (end-start));
 			return;
 		}
-		
 		long end = System.currentTimeMillis();
 		fail("Execution was not timed out, took " + (end-start));
 	}
@@ -105,11 +103,11 @@ public class TestHttpUtils
 		p.setProperty(HttpClientProperties.HTTP_MAX_REDIRECTS, "1");
 		HttpClient client = HttpUtils.createClient(p);
 		String resp = client.execute(post, new BasicHttpClientResponseHandler());
-		assertTrue("Got: " + resp, SimpleServlet.OK_GET.equals(resp));
+		assertTrue(SimpleServlet.OK_GET.equals(resp),"Got: " + resp);
 	}
 
 	@Test
-	@Ignore("custom redirect handling currently not implemented")
+	@Disabled("custom redirect handling currently not implemented")
 	public void testRedirectsTooMany() throws Exception
 	{
 		HttpClientProperties p = new HttpClientProperties(new Properties());
@@ -128,12 +126,12 @@ public class TestHttpUtils
 			fail("Got proper response when redirects limit should be hit");
 		} catch(ClientProtocolException e)
 		{
-			assertTrue("Got wrong exception cause: " + e, e.getCause() instanceof RedirectException);
+			assertTrue(e.getCause() instanceof RedirectException, "Got wrong exception cause: " + e);
 		}
 	}
 
 	@Test
-	@Ignore("custom redirect handling currently not implemented")
+	@Disabled("custom redirect handling currently not implemented")
 	public void testRedirectsMany() throws Exception
 	{
 		HttpClientProperties p = new HttpClientProperties(new Properties());
@@ -146,7 +144,7 @@ public class TestHttpUtils
 				.addParameter("num", "4").build();
 		HttpPost post = new HttpPost(uri);
 		String resp = client.execute(post, new BasicHttpClientResponseHandler());
-		assertTrue("Got: " + resp, SimpleServlet.OK_POST.equals(resp));
+		assertTrue(SimpleServlet.OK_POST.equals(resp), "Got: " + resp);
 	}
 	
 	@Test
@@ -162,7 +160,7 @@ public class TestHttpUtils
 		HttpClient client = HttpUtils.createClient(url, secCfg);
 		HttpGet get = new HttpGet(url);
 		String resp = client.execute(get, new BasicHttpClientResponseHandler());
-		assertTrue("Got: " + resp, SimpleServlet.OK_GET.equals(resp));
+		assertTrue(SimpleServlet.OK_GET.equals(resp), "Got: " + resp);
 	}
 
 	@Test
@@ -179,7 +177,7 @@ public class TestHttpUtils
 		HttpClient client = HttpUtils.createClient(url, secCfg);
 		HttpGet get = new HttpGet(url);
 		ClassicHttpResponse resp = client.executeOpen(null, get, null);
-		assertTrue("Got: " + resp, HttpStatus.SC_OK == resp.getCode());
+		assertTrue(HttpStatus.SC_OK == resp.getCode(), "Got: " + resp);
 		EntityUtils.consumeQuietly(resp.getEntity());
 		resp.close();
 	}
@@ -205,10 +203,6 @@ public class TestHttpUtils
 		} catch (SSLException e)
 		{
 			//OK
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.toString());
 		}
 	}
 	

@@ -12,11 +12,11 @@ import static eu.unicore.util.httpclient.ClientProperties.PROP_MESSAGE_SIGNING_E
 import static eu.unicore.util.httpclient.ClientProperties.PROP_SERVER_HOSTNAME_CHECKING;
 import static eu.unicore.util.httpclient.ClientProperties.PROP_SSL_AUTHN_ENABLED;
 import static eu.unicore.util.httpclient.ClientProperties.PROP_SSL_ENABLED;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import eu.unicore.security.canl.DefaultAuthnAndTrustConfiguration;
 import eu.unicore.util.httpclient.ClientProperties;

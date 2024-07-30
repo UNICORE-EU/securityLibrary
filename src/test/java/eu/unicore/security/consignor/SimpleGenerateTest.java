@@ -8,14 +8,14 @@
 
 package eu.unicore.security.consignor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.security.cert.X509Certificate;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.samly2.SAMLConstants.AuthNClasses;
