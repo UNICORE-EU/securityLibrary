@@ -136,7 +136,22 @@
       <artifactId>canl</artifactId>
       <version>${canl.version}</version>
     </dependency>
-    <!-- Jetty is required only if you use classes from the 
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+      <version>${bc.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+        <artifactId>bcpkix-jdk18on</artifactId>
+        <version>${bc.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.16.1</version>
+    </dependency>
+      <!-- Jetty is required only if you use classes from the 
          eu.unicore.util.jetty 
 	 package.
 	 If you use them then you need Jetty on classpath as below. -->
@@ -169,26 +184,6 @@
       <optional>true</optional>
     </dependency>
   </dependencies>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.bouncycastle</groupId>
-        <artifactId>bcprov-jdk18on</artifactId>
-        <version>${bc.version}</version>
-      </dependency>
-    <dependency>
-        <groupId>org.bouncycastle</groupId>
-        <artifactId>bcpkix-jdk18on</artifactId>
-        <version>${bc.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-io</groupId>
-	<artifactId>commons-io</artifactId>
-	<version>2.16.1</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <build>
     <plugins>
