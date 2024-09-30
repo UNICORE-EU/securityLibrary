@@ -4,7 +4,7 @@
   <groupId>eu.unicore.security</groupId>
   <artifactId>securityLibrary</artifactId>
   <packaging>jar</packaging>
-  <version>7.1.2</version>
+  <version>7.1.3-SNAPSHOT</version>
   <name>securityLibrary</name>
   <description>Low level security library for UNICORE: config, utils and data types</description>
   <url>https://github.com/UNICORE-EU/securityLibrary</url>
@@ -29,7 +29,7 @@
     <connection>scm:git:git://github.com/UNICORE-EU/securityLibrary.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/UNICORE-EU/securityLibrary.git</developerConnection>
     <url>https://github.com/UNICORE-EU/securityLibrary</url>
-    <tag>securityLibrary-7.1.2</tag>
+    <tag>HEAD</tag>
   </scm>
   
   <licenses>
