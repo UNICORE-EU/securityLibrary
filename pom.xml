@@ -100,10 +100,6 @@
       <artifactId>jproperties-conf</artifactId>
       <version>${jproperties.version}</version>
     </dependency>
-    <!-- XMLBeans and samly2 are required only if you use classes from the
-	 eu.unicore.security and eu.unicore.security.consignor
-         packages.
-         If you use them then you need the below dependencies. -->
     <dependency>
       <groupId>com.fasterxml.woodstox</groupId>
       <artifactId>woodstox-core</artifactId>
@@ -154,7 +150,7 @@
       <version>${commons-io.version}</version>
     </dependency>
       <!-- Jetty is required only if you use classes from the 
-         eu.unicore.util.jetty 
+         eu.unicore.util.jetty
 	 package.
 	 If you use them then you need Jetty on classpath as below. -->
     <dependency>
@@ -241,15 +237,17 @@
           </execution>
         </executions>
       </plugin>
+      <!-- publishing to central requires auth user and token
+           in settings.xml created via central.sonatype.com
+      -->
       <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.13</version>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.8.0</version>
         <extensions>true</extensions>
         <configuration>
-          <serverId>sonatype-nexus-staging</serverId>
-          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-          <autoReleaseAfterClose>true</autoReleaseAfterClose>
+          <publishingServerId>central</publishingServerId>
+	  <autoPublish>true</autoPublish>
         </configuration>
       </plugin>
     </plugins>
