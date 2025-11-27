@@ -35,6 +35,7 @@ import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.NamespaceCheckingMode;
 import eu.emi.security.authn.x509.ProxySupport;
 import eu.emi.security.authn.x509.impl.DirectoryCertChainValidator;
+import eu.emi.security.authn.x509.impl.InMemoryKeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.OpensslCertChainValidator;
 import eu.unicore.security.canl.TrustedIssuersProperties.TruststoreType;
@@ -42,6 +43,7 @@ import eu.unicore.security.canl.TrustedIssuersProperties.TruststoreType;
 
 public class TruststorePropertiesTest
 {
+
 	private static final String PFX = "src/test/resources/truststores/";
 
 	@Test
@@ -183,6 +185,16 @@ public class TruststorePropertiesTest
 		assertEquals(v.getTruststorePath(), PFX+"keystore-1.p12");
 		assertEquals(v.getTruststoreUpdateInterval()+"", 
 				TruststoreProperties.META.get(PROP_UPDATE).getDefault()+"000");
+	}
+
+	@Test
+	public void testJDKDefaultCerts() throws Exception
+	{
+		Properties p = new Properties();
+		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TruststoreType.builtin.toString());
+		InMemoryKeystoreCertChainValidator v = (InMemoryKeystoreCertChainValidator) verify(p).getValidator();
+		assertTrue(v.getTrustedIssuers().length > 0);
+		v.dispose();
 	}
 
 	private TruststoreProperties verify(Properties p) throws Exception

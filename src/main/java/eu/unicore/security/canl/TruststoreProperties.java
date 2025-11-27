@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -62,7 +63,7 @@ public class TruststoreProperties extends TrustedIssuersProperties
 	private static final Logger log = Log.getLogger(Log.CONFIGURATION, TruststoreProperties.class);
 
 	public static final String DEFAULT_PREFIX = "truststore.";
-	
+
 	//common for all
 	public static final String PROP_PROXY_SUPPORT = "allowProxy";
 	public static final String PROP_CRL_MODE = "crlMode";
@@ -73,19 +74,19 @@ public class TruststoreProperties extends TrustedIssuersProperties
 	public static final String PROP_OCSP_LOCAL_RESPONDERS = "ocspLocalResponders.";
 	public static final String PROP_REVOCATION_ORDER = "revocationOrder";
 	public static final String PROP_REVOCATION_USE_ALL = "revocationUseAll";
-	
+
 	//these are common for keystore and directory trust stores
 	public static final String PROP_CRL_LOCATIONS = "crlLocations.";
 	public static final String PROP_CRL_UPDATE = "crlUpdateInterval";
 	public static final String PROP_CRL_CONNECTION_TIMEOUT = "crlConnectionTimeout";
 	public static final String PROP_CRL_CACHE_PATH = "crlDiskCachePath";
-	
+
 	public static final String PROP_OPENSSL_NS_MODE = "opensslNsMode";
-	
+
 	private final static String[] UPDATEABLE_PROPS = {PROP_UPDATE, PROP_CRL_UPDATE, 
 			PROP_DIRECTORY_LOCATIONS, PROP_CRL_LOCATIONS};
-	
-	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
+
+	public final static Map<String, PropertyMD> META = new HashMap<>();
 	static 
 	{
 		DocumentationCategory opensslCat = new DocumentationCategory("Openssl type settings", "3");
@@ -133,7 +134,7 @@ public class TruststoreProperties extends TrustedIssuersProperties
 	private int crlConnectionTimeout;
 	private String crlDiskCache;
 	private List<String> crlLocations;
-	
+
 	/**
 	 * Simple constructor: logging is turned on and standard properties prefix is used.
 	 * @param properties properties object to read configuration from
@@ -176,7 +177,7 @@ public class TruststoreProperties extends TrustedIssuersProperties
 	{
 		this(properties, initialListeners, null, pfx);
 	}
-	
+
 	/**
 	 * Allows for setting prefix, callback and initialization listeners
 	 * @param properties properties object to read configuration from
@@ -191,7 +192,7 @@ public class TruststoreProperties extends TrustedIssuersProperties
 	{
 		super(META, log, properties, initialListeners, callback, pfx);
 	}
-	
+
 	/**
 	 * Checks properties and tries to update the underlying validator whenever possible.
 	 * Only few options can be modified at runtime.
@@ -200,10 +201,9 @@ public class TruststoreProperties extends TrustedIssuersProperties
 	protected void update(String property) throws ConfigurationException
 	{
 		super.update(property);
-		
 		if (opensslValidator != null)
 			return;
-		
+
 		if (property.equals(PROP_CRL_UPDATE))
 		{
 			long newCrlUpdateInterval = getLongValue(PROP_CRL_UPDATE);
@@ -217,7 +217,7 @@ public class TruststoreProperties extends TrustedIssuersProperties
 				log.info("Updated " + prefix+PROP_CRL_UPDATE + " value to " + crlUpdateInterval);
 			}
 		}
-		
+
 		if (property.startsWith(PROP_CRL_LOCATIONS))
 		{
 			List<String> newCrlLocations = getListOfValues(PROP_CRL_LOCATIONS);
@@ -239,7 +239,7 @@ public class TruststoreProperties extends TrustedIssuersProperties
 	}
 
 	protected void createValidator() throws ConfigurationException,
-			KeyStoreException, IOException
+			GeneralSecurityException, IOException
 	{
 		crlMode = getEnumValue(PROP_CRL_MODE, CrlCheckingMode.class);
 		proxySupport = getEnumValue(PROP_PROXY_SUPPORT, ProxySupport.class);
@@ -252,7 +252,7 @@ public class TruststoreProperties extends TrustedIssuersProperties
 		setCrlSettings();
 		return super.getDirectoryValidator();
 	}
-	
+
 	protected OpensslCertChainValidator getOpensslValidator() throws ConfigurationException
 	{
 		nsMode = getEnumValue(PROP_OPENSSL_NS_MODE, NamespaceCheckingMode.class);
@@ -270,14 +270,13 @@ public class TruststoreProperties extends TrustedIssuersProperties
 				storeUpdateInterval*1000, params);
 	}
 
-
 	protected KeystoreCertChainValidator getKeystoreValidator() 
 			throws ConfigurationException, KeyStoreException, IOException
 	{
 		setCrlSettings();
 		return super.getKeystoreValidator();
 	}
-	
+
 	protected void setCrlSettings() throws ConfigurationException
 	{
 		crlUpdateInterval = getLongValue(PROP_CRL_UPDATE);
@@ -285,7 +284,7 @@ public class TruststoreProperties extends TrustedIssuersProperties
 		crlDiskCache = getFileValueAsString(PROP_CRL_CACHE_PATH, true);
 		crlLocations = getListOfValues(PROP_CRL_LOCATIONS);
 	}
-	
+
 	protected ValidatorParamsExt getValidatorParamsExt()
 	{
 		CRLParameters crlParameters = new CRLParameters(crlLocations, crlUpdateInterval*1000, 
@@ -296,14 +295,13 @@ public class TruststoreProperties extends TrustedIssuersProperties
 			crlParameters, getOCSPParameters(), useAll, order);
 		return new ValidatorParamsExt(revParams, proxySupport, initialListeners);
 	}
-	
+
 	protected OCSPParametes getOCSPParameters()
 	{
 		OCSPCheckingMode checkingMode = getEnumValue(PROP_OCSP_MODE, OCSPCheckingMode.class);
 		int connectTimeout = getIntValue(PROP_OCSP_TIMEOUT);
 		int cacheTtl = getIntValue(PROP_OCSP_CACHE_TTL);
 		String diskCachePath = getFileValueAsString(PROP_OCSP_DISK_CACHE, true);
-		
 		List<String> localRespondersCfg = getListOfValues(PROP_OCSP_LOCAL_RESPONDERS);
 		OCSPResponder[] localResponders = new OCSPResponder[localRespondersCfg.size()];
 		for (int i=0; i<localResponders.length; i++)
@@ -311,14 +309,12 @@ public class TruststoreProperties extends TrustedIssuersProperties
 			String cfg = localRespondersCfg.get(i);
 			cfg = cfg.trim();
 			String[] arr = cfg.split("[ ]+");
-			BufferedInputStream is = null;
 			if (arr.length != 2)
 				throw new ConfigurationException("Local responder's number " + (i+1) + 
 						" configuration is invalid, must be: " +
 						"'<responderURL> <responderPemCertificatePath>'");
-			try
+			try(BufferedInputStream is = new BufferedInputStream(new FileInputStream(arr[1])))
 			{
-				is = new BufferedInputStream(new FileInputStream(arr[1]));
 				X509Certificate cert = CertificateUtils.loadCertificate(is, Encoding.PEM);
 				localResponders[i] = new OCSPResponder(new URL(arr[0]), cert);			
 			} catch (FileNotFoundException e)
@@ -333,20 +329,8 @@ public class TruststoreProperties extends TrustedIssuersProperties
 			{
 				throw new ConfigurationException("Local responder's number " + (i+1) + 
 						" certificate can not be loaded: " + e.getMessage(), e);
-			} finally
-			{
-				if (is != null)
-					try
-					{
-						is.close();
-					} catch (IOException e)
-					{
-						//ignored
-					}
 			}
 		}
-		
-		
 		return new OCSPParametes(checkingMode, localResponders, connectTimeout, true, false, 
 				cacheTtl, diskCachePath);
 	}

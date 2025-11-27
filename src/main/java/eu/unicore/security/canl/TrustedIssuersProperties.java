@@ -6,12 +6,19 @@ package eu.unicore.security.canl;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.logging.log4j.Logger;
 
@@ -21,18 +28,19 @@ import eu.emi.security.authn.x509.OCSPCheckingMode;
 import eu.emi.security.authn.x509.OCSPParametes;
 import eu.emi.security.authn.x509.ProxySupport;
 import eu.emi.security.authn.x509.RevocationParameters;
-import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.StoreUpdateListener;
+import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.impl.CRLParameters;
+import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.emi.security.authn.x509.impl.DirectoryCertChainValidator;
+import eu.emi.security.authn.x509.impl.InMemoryKeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.emi.security.authn.x509.impl.OpensslCertChainValidator;
 import eu.emi.security.authn.x509.impl.RevocationParametersExt;
 import eu.emi.security.authn.x509.impl.ValidatorParams;
 import eu.emi.security.authn.x509.impl.ValidatorParamsExt;
-import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.configuration.PropertiesHelper;
@@ -62,13 +70,14 @@ public class TrustedIssuersProperties extends PropertiesHelper
 	private static final Logger log = Log.getLogger(Log.CONFIGURATION, TrustedIssuersProperties.class);
 
 	public static final String DEFAULT_PREFIX = "trustedIssuers.";
-	
-	public enum TruststoreType {keystore, openssl, directory};
+
+	public enum TruststoreType {keystore, openssl, directory, java_default};
+
 	//common for all
 	public static final String PROP_TYPE = "type";
 
 	public static final String PROP_UPDATE = "updateInterval";
-	
+
 	//the rest is store dependent
 	public static final String PROP_KS_PATH = "keystorePath";
 	public static final String PROP_KS_PASSWORD = "keystorePassword";
@@ -76,27 +85,28 @@ public class TrustedIssuersProperties extends PropertiesHelper
 
 	public static final String PROP_OPENSSL_DIR = "opensslPath";
 	public static final String PROP_OPENSSL_NEW_STORE_FORMAT = "opensslNewStoreFormat";
-	
+
 	public static final String PROP_DIRECTORY_LOCATIONS = "directoryLocations.";
 	public static final String PROP_DIRECTORY_ENCODING = "directoryEncoding";
 	public static final String PROP_DIRECTORY_CONNECTION_TIMEOUT = "directoryConnectionTimeout";
 	public static final String PROP_DIRECTORY_CACHE_PATH = "directoryDiskCachePath";
-	
+
 	private final static String[] UPDATEABLE_PROPS = {PROP_UPDATE, PROP_DIRECTORY_LOCATIONS};
-	
+
 	protected Collection<? extends StoreUpdateListener> initialListeners;
 	protected OpensslCertChainValidator opensslValidator = null;
 	protected DirectoryCertChainValidator directoryValidator = null;
 	protected KeystoreCertChainValidator ksValidator = null;
-		
-	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
+	protected InMemoryKeystoreCertChainValidator builtinCertsValidator = null;
+
+	public final static Map<String, PropertyMD> META = new HashMap<>();
 	static 
 	{
 		DocumentationCategory dirCat = new DocumentationCategory("Directory type settings", "1");
 		DocumentationCategory ksCat = new DocumentationCategory("Keystore type settings", "2");
 		DocumentationCategory opensslCat = new DocumentationCategory("Openssl type settings", "3");
-		
-		META.put(PROP_TYPE, new PropertyMD().setEnum(TruststoreType.directory).
+
+		META.put(PROP_TYPE, new PropertyMD().setEnum(TruststoreType.java_default).
 				setMandatory().setDescription("The truststore type."));
 		META.put(PROP_UPDATE, new PropertyMD("600").setLong().setUpdateable().
 				setDescription("How often the truststore should be reloaded, in seconds. Set to negative value to disable refreshing at runtime."));
@@ -109,7 +119,7 @@ public class TrustedIssuersProperties extends PropertiesHelper
 				setDescription("The keystore path in case of truststore of keystore type."));
 
 		META.put(PROP_OPENSSL_DIR, new PropertyMD("/etc/grid-security/certificates").setPath().setCategory(opensslCat).
-				setDescription("Directory to be used for opeenssl truststore."));
+				setDescription("Directory to be used for openssl truststore."));
 		META.put(PROP_OPENSSL_NEW_STORE_FORMAT, new PropertyMD("false").setCategory(opensslCat).
 				setDescription("In case of openssl truststore, specifies whether the trust store is in openssl 1.0.0+ format (true) or older openssl 0.x format (false)"));
 
@@ -126,7 +136,7 @@ public class TrustedIssuersProperties extends PropertiesHelper
 	}
 
 	protected TruststoreType type;
-	
+
 	protected long storeUpdateInterval;
 	protected String opensslDir;
 	protected boolean opensslNewStoreFormat;
@@ -134,7 +144,7 @@ public class TrustedIssuersProperties extends PropertiesHelper
 	protected List<String> directoryLocations;
 	protected int caConnectionTimeout;
 	protected String caDiskCache;
-	
+
 	protected String ksPath;
 	protected String ksType;
 	protected PasswordCallback passwordCallback;
@@ -181,7 +191,7 @@ public class TrustedIssuersProperties extends PropertiesHelper
 	{
 		this(properties, initialListeners, null, pfx);
 	}
-	
+
 	/**
 	 * Allows for setting prefix, callback and initialization listeners
 	 * @param properties properties object to read configuration from
@@ -217,7 +227,7 @@ public class TrustedIssuersProperties extends PropertiesHelper
 		createValidatorSafe();
 		addPropertyChangeListener(new PropertyChangeListenerImpl());
 	}
-	
+
 	/**
 	 * @return a configured validator. 
 	 */
@@ -232,6 +242,9 @@ public class TrustedIssuersProperties extends PropertiesHelper
 		} else if (type.equals(TruststoreType.directory))
 		{
 			return directoryValidator;
+		}
+		else if (type.equals(TruststoreType.java_default)) {
+			return builtinCertsValidator;
 		}
 		throw new RuntimeException("BUG: not all truststore types are handled in the code");
 	}
@@ -258,13 +271,13 @@ public class TrustedIssuersProperties extends PropertiesHelper
 				log.info("Updated " + prefix+PROP_UPDATE + " value to " + storeUpdateInterval);
 			}
 		}
-		
+
 		if (opensslValidator != null)
 			return;
-		
+
 		if (ksValidator != null)
 			return;
-		
+
 		if (property.startsWith(PROP_DIRECTORY_LOCATIONS))
 		{
 			List<String> newDirectoryLocations = getListOfValues(PROP_DIRECTORY_LOCATIONS);
@@ -276,19 +289,18 @@ public class TrustedIssuersProperties extends PropertiesHelper
 			}
 		}
 	}
-	
+
 	protected String[] getUpdateableProperties()
 	{
 		return UPDATEABLE_PROPS;
 	}
-
 
 	private void createValidatorSafe() throws ConfigurationException
 	{
 		try
 		{
 			createValidator();
-		} catch (KeyStoreException e)
+		} catch (GeneralSecurityException e)
 		{
 			throw new ConfigurationException("There was a problem setting up the " +
 					"truststore of type " + type + ": " + e.getMessage(), 
@@ -300,13 +312,13 @@ public class TrustedIssuersProperties extends PropertiesHelper
 					e);
 		}
 	}
-	
+
 	protected void createValidator() throws ConfigurationException,
-			KeyStoreException, IOException
+			GeneralSecurityException, IOException
 	{
 		type = getEnumValue(PROP_TYPE, TruststoreType.class);
 		storeUpdateInterval = getLongValue(PROP_UPDATE);
-		
+
 		if (type.equals(TruststoreType.keystore))
 		{
 			ksValidator = getKeystoreValidator();
@@ -317,9 +329,12 @@ public class TrustedIssuersProperties extends PropertiesHelper
 		{
 			directoryValidator = getDirectoryValidator();
 		}
+		else if(type.equals(TruststoreType.java_default))
+		{
+			builtinCertsValidator = getJDKCertsValidator();
+		}
 	}
 
-	
 	protected DirectoryCertChainValidator getDirectoryValidator() 
 			throws ConfigurationException, KeyStoreException, IOException
 	{
@@ -327,7 +342,6 @@ public class TrustedIssuersProperties extends PropertiesHelper
 		directoryEncoding = getEnumValue(PROP_DIRECTORY_ENCODING, Encoding.class);
 		caConnectionTimeout = getIntValue(PROP_DIRECTORY_CONNECTION_TIMEOUT);
 		caDiskCache = getFileValueAsString(PROP_DIRECTORY_CACHE_PATH, true);
-		
 		ValidatorParamsExt params = getValidatorParamsExt();
 		return new DirectoryCertChainValidator(directoryLocations, directoryEncoding, 
 			storeUpdateInterval*1000, caConnectionTimeout*1000, caDiskCache, params);
@@ -337,7 +351,6 @@ public class TrustedIssuersProperties extends PropertiesHelper
 	{
 		opensslDir = getFileValueAsString(PROP_OPENSSL_DIR, true);
 		opensslNewStoreFormat = getBooleanValue(PROP_OPENSSL_NEW_STORE_FORMAT);
-		
 		RevocationParameters revocationSettings = new RevocationParameters(CrlCheckingMode.IGNORE, 
 				getOCSPParameters());
 		ValidatorParams params = new ValidatorParams(revocationSettings, 
@@ -381,8 +394,26 @@ public class TrustedIssuersProperties extends PropertiesHelper
 		ValidatorParamsExt params = getValidatorParamsExt();
 		return new KeystoreCertChainValidator(ksPath, ksPassword, 
 			ksType, storeUpdateInterval*1000, params);
-	}	
-	
+	}
+
+	protected InMemoryKeystoreCertChainValidator getJDKCertsValidator()
+			throws ConfigurationException, GeneralSecurityException, IOException
+	{
+		KeyStore ks = KeyStore.getInstance("jks");
+		ks.load(null);
+		TrustManagerFactory tmf = TrustManagerFactory.getInstance("PKIX");
+		tmf.init((KeyStore)null); 
+		for(TrustManager tm: tmf.getTrustManagers()) {
+			X509TrustManager xtm = (X509TrustManager)tm;
+			int alias = 1;
+			for(X509Certificate x : xtm.getAcceptedIssuers()) {
+				ks.setEntry(String.valueOf(alias), new KeyStore.TrustedCertificateEntry(x), null);
+				alias++;
+			}
+		}
+		return new InMemoryKeystoreCertChainValidator(ks);
+	}
+
 	protected ValidatorParamsExt getValidatorParamsExt()
 	{
 		RevocationParametersExt revParams = new RevocationParametersExt(CrlCheckingMode.IGNORE, 
