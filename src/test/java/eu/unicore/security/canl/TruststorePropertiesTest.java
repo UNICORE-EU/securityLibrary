@@ -191,7 +191,7 @@ public class TruststorePropertiesTest
 	public void testJDKDefaultCerts() throws Exception
 	{
 		Properties p = new Properties();
-		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TruststoreType.builtin.toString());
+		p.setProperty(DEFAULT_PREFIX + PROP_TYPE, TruststoreType.java_default.toString());
 		InMemoryKeystoreCertChainValidator v = (InMemoryKeystoreCertChainValidator) verify(p).getValidator();
 		assertTrue(v.getTrustedIssuers().length > 0);
 		v.dispose();
