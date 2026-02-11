@@ -1,10 +1,3 @@
-/*
- * Copyright (c) 2012 ICM Uniwersytet Warszawski All rights reserved.
- * See LICENCE file for licencing information.
- *
- * Author: K. Benedyczak <golbi@mat.umk.pl>
- */
-
 package eu.unicore.util.httpclient;
 
 import java.util.HashMap;

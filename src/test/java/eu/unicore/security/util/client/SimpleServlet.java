@@ -1,10 +1,3 @@
-/*
- * Copyright (c) 2011 ICM Uniwersytet Warszawski All rights reserved.
- * See LICENCE file for licencing information.
- *
- * Created on 21-01-2011
- * Author: K. Benedyczak <golbi@mat.umk.pl>
- */
 package eu.unicore.security.util.client;
 
 import java.io.IOException;

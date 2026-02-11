@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2011-2012 ICM Uniwersytet Warszawski All rights reserved.
- * See LICENCE.txt file for licensing information.
- */
 package eu.unicore.security.util.httpclient;
 
 import static eu.unicore.util.httpclient.ClientProperties.DEFAULT_PREFIX;

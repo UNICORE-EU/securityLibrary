@@ -1,10 +1,3 @@
-/*
- * Copyright (c) 2010 ICM Uniwersytet Warszawski All rights reserved.
- * See LICENCE file for licencing information.
- *
- * Created on 08-11-2010
- * Author: K. Benedyczak <golbi@mat.umk.pl>
- */
 package eu.unicore.security;
 
 import java.io.Serializable;

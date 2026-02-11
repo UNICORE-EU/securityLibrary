@@ -1,36 +1,3 @@
-/*********************************************************************************
- * Copyright (c) 2006 Forschungszentrum Juelich GmbH 
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- * (1) Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the disclaimer at the end. Redistributions in
- * binary form must reproduce the above copyright notice, this list of
- * conditions and the following disclaimer in the documentation and/or other
- * materials provided with the distribution.
- * 
- * (2) Neither the name of Forschungszentrum Juelich GmbH nor the names of its 
- * contributors may be used to endorse or promote products derived from this 
- * software without specific prior written permission.
- * 
- * DISCLAIMER
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- ********************************************************************************/
-
-
 package eu.unicore.util.jetty;
 
 import java.net.MalformedURLException;
@@ -53,7 +20,6 @@ import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.CrossOriginHandler;
-import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.session.DefaultSessionIdManager;
 import org.eclipse.jetty.session.SessionIdManager;
 import org.eclipse.jetty.util.Callback;
@@ -173,6 +139,7 @@ public abstract class JettyServerBase {
 		ErrorHandler errorHandler = new ErrorHandler();
 		errorHandler.setShowCauses(false);
 		errorHandler.setShowStacks(false);
+		errorHandler.setShowOrigin(false);
 		theServer.setErrorHandler(errorHandler);
 	}
 
@@ -392,16 +359,24 @@ public abstract class JettyServerBase {
 	protected Handler configureGzip(Handler handler) throws ConfigurationException {
 		boolean enableGzip = extraSettings.getBooleanValue(HttpServerProperties.ENABLE_GZIP);
 		if (enableGzip) {
-			GzipHandler gzipHandler = new GzipHandler();
-			gzipHandler.setMinGzipSize(extraSettings.getIntValue(HttpServerProperties.MIN_GZIP_SIZE));
-			logger.info("Enabling GZIP compression filter");
-			gzipHandler.setServer(theServer);
-			gzipHandler.setHandler(handler);
-			return gzipHandler;
-		} else
-			return handler;
+			try {
+				// use full classnames here, so this class will work even if the 
+				// (optional!) compression jars are not on the classpath
+				var compressionHandler = new org.eclipse.jetty.compression.server.CompressionHandler(handler);
+				compressionHandler.setServer(theServer);
+				compressionHandler.setHandler(handler);
+				var gzip = new org.eclipse.jetty.compression.gzip.GzipCompression(); 
+				gzip.setMinCompressSize(extraSettings.getIntValue(HttpServerProperties.MIN_GZIP_SIZE));
+				compressionHandler.putCompression(gzip);
+				logger.info("Enabling GZIP compression filter");
+				return compressionHandler;
+			}catch(Exception e) {
+				logger.error("Could not setup GZIP - check classpath for the required jetty-compression-* jars.", e);
+			}
+		}
+		return handler;
 	}
-	
+
 	/**
 	 * configures Cross Origin Resource Sharing
 	 * @throws ConfigurationException

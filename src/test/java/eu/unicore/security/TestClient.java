@@ -1,10 +1,3 @@
-/*
- * Copyright (c) 2011 ICM Uniwersytet Warszawski All rights reserved.
- * See LICENCE file for licencing information.
- *
- * Created on 16-06-2011
- * Author: K. Benedyczak <golbi@mat.umk.pl>
- */
 package eu.unicore.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
