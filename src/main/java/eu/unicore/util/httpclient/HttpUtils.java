@@ -11,8 +11,9 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
+import org.apache.hc.client5.http.DnsResolver;
+import org.apache.hc.client5.http.SchemePortResolver;
 import org.apache.hc.client5.http.auth.AuthCache;
-import org.apache.hc.client5.http.auth.AuthScheme;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.Credentials;
 import org.apache.hc.client5.http.auth.CredentialsStore;
@@ -25,17 +26,21 @@ import org.apache.hc.client5.http.impl.auth.BasicAuthCache;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.auth.BasicScheme;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.DefaultHttpClientConnectionOperator;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.io.DetachedSocketFactory;
+import org.apache.hc.client5.http.io.HttpClientConnectionOperator;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
-import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
-import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
+import org.apache.hc.client5.http.ssl.TlsSocketStrategy;
 import org.apache.hc.core5.http.EntityDetails;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
-import org.apache.hc.core5.http.config.Registry;
+import org.apache.hc.core5.http.URIScheme;
+import org.apache.hc.core5.http.config.Lookup;
 import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.logging.log4j.Logger;
@@ -73,10 +78,9 @@ import eu.unicore.util.Log;
 public class HttpUtils {
 
 	private static final Logger logger = Log.getLogger(Log.CLIENT, HttpUtils.class);
+
 	private static final ConnectionCloseInterceptor CONN_CLOSE_INTERCEPTOR = new ConnectionCloseInterceptor();
 
-	//prevent instantiation 
-	private HttpUtils(){}
 	public static final String USER_AGENT = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)";
 
 	/**
@@ -90,7 +94,6 @@ public class HttpUtils {
 	{
 		PoolingHttpClientConnectionManager connMan = security.isSslEnabled() ? 
 				getSSLConnectionManager(security) : new PoolingHttpClientConnectionManager();
-				
 		HttpClientBuilder clientBuilder = createClientBuilder(security.getHttpClientProperties(), connMan);
 		configureProxy(clientBuilder, uri, security.getHttpClientProperties());
 		return clientBuilder.build();
@@ -104,7 +107,7 @@ public class HttpUtils {
 	{
 		return createClientBuilder(properties, new PoolingHttpClientConnectionManager()).build();
 	}
-	
+
 	/**
 	 * Create a HTTP client builder
 	 * The returned client has no HTTP proxy support configured.
@@ -129,7 +132,7 @@ public class HttpUtils {
 		RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
 		int socketTimeout = properties.getIntValue(HttpClientProperties.SO_TIMEOUT);
 		int connectTimeout = properties.getIntValue(HttpClientProperties.CONNECT_TIMEOUT);
-		
+
 		setConnectionTimeout(requestConfigBuilder, socketTimeout, connectTimeout);
 		RequestConfig requestConfig = requestConfigBuilder.
 				setCircularRedirectsAllowed(allowCircularRedirects).
@@ -144,26 +147,37 @@ public class HttpUtils {
 		return clientBuilder;
 	}
 
+	private static final DetachedSocketFactory SELECTABLE_SOCKET_FACTORY = socksProxy -> {
+		if(socksProxy==null) {
+			return SocketChannel.open().socket(); 
+		}
+		else {
+			return new Socket(socksProxy);
+		}
+	};
+	
+	private static DefaultHttpClientConnectionOperator selectableSocketConnections(SchemePortResolver schemes,
+            DnsResolver dns, Lookup<TlsSocketStrategy> tls)
+	{
+		return new DefaultHttpClientConnectionOperator(SELECTABLE_SOCKET_FACTORY, schemes, dns, tls);
+	}
+
 	public static PoolingHttpClientConnectionManager getSSLConnectionManager(IClientConfiguration security)
 	{
-		SSLContext sslContext = createSSLContext(security);
-		HostnameVerifier hostnameVerifier = new EmptyHostnameVerifier();
-		SSLConnectionSocketFactory sslsf = new CustomSSLConnectionSocketFactory(sslContext, hostnameVerifier);
-		ConnectionSocketFactory plainsf = nioSocketFactory();
-		Registry<ConnectionSocketFactory> r = RegistryBuilder.<ConnectionSocketFactory>create()
-		        .register("http", plainsf)
-		        .register("https", sslsf)
-		        .build();
-		return new PoolingHttpClientConnectionManager(r);
-	}
-	
-	private static ConnectionSocketFactory nioSocketFactory() {
-		return new PlainConnectionSocketFactory() {
+		PoolingHttpClientConnectionManagerBuilder b = new PoolingHttpClientConnectionManagerBuilder(){
 			@Override
-			public Socket createSocket(HttpContext context) throws IOException {
-				return SocketChannel.open().socket();
+		    protected HttpClientConnectionOperator createConnectionOperator(SchemePortResolver schemes, DnsResolver dns, TlsSocketStrategy tls)
+			{
+				Lookup<TlsSocketStrategy> l = RegistryBuilder.<TlsSocketStrategy>create()
+                        .register(URIScheme.HTTPS.id, tls).build();
+				return selectableSocketConnections(schemes, dns, l);
 			}
 		};
+		SSLContext sslContext = createSSLContext(security);
+		HostnameVerifier hostnameVerifier = new EmptyHostnameVerifier();
+		DefaultClientTlsStrategy tls = new DefaultClientTlsStrategy(sslContext, hostnameVerifier);
+		b.setTlsSocketStrategy(tls);
+		return b.build();
 	}
 
 	/**
@@ -197,7 +211,6 @@ public class HttpUtils {
 				port = 80;
 			HttpHost proxy = new HttpHost(proxyHost, port);
 			clientBuilder.setProxy(proxy);
-			
 			String proxyUser = properties.getValue(HttpClientProperties.HTTP_PROXY_USER);
 			String proxyPass = properties.getValue(HttpClientProperties.HTTP_PROXY_PASS);
 			if (proxyUser != null && proxyPass != null)
@@ -210,7 +223,6 @@ public class HttpUtils {
 				clientBuilder.addRequestInterceptorLast(new ProxyPreemptiveAuthnInterceptor(proxy));
 			}
 		}
-
 	}
 
 	private static boolean isNonProxyHost(String uri, HttpClientProperties properties){
@@ -226,7 +238,6 @@ public class HttpUtils {
 		}catch(URISyntaxException e){
 			logger.error("Can't resolve URI from "+uri, e);
 		}	
-
 		return false;
 	}
 
@@ -258,7 +269,7 @@ public class HttpUtils {
 		setConnectionTimeout(reqConfigBuilder, socketTimeout, connectTimeout);
 		request.setConfig(reqConfigBuilder.build());
 	}
-	
+
 	/**
 	 * Adds the 'Connection: close' HTTP header.
 	 * @author K. Benedyczak
@@ -282,7 +293,7 @@ public class HttpUtils {
 	private static class ProxyPreemptiveAuthnInterceptor implements HttpRequestInterceptor
 	{
 		private HttpHost host;
-		
+
 		public ProxyPreemptiveAuthnInterceptor(HttpHost host)
 		{
 			this.host = host;
@@ -292,24 +303,20 @@ public class HttpUtils {
 		public void process(HttpRequest request, EntityDetails details, HttpContext context) throws HttpException,
 				IOException
 		{
-			AuthCache authCache = (AuthCache) context.getAttribute(HttpClientContext.AUTH_CACHE);
+			HttpClientContext clientContext = (HttpClientContext)context;
+			AuthCache authCache = clientContext.getAuthCache();
 			if (authCache == null)
 			{
 				authCache = new BasicAuthCache();
-				context.setAttribute(HttpClientContext.AUTH_CACHE, authCache);				
+				clientContext.setAuthCache(authCache);				
 			}
-			
 			if (authCache.get(host) == null)
 			{
-				AuthScheme scheme = new BasicScheme();
-				authCache.put(host, scheme);
+				authCache.put(host, new BasicScheme());
 			}
 		}
 	}
-	
 
-	static String[] protocols = {"TLSv1","TLSv1.1","TLSv1.2"};
-	
 	public static SSLContext createSSLContext(IPlainClientConfiguration sec)
 	{
 		X509Credential credential = sec.doSSLAuthn() ? sec.getCredential() : null;
@@ -317,7 +324,6 @@ public class HttpUtils {
 		{
 			SSLContext sslContext = SSLContextCreator.createSSLContext(credential, sec.getValidator(), 
 					"TLS", "HTTP Client", logger, sec.getServerHostnameCheckingMode());
-			sslContext.getSupportedSSLParameters().setProtocols(protocols);
 			return sslContext;
 		} catch (Exception e)
 		{

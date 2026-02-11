@@ -4,6 +4,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.compression.gzip.GzipCompression;
+import org.eclipse.jetty.compression.server.CompressionHandler;
 import org.eclipse.jetty.ee10.servlet.ErrorHandler;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.rewrite.handler.HeaderPatternRule;
@@ -359,20 +361,14 @@ public abstract class JettyServerBase {
 	protected Handler configureGzip(Handler handler) throws ConfigurationException {
 		boolean enableGzip = extraSettings.getBooleanValue(HttpServerProperties.ENABLE_GZIP);
 		if (enableGzip) {
-			try {
-				// use full classnames here, so this class will work even if the 
-				// (optional!) compression jars are not on the classpath
-				var compressionHandler = new org.eclipse.jetty.compression.server.CompressionHandler(handler);
-				compressionHandler.setServer(theServer);
-				compressionHandler.setHandler(handler);
-				var gzip = new org.eclipse.jetty.compression.gzip.GzipCompression(); 
-				gzip.setMinCompressSize(extraSettings.getIntValue(HttpServerProperties.MIN_GZIP_SIZE));
-				compressionHandler.putCompression(gzip);
-				logger.info("Enabling GZIP compression filter");
-				return compressionHandler;
-			}catch(Exception e) {
-				logger.error("Could not setup GZIP - check classpath for the required jetty-compression-* jars.", e);
-			}
+			var compressionHandler = new CompressionHandler(handler);
+			compressionHandler.setServer(theServer);
+			compressionHandler.setHandler(handler);
+			var gzip = new GzipCompression(); 
+			gzip.setMinCompressSize(extraSettings.getIntValue(HttpServerProperties.MIN_GZIP_SIZE));
+			compressionHandler.putCompression(gzip);
+			logger.info("Enabling GZIP compression filter");
+			return compressionHandler;
 		}
 		return handler;
 	}
