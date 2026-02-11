@@ -115,32 +115,33 @@ public class TrustDelegation extends Assertion
 					continue;
 				if (attrs[j].getNameFormat().equals(CUSTODIAN_NAME_FORMAT_DN))
 				{
-					XmlCursor cur = attrs[j].getAttributeValueArray(0)
-						.newCursor();
-					cur.toFirstContentToken();
-					custodianDN = cur.getTextValue();
-					cur.dispose();
+					try(XmlCursor cur = attrs[j].getAttributeValueArray(0).newCursor())
+					{
+						cur.toFirstContentToken();
+						custodianDN = cur.getTextValue();
+					}
 				} else if (attrs[j].getNameFormat().equals(CUSTODIAN_NAME_FORMAT_FP))
 				{ //backwards compatibility - we support U6.x cert hashes, which are hashes of java objects
-					XmlCursor cur = attrs[j].getAttributeValueArray(0)
-						.newCursor();
-					cur.toFirstContentToken();
-					try
+					try(XmlCursor cur = attrs[j].getAttributeValueArray(0).newCursor())
 					{
-						legacyHash = Integer.parseInt(cur.getTextValue());
-					} catch (NumberFormatException e)
-					{
-						throw new SAMLValidationException(
-							"Custodian certificate hash " +
-							"value is not an integer");						
+						cur.toFirstContentToken();
+						try
+						{
+							legacyHash = Integer.parseInt(cur.getTextValue());
+						} catch (NumberFormatException e)
+						{
+							throw new SAMLValidationException(
+									"Custodian certificate hash " +
+									"value is not an integer");						
+						}
 					}
-					cur.dispose();
 				} else if (attrs[j].getNameFormat().equals(CUSTODIAN_NAME_FORMAT_SHA2))
 				{ //SHA2 hashes used from U7
-					XmlCursor cur = attrs[j].getAttributeValueArray(0).newCursor();
-					cur.toFirstContentToken();
-					sha2Hash = cur.getTextValue();
-					cur.dispose();
+					try(XmlCursor cur = attrs[j].getAttributeValueArray(0).newCursor())
+					{
+						cur.toFirstContentToken();
+						sha2Hash = cur.getTextValue();
+					}
 				}
 			}
 		}

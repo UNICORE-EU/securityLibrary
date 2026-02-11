@@ -4,13 +4,13 @@
   <groupId>eu.unicore.security</groupId>
   <artifactId>securityLibrary</artifactId>
   <packaging>jar</packaging>
-  <version>7.3.2-SNAPSHOT</version>
+  <version>8.0.0-SNAPSHOT</version>
   <name>securityLibrary</name>
   <description>Low level security library for UNICORE: config, utils and data types</description>
   <url>https://github.com/UNICORE-EU/securityLibrary</url>
   <properties>
     <junit.version>5.12.0</junit.version>
-    <jetty.version>11.0.26</jetty.version>
+    <jetty.version>12.1.6</jetty.version>
     <log4j.version>2.25.3</log4j.version>
     <slf.version>2.0.17</slf.version>
     <samly.version>3.1.0</samly.version>
@@ -22,7 +22,7 @@
     <jproperties.version>1.1.4</jproperties.version>
     <commons-io.version>2.21.0</commons-io.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.release>11</maven.compiler.release>
+    <maven.compiler.release>17</maven.compiler.release>
   </properties>
   
   <scm>
@@ -68,11 +68,6 @@
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
-      <version>${log4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-1.2-api</artifactId>
       <version>${log4j.version}</version>
     </dependency>
     <dependency>
@@ -154,14 +149,14 @@
 	 package.
 	 If you use them then you need Jetty on classpath as below. -->
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-servlet</artifactId>
+      <groupId>org.eclipse.jetty.ee10</groupId>
+      <artifactId>jetty-ee10-servlet</artifactId>
       <version>${jetty.version}</version>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-servlets</artifactId>
+      <groupId>org.eclipse.jetty.ee10</groupId>
+      <artifactId>jetty-ee10-servlets</artifactId>
       <version>${jetty.version}</version>
       <optional>true</optional>
     </dependency>

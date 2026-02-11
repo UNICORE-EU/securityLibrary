@@ -36,9 +36,9 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
 
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import eu.unicore.security.canl.AuthnAndTrustProperties;
 import eu.unicore.security.canl.CredentialProperties;
@@ -115,9 +115,9 @@ public class JettyServer4Testing extends JettyServerBase {
 	}
 
 	@Override
-	protected ContextHandler createRootHandler() throws ConfigurationException
+	protected Handler createRootHandler() throws ConfigurationException
 	{
-		return new ServletContextHandler(getServer(), "/", ServletContextHandler.SESSIONS);		
+		return new ServletContextHandler("/", ServletContextHandler.SESSIONS);
 	}
 
 	public String getUrl() {

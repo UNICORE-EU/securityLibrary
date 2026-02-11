@@ -24,9 +24,9 @@ public class ForwardingConnection extends AbstractConnection implements Connecti
 	private static final Logger LOG = Log.getLogger(Log.HTTP_SERVER, ForwardingConnection.class);
 
 	private final ByteBuffer buffer;
-	
+
 	private final SocketChannel backend;
-	
+
 	public ForwardingConnection(EndPoint endPoint, Executor executor, SocketChannel backend, int buffersize)
 	{
 		super(endPoint, executor);
@@ -34,12 +34,12 @@ public class ForwardingConnection extends AbstractConnection implements Connecti
 		this.backend = backend;
 		buffer = ByteBuffer.allocate(65536);
 	}
-	
+
 	public ForwardingConnection(EndPoint endPoint, Executor executor, SocketChannel backend)
 	{
 		this(endPoint, executor, backend, 65536);
 	}
-	
+
 	public SocketChannel getBackend() {
 		return backend;
 	}
@@ -64,12 +64,12 @@ public class ForwardingConnection extends AbstractConnection implements Connecti
 			else {
 				if(n>0) {
 					int written = ChannelUtils.writeFully(backend, buffer);
-					LOG.debug("<-- {} bytes from client --> {} to backend", n, written);
+					LOG.debug("<-- {} bytes from client --> {} to back-end", n, written);
 				}
 			fillInterested();
 			}
 		}catch(Exception ioe) {
-			Log.logException("Error handling forwarding to backend "+backend, ioe, LOG);
+			Log.logException("Error handling forwarding to back-end "+backend, ioe, LOG);
 			this.close();
 		}
 	}

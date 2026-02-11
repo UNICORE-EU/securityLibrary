@@ -98,17 +98,16 @@ public class Forwarder implements Runnable {
 				toClient.getEndPoint().write(callback, buffer);
 				// don't want to hang forever though
 				callback.get(60, TimeUnit.SECONDS);
-				log.debug("Wrote {} bytes from backend to client.", n);
+				log.debug("Wrote {} bytes from back-end to client.", n);
 			}
 			if(n==-1) {
-				log.debug("Backend at EOF, closing.", n);
+				log.debug("Back-end at EOF, closing.", n);
 				IOUtils.closeQuietly(toClient);
 				key.cancel();
 			}
 		}catch(Throwable ioe) {
 			log.error("Error handling write to client "+toClient, ioe);
-			IOUtils.closeQuietly(toClient);
-			IOUtils.closeQuietly(backend);
+			IOUtils.closeQuietly(toClient, backend);
 			key.cancel();
 		}
 	}

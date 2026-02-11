@@ -33,34 +33,30 @@
 
 package eu.unicore.util.jetty;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Enumeration;
 
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.ee10.servlet.ErrorHandler;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.rewrite.handler.HeaderPatternRule;
 import org.eclipse.jetty.rewrite.handler.RewriteHandler;
-import org.eclipse.jetty.rewrite.handler.Rule;
-import org.eclipse.jetty.server.ConnectionLimit;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.HttpChannel;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.NetworkConnectionLimit;
 import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SessionIdManager;
-import org.eclipse.jetty.server.handler.AbstractHandlerContainer;
+import org.eclipse.jetty.server.handler.CrossOriginHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.server.session.DefaultSessionIdManager;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlets.CrossOriginFilter;
+import org.eclipse.jetty.session.DefaultSessionIdManager;
+import org.eclipse.jetty.session.SessionIdManager;
+import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
@@ -68,9 +64,6 @@ import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.jetty.HttpServerProperties.XFrameOptions;
-import jakarta.servlet.FilterConfig;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
@@ -107,7 +100,7 @@ public abstract class JettyServerBase {
 	{
 		this(new URL[] {listenUrl}, secConfiguration, extraSettings);
 	}
-	
+
 	/**
 	 * @param listenUrls listen URLs
 	 * @param secConfiguration security configuration, providing local credential and trust settings.
@@ -146,57 +139,43 @@ public abstract class JettyServerBase {
 				allAddresses.append(url).append(" ");
 			logger.info("Creating Jetty HTTP server, will listen on: {}", allAddresses);	
 		}
-		
 		theServer = createServer();
-		
 		configureSessionIdManager(extraSettings.getBooleanValue(HttpServerProperties.FAST_RANDOM));
-
 		Connector[] connectors = createConnectors();
 		for (Connector connector: connectors) {
 			theServer.addConnector(connector);
 		}
-		
 		configureResourceMonitoring();
 		rootHandler = createRootHandler();
-		try{
-			rootHandler = configureCORS(rootHandler);
-		}catch(ServletException se){
-			throw new ConfigurationException("Error setting up CORS", se);
-		}
-		AbstractHandlerContainer headersRewriteHandler = configureHttpHeaders(rootHandler);
-		configureGzipHandler(headersRewriteHandler);
+		Handler handler = configureHandlers(rootHandler);
+		theServer.setHandler(handler);
+		handler.setServer(theServer);
 		configureErrorHandler();
 	}
 
 	protected Server createServer(){
-		Server server = new Server(getThreadPool()){
+		return new Server(getThreadPool()) {
 			@Override
-		    public void handle(HttpChannel connection) throws IOException, ServletException {
-		        Request request=connection.getRequest();
-		        Response response=connection.getResponse();
-
+		    public boolean handle(Request request, Response response, Callback callback) throws Exception {
 		        if ("TRACE".equals(request.getMethod())){
-		            request.setHandled(true);
 		            response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		            callback.succeeded();
+		            return true;
 		        } else {
-		            super.handle(connection);
+		            return super.handle(request, response, callback);
 		        }
-		    }
+			}
 		};
-		return server;
 	}
-	
-	protected void configureGzipHandler(AbstractHandlerContainer headersRewriteHandler)
-	{
-		Handler withGzip = configureGzip(headersRewriteHandler);
-		theServer.setHandler(withGzip);
-	}
-	
+
 	protected void configureErrorHandler()
 	{
-		theServer.addBean(new JettyErrorHandler(theServer));
+		ErrorHandler errorHandler = new ErrorHandler();
+		errorHandler.setShowCauses(false);
+		errorHandler.setShowStacks(false);
+		theServer.setErrorHandler(errorHandler);
 	}
-	
+
 	protected QueuedThreadPool getThreadPool()
 	{
 		QueuedThreadPool btPool=new QueuedThreadPool();
@@ -206,32 +185,29 @@ public abstract class JettyServerBase {
 		return btPool;
 	}
 
-	protected AbstractHandlerContainer configureHttpHeaders(Handler toWrap)
-	{
-		RewriteHandler rewriter = new RewriteHandler();
-		rewriter.setRewriteRequestURI(false);
-		rewriter.setRewritePathInfo(false);
-		rewriter.setHandler(toWrap);
+	/**
+	 * configure all the handlers that need to be chained around the root handler
+	 * @param toWrap
+	 * @return
+	 */
+	protected Handler configureHandlers(Handler toWrap) {
+		Handler handler = configureCORS(rootHandler);
+		handler = configureGzip(handler);
+		handler = configureFrame(handler);
+		handler = configureHsts(handler);
+		return handler;
+	}
 
-		//workaround for Jetty bug: RewriteHandler without any rule won't work
-		rewriter.setRules(new Rule[0]);
-		
-		if (extraSettings.getBooleanValue(HttpServerProperties.ENABLE_HSTS))
-		{
-			HeaderPatternRule hstsRule = new HeaderPatternRule();
-			hstsRule.setName("Strict-Transport-Security");
-			hstsRule.setValue("max-age=31536000; includeSubDomains");
-			hstsRule.setPattern("*");
-			rewriter.addRule(hstsRule);
-		}
-		
+	protected Handler configureFrame(Handler toWrap)
+	{
 		XFrameOptions frameOpts = extraSettings.getEnumValue(
 				HttpServerProperties.FRAME_OPTIONS, XFrameOptions.class);
 		if (frameOpts != XFrameOptions.allow)
 		{
+			RewriteHandler rewriter = new RewriteHandler();
+			rewriter.setHandler(toWrap);	
 			HeaderPatternRule frameOriginRule = new HeaderPatternRule();
-			frameOriginRule.setName("X-Frame-Options");
-			
+			frameOriginRule.setHeaderName("X-Frame-Options");
 			StringBuilder sb = new StringBuilder(frameOpts.toHttp());
 			if (frameOpts == XFrameOptions.allowFrom)
 			{
@@ -239,19 +215,38 @@ public abstract class JettyServerBase {
 						HttpServerProperties.ALLOWED_TO_EMBED);
 				sb.append(" ").append(allowedOrigin);
 			}
-			frameOriginRule.setValue(sb.toString());
+			frameOriginRule.setHeaderValue(sb.toString());
 			frameOriginRule.setPattern("*");
 			rewriter.addRule(frameOriginRule);
+			return rewriter;
 		}
-		return rewriter;
+		return toWrap;
 	}
 	
+	protected Handler configureHsts(Handler toWrap)
+	{
+		if (extraSettings.getBooleanValue(HttpServerProperties.ENABLE_HSTS))
+		{
+			RewriteHandler rewriter = new RewriteHandler();
+			rewriter.setHandler(toWrap);
+			HeaderPatternRule hstsRule = new HeaderPatternRule();
+			hstsRule.setHeaderName("Strict-Transport-Security");
+			hstsRule.setHeaderValue("max-age=31536000; includeSubDomains");
+			hstsRule.setPattern("*");
+			rewriter.addRule(hstsRule);
+			return rewriter;
+		}
+		else {
+			return toWrap;
+		}
+	}
+
 	protected void configureSessionIdManager(boolean useFastRandom) {
 		if (useFastRandom){
 			logger.debug("Using fast (but less secure) session ID generator");
 			SessionIdManager sm = new DefaultSessionIdManager(theServer, 
 					new java.util.Random());
-			theServer.setSessionIdManager(sm);
+			theServer.addBean(sm);
 		}
 	}
 	
@@ -384,7 +379,7 @@ public abstract class JettyServerBase {
 	protected void configureResourceMonitoring() throws ConfigurationException {
 		Integer maxConnections = extraSettings.getIntValue(HttpServerProperties.MAX_CONNECTIONS);
 		if (maxConnections > 0) {
-			theServer.addBean(new ConnectionLimit(maxConnections, theServer));
+			theServer.addBean(new NetworkConnectionLimit(maxConnections, theServer));
 		}
 	}
 
@@ -394,7 +389,7 @@ public abstract class JettyServerBase {
 	 * enable compression selectively.
 	 * @throws ConfigurationException
 	 */
-	protected AbstractHandlerContainer configureGzip(AbstractHandlerContainer handler) throws ConfigurationException {
+	protected Handler configureGzip(Handler handler) throws ConfigurationException {
 		boolean enableGzip = extraSettings.getBooleanValue(HttpServerProperties.ENABLE_GZIP);
 		if (enableGzip) {
 			GzipHandler gzipHandler = new GzipHandler();
@@ -411,42 +406,19 @@ public abstract class JettyServerBase {
 	 * configures Cross Origin Resource Sharing
 	 * @throws ConfigurationException
 	 */
-	protected Handler configureCORS(Handler handler) throws ConfigurationException, ServletException {
+	protected Handler configureCORS(Handler handler) throws ConfigurationException {
 		boolean enable = extraSettings.getBooleanValue(HttpServerProperties.ENABLE_CORS);
 		if (enable && handler instanceof ServletContextHandler) {
 			logger.info("Enabling CORS");
-			CrossOriginFilter cors = new CrossOriginFilter();
-			FilterConfig config = new FilterConfig() {
-				
-				@Override
-				public ServletContext getServletContext() {
-					// TODO Auto-generated method stub
-					return null;
-				}
-				
-				@Override
-				public Enumeration<String> getInitParameterNames() {
-					// TODO Auto-generated method stub
-					return null;
-				}
-				
-				@Override
-				public String getInitParameter(String name) {
-					return extraSettings.getValue("CORS_"+name); 
-				}
-				
-				@Override
-				public String getFilterName() {
-					// TODO Auto-generated method stub
-					return null;
-				}
-			};
-			cors.init(config);
-			FilterHolder h = new FilterHolder();
-			h.setFilter(cors);
-			((ServletContextHandler)handler).addFilter(h, "*", null);
+			CrossOriginHandler cors = new CrossOriginHandler();
+			cors.setServer(theServer);
+			cors.setHandler(handler);
+			return cors;
 		}
-		return handler;
+		else {
+			return handler;
+		}
+		
 	}
 	
 	/**
@@ -484,14 +456,14 @@ public abstract class JettyServerBase {
 	{
 		return rootHandler;
 	}
-	
+
 	/**
 	 * @return the root handler of this Jetty server - it is a wrapper of the 
 	 * handler returned by the {@link #getRootHandler()}
 	 */
-	public AbstractHandlerContainer getRootHandlerLowLevel() 
+	public Handler getRootHandlerLowLevel() 
 	{
-		return (AbstractHandlerContainer) theServer.getHandler();
+		return theServer.getHandler();
 	}
 	
 	/**
