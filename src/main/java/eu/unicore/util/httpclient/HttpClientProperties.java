@@ -32,6 +32,8 @@ public class HttpClientProperties extends PropertiesHelper
 	/** Maximum number of redirects to take. Set to a non positive value to disable automatic redirects. */
 	public static final String HTTP_MAX_REDIRECTS = "maxRedirects";
 	/** Space delimited list of hosts for which HTTP proxy shouldn't be used */
+	/** If true then some I/O errors will trigger a re-try  */
+	public static final String ENABLE_AUTOMATIC_RETRIES = "enable-retries";
 	public static final String HTTP_NON_PROXY_HOSTS = "nonProxyHosts";
 	/** HTTP proxy host */
 	public static final String HTTP_PROXY_HOST = "proxyHost";
@@ -63,6 +65,8 @@ public class HttpClientProperties extends PropertiesHelper
 						"so the server will close the socket."));
 		META.put(ALLOW_CHUNKING, new PropertyMD("true").setCategory(httpCat).
 				setDescription("If set to false, then the client will not use HTTP 1.1 data chunking."));
+		META.put(ENABLE_AUTOMATIC_RETRIES, new PropertyMD("false").setCategory(httpCat).
+				setDescription("If set to true, then the client will re-try requests on some I/O errors."));
 		META.put(HTTP_MAX_REDIRECTS, new PropertyMD("3").setCategory(httpCat).
 				setDescription("Maximum number of allowed HTTP redirects."));
 		META.put(MAX_HOST_CONNECTIONS, new PropertyMD("6").setCategory(httpCat).

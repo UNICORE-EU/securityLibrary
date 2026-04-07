@@ -14,7 +14,7 @@ import java.util.TreeSet;
 import org.w3c.dom.Element;
 
 import eu.unicore.samly2.assertion.Assertion;
-import eu.unicore.security.dsig.DigSignatureUtil;
+import eu.unicore.security.dsig.DOMUtilities;
 
 /**
  * In-memory storage of security sessions. Thread safe. 
@@ -222,7 +222,7 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 							md.update(safeToBytes(text));
 						} else if (listEl instanceof Element)
 						{
-							String xml = DigSignatureUtil.dumpDOMToString((Element)listEl);
+							String xml = DOMUtilities.dumpNodeToString((Element)listEl);
 							md.update(safeToBytes(xml));
 						} else if (listEl != null)
 						{

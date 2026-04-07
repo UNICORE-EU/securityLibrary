@@ -120,7 +120,7 @@ public class HttpUtils {
 				HttpClientProperties.ALLOW_CIRCULAR_REDIRECTS);
 		int maxRedirects = properties.getIntValue(HttpClientProperties.HTTP_MAX_REDIRECTS);
 		boolean allowRedirects = maxRedirects > 0;
-
+		boolean enableAutomaticRetries = properties.getBooleanValue(HttpClientProperties.ENABLE_AUTOMATIC_RETRIES);
 		int maxConnPerHost = properties.getIntValue(HttpClientProperties.MAX_HOST_CONNECTIONS);
 		connMan.setDefaultMaxPerRoute(maxConnPerHost);
 		int maxTotalConn  = properties.getIntValue(HttpClientProperties.MAX_TOTAL_CONNECTIONS);
@@ -132,15 +132,19 @@ public class HttpUtils {
 		RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
 		int socketTimeout = properties.getIntValue(HttpClientProperties.SO_TIMEOUT);
 		int connectTimeout = properties.getIntValue(HttpClientProperties.CONNECT_TIMEOUT);
-
 		setConnectionTimeout(requestConfigBuilder, socketTimeout, connectTimeout);
+
 		RequestConfig requestConfig = requestConfigBuilder.
 				setCircularRedirectsAllowed(allowCircularRedirects).
 				setMaxRedirects(maxRedirects).
 				setRedirectsEnabled(allowRedirects).
 				build();
+
 		clientBuilder.setDefaultRequestConfig(requestConfig);
 		clientBuilder.setUserAgent(USER_AGENT);
+		if(!enableAutomaticRetries) {
+			clientBuilder.disableAutomaticRetries();
+		}
 		if (connClose) {
 			clientBuilder.addRequestInterceptorFirst(CONN_CLOSE_INTERCEPTOR);
 		}
