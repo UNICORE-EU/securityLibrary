@@ -14,6 +14,7 @@
     <log4j.version>2.25.3</log4j.version>
     <slf.version>2.0.17</slf.version>
     <samly.version>3.2.0</samly.version>
+    <samly-types.version>1.4.0</samly-types.version>
     <canl.version>2.8.3</canl.version>
     <bc.version>1.83</bc.version>
     <xmlsec.version>4.0.4</xmlsec.version>
@@ -104,6 +105,11 @@
       <groupId>org.apache.santuario</groupId>
       <artifactId>xmlsec</artifactId>
       <version>${xmlsec.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.imunity.samly</groupId>
+      <artifactId>samly2-coretypes</artifactId>
+      <version>${samly-types.version}</version>
     </dependency>
     <dependency>
       <groupId>io.imunity.samly</groupId>
