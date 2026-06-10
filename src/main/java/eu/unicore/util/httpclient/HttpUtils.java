@@ -20,16 +20,20 @@ import org.apache.hc.client5.http.auth.CredentialsStore;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.DefaultRedirectStrategy;
 import org.apache.hc.client5.http.impl.auth.BasicAuthCache;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.auth.BasicScheme;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.DefaultHttpClientConnectionOperator;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.io.DetachedSocketFactory;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
 import org.apache.hc.client5.http.io.HttpClientConnectionOperator;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
@@ -42,7 +46,9 @@ import org.apache.hc.core5.http.HttpRequestInterceptor;
 import org.apache.hc.core5.http.URIScheme;
 import org.apache.hc.core5.http.config.Lookup;
 import org.apache.hc.core5.http.config.RegistryBuilder;
+import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.hc.core5.util.Timeout;
 import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.X509Credential;
@@ -84,28 +90,55 @@ public class HttpUtils {
 	public static final String USER_AGENT = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)";
 
 	/**
-	 * Convenience method for getting a {@link HttpClient} configured 
-	 * with HTTP proxy support and SSL setup. Whenever possible use this method.
+	 * Create a {@link CloseableHttpClient} configured with proxy support and SSL setup,
+	 * using no connection pooling. This is the right client for most server-side use cases,
+	 * as it will not leak resources if used correctly (i.e. try-with-resources)
+	 *
+	 * @param uri
+	 * @param security
+	 */
+	public static synchronized CloseableHttpClient client(String uri, IClientConfiguration security)
+	{
+		return (CloseableHttpClient)createClient(uri, security, getBasicConnectionManager(security), false);
+	}
+
+	/**
+	 * Create a {@link HttpClient} configured with proxy support and SSL setup.
+	 *
+	 * @param uri
+	 * @param security
+	 * @param connManager - the connection manager to use
+	 * @param sharedConnectionManager - if true, the connManager is shared and not shut down when the client is closed
+	 * @return
+	 */
+	public static synchronized HttpClient createClient(String uri, IClientConfiguration security,
+			HttpClientConnectionManager connManager, boolean sharedConnectionManager)
+	{
+		HttpClientBuilder clientBuilder = createClientBuilder(security.getHttpClientProperties(), connManager);
+		clientBuilder.setConnectionManagerShared(sharedConnectionManager);
+		configureProxy(clientBuilder, uri, security.getHttpClientProperties());
+		return clientBuilder.build();
+	}
+
+	/**
+	 * Create a {@link HttpClient} configured with proxy support and SSL setup.
+	 * By default, this uses a {@link BasicHttpClientConnectionManager} without any connection pooling
+	 *
 	 * @param uri -  URI to connect to
 	 * @param security - Security settings. Note that SSL can be turned off there.
 	 * @return a preconfigured http client
 	 */
 	public static synchronized HttpClient createClient(String uri, IClientConfiguration security)
 	{
-		PoolingHttpClientConnectionManager connMan = security.isSslEnabled() ? 
-				getSSLConnectionManager(security) : new PoolingHttpClientConnectionManager();
-		HttpClientBuilder clientBuilder = createClientBuilder(security.getHttpClientProperties(), connMan);
-		configureProxy(clientBuilder, uri, security.getHttpClientProperties());
-		return clientBuilder.build();
+		return createClient(uri, security, getBasicConnectionManager(security), false);
 	}
 
 	/**
-	 * Create a HTTP client.
-	 * The returned client has neither SSL nor HTTP proxy support configured.
+	 * Create a HTTP client without SSL or proxy support.
 	 */
 	public static synchronized HttpClient createClient(HttpClientProperties properties)
 	{
-		return createClientBuilder(properties, new PoolingHttpClientConnectionManager()).build();
+		return createClientBuilder(properties, getBasicConnectionManager(properties)).build();
 	}
 
 	/**
@@ -113,7 +146,7 @@ public class HttpUtils {
 	 * The returned client has no HTTP proxy support configured.
 	 */
 	public static synchronized HttpClientBuilder createClientBuilder(HttpClientProperties properties,
-			PoolingHttpClientConnectionManager connMan)
+			HttpClientConnectionManager connMan)
 	{
 		boolean connClose = properties.getBooleanValue(HttpClientProperties.CONNECTION_CLOSE);
 		boolean allowCircularRedirects = properties.getBooleanValue(
@@ -122,10 +155,13 @@ public class HttpUtils {
 		boolean allowRedirects = maxRedirects > 0;
 		boolean enableAutomaticRetries = properties.getBooleanValue(HttpClientProperties.ENABLE_AUTOMATIC_RETRIES);
 		int maxConnPerHost = properties.getIntValue(HttpClientProperties.MAX_HOST_CONNECTIONS);
-		connMan.setDefaultMaxPerRoute(maxConnPerHost);
-		int maxTotalConn  = properties.getIntValue(HttpClientProperties.MAX_TOTAL_CONNECTIONS);
-		connMan.setMaxTotal(maxTotalConn);
 
+		if(connMan instanceof PoolingHttpClientConnectionManager) {
+			PoolingHttpClientConnectionManager pcm = (PoolingHttpClientConnectionManager)connMan;
+			pcm.setDefaultMaxPerRoute(maxConnPerHost);
+			int maxTotalConn  = properties.getIntValue(HttpClientProperties.MAX_TOTAL_CONNECTIONS);
+			pcm.setMaxTotal(maxTotalConn);
+		}
 		HttpClientBuilder clientBuilder = HttpClientBuilder.create();
 		clientBuilder.setConnectionManager(connMan);
 		clientBuilder.setRedirectStrategy(new DefaultRedirectStrategy());
@@ -133,13 +169,11 @@ public class HttpUtils {
 		int socketTimeout = properties.getIntValue(HttpClientProperties.SO_TIMEOUT);
 		int connectTimeout = properties.getIntValue(HttpClientProperties.CONNECT_TIMEOUT);
 		setConnectionTimeout(requestConfigBuilder, socketTimeout, connectTimeout);
-
 		RequestConfig requestConfig = requestConfigBuilder.
 				setCircularRedirectsAllowed(allowCircularRedirects).
 				setMaxRedirects(maxRedirects).
 				setRedirectsEnabled(allowRedirects).
 				build();
-
 		clientBuilder.setDefaultRequestConfig(requestConfig);
 		clientBuilder.setUserAgent(USER_AGENT);
 		if(!enableAutomaticRetries) {
@@ -159,14 +193,14 @@ public class HttpUtils {
 			return new Socket(socksProxy);
 		}
 	};
-	
+
 	private static DefaultHttpClientConnectionOperator selectableSocketConnections(SchemePortResolver schemes,
             DnsResolver dns, Lookup<TlsSocketStrategy> tls)
 	{
 		return new DefaultHttpClientConnectionOperator(SELECTABLE_SOCKET_FACTORY, schemes, dns, tls);
 	}
 
-	public static PoolingHttpClientConnectionManager getSSLConnectionManager(IClientConfiguration security)
+	public static PoolingHttpClientConnectionManager getPoolingSSLConnectionManager(IClientConfiguration security)
 	{
 		PoolingHttpClientConnectionManagerBuilder b = new PoolingHttpClientConnectionManagerBuilder(){
 			@Override
@@ -181,7 +215,61 @@ public class HttpUtils {
 		HostnameVerifier hostnameVerifier = new EmptyHostnameVerifier();
 		DefaultClientTlsStrategy tls = new DefaultClientTlsStrategy(sslContext, hostnameVerifier);
 		b.setTlsSocketStrategy(tls);
+		HttpClientProperties properties = security.getHttpClientProperties();
+		ConnectionConfig cc = ConnectionConfig.custom()
+				.setConnectTimeout(Timeout.of(properties.getConnectionTimeout(), TimeUnit.MILLISECONDS))
+				.setIdleTimeout(Timeout.of(properties.getIdleTimeout(), TimeUnit.MILLISECONDS))
+				.build();
+		b.setDefaultConnectionConfig(cc);
 		return b.build();
+	}
+
+	public static BasicHttpClientConnectionManager getBasicConnectionManager(IClientConfiguration security)
+	{
+		BasicHttpClientConnectionManager b = null;
+		if(security.isSslEnabled()) {
+			SSLContext sslContext = createSSLContext(security);
+			HostnameVerifier hostnameVerifier = new EmptyHostnameVerifier();
+			DefaultClientTlsStrategy tls = new DefaultClientTlsStrategy(sslContext, hostnameVerifier);
+			Lookup<TlsSocketStrategy> l = RegistryBuilder.<TlsSocketStrategy>create()
+					.register(URIScheme.HTTPS.id, tls).build();
+			b = BasicHttpClientConnectionManager.create(l);
+		}
+		else {
+			b = new BasicHttpClientConnectionManager();
+		}
+		HttpClientProperties properties = security.getHttpClientProperties();
+		b.setConnectionConfig(getConnectionConfig(properties));
+		return b;
+	}
+
+	public static PoolingHttpClientConnectionManager getPoolingConnectionManager(HttpClientProperties properties)
+	{
+		PoolingHttpClientConnectionManagerBuilder b = new PoolingHttpClientConnectionManagerBuilder(){};
+		b.setDefaultConnectionConfig(getConnectionConfig(properties));
+		b.setDefaultSocketConfig(getSocketConfig(properties));
+		return b.build();
+	}
+
+	public static BasicHttpClientConnectionManager getBasicConnectionManager(HttpClientProperties properties)
+	{
+		BasicHttpClientConnectionManager cm = new BasicHttpClientConnectionManager();
+		cm.setConnectionConfig(getConnectionConfig(properties));
+		cm.setSocketConfig(getSocketConfig(properties));
+		return cm;
+	}
+
+	private static ConnectionConfig getConnectionConfig(HttpClientProperties properties) {
+		return ConnectionConfig.custom()
+				.setConnectTimeout(Timeout.of(properties.getConnectionTimeout(), TimeUnit.MILLISECONDS))
+				.setIdleTimeout(Timeout.of(properties.getIdleTimeout(), TimeUnit.MILLISECONDS))
+				.build();
+	}
+
+	private static SocketConfig getSocketConfig(HttpClientProperties properties) {
+		return SocketConfig.custom()
+				.setSoTimeout(Timeout.of(properties.getSocketTimeout(), TimeUnit.MILLISECONDS))
+				.build();
 	}
 
 	/**

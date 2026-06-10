@@ -49,12 +49,14 @@ public class HttpClientProperties extends PropertiesHelper
 	public static final String MAX_TOTAL_CONNECTIONS = "maxTotal";
 	/** socket read timeout for HTTP */
 	public static final String SO_TIMEOUT = "socket.timeout";
+	/** socket read timeout for HTTP */
+	public static final String CONNECTION_IDLE_TIMEOUT = "idle.timeout";
 	/** timeout for creating new HTTP connections */
 	public static final String CONNECT_TIMEOUT = "connection.timeout";
 	
 	public static final String ALLOW_CIRCULAR_REDIRECTS = "allowCircularRedirects";
 	
-	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
+	public final static Map<String, PropertyMD> META = new HashMap<>();
 	static 
 	{
 		DocumentationCategory proxyCat = new DocumentationCategory("HTTP proxy settings", "2");
@@ -75,8 +77,10 @@ public class HttpClientProperties extends PropertiesHelper
 		META.put(MAX_TOTAL_CONNECTIONS, new PropertyMD("20").setCategory(httpCat).
 				setDescription("How many connections in total can be made. " +
 						"Note: this is a limit for a single client object instance."));
-		META.put(SO_TIMEOUT, new PropertyMD("0").setCategory(httpCat).
+		META.put(SO_TIMEOUT, new PropertyMD("180000").setCategory(httpCat).
 				setDescription("Socket timeout (ms)"));
+		META.put(CONNECTION_IDLE_TIMEOUT, new PropertyMD("30000").setCategory(httpCat).
+				setDescription("Idle timeout for http client connections (ms)"));
 		META.put(CONNECT_TIMEOUT, new PropertyMD("20000").setCategory(httpCat).
 				setDescription("Timeout for the connection establishing (ms)"));
 		META.put(ALLOW_CIRCULAR_REDIRECTS, new PropertyMD("false").setHidden().setCategory(httpCat).
@@ -121,7 +125,15 @@ public class HttpClientProperties extends PropertiesHelper
 	public int getSocketTimeout(){
 		return getIntValue(SO_TIMEOUT);
 	}
+
+	public void setIdleTimeout(int millis){
+		setProperty(CONNECTION_IDLE_TIMEOUT, Integer.toString(millis));
+	}
 	
+	public int getIdleTimeout(){
+		return getIntValue(CONNECTION_IDLE_TIMEOUT);
+	}
+
 	@Override
 	public HttpClientProperties clone()
 	{
