@@ -37,7 +37,7 @@ public class SSLContextCreator
 	 * @param validator required
 	 * @param protocol protocol to be used, e.g. "TLS".
 	 * @param loginfo message which will be used on TRACE level to identify the component
-	 * @param log logger, used on TRACE level to dump some extra information
+	 * @param log logger, can be null, used on TRACE level to dump some extra information
 	 * @return SSLContext
 	 * @throws NoSuchAlgorithmException 
 	 * @throws KeyManagementException 
@@ -51,42 +51,41 @@ public class SSLContextCreator
 		if (credential != null)
 		{
 			km = credential.getKeyManager();
-			if (log.isTraceEnabled())
-				debugKS(credential, loginfo, log);
+			debugKS(credential, loginfo, log);
 		} else
 		{
 			km = new NoAuthKeyManager();
-			log.trace("Creating SSL context without client's certificate for " + loginfo);
+			if(log!=null)log.trace("Creating SSL context without client's certificate for {}", loginfo);
 		}
-
 		HostnameMismatchCallback2 hostnameVerificationCallback = new HostnameMismatchCallbackImpl(hostnameCheckingMode);
 		X509ExtendedTrustManager baseTM = (X509ExtendedTrustManager) new SocketFactoryCreator2(
 				validator, hostnameVerificationCallback).getSSLTrustManager();
 		X509TrustManager tm = new LoggingX509TrustManager(baseTM, loginfo);
-		if (log.isTraceEnabled())
-			debugTS(validator, loginfo, log);
-
+		debugTS(validator, loginfo, log);
 		SSLContext sslcontext = SSLContext.getInstance(protocol);
 		sslcontext.init(new KeyManager[] {km}, new TrustManager[] {tm}, null);
-
 		return sslcontext;
 	}
 
 	private static void debugTS(X509CertChainValidator validator, String loginfo, Logger log)
 	{
-		X509Certificate trustedCerts[] = validator.getTrustedIssuers();
-		for (X509Certificate cert: trustedCerts)
-		{
-			log.trace("Initially trusted certificates for " + loginfo + ":\n" + 
-					CertificateUtils.format(cert, FormatMode.FULL));
+		if (log!=null && log.isTraceEnabled()) {
+			X509Certificate trustedCerts[] = validator.getTrustedIssuers();
+			for (X509Certificate cert: trustedCerts)
+			{
+				log.trace("Initially trusted certificates for " + loginfo + ":\n" + 
+						CertificateUtils.format(cert, FormatMode.FULL));
+			}
 		}
 	}
 	
 	private static void debugKS(X509Credential c, String loginfo, Logger log)
 	{
-		X509Certificate[] certs = c.getCertificateChain();
-		X509Certificate[] certs509 = CertificateUtils.convertToX509Chain(certs);
-		log.trace("Client's certificate chain for " + loginfo + ": " + 
-				CertificateUtils.format(certs509, FormatMode.FULL));
+		if (log!=null && log.isTraceEnabled()) {
+			X509Certificate[] certs = c.getCertificateChain();
+			X509Certificate[] certs509 = CertificateUtils.convertToX509Chain(certs);
+			log.trace("Client's certificate chain for " + loginfo + ": " + 
+					CertificateUtils.format(certs509, FormatMode.FULL));
+		}
 	}	
 }

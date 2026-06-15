@@ -49,11 +49,9 @@ import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.util.Timeout;
-import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.X509Credential;
 import eu.unicore.security.canl.SSLContextCreator;
-import eu.unicore.util.Log;
 
 /**
  * Contains helper code to create HttpClient instances. The following settings are always set
@@ -82,8 +80,6 @@ import eu.unicore.util.Log;
  * @author <a href="mailto:tsztelak@gmail.com">Tomasz Sztelak</a>
  */
 public class HttpUtils {
-
-	private static final Logger logger = Log.getLogger(Log.CLIENT, HttpUtils.class);
 
 	private static final ConnectionCloseInterceptor CONN_CLOSE_INTERCEPTOR = new ConnectionCloseInterceptor();
 
@@ -289,16 +285,13 @@ public class HttpUtils {
 	 * @param properties
 	 */
 	public static void configureProxy(HttpClientBuilder clientBuilder, String uri, HttpClientProperties properties){
-		if (isNonProxyHost(uri, properties)) 
-			return;
+		if (isNonProxyHost(uri, properties))return;
 
-		// Setup the proxy settings
 		String proxyHost = properties.getValue(HttpClientProperties.HTTP_PROXY_HOST);
 		if (proxyHost == null)
 		{
 			proxyHost = System.getProperty(HttpClientProperties.HTTP_PROXY_HOST);
 		}
-
 		if (proxyHost != null && proxyHost.trim().length()>0)
 		{ 
 			Integer port = properties.getIntValue(HttpClientProperties.HTTP_PROXY_PORT);
@@ -329,16 +322,14 @@ public class HttpUtils {
 	private static boolean isNonProxyHost(String uri, HttpClientProperties properties){
 		String nonProxyHosts = properties.getValue(HttpClientProperties.HTTP_NON_PROXY_HOSTS);
 		if(nonProxyHosts==null)return false;
-		try{
-			URI u=new URI(uri);
-			String host=u.getHost();
-			String[] npHosts=nonProxyHosts.split(" ");
+		try {
+			URI u = new URI(uri);
+			String host = u.getHost();
+			String[] npHosts = nonProxyHosts.split(" ");
 			for(String npHost: npHosts){
 				if(host.contains(npHost))return true;
 			}
-		}catch(URISyntaxException e){
-			logger.error("Can't resolve URI from "+uri, e);
-		}	
+		}catch(URISyntaxException e){}	
 		return false;
 	}
 
@@ -428,7 +419,7 @@ public class HttpUtils {
 		try
 		{
 			return SSLContextCreator.createSSLContext(credential, sec.getValidator(), 
-					"TLS", "HTTP Client", logger, sec.getServerHostnameCheckingMode());
+					"TLS", "HTTP Client", null, sec.getServerHostnameCheckingMode());
 		} catch (Exception e)
 		{
 			throw new RuntimeException(e);
