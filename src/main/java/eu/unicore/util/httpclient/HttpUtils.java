@@ -99,7 +99,7 @@ public class HttpUtils {
 	 */
 	public static synchronized CloseableHttpClient client(String uri, IClientConfiguration security)
 	{
-		return (CloseableHttpClient)createClient(uri, security, getBasicConnectionManager(security), false);
+		return (CloseableHttpClient)createClient(uri, security, createBasicConnectionManager(security), false);
 	}
 
 	/**
@@ -108,8 +108,8 @@ public class HttpUtils {
 	 * @param uri
 	 * @param security
 	 * @param connManager - the connection manager to use
-	 * @param sharedConnectionManager - if true, the connManager is shared and not shut down when the client is closed
-	 * @return
+	 * @param sharedConnectionManager - if true, the connManager is shared and will not be shut down when the client is closed
+	 * @return a configured httpclient
 	 */
 	public static synchronized HttpClient createClient(String uri, IClientConfiguration security,
 			HttpClientConnectionManager connManager, boolean sharedConnectionManager)
@@ -126,11 +126,11 @@ public class HttpUtils {
 	 *
 	 * @param uri -  URI to connect to
 	 * @param security - Security settings. Note that SSL can be turned off there.
-	 * @return a preconfigured http client
+	 * @return a configured http client
 	 */
 	public static synchronized HttpClient createClient(String uri, IClientConfiguration security)
 	{
-		return createClient(uri, security, getBasicConnectionManager(security), false);
+		return createClient(uri, security, createBasicConnectionManager(security), false);
 	}
 
 	/**
@@ -139,6 +139,89 @@ public class HttpUtils {
 	public static synchronized HttpClient createClient(HttpClientProperties properties)
 	{
 		return createClientBuilder(properties, getBasicConnectionManager(properties)).build();
+	}
+
+	/**
+	 * create a {@link BasicHttpClientConnectionManager}
+	 * @param properties
+	 * @return
+	 */
+	public static BasicHttpClientConnectionManager createBasicConnectionManager(IClientConfiguration security)
+	{
+		BasicHttpClientConnectionManager b = null;
+		if(security.isSslEnabled()) {
+			SSLContext sslContext = createSSLContext(security);
+			HostnameVerifier hostnameVerifier = new EmptyHostnameVerifier();
+			DefaultClientTlsStrategy tls = new DefaultClientTlsStrategy(sslContext, hostnameVerifier);
+			Lookup<TlsSocketStrategy> l = RegistryBuilder.<TlsSocketStrategy>create()
+					.register(URIScheme.HTTPS.id, tls).build();
+			b = BasicHttpClientConnectionManager.create(l);
+		}
+		else {
+			b = new BasicHttpClientConnectionManager();
+		}
+		HttpClientProperties properties = security.getHttpClientProperties();
+		b.setConnectionConfig(getConnectionConfig(properties));
+		return b;
+	}
+
+	
+
+	private static final DetachedSocketFactory SELECTABLE_SOCKET_FACTORY = socksProxy -> {
+		if(socksProxy==null) {
+			return SocketChannel.open().socket(); 
+		}
+		else {
+			return new Socket(socksProxy);
+		}
+	};
+
+	private static DefaultHttpClientConnectionOperator selectableSocketConnections(SchemePortResolver schemes,
+            DnsResolver dns, Lookup<TlsSocketStrategy> tls)
+	{
+		return new DefaultHttpClientConnectionOperator(SELECTABLE_SOCKET_FACTORY, schemes, dns, tls);
+	}
+
+	/**
+	 * create a {@link PoolingHttpClientConnectionManager}
+	 * @param properties
+	 * @return
+	 */
+	public static PoolingHttpClientConnectionManager createPoolingConnectionManager(IClientConfiguration security)
+	{
+		PoolingHttpClientConnectionManagerBuilder b = new PoolingHttpClientConnectionManagerBuilder(){
+			@Override
+		    protected HttpClientConnectionOperator createConnectionOperator(SchemePortResolver schemes, DnsResolver dns, TlsSocketStrategy tls)
+			{
+				Lookup<TlsSocketStrategy> l = RegistryBuilder.<TlsSocketStrategy>create()
+                        .register(URIScheme.HTTPS.id, tls).build();
+				return selectableSocketConnections(schemes, dns, l);
+			}
+		};
+		if(security.isSslEnabled()) {
+			SSLContext sslContext = createSSLContext(security);
+			HostnameVerifier hostnameVerifier = new EmptyHostnameVerifier();
+			DefaultClientTlsStrategy tls = new DefaultClientTlsStrategy(sslContext, hostnameVerifier);
+			b.setTlsSocketStrategy(tls);
+		};
+		HttpClientProperties properties = security.getHttpClientProperties();
+		ConnectionConfig cc = ConnectionConfig.custom()
+				.setConnectTimeout(Timeout.of(properties.getConnectionTimeout(), TimeUnit.MILLISECONDS))
+				.setIdleTimeout(Timeout.of(properties.getIdleTimeout(), TimeUnit.MILLISECONDS))
+				.build();
+		b.setDefaultConnectionConfig(cc);
+		b.setDefaultSocketConfig(getSocketConfig(properties));
+		b.setMaxConnPerRoute(properties.getIntValue(HttpClientProperties.MAX_HOST_CONNECTIONS));
+		b.setMaxConnTotal(properties.getIntValue(HttpClientProperties.MAX_TOTAL_CONNECTIONS));
+		return b.build();
+	}
+
+	public static BasicHttpClientConnectionManager getBasicConnectionManager(HttpClientProperties properties)
+	{
+		BasicHttpClientConnectionManager cm = new BasicHttpClientConnectionManager();
+		cm.setConnectionConfig(getConnectionConfig(properties));
+		cm.setSocketConfig(getSocketConfig(properties));
+		return cm;
 	}
 
 	/**
@@ -183,80 +266,6 @@ public class HttpUtils {
 			clientBuilder.addRequestInterceptorFirst(CONN_CLOSE_INTERCEPTOR);
 		}
 		return clientBuilder;
-	}
-
-	private static final DetachedSocketFactory SELECTABLE_SOCKET_FACTORY = socksProxy -> {
-		if(socksProxy==null) {
-			return SocketChannel.open().socket(); 
-		}
-		else {
-			return new Socket(socksProxy);
-		}
-	};
-
-	private static DefaultHttpClientConnectionOperator selectableSocketConnections(SchemePortResolver schemes,
-            DnsResolver dns, Lookup<TlsSocketStrategy> tls)
-	{
-		return new DefaultHttpClientConnectionOperator(SELECTABLE_SOCKET_FACTORY, schemes, dns, tls);
-	}
-
-	public static PoolingHttpClientConnectionManager getPoolingSSLConnectionManager(IClientConfiguration security)
-	{
-		PoolingHttpClientConnectionManagerBuilder b = new PoolingHttpClientConnectionManagerBuilder(){
-			@Override
-		    protected HttpClientConnectionOperator createConnectionOperator(SchemePortResolver schemes, DnsResolver dns, TlsSocketStrategy tls)
-			{
-				Lookup<TlsSocketStrategy> l = RegistryBuilder.<TlsSocketStrategy>create()
-                        .register(URIScheme.HTTPS.id, tls).build();
-				return selectableSocketConnections(schemes, dns, l);
-			}
-		};
-		SSLContext sslContext = createSSLContext(security);
-		HostnameVerifier hostnameVerifier = new EmptyHostnameVerifier();
-		DefaultClientTlsStrategy tls = new DefaultClientTlsStrategy(sslContext, hostnameVerifier);
-		b.setTlsSocketStrategy(tls);
-		HttpClientProperties properties = security.getHttpClientProperties();
-		ConnectionConfig cc = ConnectionConfig.custom()
-				.setConnectTimeout(Timeout.of(properties.getConnectionTimeout(), TimeUnit.MILLISECONDS))
-				.setIdleTimeout(Timeout.of(properties.getIdleTimeout(), TimeUnit.MILLISECONDS))
-				.build();
-		b.setDefaultConnectionConfig(cc);
-		return b.build();
-	}
-
-	public static BasicHttpClientConnectionManager getBasicConnectionManager(IClientConfiguration security)
-	{
-		BasicHttpClientConnectionManager b = null;
-		if(security.isSslEnabled()) {
-			SSLContext sslContext = createSSLContext(security);
-			HostnameVerifier hostnameVerifier = new EmptyHostnameVerifier();
-			DefaultClientTlsStrategy tls = new DefaultClientTlsStrategy(sslContext, hostnameVerifier);
-			Lookup<TlsSocketStrategy> l = RegistryBuilder.<TlsSocketStrategy>create()
-					.register(URIScheme.HTTPS.id, tls).build();
-			b = BasicHttpClientConnectionManager.create(l);
-		}
-		else {
-			b = new BasicHttpClientConnectionManager();
-		}
-		HttpClientProperties properties = security.getHttpClientProperties();
-		b.setConnectionConfig(getConnectionConfig(properties));
-		return b;
-	}
-
-	public static PoolingHttpClientConnectionManager getPoolingConnectionManager(HttpClientProperties properties)
-	{
-		PoolingHttpClientConnectionManagerBuilder b = new PoolingHttpClientConnectionManagerBuilder(){};
-		b.setDefaultConnectionConfig(getConnectionConfig(properties));
-		b.setDefaultSocketConfig(getSocketConfig(properties));
-		return b.build();
-	}
-
-	public static BasicHttpClientConnectionManager getBasicConnectionManager(HttpClientProperties properties)
-	{
-		BasicHttpClientConnectionManager cm = new BasicHttpClientConnectionManager();
-		cm.setConnectionConfig(getConnectionConfig(properties));
-		cm.setSocketConfig(getSocketConfig(properties));
-		return cm;
 	}
 
 	private static ConnectionConfig getConnectionConfig(HttpClientProperties properties) {
@@ -363,7 +372,9 @@ public class HttpUtils {
 	}
 
 	/**
-	 * Adds the 'Connection: close' HTTP header.
+	 * Adds the 'Connection: close' HTTP header,
+	 * if no "Connection:" header is set on the request
+	 *
 	 * @author K. Benedyczak
 	 */
 	private static class ConnectionCloseInterceptor implements HttpRequestInterceptor
@@ -372,7 +383,9 @@ public class HttpUtils {
 		public void process(HttpRequest request, EntityDetails details, HttpContext context) throws HttpException,
 				IOException
 		{
-			request.setHeader("Connection", "close");
+			if(request.getHeader("Connection")==null) {
+				request.setHeader("Connection", "close");
+			}
 		}
 	}
 	
@@ -414,9 +427,8 @@ public class HttpUtils {
 		X509Credential credential = sec.doSSLAuthn() ? sec.getCredential() : null;
 		try
 		{
-			SSLContext sslContext = SSLContextCreator.createSSLContext(credential, sec.getValidator(), 
+			return SSLContextCreator.createSSLContext(credential, sec.getValidator(), 
 					"TLS", "HTTP Client", logger, sec.getServerHostnameCheckingMode());
-			return sslContext;
 		} catch (Exception e)
 		{
 			throw new RuntimeException(e);
