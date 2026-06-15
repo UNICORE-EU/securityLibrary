@@ -21,18 +21,15 @@ import eu.unicore.security.dsig.DigSignatureUtil;
  * @author K. Benedyczak
  */
 public class SessionIDProviderImpl implements SessionIDProvider {
+
 	/**
 	 * We expire sessions before their actual expiry timestamp,
 	 * as each request needs some time to travel and there might be a clock difference.
 	 */
 	private static final long EXPIRY_BEFORE = 5*3600;
 	private static final byte[] SEP = "||~~||".getBytes();
-	
-	private Map<String, ArrayList<ClientSecuritySession>> sessions;
-	
-	public SessionIDProviderImpl(){
-		this.sessions = new HashMap<String, ArrayList<ClientSecuritySession>>();
-	}
+
+	private final Map<String, ArrayList<ClientSecuritySession>> sessions = new HashMap<>();
 
 	/*
 	 * extract the service independent part of a service URI
@@ -59,15 +56,13 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 	@Override
 	public synchronized String getSessionID(String url, IClientConfiguration currentSettings)
 	{
-		String sessionHash = checksumSecuritySettings(currentSettings);
-		return getSessionID(url, sessionHash);
+		return getSessionID(url, checksumSecuritySettings(currentSettings));
 	}
 	
 	@Override
 	public synchronized String getSessionID(String url, String myKey)
 	{
 		if(myKey==null)return null;
-		
 		String scope = extractServerID(url);
 		ArrayList<ClientSecuritySession> scoped = sessions.get(scope);
 		if (scoped == null)
@@ -76,14 +71,12 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 		for (int i=0; i<scoped.size(); i++)
 		{
 			ClientSecuritySession existing = scoped.get(i);
-			
 			if (currentTime > existing.getExpiryTS())
 			{
 				scoped.remove(i);
 				i--;
 				continue;
 			}
-			
 			if (existing.getSessionHash().equals(myKey))
 			{
 				return existing.getSessionId();
@@ -91,11 +84,10 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 		}
 		return null;
 	}
-	
 	@Override
 	public synchronized Collection<ClientSecuritySession> getAllSessions()
 	{
-		List<ClientSecuritySession> ret = new ArrayList<ClientSecuritySession>(sessions.size()*2);
+		List<ClientSecuritySession> ret = new ArrayList<>(sessions.size()*2);
 		for (List<ClientSecuritySession> entry: sessions.values())
 			ret.addAll(entry);
 		return ret;
@@ -113,7 +105,7 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 		ArrayList<ClientSecuritySession> scoped = sessions.get(session.getScope());
 		if (scoped == null)
 		{
-			scoped = new ArrayList<ClientSecuritySession>(5);
+			scoped = new ArrayList<>(5);
 			sessions.put(session.getScope(), scoped);
 		}
 		scoped.add(session);
@@ -156,7 +148,6 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 				}
 			}
 		}
-		
 		if (add)
 		{
 			scoped.add(new ClientSecuritySession(sessionId, expiry, myKey, scope));
@@ -188,7 +179,7 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 				md.update(safeToBytes(settings.getCredential().getSubjectName()));
 			else
 				md.update(safeToBytes(null));
-			
+
 			//preferences
 			Map<String,String[]>attrs=settings.getRequestedUserAttributes();
 			SortedSet<String> sortedAttr = new TreeSet<>(attrs.keySet());
@@ -197,15 +188,15 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 				md.update(safeToBytes(k));
 				md.update(safeToBytes(val));
 			}
-			
+
 			//HTTP auth
 			md.update(safeToBytes(settings.getHttpUser()));
 			md.update(safeToBytes(settings.getHttpPassword()));
-			
+
 			//Extra tokens including most notably SAML assertions, which we handle specially.
 			//unknown objects have their hashcode used.
 			Map<String, Object> extraTokens = settings.getExtraSecurityTokens();
-			sortedAttr = new TreeSet<String>(extraTokens.keySet());
+			sortedAttr = new TreeSet<>(extraTokens.keySet());
 			for (String key: sortedAttr)
 			{
 				md.update(safeToBytes(key));
@@ -232,7 +223,6 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 				} else if (val != null) //this puts objects hashcode as byte array
 					md.update(ByteBuffer.allocate(4).putInt(val.hashCode()).array());
 			}
-			
 			res=md.digest();
 		} catch(Exception ex)
 		{
@@ -241,15 +231,14 @@ public class SessionIDProviderImpl implements SessionIDProvider {
 		}
 		return hexString(res);
 	}
-	
-	
+
 	private byte[] safeToBytes(String arg)
 	{
 		if (arg == null)
 			return SEP;
 		return (SEP+arg).getBytes();
 	}
-	
+
 	private static String hexString(byte[] bytes){
 		StringBuilder hexString = new StringBuilder();
 		for (int i=0;i<bytes.length;i++) {

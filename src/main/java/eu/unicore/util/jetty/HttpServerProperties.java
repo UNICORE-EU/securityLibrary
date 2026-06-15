@@ -24,27 +24,27 @@ import eu.unicore.util.configuration.PropertyMD.DocumentationCategory;
  */
 public class HttpServerProperties extends PropertiesHelper
 {
+
 	private static final Logger log = Log.getLogger(Log.CONFIGURATION, HttpServerProperties.class);
-	
 
 	public enum XFrameOptions {
 		deny("DENY"), sameOrigin("SAMEORIGIN"), allowFrom("ALLOW-FROM"), allow("");
-		
+
 		private String httpValue;
-		
+
 		XFrameOptions(String httpValue)
 		{
 			this.httpValue = httpValue;
 		}
-		
+
 		public String toHttp()
 		{
 			return httpValue;
 		}
 	};
-	
+
 	public static final String DEFAULT_PREFIX = "httpServer.";
-	
+
 	/**
 	 * use java.util.Random to generate session ids instead of SecureRandom (for SSL sockets)
 	 */
@@ -94,17 +94,17 @@ public class HttpServerProperties extends PropertiesHelper
 	 * Prefix for the below defined gzip properties
 	 */
 	public static final String GZIP_PREFIX = "gzip.";
-	
+
 	/**
 	 * What is the minimal size of message that should be compressed
 	 */
 	public static final String MIN_GZIP_SIZE = GZIP_PREFIX + "minGzipSize";
-	
+
 	/**
 	 * Whether to enable compression?
 	 */
 	public static final String ENABLE_GZIP = GZIP_PREFIX + "enable";
-	
+
 	public static final String ENABLE_HSTS = "enableHsts";
 	public static final String FRAME_OPTIONS = "xFrameOptions";
 	public static final String ALLOWED_TO_EMBED = "xFrameAllowed";
@@ -119,14 +119,13 @@ public class HttpServerProperties extends PropertiesHelper
 	public static final String CORS_ALLOWED_HEADERS = "CORS_allowedHeaders";
 	public static final String CORS_EXPOSED_HEADERS = "CORS_exposedHeaders";
 	public static final String CORS_CHAIN_PREFLIGHT = "CORS_chainPreflight";
-	
 
 	// enables more strict hostname checking e.g. no "localhost"
 	public static final String ENABLE_SNI = "enableSNI";
-	
+
 	@DocumentationReferenceMeta
 	protected final static Map<String, PropertyMD> defaults = new HashMap<>();
-	
+
 	static{
 		DocumentationCategory _general= new DocumentationCategory("General settings", "1");
 		DocumentationCategory _cors = new DocumentationCategory("CORS settings", "7");
@@ -200,24 +199,23 @@ public class HttpServerProperties extends PropertiesHelper
 	{
 		this(new Properties(), DEFAULT_PREFIX);
 	}
-	
+
 	public HttpServerProperties(Properties properties) throws ConfigurationException 
 	{
 		this(properties, DEFAULT_PREFIX);
 	}
-	
+
 	public HttpServerProperties(Properties properties, String prefix) throws ConfigurationException 
 	{
 		super(prefix, properties, defaults, log);
 	}
-	
+
 	protected HttpServerProperties(Properties properties, String prefix, Map<String, PropertyMD> defaults) 
 			throws ConfigurationException 
 	{
 		super(prefix, properties, defaults, log);
 	}
-	
-	
+
 	/**
 	 * @return Jetty settings useful for tests, with insecure random
 	 */
@@ -229,8 +227,3 @@ public class HttpServerProperties extends PropertiesHelper
 		return ret;
 	}
 }
-
-
-
-
-

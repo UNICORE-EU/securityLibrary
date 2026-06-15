@@ -21,11 +21,13 @@ import eu.unicore.util.configuration.FilePropertiesHelper;
  */
 public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 {
+
 	private static final Logger log = Log.getLogger(Log.CONFIGURATION, AuthnAndTrustProperties.class);
-	
+
 	private TruststoreProperties truststoreProperties;
+
 	private CredentialProperties credentialProperties;
-	
+
 	public AuthnAndTrustProperties(String file) throws IOException, ConfigurationException
 	{
 		this(new File(file));
@@ -35,7 +37,7 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 	{
 		this(FilePropertiesHelper.load(file));
 	}
-	
+
 	public AuthnAndTrustProperties(String file, String trustPrefix, String credPrefix) throws IOException, ConfigurationException
 	{
 		this(new File(file), trustPrefix, credPrefix);
@@ -45,7 +47,7 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 	{
 		this(FilePropertiesHelper.load(file), trustPrefix, credPrefix, null, false, false);
 	}
-	
+
 	public AuthnAndTrustProperties(Properties p) throws ConfigurationException
 	{
 		this(p, TruststoreProperties.DEFAULT_PREFIX, CredentialProperties.DEFAULT_PREFIX, null, false, false);
@@ -65,7 +67,7 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 	{
 		this(FilePropertiesHelper.load(file), callback);
 	}
-	
+
 	public AuthnAndTrustProperties(String file, String trustPrefix, String credPrefix, PasswordCallback callback) throws IOException, ConfigurationException
 	{
 		this(new File(file), trustPrefix, credPrefix, callback);
@@ -75,7 +77,7 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 	{
 		this(FilePropertiesHelper.load(file), trustPrefix, credPrefix, callback, false, false);
 	}
-	
+
 	public AuthnAndTrustProperties(Properties p, PasswordCallback callback) throws ConfigurationException
 	{
 		this(p, TruststoreProperties.DEFAULT_PREFIX, CredentialProperties.DEFAULT_PREFIX, callback, false, false);
@@ -86,7 +88,6 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 		this(p, trustPrefix, credPrefix, callback, false, false);
 	}
 
-	
 	/**
 	 * only for cloning
 	 */
@@ -98,13 +99,13 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 		setValidator(configured.getValidator());
 		setCredential(configured.getCredential());
 	}
-	
+
 	public AuthnAndTrustProperties(Properties p, String trustPrefix, String credPrefix,  
 			boolean trustOptional, boolean credOptional) throws ConfigurationException
 	{
 		this(p, trustPrefix, credPrefix, null, trustOptional, credOptional);
 	}
-	
+
 	public AuthnAndTrustProperties(Properties p, String trustPrefix, String credPrefix, PasswordCallback passwordCallback, 
 			boolean trustOptional, boolean credOptional) throws ConfigurationException
 	{
@@ -120,7 +121,6 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 			else
 				log.info("Trust store settings (optional) were not loaded as: " + e.getMessage());
 		}
-		
 		try
 		{
 			credentialProperties = new CredentialProperties(p, passwordCallback, credPrefix); 
@@ -149,7 +149,7 @@ public class AuthnAndTrustProperties extends DefaultAuthnAndTrustConfiguration
 	{
 		return credentialProperties;
 	}
-	
+
 	public AuthnAndTrustProperties clone()
 	{
 		AuthnAndTrustProperties clonedRaw = (AuthnAndTrustProperties) super.clone();

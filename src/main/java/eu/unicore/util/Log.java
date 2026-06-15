@@ -10,14 +10,14 @@ import org.apache.logging.log4j.Logger;
 import eu.unicore.util.configuration.PropertiesHelper;
 
 public class Log {
-	
+
 	private static LoggerFactory spi;
-	
+
 	static {
 		try {
 			System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
 		}catch(Throwable t) {}
-		
+
 		String factName = System.getProperty(LoggerFactory.LOGGER_FACTORY_PROPERTY);
 		if (factName != null) {
 			try

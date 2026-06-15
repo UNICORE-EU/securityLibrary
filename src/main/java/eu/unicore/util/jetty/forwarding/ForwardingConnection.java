@@ -21,6 +21,7 @@ import eu.unicore.util.Log;
  */
 public class ForwardingConnection extends AbstractConnection implements Connection.UpgradeTo
 {
+
 	private static final Logger LOG = Log.getLogger(Log.HTTP_SERVER, ForwardingConnection.class);
 
 	private final ByteBuffer buffer;

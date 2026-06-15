@@ -10,7 +10,7 @@ import org.eclipse.jetty.server.ServerConnector;
  * @author golbi
  */
 public class PlainServerConnector extends ServerConnector {
-	
+
 	public PlainServerConnector(Server server, ConnectionFactory... factories)
 	{
 		super(server, factories);

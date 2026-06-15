@@ -9,12 +9,12 @@ import java.util.Date;
  */
 public class ClientSecuritySession
 {
-	private String sessionId;
-	private String sessionHash;
-	private String scope;
-	private long expiryTS;
-	
-	
+
+	private final String sessionId;
+	private final String sessionHash;
+	private final String scope;
+	private final long expiryTS;	
+
 	public ClientSecuritySession(String sessionId, long expiryTS, String sessionHash, String scope)
 	{
 		this.sessionId = sessionId;
@@ -42,7 +42,8 @@ public class ClientSecuritySession
 	{
 		return scope;
 	}
-	
+
+	@Override
 	public String toString()
 	{
 		return "Session for " + scope + ": " + sessionId + " expires " + new Date(expiryTS);

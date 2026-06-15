@@ -37,16 +37,16 @@ public class ConnectionUtil
 				securityCfg.getCredential() == null)
 			throw new IllegalArgumentException("Can not establish peer's identity " +
 					"without having credential and validator set.");
-		URL u=new URL(url);
+		URL u = new URL(url);
 		SSLSocketFactory socketFactory = new SocketFactoryCreator2(securityCfg.getCredential(), 
 				securityCfg.getValidator(), null).getSocketFactory();
-		
+
 		int port = u.getPort();
 		if (port == -1)
 			port = u.getDefaultPort();
 		if (port == -1)
 			port = 443;
-		
+
 		try(SSLSocket s = (SSLSocket) socketFactory.createSocket(u.getHost(), port)){
 			s.setSoTimeout(timeout);
 			X509Certificate[] peer = CertificateUtils.convertToX509Chain(s.getSession().getPeerCertificates());

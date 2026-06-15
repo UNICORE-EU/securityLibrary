@@ -96,7 +96,7 @@ public class TrustedIssuersProperties extends PropertiesHelper
 	protected InMemoryKeystoreCertChainValidator builtinCertsValidator = null;
 
 	public final static Map<String, PropertyMD> META = new HashMap<>();
-	static 
+	static
 	{
 		DocumentationCategory dirCat = new DocumentationCategory("Directory type settings", "1");
 		DocumentationCategory ksCat = new DocumentationCategory("Keystore type settings", "2");

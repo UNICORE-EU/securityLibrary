@@ -12,7 +12,7 @@ import eu.unicore.util.Log;
 public class LoggingStoreUpdateListener implements StoreUpdateListener
 {
 	private static final Logger log = Log.getLogger(Log.SECURITY, LoggingStoreUpdateListener.class);
-	
+
 	@Override
 	public void loadingNotification(String location, String type, Severity level,
 			Exception cause)
@@ -28,7 +28,7 @@ public class LoggingStoreUpdateListener implements StoreUpdateListener
 			}
 			return;
 		} 
-		
+
 		sb.insert(0, "Problem loading ");
 		if (cause != null)
 		{

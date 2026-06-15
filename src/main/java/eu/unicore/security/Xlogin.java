@@ -19,12 +19,12 @@ public class Xlogin implements Serializable{
 
 	private String[] logins;
 	private String selectedLogin;
-	
+
 	private String[] groups;
 	private String selectedGroup;
 	private String[] selectedSupplementaryGroups;
 	private boolean addDefaultGroups = true;
-	
+
 	/**
 	 * constructs a new Xlogin instance from the list of logins 
 	 * @param logins - the logins
@@ -32,7 +32,7 @@ public class Xlogin implements Serializable{
 	public Xlogin(String[] logins){
 		this.logins=logins;
 	}
-	
+
 	/**
 	 * constructs a new Xlogin instance from the lists of logins and groups 
 	 * @param logins - the logins
@@ -42,10 +42,9 @@ public class Xlogin implements Serializable{
 		this.logins=logins;
 		this.groups=groups;
 	}
-	
-	public Xlogin(){
-	}
-	
+
+	public Xlogin() {}
+
 	/**
 	 * sets the login that should be used. The selection is checked.
 	 * 
@@ -67,7 +66,7 @@ public class Xlogin implements Serializable{
 		if(logins==null)return null;
 		return (selectedLogin!=null) ? selectedLogin:logins[0];
 	}
-	
+
 	/**
 	 * @param preferredLogin - the preferred login
 	 * @return true if this xlogin contains the preferred one
@@ -89,40 +88,38 @@ public class Xlogin implements Serializable{
 	public String[] getLogins(){
 		return logins;
 	}
-	
+
 	/**
 	 * returns the list of xlogins as ":" separated String
 	 * @return the encoded list of xlogins, or an empty string if empty
 	 */
 	public String getEncoded(){
-		return getEncodedInteranl(logins);
+		return getEncodedInternal(logins);
 	}
-	
+
 	/**
 	 * returns the list of groups as ":" separated String
 	 * @return the encoded list of groups, or an empty string if empty
 	 */
 	public String getEncodedGroups(){
-		return getEncodedInteranl(groups);
+		return getEncodedInternal(groups);
 	}
-	
-	private String getEncodedInteranl(String[] array) {
-		StringBuilder sb=new StringBuilder();
-		int i=0;
+
+	private String getEncodedInternal(String[] array) {
+		StringBuilder sb = new StringBuilder();
 		if (array != null) {
 			for(String s: array) {
-				if(i>0)sb.append(":");
+				if(sb.length()>0)sb.append(":");
 				sb.append(s);
-				i++;
 			}
 		}
 		return sb.toString();
 	}
-	
+
 	public boolean isMultiLogin(){
 		return logins!=null && logins.length>1;
 	}
-	
+
 	/**
 	 * sets the group that should be used. The selection is checked.
 	 * 
@@ -134,7 +131,7 @@ public class Xlogin implements Serializable{
 			selectedGroup=group;
 		else throw new SecurityException("Requested group <"+group+"> is not available.");
 	}
-	
+
 	public boolean isGroupSelected() {
 		return selectedGroup != null;
 	}
@@ -152,7 +149,6 @@ public class Xlogin implements Serializable{
 		selectedSupplementaryGroups = Arrays.copyOf(groups, groups.length);
 	}
 
-	
 	/**
 	 * @param preferredGroup - the preferred group
 	 * @return true if the valid groups contains the preferred one
@@ -191,12 +187,13 @@ public class Xlogin implements Serializable{
 	}
 
 	public String getEncodedSelectedSupplementaryGroups() {
-		return getEncodedInteranl(selectedSupplementaryGroups);
+		return getEncodedInternal(selectedSupplementaryGroups);
 	}
-		
+
+	@Override
 	public String toString() {
-		StringBuilder cInfo = new StringBuilder(256);
-		
+		StringBuilder cInfo = new StringBuilder();
+
 		cInfo.append("uid: [");
 		cInfo.append(getEncoded());
 		if (isMultiLogin()) 
@@ -222,10 +219,9 @@ public class Xlogin implements Serializable{
 		cInfo.append("addingOSgroups: ");
 		cInfo.append(isAddDefaultGroups());
 		cInfo.append("]");
-		
 		return cInfo.toString();
 	}
-	
+
 	public void setAddDefaultGroups(boolean addDefaultGroups)
 	{
 		this.addDefaultGroups = addDefaultGroups;
@@ -235,4 +231,5 @@ public class Xlogin implements Serializable{
 	{
 		return addDefaultGroups;
 	}	
+
 }

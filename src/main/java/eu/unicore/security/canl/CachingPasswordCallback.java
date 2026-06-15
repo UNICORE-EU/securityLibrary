@@ -10,8 +10,9 @@ import java.util.Map;
  */
 public abstract class CachingPasswordCallback implements PasswordCallback
 {
-	private transient Map<String, char[]> cache = new HashMap<String, char[]>();
-	
+
+	private transient Map<String, char[]> cache = new HashMap<>();
+
 	@Override
 	public final char[] getPassword(String protectedArtifactType, String protectedArtifactDescription)
 	{
@@ -23,7 +24,7 @@ public abstract class CachingPasswordCallback implements PasswordCallback
 		cache.put(key, cached);
 		return cached;
 	}
-	
+
 	/**
 	 * Implement this method to obtain the password. It is guaranteed that this method is called only once
 	 * per type and description combination.

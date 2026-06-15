@@ -16,7 +16,7 @@ public class DefaultLogFactory implements LoggerFactory
 	public String getLoggerName(String prefix, Class<?>clazz){
 		return prefix+"."+clazz.getSimpleName();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

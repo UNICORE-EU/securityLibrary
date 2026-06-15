@@ -8,7 +8,7 @@ import org.apache.xmlbeans.XmlObject;
  * @author schuller
  */
 public interface UserAttributeHandler {
-	
+
 	/**
 	 * process a SAML attribute defined in the User assertion
 	 * 
@@ -18,5 +18,5 @@ public interface UserAttributeHandler {
 	 * @param tokens - the security tokens
 	 */
 	public void processUserDefinedAttribute(String name, String nameFormat, XmlObject[]values, SecurityTokens tokens);
-	
+
 }

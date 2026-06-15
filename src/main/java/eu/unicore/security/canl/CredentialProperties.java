@@ -55,7 +55,7 @@ public class CredentialProperties extends PropertiesHelper
 	public static final String PROP_KS_ALIAS = "keyAlias";
 	public static final String PROP_KS_KEY_PASSWORD = "keyPassword";
 
-	public static final Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
+	public static final Map<String, PropertyMD> META = new HashMap<>();
 	static
 	{
 		META.put(PROP_LOCATION, new PropertyMD().setMandatory().setSortKey("1").

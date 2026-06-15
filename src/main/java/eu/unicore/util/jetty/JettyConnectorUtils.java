@@ -28,28 +28,26 @@ import eu.unicore.util.httpclient.ServerHostnameCheckingMode;
  */
 public class JettyConnectorUtils
 {
+
 	public static SslContextFactory.Server createJettyContextFactory(X509CertChainValidator validator,
 			X509Credential credential, Logger log) throws NoSuchAlgorithmException, 
 			NoSuchProviderException, KeyManagementException
 	{
 		SslContextFactory.Server ret = new SslContextFactory.Server();
-		String protocol = "TLS"; 
-		ret.setSslContext(SSLContextCreator.createSSLContext(credential, validator, protocol, 
+		ret.setSslContext(SSLContextCreator.createSSLContext(credential, validator, "TLS", 
 				"Jetty HTTP Server", log, ServerHostnameCheckingMode.NONE));
 		return ret;
 	}
-	
-	
+
 	public static void reloadCredential(SslContextFactory.Server contextFactory, X509Credential newCredential, 
 			X509CertChainValidator validator, Logger log) throws Exception {
-		String protocol = "TLS";
-		contextFactory.setSslContext(SSLContextCreator.createSSLContext(newCredential, validator, protocol, 
+		contextFactory.setSslContext(SSLContextCreator.createSSLContext(newCredential, validator, "TLS", 
 				"Jetty HTTP Server", log, ServerHostnameCheckingMode.NONE));
 		contextFactory.reload(scf->{});	
 	}
 
 	public static void logConnection(final Socket socket, final Logger log) {
-		InetSocketAddress peer=(InetSocketAddress)socket.getRemoteSocketAddress();
+		InetSocketAddress peer = (InetSocketAddress)socket.getRemoteSocketAddress();
 		if(log.isDebugEnabled() && peer!=null && peer.getAddress()!=null){
 			final String hostAddress = peer.getAddress().getHostAddress();
 			log.debug("Connection attempt from {}", hostAddress);

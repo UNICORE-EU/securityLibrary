@@ -21,10 +21,11 @@ import eu.unicore.util.configuration.PropertyMD.DocumentationCategory;
  */
 public class HttpClientProperties extends PropertiesHelper
 {
+
 	private static final Logger log = Log.getLogger(Log.CONFIGURATION, HttpClientProperties.class);
-	
+
 	public static final String PREFIX = "http.";
-	
+
 	/** If true then connection will be closed immediately after serving the request */
 	public static final String CONNECTION_CLOSE = "connection-close";
 	/** If true then connection will be closed immediately after serving the request */
@@ -53,15 +54,15 @@ public class HttpClientProperties extends PropertiesHelper
 	public static final String CONNECTION_IDLE_TIMEOUT = "idle.timeout";
 	/** timeout for creating new HTTP connections */
 	public static final String CONNECT_TIMEOUT = "connection.timeout";
-	
+
 	public static final String ALLOW_CIRCULAR_REDIRECTS = "allowCircularRedirects";
-	
+
 	public final static Map<String, PropertyMD> META = new HashMap<>();
-	static 
+	static
 	{
 		DocumentationCategory proxyCat = new DocumentationCategory("HTTP proxy settings", "2");
 		DocumentationCategory httpCat = new DocumentationCategory("HTTP client settings", "1");
-		
+
 		META.put(CONNECTION_CLOSE, new PropertyMD("false").setCategory(httpCat).
 				setDescription("If set to true then the client will send connection close header, " +
 						"so the server will close the socket."));
@@ -99,7 +100,7 @@ public class HttpClientProperties extends PropertiesHelper
 		META.put(HTTP_PROXY_PASS, new PropertyMD().setCategory(proxyCat).
 				setDescription("Relevant only when using HTTP proxy: defines password for authentication to the proxy."));
 	}
-	
+
 	public HttpClientProperties(String prefix, Properties properties) throws ConfigurationException
 	{
 		super(prefix, properties, META, log);
@@ -109,19 +110,19 @@ public class HttpClientProperties extends PropertiesHelper
 	{
 		super(PREFIX, properties, META, log);
 	}
-	
+
 	public void setConnectionTimeout(int millis){
 		setProperty(CONNECT_TIMEOUT, Integer.toString(millis));
 	}
-	
+
 	public int getConnectionTimeout(){
 		return getIntValue(CONNECT_TIMEOUT);
 	}
-	
+
 	public void setSocketTimeout(int millis){
 		setProperty(SO_TIMEOUT, Integer.toString(millis));
 	}
-	
+
 	public int getSocketTimeout(){
 		return getIntValue(SO_TIMEOUT);
 	}
@@ -129,7 +130,7 @@ public class HttpClientProperties extends PropertiesHelper
 	public void setIdleTimeout(int millis){
 		setProperty(CONNECTION_IDLE_TIMEOUT, Integer.toString(millis));
 	}
-	
+
 	public int getIdleTimeout(){
 		return getIntValue(CONNECTION_IDLE_TIMEOUT);
 	}
@@ -141,5 +142,5 @@ public class HttpClientProperties extends PropertiesHelper
 		super.cloneTo(ret);
 		return ret;
 	}
-	
+
 }

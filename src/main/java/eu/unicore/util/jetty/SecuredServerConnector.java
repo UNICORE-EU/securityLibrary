@@ -18,10 +18,11 @@ import eu.unicore.util.Log;
  * @author golbi
  */
 public class SecuredServerConnector extends ServerConnector {
-	
+
 	private final static Logger log = Log.getLogger(Log.CONNECTIONS, SecuredServerConnector.class);
-	private SslContextFactory.Server sslContextFactory;
-	
+
+	private final SslContextFactory.Server sslContextFactory;
+
 	public SecuredServerConnector(Server server, SslContextFactory.Server sslContextFactory, 
 			ConnectionFactory... factories)
 	{
@@ -33,7 +34,7 @@ public class SecuredServerConnector extends ServerConnector {
 	{
 		return sslContextFactory;
 	}
-	
+
 	public static SslContextFactory.Server createContextFactory(X509CertChainValidator validator, 
 			X509Credential credential) throws Exception
 	{

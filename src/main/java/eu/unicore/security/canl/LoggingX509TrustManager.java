@@ -36,7 +36,7 @@ public class LoggingX509TrustManager extends X509ExtendedTrustManager {
 		this.info = info;
 		this.defaultTrustManager = defaultTrustManager;
 	}
-	
+
 	@Override
 	public void checkClientTrusted(X509Certificate[] certificates, String s)
 			throws CertificateException {

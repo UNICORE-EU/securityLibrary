@@ -1,7 +1,7 @@
 package eu.unicore.security;
 
 /**
- * exception thrown when trust delagation fails
+ * exception thrown when trust delegation fails
  */
 public class TrustDelegationException extends SecurityException{
 

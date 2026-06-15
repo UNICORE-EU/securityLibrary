@@ -18,6 +18,7 @@ import eu.unicore.util.configuration.PropertiesHelper;
  */
 public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguration implements IClientConfiguration
 {
+
 	private String httpUser;
 	private String httpPassword;
 	private boolean sslAuthn;
@@ -36,7 +37,7 @@ public class DefaultClientConfiguration extends DefaultAuthnAndTrustConfiguratio
 			= new HashMap<>();
 
 	private SessionIDProvider sessionIDProvider = new SessionIDProviderImpl();
-	
+
 	/**
 	 * Only default settings, i.e. no security.
 	 */

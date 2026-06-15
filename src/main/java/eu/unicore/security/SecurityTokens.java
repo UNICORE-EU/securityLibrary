@@ -35,7 +35,6 @@ public class SecurityTokens implements Serializable, Cloneable
 	 */
 	public static final String KEY = SecurityTokens.class.getName() + ".key";
 
-	
 	/**
 	 * Context key of the token (as found in Unicore6Tokens) with HTTP BASIC login data.
 	 * The value corresponding to this key is either null or {@link HTTPAuthNTokens}.
@@ -64,11 +63,11 @@ public class SecurityTokens implements Serializable, Cloneable
 	private String userName;
 	private String consignorName;
 	private String clientIP;
-	
+
 	private final Map<String, String[]> userPreferences = new HashMap<>();
-	
+
 	private transient Map<String, Object> context;
-	
+
 	/**
 	 * If true then tdTokens confirmed that the User allowed the Consignor to act 
 	 * on her behalf or Consignor is equal to User or this is a local call.
@@ -142,7 +141,7 @@ public class SecurityTokens implements Serializable, Cloneable
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Sets user identity in terms of certificates. It is an identity of a user on 
 	 * whose behalf consignor wishes to execute the request. 
@@ -248,28 +247,27 @@ public class SecurityTokens implements Serializable, Cloneable
 		return getConsignorName();
 	}
 
+	private static final String lineSep = System.getProperty("line.separator");
 
-        private static final String lineSep=System.getProperty("line.separator");
-
-        public String toString()
-        {
-        	StringBuilder sb = new StringBuilder();
-        	if (userName != null) {
-        		sb.append("User: ").append(X500NameUtils.getReadableForm(userName));
-        	}
-        	String consignor = getConsignorName(); 
-    		if (consignor != null) {
-        		sb.append(lineSep);
-        		sb.append("Consignor: ").append(X500NameUtils.getReadableForm(consignor));
-    		}
-        	if (clientIP != null) {
-        		sb.append(lineSep).append("Client's original IP: ").append(clientIP);
-        	}
-        	if (sb.length() == 0) {
-        		sb.append(super.toString()).append(" [no details available]");
-        	}
-        	return sb.toString();
-        }
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder();
+		if (userName != null) {
+			sb.append("User: ").append(X500NameUtils.getReadableForm(userName));
+		}
+		String consignor = getConsignorName(); 
+		if (consignor != null) {
+			sb.append(lineSep);
+			sb.append("Consignor: ").append(X500NameUtils.getReadableForm(consignor));
+		}
+		if (clientIP != null) {
+			sb.append(lineSep).append("Client's original IP: ").append(clientIP);
+		}
+		if (sb.length() == 0) {
+			sb.append(super.toString()).append(" [no details available]");
+		}
+		return sb.toString();
+	}
 
 	/**
 	 * Returns a map with additional security related data. This can be used 
@@ -277,7 +275,7 @@ public class SecurityTokens implements Serializable, Cloneable
 	 * NOTE: this information is only available during request processing and is never stored.
 	 * To store something permanently, use {@link #getUserPreferences()}
 	 */
-	public synchronized Map<String, Object> getContext()
+	public Map<String, Object> getContext()
 	{
 		return context;
 	}
@@ -314,7 +312,7 @@ public class SecurityTokens implements Serializable, Cloneable
 		}
 		return consignorName;
 	}
-	
+
 	/**
 	 * Returns true if the Consignor is anyhow allowed to work on
 	 * User's behalf, as set by the setConsignorTrusted method. 
@@ -328,7 +326,7 @@ public class SecurityTokens implements Serializable, Cloneable
 	{
 		return supportProxy;
 	}
-	
+
 	/**
 	 * Sets the key value telling if the Consignor is allowed to work on 
 	 * the Users behalf. 
@@ -345,9 +343,6 @@ public class SecurityTokens implements Serializable, Cloneable
 		return clientIP;
 	}
 
-	/**
-	 * Sets client's IP
-	 */
 	public void setClientIP(String clientIP) {
 		this.clientIP = clientIP;
 	}
@@ -357,6 +352,7 @@ public class SecurityTokens implements Serializable, Cloneable
 	 * consignor names, delegation statuses and signature status are equal.
 	 * Also proxy mode and client's IP must be the same.
 	 */
+	@Override
 	public boolean equals(Object otherO)
 	{
 		if (otherO == null || !(otherO instanceof SecurityTokens))
@@ -367,35 +363,36 @@ public class SecurityTokens implements Serializable, Cloneable
 
 		if (other.isConsignorTrusted() != isConsignorTrusted())
 			return false;
-		
+
 		if (other.getConsignorName() == null)
 		{
 			if (getConsignorName() != null)
 				return false;
 		} else if (!other.getConsignorName().equals(getConsignorName()))
 			return false;
-		
-		
+
+
 		if (other.getEffectiveUserName() == null)
 		{
 			if (getEffectiveUserName() != null)
 				return false;
 		} else if (!other.getEffectiveUserName().equals(getEffectiveUserName()))
 			return false;
-		
+
 		if (other.supportProxy != supportProxy)
 			return false;
-		
+
 		if (other.getClientIP() == null)
 		{
 			if (getClientIP() != null)
 				return false;
 		} else if (!other.getClientIP().equals(getClientIP()))
 			return false;
-		
+
 		return true;
 	}
 
+	@Override
 	public int hashCode(){
 		String cons = getConsignorName();
 		int consignorHash = cons == null ? 0 : cons.hashCode(); 
@@ -406,15 +403,3 @@ public class SecurityTokens implements Serializable, Cloneable
 				^ userHash;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-

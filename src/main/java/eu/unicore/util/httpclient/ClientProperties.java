@@ -44,7 +44,7 @@ public class ClientProperties extends DefaultClientConfiguration
 {
 	private static final Logger log = Log.getLogger(Log.CONFIGURATION, ClientProperties.class);
 	public static final String DEFAULT_PREFIX = "client.";
-	
+
 	public static final String PROP_HTTP_AUTHN_ENABLED = "httpAuthnEnabled";
 	public static final String PROP_HTTP_USER = "httpUser";
 	public static final String PROP_HTTP_PASSWORD = "httpPassword";
@@ -56,13 +56,12 @@ public class ClientProperties extends DefaultClientConfiguration
 	public static final String PROP_SECURITY_SESSIONS = "securitySessions";
 	public static final String PROP_MAX_RETRIES = "maxWsCallRetries";
 	public static final String PROP_RETRY_DELAY = "wsCallRetryDelay";
-	
+
 	private IAuthnAndTrustConfiguration authnAndTrustConfiguration;
 	private PropertiesHelper clientPropertiesHelper;
-	
 
-	public final static Map<String, PropertyMD> META = new HashMap<String, PropertyMD>();
-	static 
+	public final static Map<String, PropertyMD> META = new HashMap<>();
+	static
 	{
 		META.put(PROP_HTTP_AUTHN_ENABLED, new PropertyMD("false").
 				setDescription("Whether HTTP basic authentication should be used."));
@@ -93,9 +92,6 @@ public class ClientProperties extends DefaultClientConfiguration
 			META.put(HttpClientProperties.PREFIX+entry.getKey(), entry.getValue());
 	}
 
-	//all those constructors suck a bit- but there is no multi inheritance in Java, 
-	//so we can't reuse code from AuthAndTrustProperties...
-	
 	public ClientProperties(String file) throws IOException, ConfigurationException
 	{
 		this(new File(file));
@@ -105,7 +101,7 @@ public class ClientProperties extends DefaultClientConfiguration
 	{
 		this(FilePropertiesHelper.load(file));
 	}
-	
+
 	public ClientProperties(String file, String trustPrefix, String credPrefix) 
 			throws IOException, ConfigurationException
 	{
@@ -117,25 +113,24 @@ public class ClientProperties extends DefaultClientConfiguration
 	{
 		this(FilePropertiesHelper.load(file), trustPrefix, credPrefix, DEFAULT_PREFIX);
 	}
-	
+
 	public ClientProperties(Properties p) throws ConfigurationException
 	{
 		this(p, TruststoreProperties.DEFAULT_PREFIX, CredentialProperties.DEFAULT_PREFIX, DEFAULT_PREFIX);
 	}
 
-	
 	public ClientProperties(Properties p, String trustPrefix, String credPrefix, String clientPrefix) 
 			throws ConfigurationException
 	{
 		this(p, clientPrefix, getDefaultAuthnAndTrust(p, null, trustPrefix, credPrefix, clientPrefix));
 	}
-	
+
 	public ClientProperties(Properties p, PasswordCallback callback, String trustPrefix, String credPrefix, String clientPrefix) 
 			throws ConfigurationException
 	{
 		this(p, clientPrefix, getDefaultAuthnAndTrust(p, callback, trustPrefix, credPrefix, clientPrefix));
 	}
-	
+
 	public ClientProperties(Properties p, IAuthnAndTrustConfiguration authAndTrust) 
 			throws ConfigurationException
 	{
@@ -155,14 +150,14 @@ public class ClientProperties extends DefaultClientConfiguration
 			String credPrefix, String clientPrefix)
 	{
 		boolean trustOptional = false, credOptional = false;
-		
+
 		String sslP = p.getProperty(clientPrefix + PROP_SSL_ENABLED);
 		String sslAuthnP = p.getProperty(clientPrefix + PROP_SSL_AUTHN_ENABLED);
 		String signP = p.getProperty(clientPrefix + PROP_MESSAGE_SIGNING_ENABLED);
 		boolean sslOff = sslP != null && (sslP.equalsIgnoreCase("false") || sslP.equalsIgnoreCase("no"));
 		boolean sslAuthnOff = sslAuthnP != null && (sslAuthnP.equalsIgnoreCase("false") || sslAuthnP.equalsIgnoreCase("no"));
 		boolean signOff = signP != null && (signP.equalsIgnoreCase("false") || signP.equalsIgnoreCase("no")); 
-		
+
 		//theoretically we can simply set that trust and creds are optional, as anyway it will be strictly verified further.
 		//however we perform this trick here, to get detailed error messages - otherwise we would only get
 		// "no truststore" or "no keystore"
@@ -176,14 +171,12 @@ public class ClientProperties extends DefaultClientConfiguration
 		
 		return new AuthnAndTrustProperties(p, trustPrefix, credPrefix, callback, trustOptional, credOptional);
 	}
-	
+
 	/**
 	 * only for cloning
 	 */
-	protected ClientProperties()
-	{
-	}
-	
+	protected ClientProperties(){}
+
 	/**
 	 * Low level constructor - allow to pass properties, set prefix for client settings 
 	 * and a preloaded {@link IAuthnAndTrustConfiguration}
@@ -219,21 +212,21 @@ public class ClientProperties extends DefaultClientConfiguration
 			setHttpPassword(clientPropertiesHelper.getValue(PROP_HTTP_PASSWORD));
 			setHttpUser(clientPropertiesHelper.getValue(PROP_HTTP_USER));
 		}
-		
+
 		ServerHostnameCheckingMode hostnameMode = clientPropertiesHelper.getEnumValue(PROP_SERVER_HOSTNAME_CHECKING, 
 				ServerHostnameCheckingMode.class);
 		setServerHostnameCheckingMode(hostnameMode);
-		
+
 		HttpClientProperties httpProperties = new HttpClientProperties(
 				clientPrefix+HttpClientProperties.PREFIX, p);
 		setHttpClientProperties(httpProperties);
-		
+
 		setMessageLogging(clientPropertiesHelper.getBooleanValue(PROP_MESSAGE_LOGGING));
 		setUseSecuritySessions(clientPropertiesHelper.getBooleanValue(PROP_SECURITY_SESSIONS));
 		setMaxWSRetries(clientPropertiesHelper.getIntValue(PROP_MAX_RETRIES));
 		setRetryDelay(clientPropertiesHelper.getLongValue(PROP_RETRY_DELAY));
 	}
-	
+
 	/**
 	 * This version clones the object as normal clone(), but authnAndTrustConfiguration is
 	 * simply copied by reference so is shared with the cloned instance.
@@ -263,10 +256,3 @@ public class ClientProperties extends DefaultClientConfiguration
 		return clientPropertiesHelper;
 	}
 }
-
-
-
-
-
-
-

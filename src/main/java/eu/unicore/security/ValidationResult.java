@@ -6,39 +6,32 @@ package eu.unicore.security;
  */
 public class ValidationResult
 {
-	private boolean valid;
-	private String invalidResaon;
-	
-	public ValidationResult(boolean valid, String invalidResaon)
+
+	private final boolean valid;
+
+	private final String invalidReason;
+
+	public ValidationResult(boolean valid, String invalidReason)
 	{
 		super();
 		this.valid = valid;
-		this.invalidResaon = invalidResaon;
+		this.invalidReason = invalidReason;
 	}
-	
-	public String getInvalidResaon()
+
+	public String getInvalidReason()
 	{
-		return invalidResaon;
+		return invalidReason;
 	}
-	
-	public void setInvalidResaon(String invalidResaon)
-	{
-		this.invalidResaon = invalidResaon;
-	}
-	
+
 	public boolean isValid()
 	{
 		return valid;
 	}
-	
-	public void setValid(boolean valid)
-	{
-		this.valid = valid;
-	}
-	
+
+	@Override
 	public String toString()
 	{
-		return "Validation status: " + valid + ((!valid && invalidResaon != null) ? 
-				" " + invalidResaon : "");
+		return "Validation status: " + valid + ((!valid && invalidReason != null) ? 
+				" " + invalidReason : "");
 	}
 }

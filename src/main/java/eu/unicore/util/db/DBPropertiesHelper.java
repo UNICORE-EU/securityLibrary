@@ -29,7 +29,7 @@ public abstract class DBPropertiesHelper
 	public final static String URL = "jdbcUrl";
 	public final static String DRIVER = "driver";
 	public final static DocumentationCategory dbCategory = new DocumentationCategory("Database");
-	
+
 	/**
 	 * Returns a fully initialized database metadata, ready to be included in PropertyHelper extension.
 	 * None of the properties is marked as mandatory. Example usage:
@@ -50,7 +50,7 @@ public abstract class DBPropertiesHelper
 	public static <T extends Enum<T>> Map<String, PropertyMD> getMetadata(Class<? extends Driver> defaultDriver, 
 			String defaultUrl, T defaultDialect, String prefix)
 	{
-		Map<String, PropertyMD> ret = new HashMap<String, PropertyMD>();
+		Map<String, PropertyMD> ret = new HashMap<>();
 		if (defaultDialect != null)
 			ret.put(prefix+DIALECT, new PropertyMD(defaultDialect).setCategory(dbCategory).
 				setDescription("Database SQL dialect. Must match the selected driver, however " +

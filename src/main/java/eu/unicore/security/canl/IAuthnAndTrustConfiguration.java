@@ -17,13 +17,13 @@ public interface IAuthnAndTrustConfiguration extends Cloneable
 	 * @return Object used to verify certificate chains
 	 */
 	public X509CertChainValidatorExt getValidator();
-	
+
 	/**
 	 * 
 	 * @return object used to provide local credentias
 	 */
 	public X509Credential getCredential();
-	
+
 	/**
 	 * 
 	 * @return cloned object

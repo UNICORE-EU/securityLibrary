@@ -10,14 +10,16 @@ import java.io.Serializable;
  */
 public class XACMLAttribute implements Serializable
 {
+
 	private static final long serialVersionUID = 1L;
 
 	public enum Name {
 		XACML_SUBJECT_ID_ATTR("urn:oasis:names:tc:xacml:1.0:subject:subject-id"), 
 		XACML_RESOURCE_ID_ATTR("urn:oasis:names:tc:xacml:1.0:resource:resource-id"),
 		XACML_ACTION_ID_ATTR("urn:oasis:names:tc:xacml:1.0:action:action-id");
-		
+
 		private String name;
+
 		private Name(String name)
 		{
 			this.name = name;
@@ -56,11 +58,11 @@ public class XACMLAttribute implements Serializable
 			return name;
 		}
 	}
-	
+
 	private String name;
 	private String value;
 	private Type type;
-	
+
 	/**
 	 * 
 	 * @param name
@@ -73,7 +75,7 @@ public class XACMLAttribute implements Serializable
 		this.value = value;
 		this.type = type;
 	}
-	
+
 	public String getName()
 	{
 		return name;
@@ -83,17 +85,17 @@ public class XACMLAttribute implements Serializable
 	{
 		this.name = name;
 	}
-	
+
 	public String getValue()
 	{
 		return value;
 	}
-	
+
 	public void setValue(String value)
 	{
 		this.value = value;
 	}
-	
+
 	/**
 	 * Sets XACML 2.0 type
 	 */
@@ -101,7 +103,7 @@ public class XACMLAttribute implements Serializable
 	{
 		return type;
 	}
-	
+
 	/**
 	 * Sets XACML 2.0 type.
 	 * @param type
@@ -151,7 +153,8 @@ public class XACMLAttribute implements Serializable
 			return false;
 		return true;
 	}
-	
+
+	@Override
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder(128);

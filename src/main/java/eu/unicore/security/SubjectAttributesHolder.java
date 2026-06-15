@@ -40,19 +40,22 @@ public class SubjectAttributesHolder implements Serializable
 	private static final long serialVersionUID = 1L;
 	
 	private Map<String, List<XACMLAttribute>> xacmlAttributes;
+	
 	private Map<String, String[]> defaultIncarnationAttributes;
+
 	private Map<String, String[]> validIncarnationAttributes;
 	
-	private Map<String, String[]> preferredVoIncarnationAttributes = new HashMap<String, String[]>();
+	private Map<String, String[]> preferredVoIncarnationAttributes = new HashMap<>();
+
 	/**
 	 * Stores the actual name of the VO which attributes are in the preferredVOIncarnationAttributes.
 	 * Must be one of preferredVos. It can be overwritten if subsequent AIP provides attributes from a VO which
 	 * is higher on the preferredVos list.  
 	 */
 	private String selectedVo;
+
 	private String[] preferredVos;
 
-	
 	/**
 	 * All structures are initialized to be empty.
 	 */
@@ -60,19 +63,18 @@ public class SubjectAttributesHolder implements Serializable
 	{
 		this(new String[] {});
 	}
-	
+
 	/**
 	 * All structures are initialized to be empty.
 	 * Preferred VOs are initially set. 
 	 */
 	public SubjectAttributesHolder(String[] preferredVos)
 	{
-		xacmlAttributes = new HashMap<String, List<XACMLAttribute>>();
-		defaultIncarnationAttributes = new HashMap<String, String[]>();
-		validIncarnationAttributes = new HashMap<String, String[]>();
+		xacmlAttributes = new HashMap<>();
+		defaultIncarnationAttributes = new HashMap<>();
+		validIncarnationAttributes = new HashMap<>();
 		this.preferredVos = preferredVos;
 	}
-
 	
 	/**
 	 * No XACML attributes, valid == default
@@ -185,7 +187,7 @@ public class SubjectAttributesHolder implements Serializable
 		List<XACMLAttribute> current = this.xacmlAttributes.get(a.getName());
 		if (current == null)
 		{
-			current = new ArrayList<XACMLAttribute>();
+			current = new ArrayList<>();
 			this.xacmlAttributes.put(a.getName(), current);
 		}
 		if (!current.contains(a))
@@ -194,7 +196,7 @@ public class SubjectAttributesHolder implements Serializable
 	
 	public List<XACMLAttribute> getXacmlAttributes()
 	{
-		List<XACMLAttribute> ret = new ArrayList<XACMLAttribute>();
+		List<XACMLAttribute> ret = new ArrayList<>();
 		Collection<List<XACMLAttribute>> vals = xacmlAttributes.values();
 		for (List<XACMLAttribute> val: vals)
 			ret.addAll(val);
@@ -203,7 +205,7 @@ public class SubjectAttributesHolder implements Serializable
 	
 	public void setXacmlAttributes(List<XACMLAttribute> xacmlAttributes)
 	{
-		this.xacmlAttributes = new HashMap<String, List<XACMLAttribute>>();
+		this.xacmlAttributes = new HashMap<>();
 		if (xacmlAttributes != null)
 		{
 			for (XACMLAttribute a: xacmlAttributes)
@@ -218,7 +220,7 @@ public class SubjectAttributesHolder implements Serializable
 	public Map<String, String[]> getIncarnationAttributes()
 	{
 		if (validateVoIncarnationAttributes()) {
-			Map<String, String[]> ret = new HashMap<String, String[]>();
+			Map<String, String[]> ret = new HashMap<>();
 			ret.putAll(getDefaultIncarnationAttributes());
 			ret.putAll(getPreferredVoIncarnationAttributes());
 			return ret;
@@ -336,9 +338,9 @@ public class SubjectAttributesHolder implements Serializable
 		if (defaultIncarnationAttributes == null || validIncarnationAttributes == null)
 			throw new IllegalArgumentException("Arguments can not be null");
 		testSubset(defaultIncarnationAttributes, validIncarnationAttributes);
-		this.defaultIncarnationAttributes = new HashMap<String, String[]>();
+		this.defaultIncarnationAttributes = new HashMap<>();
 		this.defaultIncarnationAttributes.putAll(defaultIncarnationAttributes);
-		this.validIncarnationAttributes = new HashMap<String, String[]>();
+		this.validIncarnationAttributes = new HashMap<>();
 		this.validIncarnationAttributes.putAll(validIncarnationAttributes);
 	}
 	
