@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.emi.security.authn.x509.impl.X500NameUtils;
-import eu.emi.security.authn.x509.proxy.ProxyUtils;
 
 /**
  * A set of security tokens with authentication information collected and held 
@@ -74,29 +73,15 @@ public class SecurityTokens implements Serializable, Cloneable
 	 */
 	private boolean consignorTrusted;
 
-	private boolean supportProxy;
-
-	/**
-	 * With proxy support turned on
-	 */
 	public SecurityTokens()
 	{
-		this(true);
-	}
-
-	/**
-	 * Allows to set proxy support
-	 */
-	public SecurityTokens(boolean supportProxy)
-	{
-		this.supportProxy = supportProxy;
 		context = new HashMap<>();
 	}
 
 	public SecurityTokens clone()throws CloneNotSupportedException{
-		SecurityTokens clone=(SecurityTokens)super.clone();
-		return clone;
+		return (SecurityTokens)super.clone();
 	}
+
 	/**
 	 * Sets a consignor. It should be a VALIDATED identity.
 	 * @param consignor
@@ -132,14 +117,7 @@ public class SecurityTokens implements Serializable, Cloneable
 	 */
 	public X509Certificate getConsignorCertificate()
 	{
-		if (consignor != null)
-		{
-			if (supportProxy)
-				return ProxyUtils.getEndUserCertificate(consignor);
-			else
-				return consignor[0];
-		}
-		return null;
+		return consignor != null? consignor[0] : null;
 	}
 
 	/**
@@ -289,18 +267,6 @@ public class SecurityTokens implements Serializable, Cloneable
 	}
 
 	/**
-	 * @return true only if the consignor's certificate is a proxy and proxy support is turned on.
-	 */
-	public boolean isConsignorUsingProxy()
-	{
-		if (consignor != null && supportProxy)
-		{
-			return ProxyUtils.isProxy(consignor);
-		}
-		return false;
-	}
-
-	/**
 	 * @return the identity of the real consignor's certificate. In case of proxies it can be different
 	 * from the value returned by the {@link #getConsignorName()}
 	 */
@@ -320,11 +286,6 @@ public class SecurityTokens implements Serializable, Cloneable
 	public boolean isConsignorTrusted()
 	{
 		return consignorTrusted;
-	}
-
-	public boolean isSupportingProxy()
-	{
-		return supportProxy;
 	}
 
 	/**
@@ -371,15 +332,11 @@ public class SecurityTokens implements Serializable, Cloneable
 		} else if (!other.getConsignorName().equals(getConsignorName()))
 			return false;
 
-
 		if (other.getEffectiveUserName() == null)
 		{
 			if (getEffectiveUserName() != null)
 				return false;
 		} else if (!other.getEffectiveUserName().equals(getEffectiveUserName()))
-			return false;
-
-		if (other.supportProxy != supportProxy)
 			return false;
 
 		if (other.getClientIP() == null)

@@ -19,10 +19,8 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
-import eu.emi.security.authn.x509.NamespaceCheckingMode;
 import eu.emi.security.authn.x509.OCSPCheckingMode;
 import eu.emi.security.authn.x509.OCSPParametes;
-import eu.emi.security.authn.x509.ProxySupport;
 import eu.emi.security.authn.x509.RevocationParameters;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.X509CertChainValidator;
@@ -116,9 +114,7 @@ public class TrustedIssuersProperties extends PropertiesHelper
 
 		META.put(PROP_OPENSSL_DIR, new PropertyMD("/etc/grid-security/certificates").setPath().setCategory(opensslCat).
 				setDescription("Directory to be used for openssl truststore."));
-		META.put(PROP_OPENSSL_NEW_STORE_FORMAT, new PropertyMD("false").setCategory(opensslCat).
-				setDescription("In case of openssl truststore, specifies whether the trust store is in openssl 1.0.0+ format (true) or older openssl 0.x format (false)"));
-
+	
 		META.put(PROP_DIRECTORY_LOCATIONS, new PropertyMD().setList(false).setUpdateable().setCategory(dirCat).
 				setDescription("List of CA certificates locations. Can contain URLs, local files and wildcard expressions."));
 		META.put(PROP_DIRECTORY_ENCODING, new PropertyMD(Encoding.PEM).setCategory(dirCat).
@@ -129,13 +125,16 @@ public class TrustedIssuersProperties extends PropertiesHelper
 				setDescription("Connection timeout for fetching the remote CA certificates in seconds."));
 		META.put(PROP_DIRECTORY_CACHE_PATH, new PropertyMD().setPath().setCategory(dirCat).
 				setDescription("Directory where CA certificates should be cached, after downloading them from a remote source. Can be left undefined if no disk cache should be used. Note that directory should be secured, i.e. normal users should not be allowed to write to it."));
+	
+		// deprecated, to be removed
+		META.put(PROP_OPENSSL_NEW_STORE_FORMAT, new PropertyMD().setDeprecated().
+				setDescription("no effect"));
 	}
 
 	protected TruststoreType type;
 
 	protected long storeUpdateInterval;
 	protected String opensslDir;
-	protected boolean opensslNewStoreFormat;
 	protected Encoding directoryEncoding;
 	protected List<String> directoryLocations;
 	protected int caConnectionTimeout;
@@ -346,13 +345,10 @@ public class TrustedIssuersProperties extends PropertiesHelper
 	protected OpensslCertChainValidator getOpensslValidator() throws ConfigurationException
 	{
 		opensslDir = getFileValueAsString(PROP_OPENSSL_DIR, true);
-		opensslNewStoreFormat = getBooleanValue(PROP_OPENSSL_NEW_STORE_FORMAT);
 		RevocationParameters revocationSettings = new RevocationParameters(CrlCheckingMode.IGNORE, 
 				getOCSPParameters());
-		ValidatorParams params = new ValidatorParams(revocationSettings, 
-			ProxySupport.DENY, initialListeners);
-		return new OpensslCertChainValidator(opensslDir, opensslNewStoreFormat, 
-				NamespaceCheckingMode.IGNORE, storeUpdateInterval*1000,	params);
+		ValidatorParams params = new ValidatorParams(revocationSettings, initialListeners);
+		return new OpensslCertChainValidator(opensslDir, storeUpdateInterval*1000,	params);
 	}
 
 	protected KeystoreCertChainValidator getKeystoreValidator() 
@@ -414,14 +410,14 @@ public class TrustedIssuersProperties extends PropertiesHelper
 	{
 		RevocationParametersExt revParams = new RevocationParametersExt(CrlCheckingMode.IGNORE, 
 				new CRLParameters(), getOCSPParameters());
-		return new ValidatorParamsExt(revParams, ProxySupport.DENY, initialListeners);
+		return new ValidatorParamsExt(revParams, initialListeners);
 	}
-	
+
 	protected OCSPParametes getOCSPParameters()
 	{
 		return new OCSPParametes(OCSPCheckingMode.IGNORE);
 	}
-	
+
 	private void autodetectKeystoreType(char[] ksPassword) throws ConfigurationException
 	{
 		try

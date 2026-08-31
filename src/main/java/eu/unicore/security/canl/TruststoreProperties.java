@@ -18,11 +18,9 @@ import java.util.Properties;
 import org.apache.logging.log4j.Logger;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
-import eu.emi.security.authn.x509.NamespaceCheckingMode;
 import eu.emi.security.authn.x509.OCSPCheckingMode;
 import eu.emi.security.authn.x509.OCSPParametes;
 import eu.emi.security.authn.x509.OCSPResponder;
-import eu.emi.security.authn.x509.ProxySupport;
 import eu.emi.security.authn.x509.RevocationParameters;
 import eu.emi.security.authn.x509.RevocationParameters.RevocationCheckingOrder;
 import eu.emi.security.authn.x509.StoreUpdateListener;
@@ -85,23 +83,17 @@ public class TruststoreProperties extends TrustedIssuersProperties
 	public final static Map<String, PropertyMD> META = new HashMap<>();
 	static 
 	{
-		DocumentationCategory opensslCat = new DocumentationCategory("Openssl type settings", "3");
 		DocumentationCategory revCat = new DocumentationCategory("Revocation settings", "4");
 		
 		META.putAll(TrustedIssuersProperties.META);
 		
-		META.put(PROP_PROXY_SUPPORT, new PropertyMD(ProxySupport.ALLOW).
-				setDescription("Controls whether proxy certificates are supported."));
-
-		META.put(PROP_OPENSSL_NS_MODE, new PropertyMD(NamespaceCheckingMode.EUGRIDPMA_GLOBUS).setCategory(opensslCat).
-				setDescription("In case of openssl truststore, controls which (and in which order) namespace checking rules should be applied. The 'REQUIRE' settings will cause that all configured namespace definitions files must be present for each trusted CA certificate (otherwise checking will fail). The 'AND' settings will cause to check both existing namespace files. Otherwise the first found is checked (in the order defined by the property)."));		
-
+		
 		META.put(PROP_REVOCATION_ORDER, new PropertyMD(RevocationCheckingOrder.OCSP_CRL).setCategory(revCat).
 				setDescription("Controls overal revocation sources order"));
 		META.put(PROP_REVOCATION_USE_ALL, new PropertyMD("false").setCategory(revCat).
 				setDescription("Controls whether all defined revocation sources should be always checked, even if the first one already confirmed that a checked certificate is not revoked."));
-		META.put(PROP_CRL_MODE, new PropertyMD(CrlCheckingMode.IF_VALID).setCategory(revCat).
-				setDescription("General CRL handling mode. The IF_VALID setting turns on CRL checking only in case the CRL is present."));
+		META.put(PROP_CRL_MODE, new PropertyMD(CrlCheckingMode.IF_PRESENT).setCategory(revCat).
+				setDescription("General CRL handling mode. The IF_PRESENT setting turns on CRL checking only in case the CRL is present."));
 		META.put(PROP_CRL_UPDATE, new PropertyMD("600").setLong().setUpdateable().setCategory(revCat).
 				setDescription("How often CRLs should be updated, in seconds. Set to negative value to disable refreshing at runtime."));
 		META.put(PROP_CRL_CONNECTION_TIMEOUT, new PropertyMD("15").setCategory(revCat).
@@ -121,11 +113,15 @@ public class TruststoreProperties extends TrustedIssuersProperties
 				setDescription("For how long the OCSP responses should be locally cached in seconds (this is a maximum value, responses won't be cached after expiration)"));
 		META.put(PROP_OCSP_DISK_CACHE, new PropertyMD().setPath().setCategory(revCat).
 				setDescription("If this property is defined then OCSP responses will be cached on disk in the defined folder."));
+
+		// deprecated, to be removed
+		META.put(PROP_PROXY_SUPPORT, new PropertyMD().setDeprecated().
+				setDescription("no effect"));
+		META.put(PROP_OPENSSL_NS_MODE, new PropertyMD().setDeprecated().
+				setDescription("no effect"));		
 	}
 
-	private ProxySupport proxySupport;
 	private CrlCheckingMode crlMode;
-	private NamespaceCheckingMode nsMode;
 	private long crlUpdateInterval;
 	private int crlConnectionTimeout;
 	private String crlDiskCache;
@@ -238,7 +234,6 @@ public class TruststoreProperties extends TrustedIssuersProperties
 			GeneralSecurityException, IOException
 	{
 		crlMode = getEnumValue(PROP_CRL_MODE, CrlCheckingMode.class);
-		proxySupport = getEnumValue(PROP_PROXY_SUPPORT, ProxySupport.class);
 		super.createValidator();
 	}
 
@@ -251,19 +246,13 @@ public class TruststoreProperties extends TrustedIssuersProperties
 
 	protected OpensslCertChainValidator getOpensslValidator() throws ConfigurationException
 	{
-		nsMode = getEnumValue(PROP_OPENSSL_NS_MODE, NamespaceCheckingMode.class);
 		opensslDir = getFileValueAsString(PROP_OPENSSL_DIR, true);
-		opensslNewStoreFormat = getBooleanValue(PROP_OPENSSL_NEW_STORE_FORMAT);
-		
 		RevocationCheckingOrder order = getEnumValue(PROP_REVOCATION_ORDER, RevocationCheckingOrder.class);
 		boolean useAll = getBooleanValue(PROP_REVOCATION_USE_ALL);
-
 		RevocationParameters revocationSettings = new RevocationParameters(crlMode, getOCSPParameters(),
 				useAll, order);
-		ValidatorParams params = new ValidatorParams(revocationSettings, 
-			proxySupport, initialListeners);
-		return new OpensslCertChainValidator(opensslDir, opensslNewStoreFormat, nsMode, 
-				storeUpdateInterval*1000, params);
+		ValidatorParams params = new ValidatorParams(revocationSettings, initialListeners);
+		return new OpensslCertChainValidator(opensslDir, storeUpdateInterval*1000, params);
 	}
 
 	protected KeystoreCertChainValidator getKeystoreValidator() 
@@ -289,7 +278,7 @@ public class TruststoreProperties extends TrustedIssuersProperties
 		boolean useAll = getBooleanValue(PROP_REVOCATION_USE_ALL);
 		RevocationParametersExt revParams = new RevocationParametersExt(crlMode, 
 			crlParameters, getOCSPParameters(), useAll, order);
-		return new ValidatorParamsExt(revParams, proxySupport, initialListeners);
+		return new ValidatorParamsExt(revParams, initialListeners);
 	}
 
 	protected OCSPParametes getOCSPParameters()

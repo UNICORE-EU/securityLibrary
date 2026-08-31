@@ -4,7 +4,7 @@
   <groupId>eu.unicore.security</groupId>
   <artifactId>securityLibrary</artifactId>
   <packaging>jar</packaging>
-  <version>8.2.2-SNAPSHOT</version>
+  <version>8.3.0-SNAPSHOT</version>
   <name>securityLibrary</name>
   <description>Low level security library for UNICORE: config, utils and data types</description>
   <url>https://github.com/UNICORE-EU/securityLibrary</url>
@@ -14,7 +14,7 @@
     <log4j.version>2.26.1</log4j.version>
     <slf.version>2.0.18</slf.version>
     <samly.version>3.1.0</samly.version>
-    <canl.version>2.8.3</canl.version>
+    <tanl.version>0.0.1</tanl.version>
     <bc.version>1.85</bc.version>
     <xmlsec.version>4.0.4</xmlsec.version>
     <woodstox.version>7.2.2</woodstox.version>
@@ -122,12 +122,16 @@
 	  <groupId>xml-apis</groupId>
 	  <artifactId>xml-apis</artifactId>
 	</exclusion>
+	<exclusion>
+	  <groupId>eu.eu-emi.security</groupId>
+	  <artifactId>canl</artifactId>
+	</exclusion>
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>eu.eu-emi.security</groupId>
-      <artifactId>canl</artifactId>
-      <version>${canl.version}</version>
+      <groupId>io.imunity.tanl</groupId>
+      <artifactId>tanl</artifactId>
+      <version>${tanl.version}</version>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
