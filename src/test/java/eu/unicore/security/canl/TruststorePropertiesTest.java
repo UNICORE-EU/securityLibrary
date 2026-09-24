@@ -16,7 +16,6 @@ import static eu.unicore.security.canl.TruststoreProperties.PROP_CRL_LOCATIONS;
 import static eu.unicore.security.canl.TruststoreProperties.PROP_CRL_MODE;
 import static eu.unicore.security.canl.TruststoreProperties.PROP_CRL_UPDATE;
 import static eu.unicore.security.canl.TruststoreProperties.PROP_OCSP_LOCAL_RESPONDERS;
-import static eu.unicore.security.canl.TruststoreProperties.PROP_PROXY_SUPPORT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,12 +25,12 @@ import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
 
-import eu.emi.security.authn.x509.CrlCheckingMode;
-import eu.emi.security.authn.x509.impl.DirectoryCertChainValidator;
-import eu.emi.security.authn.x509.impl.InMemoryKeystoreCertChainValidator;
-import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
-import eu.emi.security.authn.x509.impl.OpensslCertChainValidator;
 import eu.unicore.security.canl.TrustedIssuersProperties.TruststoreType;
+import io.imunity.tanl.x509.CrlCheckingMode;
+import io.imunity.tanl.x509.impl.DirectoryCertChainValidator;
+import io.imunity.tanl.x509.impl.InMemoryKeystoreCertChainValidator;
+import io.imunity.tanl.x509.impl.KeystoreCertChainValidator;
+import io.imunity.tanl.x509.impl.OpensslCertChainValidator;
 
 
 public class TruststorePropertiesTest

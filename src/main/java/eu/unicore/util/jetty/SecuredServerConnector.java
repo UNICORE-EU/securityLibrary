@@ -6,9 +6,9 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
-import eu.emi.security.authn.x509.X509CertChainValidator;
-import eu.emi.security.authn.x509.X509Credential;
 import eu.unicore.util.Log;
+import io.imunity.tanl.x509.X509CertChainValidator;
+import io.imunity.tanl.x509.X509Credential;
 
 /**
  * Extension of the Jetty {@link ServerConnector} logging the address of the remote host trying to 

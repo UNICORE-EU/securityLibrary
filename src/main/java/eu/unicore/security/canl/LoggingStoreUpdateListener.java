@@ -2,8 +2,8 @@ package eu.unicore.security.canl;
 
 import org.apache.logging.log4j.Logger;
 
-import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.unicore.util.Log;
+import io.imunity.tanl.x509.StoreUpdateListener;
 
 /**
  * Logs loudly problems with store updates and on debug level normal events.

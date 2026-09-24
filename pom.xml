@@ -10,12 +10,12 @@
   <url>https://github.com/UNICORE-EU/securityLibrary</url>
   <properties>
     <junit.version>6.1.3</junit.version>
-    <jetty.version>12.1.12</jetty.version>
+    <jetty.version>12.1.13</jetty.version>
     <log4j.version>2.26.1</log4j.version>
-    <slf.version>2.0.18</slf.version>
-    <samly.version>3.1.0</samly.version>
-    <tanl.version>0.0.1</tanl.version>
-    <bc.version>1.85</bc.version>
+    <slf.version>2.0.20</slf.version>
+    <samly.version>3.3.0</samly.version>
+    <tanl.version>1.0.0</tanl.version>
+    <bc.version>1.86</bc.version>
     <xmlsec.version>4.0.4</xmlsec.version>
     <woodstox.version>7.2.2</woodstox.version>
     <httpclient.version>5.6.4</httpclient.version>
@@ -248,11 +248,12 @@
       <plugin>
         <groupId>org.sonatype.central</groupId>
         <artifactId>central-publishing-maven-plugin</artifactId>
-        <version>0.8.0</version>
+        <version>0.11.0</version>
         <extensions>true</extensions>
         <configuration>
           <publishingServerId>central</publishingServerId>
 	  <autoPublish>true</autoPublish>
+	  <checksums>required</checksums>
         </configuration>
       </plugin>
     </plugins>

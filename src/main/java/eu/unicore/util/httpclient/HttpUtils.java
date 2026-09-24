@@ -50,8 +50,8 @@ import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.util.Timeout;
 
-import eu.emi.security.authn.x509.X509Credential;
 import eu.unicore.security.canl.SSLContextCreator;
+import io.imunity.tanl.x509.X509Credential;
 
 /**
  * Contains helper code to create HttpClient instances. The following settings are always set

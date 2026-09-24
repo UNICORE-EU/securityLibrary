@@ -1,7 +1,7 @@
 package eu.unicore.security.canl;
 
-import eu.emi.security.authn.x509.X509CertChainValidatorExt;
-import eu.emi.security.authn.x509.X509Credential;
+import io.imunity.tanl.x509.X509CertChainValidatorExt;
+import io.imunity.tanl.x509.X509Credential;
 
 
 /**

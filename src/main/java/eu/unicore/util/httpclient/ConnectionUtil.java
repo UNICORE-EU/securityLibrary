@@ -10,11 +10,11 @@ import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.logging.log4j.Logger;
 
-import eu.emi.security.authn.x509.impl.CertificateUtils;
-import eu.emi.security.authn.x509.impl.SocketFactoryCreator2;
-import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.security.canl.IAuthnAndTrustConfiguration;
 import eu.unicore.util.Log;
+import io.imunity.tanl.x509.impl.CertificateUtils;
+import io.imunity.tanl.x509.impl.SocketFactoryCreator2;
+import io.imunity.tanl.x509.impl.X500NameUtils;
 
 /**
  * Additional connection related utility methods

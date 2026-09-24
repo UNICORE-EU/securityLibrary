@@ -18,29 +18,29 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.logging.log4j.Logger;
 
-import eu.emi.security.authn.x509.CrlCheckingMode;
-import eu.emi.security.authn.x509.OCSPCheckingMode;
-import eu.emi.security.authn.x509.OCSPParametes;
-import eu.emi.security.authn.x509.RevocationParameters;
-import eu.emi.security.authn.x509.StoreUpdateListener;
-import eu.emi.security.authn.x509.X509CertChainValidator;
-import eu.emi.security.authn.x509.X509CertChainValidatorExt;
-import eu.emi.security.authn.x509.impl.CRLParameters;
-import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
-import eu.emi.security.authn.x509.impl.DirectoryCertChainValidator;
-import eu.emi.security.authn.x509.impl.InMemoryKeystoreCertChainValidator;
-import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
-import eu.emi.security.authn.x509.impl.KeystoreCredential;
-import eu.emi.security.authn.x509.impl.OpensslCertChainValidator;
-import eu.emi.security.authn.x509.impl.RevocationParametersExt;
-import eu.emi.security.authn.x509.impl.ValidatorParams;
-import eu.emi.security.authn.x509.impl.ValidatorParamsExt;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.configuration.PropertiesHelper;
 import eu.unicore.util.configuration.PropertyChangeListener;
 import eu.unicore.util.configuration.PropertyMD;
 import eu.unicore.util.configuration.PropertyMD.DocumentationCategory;
+import io.imunity.tanl.x509.CrlCheckingMode;
+import io.imunity.tanl.x509.OCSPCheckingMode;
+import io.imunity.tanl.x509.OCSPParametes;
+import io.imunity.tanl.x509.RevocationParameters;
+import io.imunity.tanl.x509.StoreUpdateListener;
+import io.imunity.tanl.x509.X509CertChainValidator;
+import io.imunity.tanl.x509.X509CertChainValidatorExt;
+import io.imunity.tanl.x509.impl.CRLParameters;
+import io.imunity.tanl.x509.impl.CertificateUtils.Encoding;
+import io.imunity.tanl.x509.impl.DirectoryCertChainValidator;
+import io.imunity.tanl.x509.impl.InMemoryKeystoreCertChainValidator;
+import io.imunity.tanl.x509.impl.KeystoreCertChainValidator;
+import io.imunity.tanl.x509.impl.KeystoreCredential;
+import io.imunity.tanl.x509.impl.OpensslCertChainValidator;
+import io.imunity.tanl.x509.impl.RevocationParametersExt;
+import io.imunity.tanl.x509.impl.ValidatorParams;
+import io.imunity.tanl.x509.impl.ValidatorParamsExt;
 
 
 

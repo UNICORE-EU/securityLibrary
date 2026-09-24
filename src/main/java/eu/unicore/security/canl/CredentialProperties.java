@@ -15,17 +15,17 @@ import java.util.Properties;
 
 import org.apache.logging.log4j.Logger;
 
-import eu.emi.security.authn.x509.X509Credential;
-import eu.emi.security.authn.x509.impl.CertificateUtils;
-import eu.emi.security.authn.x509.impl.DERCredential;
-import eu.emi.security.authn.x509.impl.FormatMode;
-import eu.emi.security.authn.x509.impl.KeystoreCredential;
-import eu.emi.security.authn.x509.impl.PEMCredential;
-import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.util.Log;
 import eu.unicore.util.configuration.ConfigurationException;
 import eu.unicore.util.configuration.PropertiesHelper;
 import eu.unicore.util.configuration.PropertyMD;
+import io.imunity.tanl.x509.X509Credential;
+import io.imunity.tanl.x509.impl.CertificateUtils;
+import io.imunity.tanl.x509.impl.DERCredential;
+import io.imunity.tanl.x509.impl.FormatMode;
+import io.imunity.tanl.x509.impl.KeystoreCredential;
+import io.imunity.tanl.x509.impl.PEMCredential;
+import io.imunity.tanl.x509.impl.X500NameUtils;
 
 
 

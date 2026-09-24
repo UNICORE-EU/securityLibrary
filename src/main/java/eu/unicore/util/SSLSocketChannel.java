@@ -1,9 +1,5 @@
 package eu.unicore.util;
 
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLEngineResult;
-import javax.net.ssl.SSLSession;
-
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -12,6 +8,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLEngineResult;
+import javax.net.ssl.SSLSession;
 
 /**
  * A wrapper around a real {@link SocketChannel} that adds SSL support.

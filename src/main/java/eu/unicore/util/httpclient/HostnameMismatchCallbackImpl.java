@@ -5,9 +5,9 @@ import java.security.cert.X509Certificate;
 
 import org.apache.logging.log4j.Logger;
 
-import eu.emi.security.authn.x509.impl.HostnameMismatchCallback2;
-import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.util.Log;
+import io.imunity.tanl.x509.impl.HostnameMismatchCallback2;
+import io.imunity.tanl.x509.impl.X500NameUtils;
 
 /**
  * Depending on the configured mode either log problems or log problems and close connections. 

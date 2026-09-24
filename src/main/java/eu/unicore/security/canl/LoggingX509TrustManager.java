@@ -9,10 +9,10 @@ import javax.net.ssl.X509ExtendedTrustManager;
 
 import org.apache.logging.log4j.Logger;
 
-import eu.emi.security.authn.x509.impl.CertificateUtils;
-import eu.emi.security.authn.x509.impl.FormatMode;
-import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.unicore.util.Log;
+import io.imunity.tanl.x509.impl.CertificateUtils;
+import io.imunity.tanl.x509.impl.FormatMode;
+import io.imunity.tanl.x509.impl.X500NameUtils;
 
 /**
  * This class is decorating a wrapped trust manager with optional logging

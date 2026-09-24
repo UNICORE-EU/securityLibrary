@@ -13,15 +13,15 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.logging.log4j.Logger;
 
-import eu.emi.security.authn.x509.X509CertChainValidator;
-import eu.emi.security.authn.x509.X509Credential;
-import eu.emi.security.authn.x509.impl.CertificateUtils;
-import eu.emi.security.authn.x509.impl.FormatMode;
-import eu.emi.security.authn.x509.impl.HostnameMismatchCallback2;
-import eu.emi.security.authn.x509.impl.SocketFactoryCreator2;
 import eu.unicore.util.httpclient.HostnameMismatchCallbackImpl;
 import eu.unicore.util.httpclient.NoAuthKeyManager;
 import eu.unicore.util.httpclient.ServerHostnameCheckingMode;
+import io.imunity.tanl.x509.X509CertChainValidator;
+import io.imunity.tanl.x509.X509Credential;
+import io.imunity.tanl.x509.impl.CertificateUtils;
+import io.imunity.tanl.x509.impl.FormatMode;
+import io.imunity.tanl.x509.impl.HostnameMismatchCallback2;
+import io.imunity.tanl.x509.impl.SocketFactoryCreator2;
 
 /**
  * This class should be used to create {@link SSLContext} or {@link SSLSocketFactory} in the "UNICORE
