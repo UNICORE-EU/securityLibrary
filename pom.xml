@@ -4,7 +4,7 @@
   <groupId>eu.unicore.security</groupId>
   <artifactId>securityLibrary</artifactId>
   <packaging>jar</packaging>
-  <version>8.3.1-SNAPSHOT</version>
+  <version>8.3.0</version>
   <name>securityLibrary</name>
   <description>Low level security library for UNICORE: config, utils and data types</description>
   <url>https://github.com/UNICORE-EU/securityLibrary</url>
@@ -227,6 +227,29 @@
         <configuration>
           <additionalJOption>-Xdoclint:none</additionalJOption>
         </configuration>
+	<executions>
+	  <execution>
+	    <id>genjavadoc</id>
+	    <phase>package</phase>
+	    <goals>
+	      <goal>jar</goal>
+	    </goals>
+	  </execution>
+	</executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.4.0</version>
+	<executions>
+	  <execution>
+	    <id>gensources</id>
+	    <phase>package</phase>
+	    <goals>
+	      <goal>jar-no-fork</goal>
+	    </goals>
+	  </execution>
+	</executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
